@@ -1,0 +1,104 @@
+Timer unit: 1e-09 s
+
+Total time: 22.0107 s
+File: /home/ha/dev/bgslibrary-examples-python/zpipe.py
+Function: main at line 256
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+   256                                           @line_profiler.profile
+   257                                           def main():
+   258                                               global base_timm_model, class_names, model_path, video_source, NUM_FRAME_TRIAL, SCALE, SKIP_ENABLED, big_model_transform
+   259                                               # Load model + transforms
+   260         1 1505801761.0 1.51e+09      6.8      model = load_model(base_timm_model, class_names, model_path)
+   261         1      41686.0  41686.0      0.0      device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+   262                                           
+   263         1        643.0    643.0      0.0      if BLOCK_SIZE == 16:
+   264                                                   tiny_model = FireSmokeCNN16().to(device)
+   265                                               else:
+   266         1        322.0    322.0      0.0          assert BLOCK_SIZE == 32, "BLOCK_SIZE must be either 16 or 32"
+   267                                                   # tiny_model = FireSmokeCNN32().to(device)
+   268         1    1745794.0 1.75e+06      0.0          tiny_model = TinyFireSmokeCNN().to(device)
+   269         1      82515.0  82515.0      0.0      tiny_model.eval()  # Set to evaluation mode
+   270                                           
+   271         1   22741403.0 2.27e+07      0.1      cap = cv2.VideoCapture(video_source)
+   272                                           
+   273         1       2358.0   2358.0      0.0      frame_idx = 0
+   274         1       1393.0   1393.0      0.0      time_ls = []
+   275         1      25398.0  25398.0      0.0      total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+   276         1        643.0    643.0      0.0      avg_fps = -1
+   277                                           
+   278       421    1030112.0   2446.8      0.0      while True:
+   279       421  875688878.0 2.08e+06      4.0          ret, frame = cap.read()
+   280       421     954608.0   2267.5      0.0          if not ret:
+   281         1        647.0    647.0      0.0              break
+   282                                           
+   283       420     668760.0   1592.3      0.0          frame_idx += 1
+   284       420    1981595.0   4718.1      0.0          start_time = time.time()
+   285                                           
+   286                                                   # Preprocess frame
+   287       420  244124325.0 581248.4      1.1          img_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+   288       420  767895210.0 1.83e+06      3.5          pil_img = Image.fromarray(img_rgb)
+   289       420     486126.0   1157.4      0.0          should_skip = False
+   290       420     150117.0    357.4      0.0          fg_mask = None
+   291       420     437902.0   1042.6      0.0          if SKIP_ENABLED:
+   292                                                       should_skip, _, fg_mask = skip_module(tiny_model, frame, pil_img)
+   293                                           
+   294       420      90095.0    214.5      0.0          should_skip = False  # ! always run big model for profiling
+   295       420     205274.0    488.7      0.0          if not should_skip:
+   296       420 4865666364.0 1.16e+07     22.1              img_tensor = big_model_transform(pil_img).unsqueeze(0).to(device)
+   297       420     1.17e+10 2.79e+07     53.2              do_infer(model, img_tensor)
+   298                                           
+   299                                                   # !Measure elapsed time
+   300       420    1609953.0   3833.2      0.0          elapsed = time.time() - start_time
+   301       420     420378.0   1000.9      0.0          time_ls.append(elapsed)
+   302                                           
+   303                                                   # Overlay prediction on frame
+   304       420     620333.0   1477.0      0.0          fps = 1.0 / elapsed if elapsed > 0 else 0
+   305       420   43376120.0 103276.5      0.2          avg_fps = 1.0 / np.mean(time_ls) if len(time_ls) > 0 else 0
+   306       420    3688017.0   8781.0      0.0          avg_fps_str = f" (avg {avg_fps:.2f}) " if avg_fps > 0 else ""
+   307       840   78877261.0  93901.5      0.4          cv2.putText(
+   308       420     130115.0    309.8      0.0              frame,
+   309       420    1464729.0   3487.4      0.0              f"{frame_idx}/{total_frames}-FPS: {fps:.2f}{avg_fps_str}- SKIP_MODULE: {'ON' if SKIP_ENABLED else 'OFF'}- BLOCK_SIZE: {BLOCK_SIZE}",
+   310       420     147377.0    350.9      0.0              (20, 40),
+   311       420     200992.0    478.6      0.0              cv2.FONT_HERSHEY_SIMPLEX,
+   312       420      96534.0    229.8      0.0              1,
+   313       420     161453.0    384.4      0.0              (0, 0, 255),
+   314       420      81486.0    194.0      0.0              2,
+   315                                                   )
+   316       840  194959507.0 232094.7      0.9          frame = cv2.resize(
+   317       420     604473.0   1439.2      0.0              frame, (0, 0), fx=SCALE, fy=SCALE, interpolation=cv2.INTER_LINEAR
+   318                                                   )
+   319       420  100986357.0 240443.7      0.5          cv2.imshow("Prediction", frame)
+   320                                           
+   321       420     429987.0   1023.8      0.0          if fg_mask is not None:
+   322                                                       # draw grid on the foreground mask
+   323                                                       # convert fg_mask to BGR for display
+   324                                                       fg_mask = cv2.cvtColor(fg_mask, cv2.COLOR_GRAY2BGR)
+   325                                                       H, W = fg_mask.shape[:2]
+   326                                                       grid_h = H // BLOCK_SIZE
+   327                                                       grid_w = W // BLOCK_SIZE
+   328                                                       for i in range(grid_h):
+   329                                                           cv2.line(fg_mask, (0, i * BLOCK_SIZE), (W, i * BLOCK_SIZE), (255, 0, 0), 1)
+   330                                                       for j in range(grid_w):
+   331                                                           cv2.line(fg_mask, (j * BLOCK_SIZE, 0), (j * BLOCK_SIZE, H), (255, 0, 0), 1)
+   332                                                       fg_mask = cv2.resize(fg_mask, (0, 0), fx=SCALE, fy=SCALE, interpolation=cv2.INTER_LINEAR)
+   333                                                       cv2.imshow("Foreground Mask", fg_mask)
+   334                                           
+   335                                                   # stop after NUM_FRAME_TRIAL or ESC
+   336       420     353349.0    841.3      0.0          if frame_idx >= NUM_FRAME_TRIAL:
+   337                                                       break
+   338       420 1577699236.0 3.76e+06      7.2          if cv2.waitKey(1) & 0xFF == 27:  # ESC
+   339                                                       break
+   340                                           
+   341         1    2789250.0 2.79e+06      0.0      cap.release()
+   342         1     342577.0 342577.0      0.0      cv2.destroyAllWindows()
+   343                                           
+   344                                               # drop first frame (cold start) timing
+   345         1       3990.0   3990.0      0.0      if len(time_ls) > 1:
+   346         1      19302.0  19302.0      0.0          time_ls = time_ls[1:]
+   347                                           
+   348         1     121417.0 121417.0      0.0      avg_fps = 1.0 / np.mean(time_ls) if len(time_ls) > 0 else 0
+   349         1     129289.0 129289.0      0.0      print(f"Processed {frame_idx} frames. Avg FPS: {avg_fps:.2f}")
+
+ 22.01 seconds - /home/ha/dev/bgslibrary-examples-python/zpipe.py:256 - main
