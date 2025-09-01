@@ -1,21 +1,22 @@
-import time
-
-import cv2
-import line_profiler
-import pybgs as bgs
-import timm
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
 from halib import *
 
+import cv2
+import timm
+import time
+import torch
+import line_profiler
+from PIL import Image
+
+import torch.nn as nn
+import torch.nn.functional as F
+from torchvision import transforms
+from timebudget import timebudget
+import pybgs as bgs
+from pyinstrument import Profiler
 # import torchvision.transforms.v2 as transforms
 from halib.research.profiler import zProfiler
 from numpy.lib.stride_tricks import as_strided
-from PIL import Image
-from pyinstrument import Profiler
-from timebudget import timebudget
-from torchvision import transforms
+
 
 base_timm_model = "hgnetv2_b5.ssld_stage2_ft_in1k"
 model_path = "models/prof_hgnetv2_b5.ssld_stage2_ft_in1k-20250620-50-98.78.pth"
@@ -24,16 +25,13 @@ class_names = [
     "Normal",
     "SmokeOnly",
 ]
-algorithm = bgs.FrameDifference()  # background subtraction algorithm
+algorithm = bgs.FrameDifference() #background subtraction algorithm
 
-# "extract_blocks", "extract_blocks_normed", "extract_blocks_torch"
-extract_block_func_name = "extract_blocks_torch"
+extract_block_func_name = ""
 
 BLOCK_SIZE = 32  # size of each block to extract
 NUM_FRAME_TRIAL = 100  # number of frames to process for profiling
 SCALE = 0.5
-scaled_list = [1.0, 0.75, 0.5, 1.0 / 6]
-SKIP_MODULE_FRAME_SCALED_RATIO = scaled_list[3]  # skip module frame scaling ratio
 SKIP_ENABLED = True  # skip module enabled
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 video_source = r"dataset/smallfire.mp4"
@@ -54,7 +52,6 @@ small_model_transform = transforms.Compose(
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ]
 )
-
 
 def load_model(base_timm_model, class_names, model_path):
     model = timm.create_model(
@@ -156,33 +153,25 @@ class TinyFireSmokeCNN(nn.Module):
         return x
 
 
-def extract_blocks(frame_bgr, block_size=32):
+def extract_all_blocks_cpu_transform(pil_img, block_size=16):
     """
-    Input: frame_bgr (H,W,3) uint8
+    Input: pil_img (PIL Image)
     Output: blocks (num_blocks, C, block_size, block_size) float32 PyTorch tensor
     """
-    global zprofiler
-    zprofiler.ctx_start("extract_blocks")
+    # 1. Apply transform to get normalized tensor (C,H,W)
+    zprofiler.step_start("extract_all_blocks_cpu_transform", "transform")
+    normed_tensor = small_model_transform(pil_img)  # (C,H,W) float32, normalized
+    zprofiler.step_end("extract_all_blocks_cpu_transform", "transform")
 
-    zprofiler.step_start("extract_blocks", "to-zero_one")
-    # 1. Convert to float32 and normalize to [0,1]
-    frame = frame_bgr.astype(np.float32) / 255.0  # (H,W,3)
-    zprofiler.step_end("extract_blocks", "to-zero_one")
+    # 2. Convert to NumPy for as_strided
+    zprofiler.step_start("extract_all_blocks_cpu_transform", "to_numpy")
+    tensor = normed_tensor.numpy()  # (C,H,W) float32
+    zprofiler.step_end("extract_all_blocks_cpu_transform", "to_numpy")
 
-    zprofiler.step_start("extract_blocks", "swatch-bgr2rgb")
-    # 2. BGR -> RGB
-    frame = frame[..., [2, 1, 0]]  # (H,W,3)
-    zprofiler.step_end("extract_blocks", "swatch-bgr2rgb")
-
-    zprofiler.step_start("extract_blocks", "channel-first")
-    # 4. HWC -> CHW
-    tensor = np.transpose(frame, (2, 0, 1))  # (C,H,W)
-
-    zprofiler.step_end("extract_blocks", "channel-first")
-    # 5. Use as_strided to extract blocks
+    # 3. Extract blocks using as_strided
+    zprofiler.step_start("extract_all_blocks_cpu_transform", "unfold")
     C, H, W = tensor.shape
     stride = tensor.strides
-    zprofiler.step_start("extract_blocks", "as_strided")
     blocks = as_strided(
         tensor,
         shape=(H // block_size, W // block_size, C, block_size, block_size),
@@ -194,61 +183,108 @@ def extract_blocks(frame_bgr, block_size=32):
             stride[2],
         ),
     )
-    zprofiler.step_end("extract_blocks", "as_strided")
-    zprofiler.step_start("extract_blocks", "reshape")
-
-    # 6. Reshape to (num_blocks, C, block_size, block_size)
     blocks = blocks.reshape(-1, C, block_size, block_size)
-    zprofiler.step_end("extract_blocks", "reshape")
-    # 7. Convert to PyTorch tensor (float32) and return
-    zprofiler.step_start("extract_blocks", "to-tensor")
-    torch_blocks = torch.from_numpy(blocks).float()
-    zprofiler.step_end("extract_blocks", "to-tensor")
-    return torch_blocks
+    zprofiler.step_end("extract_all_blocks_cpu_transform", "unfold")
+
+    # 4. Convert back to PyTorch tensor and return
+    zprofiler.step_start("extract_all_blocks_cpu_transform", "to_torch")
+    result = torch.from_numpy(blocks).float()
+    zprofiler.step_end("extract_all_blocks_cpu_transform", "to_torch")
+    return result
 
 
-def extract_blocks_torch(frame_bgr, block_size=32):
-    # frame_bgr: (H,W,3) uint8 numpy
-    frame = torch.from_numpy(frame_bgr).permute(2, 0, 1)  # (C,H,W), still uint8
-    frame = frame[[2, 1, 0], :, :]  # BGR → RGB
-    frame = frame.float() / 255.0  # normalize in torch
-    # unfold extracts sliding blocks, then reshape to grid
-    blocks = frame.unfold(1, block_size, block_size).unfold(2, block_size, block_size)
-    blocks = blocks.contiguous().view(3, -1, block_size, block_size)
-    return blocks.permute(1, 0, 2, 3)  # (num_blocks,C,block_size,block_size)
+def extract_all_blocks_cpu(frame_bgr, block_size=16):
+    """
+    Input: frame_bgr (H,W,3) uint8
+    Output: blocks (num_blocks, C, block_size, block_size) float32 normalized
+    """
+
+    # 1. Convert to float32 once
+    frame = torch.from_numpy(frame_bgr).float() / 255.0  # (H,W,3)
+
+    # 2. BGR -> RGB
+    frame = frame[..., [2, 1, 0]]  # (H,W,3)
+
+    # 3. Normalize (vectorized)
+    mean = torch.tensor([0.485, 0.456, 0.406]).view(1, 1, 3)
+    std = torch.tensor([0.229, 0.224, 0.225]).view(1, 1, 3)
+    frame = (frame - mean) / std  # (H,W,3)
+
+    # 4. HWC -> CHW
+    tensor = frame.permute(2, 0, 1).contiguous()  # (C,H,W)
+
+    # 5. Use unfold (optimized C++ kernel) to split blocks
+    C, H, W = tensor.shape
+    blocks = tensor.unfold(1, block_size, block_size).unfold(2, block_size, block_size)
+    # Shape: (C, H//B, W//B, B, B)
+
+    # 6. Rearrange into (num_blocks, C, B, B) without extra copies
+    blocks = blocks.permute(1, 2, 0, 3, 4).reshape(-1, C, block_size, block_size)
+
+    return blocks
 
 
-def extract_blocks_normed(frame_bgr, block_size=32):
+def extract_all_blocks_cpu_cv2(frame_bgr, block_size=16):
+    global zprofiler
+    zprofiler.ctx_start("extract_all_blocks_cpu_cv2")
+    # 1. BGR → RGB
+    zprofiler.step_start("extract_all_blocks_cpu_cv2", "bgr_to_rgb")
+    frame = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
+    zprofiler.step_end("extract_all_blocks_cpu_cv2", "bgr_to_rgb")
+
+    # 2. Convert to float and normalize
+    zprofiler.step_start("extract_all_blocks_cpu_cv2", "normalize")
+    frame = frame.astype(np.float32) / 255.0
+    mean = np.array([0.485, 0.456, 0.406], dtype=np.float32)
+    std = np.array([0.229, 0.224, 0.225], dtype=np.float32)
+    frame = (frame - mean) / std  # (H,W,3)
+    zprofiler.step_end("extract_all_blocks_cpu_cv2", "normalize")
+
+    zprofiler.step_start("extract_all_blocks_cpu_cv2", "transpose")
+    # 3. HWC → CHW
+    tensor = np.transpose(frame, (2, 0, 1))  # (C,H,W)
+    zprofiler.step_end("extract_all_blocks_cpu_cv2", "transpose")
+
+    # 4. Block extraction using as_strided (no copies)
+    zprofiler.step_start("extract_all_blocks_cpu_cv2", "reshape_blocks")
+    C, H, W = tensor.shape
+    new_shape = (C, H // block_size, W // block_size, block_size, block_size)
+    new_strides = (
+        tensor.strides[0],
+        block_size * tensor.strides[1],
+        block_size * tensor.strides[2],
+        tensor.strides[1],
+        tensor.strides[2],
+    )
+    blocks = as_strided(tensor, shape=new_shape, strides=new_strides)
+    blocks = blocks.transpose(1, 2, 0, 3, 4).reshape(-1, C, block_size, block_size)
+    zprofiler.step_end("extract_all_blocks_cpu_cv2", "reshape_blocks")
+    zprofiler.ctx_end("extract_all_blocks_cpu_cv2")
+
+    return torch.from_numpy(blocks)
+
+
+def extract_all_blocks_cpu_as_strided(frame_bgr, block_size=16):
     """
     Input: frame_bgr (H,W,3) uint8
     Output: blocks (num_blocks, C, block_size, block_size) float32 PyTorch tensor
     """
-    global zprofiler
-    zprofiler.ctx_start("extract_blocks_normed")
+    zprofiler.step_start("extract_all_blocks_cpu_cv2", "bgr2rgb")
 
-    zprofiler.step_start("extract_blocks_normed", "to-zero_one")
     # 1. Convert to float32 and normalize to [0,1]
     frame = frame_bgr.astype(np.float32) / 255.0  # (H,W,3)
-    zprofiler.step_end("extract_blocks_normed", "to-zero_one")
 
-    zprofiler.step_start("extract_blocks_normed", "swatch-bgr2rgb")
     # 2. BGR -> RGB
     frame = frame[..., [2, 1, 0]]  # (H,W,3)
-    zprofiler.step_end("extract_blocks_normed", "swatch-bgr2rgb")
 
-    zprofiler.step_start("extract_blocks_normed", "normalize")
     # 3. Normalize with mean and std
     mean = np.array([0.485, 0.456, 0.406], dtype=np.float32).reshape(1, 1, 3)
     std = np.array([0.229, 0.224, 0.225], dtype=np.float32).reshape(1, 1, 3)
     frame = (frame - mean) / std  # (H,W,3)
-    zprofiler.step_end("extract_blocks_normed", "normalize")
 
-    zprofiler.step_start("extract_blocks_normed", "channel-first")
     # 4. HWC -> CHW
     tensor = np.transpose(frame, (2, 0, 1))  # (C,H,W)
-    zprofiler.step_end("extract_blocks_normed", "channel-first")
 
-    zprofiler.step_start("extract_blocks_normed", "as_strided")
     # 5. Use as_strided to extract blocks
     C, H, W = tensor.shape
     stride = tensor.strides
@@ -263,44 +299,65 @@ def extract_blocks_normed(frame_bgr, block_size=32):
             stride[2],
         ),
     )
-    zprofiler.step_end("extract_blocks_normed", "as_strided")
 
-    zprofiler.step_start("extract_blocks_normed", "reshape")
     # 6. Reshape to (num_blocks, C, block_size, block_size)
     blocks = blocks.reshape(-1, C, block_size, block_size)
-    zprofiler.step_end("extract_blocks_normed", "reshape")
 
-    zprofiler.step_start("extract_blocks_normed", "to-tensor")
     # 7. Convert to PyTorch tensor (float32) and return
-    torch_blocks = torch.from_numpy(blocks).float()
-    zprofiler.step_end("extract_blocks_normed", "to-tensor")
+    return torch.from_numpy(blocks).float()
 
-    return torch_blocks
+
+def extract_all_blocks_cpu_as_strided_no_norm(frame_bgr, block_size=16):
+    """
+    Input: frame_bgr (H,W,3) uint8
+    Output: blocks (num_blocks, C, block_size, block_size) float32 PyTorch tensor
+    """
+    zprofiler.step_start("extract_all_blocks_cpu_cv2", "bgr2rgb")
+
+    # 1. Convert to float32 and normalize to [0,1]
+    frame = frame_bgr.astype(np.float32) / 255.0  # (H,W,3)
+
+    # 2. BGR -> RGB
+    frame = frame[..., [2, 1, 0]]  # (H,W,3)
+
+    # 4. HWC -> CHW
+    tensor = np.transpose(frame, (2, 0, 1))  # (C,H,W)
+
+    # 5. Use as_strided to extract blocks
+    C, H, W = tensor.shape
+    stride = tensor.strides
+    blocks = as_strided(
+        tensor,
+        shape=(H // block_size, W // block_size, C, block_size, block_size),
+        strides=(
+            stride[1] * block_size,
+            stride[2] * block_size,
+            stride[0],
+            stride[1],
+            stride[2],
+        ),
+    )
+
+    # 6. Reshape to (num_blocks, C, block_size, block_size)
+    blocks = blocks.reshape(-1, C, block_size, block_size)
+
+    # 7. Convert to PyTorch tensor (float32) and return
+    return torch.from_numpy(blocks).float()
 
 
 # @line_profiler.profile
-def skip_module(
-    tiny_model, cv2_bgr_frame, pil_img_frame, extract_func_name, scale_factor=0.5
-):
+def skip_module(tiny_model, cv2_bgr_frame, pil_img_frame, extract_func_name):
     # pprint('Running skip module...')
-    # pprint(f"Skip module scale factor: {scale_factor}")
     should_skip = False
     roi_rect = None
     global small_model_transform
     global zprofiler
     zprofiler.ctx_start("skip_module")
-    #! skip module using SCALED FRAME (not original frame) for speed up
-    if scale_factor < 1.0:
-        zprofiler.step_start("skip_module", "resize_frame")
-        cv2_bgr_frame = cv2.resize(
-            cv2_bgr_frame,
-            None,
-            fx=scale_factor,
-            fy=scale_factor,
-            interpolation=cv2.INTER_AREA,
-        )
-        zprofiler.step_end("skip_module", "resize_frame")
     zprofiler.step_start("skip_module", "bg_subtract")
+    scale_factor = 0.75  # scale factor for resizing
+    cv2_bgr_frame = cv2.resize(
+        cv2_bgr_frame, None, fx=scale_factor, fy=scale_factor, interpolation=cv2.INTER_AREA
+    )
     fg_mask = algorithm.apply(cv2_bgr_frame)
     zprofiler.step_end("skip_module", "bg_subtract")
     zprofiler.step_start("skip_module", "block_data_prepare")
@@ -335,17 +392,9 @@ def do_infer(model, input_tensor):
 
 # @line_profiler.profile
 def main():
-    global \
-        base_timm_model, \
-        class_names, \
-        model_path, \
-        video_source, \
-        NUM_FRAME_TRIAL, \
-        SCALE, \
-        SKIP_ENABLED, \
-        big_model_transform
+    global base_timm_model, class_names, model_path, video_source, NUM_FRAME_TRIAL, SCALE, SKIP_ENABLED, big_model_transform
     global extract_block_func_name
-    global SKIP_MODULE_FRAME_SCALED_RATIO
+
     global zProfiler
 
     # Load model + transforms
@@ -384,13 +433,7 @@ def main():
         fg_mask = None
         zprofiler.step_start("pipeline", "skip_module")
         if SKIP_ENABLED:
-            should_skip, _, fg_mask = skip_module(
-                tiny_model,
-                cv2_bgr_frame,
-                pil_img,
-                extract_block_func_name,
-                scale_factor=SKIP_MODULE_FRAME_SCALED_RATIO,
-            )
+            should_skip, _, fg_mask = skip_module(tiny_model, cv2_bgr_frame, pil_img)
         zprofiler.step_end("pipeline", "skip_module")
 
         should_skip = False  # ! always run big model for profiling
@@ -437,16 +480,10 @@ def main():
             grid_h = H // BLOCK_SIZE
             grid_w = W // BLOCK_SIZE
             for i in range(grid_h):
-                cv2.line(
-                    fg_mask, (0, i * BLOCK_SIZE), (W, i * BLOCK_SIZE), (255, 0, 0), 1
-                )
+                cv2.line(fg_mask, (0, i * BLOCK_SIZE), (W, i * BLOCK_SIZE), (255, 0, 0), 1)
             for j in range(grid_w):
-                cv2.line(
-                    fg_mask, (j * BLOCK_SIZE, 0), (j * BLOCK_SIZE, H), (255, 0, 0), 1
-                )
-            fg_mask = cv2.resize(
-                fg_mask, (0, 0), fx=SCALE, fy=SCALE, interpolation=cv2.INTER_LINEAR
-            )
+                cv2.line(fg_mask, (j * BLOCK_SIZE, 0), (j * BLOCK_SIZE, H), (255, 0, 0), 1)
+            fg_mask = cv2.resize(fg_mask, (0, 0), fx=SCALE, fy=SCALE, interpolation=cv2.INTER_LINEAR)
             cv2.imshow("Foreground Mask", fg_mask)
 
         # stop after NUM_FRAME_TRIAL or ESC
@@ -466,11 +503,7 @@ def main():
     print(f"Processed {frame_idx} frames. Avg FPS: {avg_fps:.2f}")
     zprofiler.ctx_end("big_model_infer")
     zprofiler.meta_info()
-    tag = f"{extract_block_func_name}_scaled_{SKIP_MODULE_FRAME_SCALED_RATIO:.2f}"
-    zprofiler.report_and_plot(
-        outdir=f"docs/profiler/{extract_block_func_name}_{SKIP_MODULE_FRAME_SCALED_RATIO:.2f}",
-        tag=tag,
-    )
+    zprofiler.report_and_plot(outdir="docs/profiler", tag=extract_block_func_name)
 
 
 if __name__ == "__main__":

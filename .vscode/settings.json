@@ -26,5 +26,16 @@
         "**/.venv": true,
         "**/__pycache__": true
     },
-    "explorerExclude.backup": {}
+    "explorerExclude.backup": {},
+    // "python.linting.enabled": true,
+    // "python.linting.pylintEnabled": false,
+    // "python.linting.flake8Enabled": false,
+    // "[python]": {
+    //     "editor.formatOnSave": true,
+    //     "editor.codeActionsOnSave": {
+    //         "source.fixAll": "explicit",
+    //         "source.organizeImports": "explicit"
+    //     },
+    //     "editor.defaultFormatter": "charliermarsh.ruff"
+    // }
 }
