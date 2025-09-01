@@ -1,0 +1,27 @@
+Algorithm;FPS;Video File
+FrameDifference;110.3733787604433;dataset/real_cam1.mp4
+StaticFrameDifference;127.03406755347011;dataset/real_cam1.mp4
+WeightedMovingMean;29.17529753895724;dataset/real_cam1.mp4
+WeightedMovingVariance;12.01772334951821;dataset/real_cam1.mp4
+AdaptiveBackgroundLearning;33.56251477349077;dataset/real_cam1.mp4
+AdaptiveSelectiveBackgroundLearning;72.20342564544126;dataset/real_cam1.mp4
+MixtureOfGaussianV2;22.93176394241536;dataset/real_cam1.mp4
+PixelBasedAdaptiveSegmenter;5.139071858115672;dataset/real_cam1.mp4
+SigmaDelta;27.813925501115776;dataset/real_cam1.mp4
+SuBSENSE;0.8702935228921929;dataset/real_cam1.mp4
+LOBSTER;1.4038729991254049;dataset/real_cam1.mp4
+PAWCS;0.2708583738984912;dataset/real_cam1.mp4
+TwoPoints;71.43573988472441;dataset/real_cam1.mp4
+ViBe;51.70489211959643;dataset/real_cam1.mp4
+CodeBook;37.01965805424159;dataset/real_cam1.mp4
+FuzzySugenoIntegral;4.990223682342004;dataset/real_cam1.mp4
+FuzzyChoquetIntegral;4.994377604943586;dataset/real_cam1.mp4
+LBSimpleGaussian;28.98004515294101;dataset/real_cam1.mp4
+LBFuzzyGaussian;15.591264475527579;dataset/real_cam1.mp4
+LBMixtureOfGaussians;15.86606020070244;dataset/real_cam1.mp4
+LBAdaptiveSOM;7.587019239576818;dataset/real_cam1.mp4
+LBFuzzyAdaptiveSOM;6.817995915552622;dataset/real_cam1.mp4
+VuMeter;17.885908465777867;dataset/real_cam1.mp4
+KDE;12.666493335939954;dataset/real_cam1.mp4
+IndependentMultimodal;6.269967344266978;dataset/real_cam1.mp4
+KNN;25.601210804962022;dataset/real_cam1.mp4
