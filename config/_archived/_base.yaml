@@ -1,0 +1,69 @@
+general:
+  outdir: zout
+  device: cuda
+  wandb:
+    project: fire-paper3-2025
+    mode: online
+  time_stamp: null # will be set automatically using halib.now_str()
+dataset:
+  all_datasets:
+    - dataset_name: DFire
+      metric_set: metrics_set1
+      test_dir: datasets/DFire/test
+    - dataset_name: DFireStatic
+      metric_set: metrics_set1
+      test_dir: datasets/DFire_Static/test
+    - dataset_name: FireNet
+      metric_set: metrics_set1
+      test_dir: datasets/FireNet
+    - dataset_name: pexels
+      metric_set: metrics_set1
+      test_dir: datasets/pexels
+    - dataset_name: Prof
+      metric_set: metrics_set1
+      test_dir: datasets/Prof
+    - dataset_name: MiviaFire
+      metric_set: metrics_set1
+      test_dir: datasets/Mivia_fire
+    - dataset_name: TestVideos
+      metric_set: metrics_set1
+      test_dir: datasets/TestVideos
+  target_ds_name: TestVideos # DFire, FireNet
+  metric_sets:
+    - metric_set_name: metrics_set1
+      metric_names:
+        - accuracy
+        - f1_score
+        - precision
+        - recall (TPR)
+        - FPR # False Positive Rate
+        - FPS # Frames Per Second
+      metric_set_cfgs:
+        mode: per_video # per_video, per_frame
+
+model:
+  base_timm_model: hgnetv2_b5.ssld_stage2_ft_in1k
+  model_path: models/prof_hgnetv2_b5.ssld_stage2_ft_in1k-20250620-50-98.78.pth
+  class_names: [Fire, None, SmokeOnly]
+
+method:
+  list_methods: [] # empty, will populate from config/methods
+  method_cfg_dir: config/methods
+  selected_method: temp_stabilize # no_temp, temp_stabilize
+
+infer:
+  do_infer: true
+  skip_if_exists: true # skip inference if results already exist
+  # limit: -1 # this is for testing, set to -1 for full inference
+  limit: -1
+  save_out_video: true
+  save_results: true
+  csv_columns:
+    - class_names
+    - logits
+    - probs
+    - pred_label_idx
+    - pred_label
+  gpu_monitor: false # monitor GPU usage during inference
+  calc_perf_metrics: false # calculate performance metrics after inference
+  verbose: false

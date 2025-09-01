@@ -1,0 +1,87 @@
+{
+  "global": {
+    "apikey": "aiprotest",
+    "frame_limit": -1,
+    "recording": true,
+    "debug_mode": false,
+    "boost_mode": true,
+    "igpu_enable": false,
+    "input_files": [
+      "videos/b0.avi"
+    ],
+    "output_files": [
+      "videos/b0o.mp4"
+    ],
+    "od_channels": [ 1, 2, 0, 0 ],
+    "fd_channels": [ 0, 0, 1, 0 ],
+    "cc_channels": [ 0, 0, 0, 1 ],
+    "xx_channels_note": "[channel_0, channel_1, channel_2, ...]",
+    "od_channels_note": "0: None, 1:rgb, 2:ir"
+  },
+  "od": {
+    "enable": true,
+    "score_th": 0.005,
+    "min_obj_params": [
+      [ 0, 0, 220, 500, 2000, 4000 ]
+    ],
+    "min_obj_params_note": "[vchID mode partition_0, partition_1, partition_2, partition_3]",
+    "min_obj_mode_note": "0(default):none, 1: in dll, 2: in draw"
+  },
+  "sr": {
+    "enable": false,
+    "delta_score_th": 0.1,
+    "params": [
+      [ 0, 0 ]
+    ],
+    "params_note": "[vchID top_y]"
+  },
+  "fd": {
+    "enable": true,
+    "temporal_stabilization": true,
+    "draw_block_debug": false,
+    "score_th_fire": 0.2,
+    "score_th_smoke": 0.5,
+    "params": [
+    ],
+    "params_note": "[vchID x1 y1 x2 y2]"
+  },
+  "cc": {
+    "enable": false,
+    "bias": 0.6
+  },
+  "par": {
+    "enable": false
+  },
+  "line": {
+    "params": [
+      [ 0, 4, 1, 419, 736, 1660, 752 ],
+      [ 1, 4, 1, 100, 436, 600, 452 ]
+    ],
+    "params_note": "[lineID vchID isMode x1 y1 x2 y2]"
+  },
+  "zone": {
+    "params": [
+      [ 0, 4, 1, 1000, 110, 1700, 110, 1700, 900, 1000, 900 ],
+      [ 0, 4, 1, 200, 110, 600, 110, 600, 600, 200, 600 ]
+    ],
+    "params_note": "[zoneID vchID isMode x1 y1 x2 y2 x3 y3 x4 y4]"
+  },
+  "cc_zone": {
+    "params": [
+      [ 0, 3, 0, 0, 960, 0, 960, 540, 0, 540, 10, 20, 30 ]
+    ],
+    "params_note": "ccZoneID vchID x1 y1 x2 y2 x3 y3 x4 y4 ccLevelTh1 ccLevelTh2 ccLevelTh3"
+  },
+  "models": {
+    "od_gpu": "aipro_od_1_4_5.net",
+    "od_cpu": "aipro_od_1_4_1.nez",
+    "fd_gpu": "hgnetv2_b5.ssld_stage2_ft_in1k-20250620-50-98.78-mat.trt",
+    "fd_cpu": "aipro_fd_1_4_12.nez",
+    "cc_gpu": "aipro_cc_1_4_2.net",
+    "cc_cpu": "aipro_cc_1_4_2.nez",
+    "par_gpu": "aipro_par_1_4.net",
+    "par_cpu": "aipro_par_1_4.nez",
+    "ir_gpu": "aipro_ir_1_4_1.net",
+    "sr_gpu": "aipro_sr_x20_2_1.net"
+  }
+}

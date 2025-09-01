@@ -24,7 +24,8 @@
         "**/.settings": true,
         "**/CVS": true,
         "**/.venv": true,
-        "**/__pycache__": true
+        "**/__pycache__": true,
+        "**/.vscode": true
     },
     "explorerExclude.backup": {},
     // "python.linting.enabled": true,

@@ -1,0 +1,2 @@
+experiment;dataset;metric_accuracy;metric_f1_score;metric_precision;metric_recall (TPR);metric_FPR;metric_FPS
+temp_stabilize;pexels;0.9896907210350037;0.9948186278343201;1.0;0.9896907210350037;0.0;13.758538246154785

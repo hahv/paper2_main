@@ -1,0 +1,11 @@
+__base__: "./config/_base.yaml"
+method:
+  list_methods: null
+  selected_method: "no_temp" # "no_temp", "temp_stabilize"
+
+infer:
+  do_infer: true
+  skip_if_exists: true
+  limit: -1
+  save_results: true
+  verbose: false

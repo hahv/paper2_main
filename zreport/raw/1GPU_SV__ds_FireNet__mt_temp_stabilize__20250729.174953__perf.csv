@@ -1,0 +1,2 @@
+experiment;dataset;metric_accuracy;metric_f1_score;metric_precision;metric_recall (TPR);metric_FPR;metric_FPS
+temp_stabilize;FireNet;0.9516128897666931;0.9684210419654846;0.9387755393981934;1.0;0.1875;31.3940372467041

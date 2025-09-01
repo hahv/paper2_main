@@ -1,0 +1,14 @@
+datasets:
+  # - DFire
+  # - DFireStatic
+  # - FireNet
+  # - pexels
+  # - MiviaFire
+  # - Prof
+  - TestVideos
+methods:
+  - no_temp
+  # - temp_tpt
+  - temp_stabilize
+time_stamps: null
+  # 20250731.145608

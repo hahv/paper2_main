@@ -1,5 +1,22 @@
 pybgs_env
 env
-.venv*/
-dataset
+.venv*
+datasets
 models
+test
+zout
+
+# keep models folder structure
+!models/
+models/*
+!models/.gitkeep
+
+# keep datasets folder structure
+!datasets/
+datasets/*
+!datasets/.gitkeep
+
+# keep zout folder structure
+!zout/
+zout/*
+!zout/.gitkeep

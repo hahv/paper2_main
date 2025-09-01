@@ -1,0 +1,2 @@
+experiment;dataset;metric_accuracy;metric_f1_score;metric_precision;metric_recall (TPR);metric_FPR;metric_FPS
+no_temp;DFireStatic;0.800000011920929;0.84375;0.931034505367279;0.7714285850524902;0.13333334028720856;53.4329948425293

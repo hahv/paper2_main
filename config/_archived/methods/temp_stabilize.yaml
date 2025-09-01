@@ -1,0 +1,11 @@
+params:
+  grid_size: 4 # size of the grid for spatial analysis
+  diff_frame_thres: 1 # difference threshold for frame comparison
+  impack_plus_one: 5 # difference threshold for frame
+  non_zero_thres: 200 # threshold for non-zero pixel values in the mask
+  mask_thres: 10 # threshold for accumulated changes in the mask
+  min_size: 0.75 # minimum size of the ROI to be considered valid
+  # window_size: 5  # !NOT directly related; size of temporal smoothing window (avg over frames for final prediction)
+  debug:
+    draw_block_debug: true
+    save_masks: true

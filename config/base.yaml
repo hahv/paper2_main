@@ -1,0 +1,26 @@
+general:
+  seed: 1
+  computer_name: null # PC name that run the experiment
+  outdir: zout/train
+  # time_stamp: 20250729.171542 #  add to outdir automatically, allow to resume training
+  time_stamp: null # will be set to current time if not provided
+  log_cfg:
+    wandb_cfg:
+      project: "fire-paper2-2025"
+      mode: "online"
+
+dataset_cfg:
+  list_datasets: [] # empty, will populate from config/datasets
+  selected_dataset_name: FD # will be set later
+
+metric_cfg:
+  list_metrics: [] # empty, will populate from config/metrics
+  selected_metric_set_name: metric_set1 # will be set later
+
+train_cfg:
+  list_trains: [] # empty, will populate from config/train
+  selected_train_cfg_name: base_train # will be set later
+
+method_cfg:
+  list_methods: [] # empty, will populate from config/methods
+  selected_method_name: method1 # will be set later

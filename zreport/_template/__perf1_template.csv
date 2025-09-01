@@ -1,0 +1,2 @@
+method;dataset_name;cfg_file;metric_accuracy;metric_f1_score;metric_precision;metric_recall (TPR);metric_FPR;metric_FPS
+no_temp;Dfire;a;82.23;0.24;82.32;90.23;90;30
