@@ -1,26 +1,42 @@
 general:
   seed: 1
   computer_name: null # PC name that run the experiment
-  outdir: zout/train
+  outdir: zout/perf
   # time_stamp: 20250729.171542 #  add to outdir automatically, allow to resume training
   time_stamp: null # will be set to current time if not provided
   log_cfg:
     wandb_cfg:
-      project: "fire-paper2-2025"
+      project: "paper2_main"
       mode: "online"
 
 dataset_cfg:
   list_datasets: [] # empty, will populate from config/datasets
-  selected_dataset_name: FD # will be set later
+  selected_dataset_name: FD
 
 metric_cfg:
   list_metrics: [] # empty, will populate from config/metrics
-  selected_metric_set_name: metric_set1 # will be set later
-
-train_cfg:
-  list_trains: [] # empty, will populate from config/train
-  selected_train_cfg_name: base_train # will be set later
+  selected_metric_set_name: metric_per_frame # metric_per_video
 
 method_cfg:
   list_methods: [] # empty, will populate from config/methods
-  selected_method_name: method1 # will be set later
+  selected_method_name: temp_tpt
+
+model_cfg:
+  base_model: hgnetv2_b5.ssld_stage2_ft_in1k # timm
+  model_path: models/prof_hgnetv2_b5.ssld_stage2_ft_in1k-20250620-50-98.78.pth
+  class_names: [Fire, None, SmokeOnly]
+
+infer_cfg:
+  do_infer: true
+  skip_if_exists: true
+  limit: -1 # -1 for no limit
+  save_video_results: true
+  save_csv_results: true
+  csv_columns:
+    - class_names
+    - logits
+    - probs
+    - pred_label_idx
+    - pred_label
+  calc_metrics: false
+  verbose: false

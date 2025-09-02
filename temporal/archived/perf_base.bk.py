@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 
 from halib import *
 
-from temporal.config_bk import Config
+from temporal.archived.config_bk import Config
 from halib.utils.gpu_mon import GPUMonitor
 
 
@@ -17,11 +17,6 @@ CSV_FIXED_COLUMNS = [
     "do_infer",  # whether to perform inference on this frame
     "elapsed_time",  # infer elapsed time in seconds
 ]
-GPU_MONITOR_COLUMNS = [
-    "gpu_avg_power",  # average power draw in watts
-    "gpu_avg_max_memory",  # maximum memory usage in MiB
-]
-
 
 # Abstract Base Class
 class DetectorBase(ABC):

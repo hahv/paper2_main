@@ -1,3 +1,3 @@
-params:
+extra_cfgs:
   window_size: 20
   persistence_thres: 0.5

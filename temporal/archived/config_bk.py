@@ -7,7 +7,7 @@ from typing import List, Optional, Dict, Any, Union
 
 import torchmetrics
 from torchmetrics import Metric
-from .metrics import FPS, FPR
+from ..metrics import FPS, FPR
 import yaml
 
 SEP = "__"

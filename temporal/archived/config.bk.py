@@ -5,7 +5,6 @@ from halib.filetype import yamlfile
 from dataclass_wizard import YAMLWizard
 from typing import List, Optional, Dict, Any
 from halib.research.base_config import ExpBaseConfig, NamedConfig
-from halib.research.mics import *
 
 import yaml
 
@@ -113,6 +112,29 @@ class MetricConfig(YAMLWizard):
             f"Metric set '{self.selected_metric_set_name}' not found in the configuration."
         )
 
+
+@dataclass
+class TrainConfig(YAMLWizard):
+    list_trains: List[TrainCfgSet] = None
+    selected_train_cfg_name: str = None
+    train_used: Optional[TrainCfgSet] = None
+
+    def post_init(self):
+        """
+        Post-initialization to set the used training configuration based on the selected name.
+        """
+        if self.selected_train_cfg_name is None:
+            raise ValueError("No training configuration selected in the configuration.")
+        for train_cfg in self.list_trains:
+            if train_cfg.name == self.selected_train_cfg_name:
+                self.train_used = train_cfg
+                return
+
+        raise ValueError(
+            f"Training configuration '{self.selected_train_cfg_name}' not found in the configuration."
+        )
+
+
 @dataclass
 class MethodConfig(YAMLWizard):
     list_methods: List[Method]
@@ -136,30 +158,12 @@ class MethodConfig(YAMLWizard):
 
 
 @dataclass
-class InferConfig(YAMLWizard):
-    do_infer: bool
-    skip_if_exists: bool
-    limit: int
-    save_video_results: bool
-    save_csv_results: bool
-    csv_columns: List[str]
-    calc_metrics: bool
-    verbose: bool
-
-@dataclass
-class ModelConfig(YAMLWizard):
-    base_model: str
-    model_path: str
-    class_names: List[str]
-
-@dataclass
 class Config(ExpBaseConfig):
     general: GeneralConfig
     dataset_cfg: DatasetConfig
     metric_cfg: MetricConfig
+    train_cfg: TrainConfig
     method_cfg: MethodConfig
-    infer_cfg: InferConfig
-    model_cfg: ModelConfig
     cfg_name: Optional[str] = None
 
     def post_init(self):
@@ -173,7 +177,18 @@ class Config(ExpBaseConfig):
             # pprint(f"1>.COMPUTER NAME: {self.general.computer_name=}")
             abbr = self.general.computer_name
         else:
-            abbr = get_PC_abbr_name()
+            import socket
+
+            computer_name = socket.gethostname()
+            df_computer = pd.read_csv("./config/__list_pc.csv", sep=";")
+            # cols: pc_name;abbr
+            # get all rows of dfcomputer and find the row for the current computer
+            computer_row = df_computer[df_computer["pc_name"] == computer_name]
+            if computer_row.empty:
+                raise ValueError(
+                    f"Computer '{computer_name}' not found in __list_pc.csv"
+                )
+            abbr = computer_row["abbr"].values[0]
             # pprint(f"COMPUTER NAME: {abbr=}")
             self.general.computer_name = abbr  # set computer name in general config
 
@@ -210,6 +225,7 @@ class Config(ExpBaseConfig):
         cfg_attr_to_class = {
             "dataset_cfg": DatasetInfo,
             "metric_cfg": MetricSet,
+            "train_cfg": TrainCfgSet,
             "method_cfg": Method,
         }
 
@@ -245,6 +261,7 @@ class Config(ExpBaseConfig):
         # post-init
         instance.dataset_cfg.post_init()
         instance.metric_cfg.post_init()
+        instance.train_cfg.post_init()
         instance.method_cfg.post_init()
         instance.post_init()
         return instance

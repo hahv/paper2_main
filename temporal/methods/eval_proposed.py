@@ -3,9 +3,9 @@ import torch
 from halib import *
 from PIL import Image
 from torchvision import transforms
-from temporal.det_base import DetectorBase
+from temporal.eavl_base import EvalBase
 from temporal.utils import *
-from temporal.config_bk import Config
+from temporal.archived.config_bk import Config
 from halib.filetype import csvfile
 
 from halib.research.perfcalc import (
@@ -15,7 +15,7 @@ from halib.research.perfcalc import (
 )
 
 
-class ProposedDetector(DetectorBase, PerfCalc):
+class ProposedDetector(EvalBase, PerfCalc):
     POSITIVE_LABEL = "positive"
     NEGATIVE_LABEL = "negative"
 

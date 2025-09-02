@@ -5,30 +5,14 @@ sys.path.append("E:/NextCloud/base_exp")
 from halib import *
 from halib.common import seed_everything
 from halib.research.base_exp import BaseExperiment
-from halib.research.metrics import MetricsBackend
+from halib.research.metrics import MetricsBackend, TorchMetricsBackend
 
-from pipeline.config import *
+from temporal.config import *
 from typing import Dict, Any, Union, List
+import torchmetrics
+from temporal.metrics import FPS, FPR
 
-
-class IdentityMetricsBackend(MetricsBackend):
-    """
-    A simple metrics backend that does not perform any calculations.
-    It simply returns the input data as is.
-    This can be useful for debugging or when no metrics are needed.
-    """
-
-    def compute_metrics(
-        self,
-        metrics_info: Union[List[str], Dict[str, Any]],
-        metrics_data_dict: Dict[str, Any],
-        *args,
-        **kwargs,
-    ) -> Dict[str, Any]:
-        return metrics_data_dict
-
-
-class CustomExperiment(BaseExperiment):
+class OurExp(BaseExperiment):
     """
     Custom experiment class that extends BaseExperiment.
     This class should implement the specific logic for the custom experiment.
@@ -40,6 +24,7 @@ class CustomExperiment(BaseExperiment):
         :param config: An instance of Config or its subclass.
         """
         super().__init__(config)
+        self.full_cfg = config
         self.metric_results = {}
 
     def init_general(self, general_cfg: GeneralConfig):
@@ -64,7 +49,37 @@ class CustomExperiment(BaseExperiment):
         Prepare the metrics for the experiment.
         This method should be implemented in subclasses.
         """
-        return IdentityMetricsBackend(metric_cfg.metric_names)
+        num_classes = self.full_cfg.model_cfg.class_names
+        if num_classes > 2:
+            task = "multiclass"
+        else:
+            task = "binary"
+
+        metric_names = self.full_cfg.metric_cfg.metricSet_used.metric_names
+        name_and_tmetric = {}
+        if "accuracy" in metric_names:
+            acc = torchmetrics.Accuracy(task=task, num_classes=num_classes)
+            name_and_tmetric["accuracy"] = acc
+        if "f1_score" in metric_names:
+            f1 = torchmetrics.F1Score(task=task, num_classes=num_classes)
+            name_and_tmetric["f1_score"] = f1
+        if "precision" in metric_names:
+            p = torchmetrics.Precision(task=task, num_classes=num_classes)
+            name_and_tmetric["precision"] = p
+        if "recall (TPR)" in metric_names:
+            r = torchmetrics.Recall(task=task, num_classes=num_classes)
+            name_and_tmetric["recall (TPR)"] = r
+        if "FPR" in metric_names:
+            fpr = FPR()
+            name_and_tmetric["FPR"] = fpr
+        if "FPS" in metric_names:
+            fps = FPS()
+            name_and_tmetric["FPS"] = fps
+
+        # make sure all metrics are initialized
+        for metric in metric_names:
+            assert metric in name_and_tmetric, f"Metric '{metric}' is not initialized."
+        return TorchMetricsBackend(name_and_tmetric)
 
     def exec_exp(self, *args, **kwargs):
         """
@@ -93,7 +108,7 @@ class CustomExperiment(BaseExperiment):
 
 def main():
     config = Config.from_custom_yaml_file(r"config/base.yaml")
-    experiment = CustomExperiment(config)
+    experiment = OurExp(config)
     results, outfile = experiment.run_exp(
         do_calc_metrics=True, outdir=config.get_outdir(), return_df=True
     )

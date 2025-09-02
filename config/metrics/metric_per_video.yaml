@@ -1,0 +1,6 @@
+# name: metrics_set2
+metric_names:
+  - FPR # False Positive Rate
+  - FPS # Frames Per Second
+extra_cfgs:
+  mode: per_video # per_video, per_frame

@@ -1,0 +1,10 @@
+# name: metrics_set1
+metric_names:
+  - accuracy
+  - f1_score
+  - precision
+  - recall (TPR)
+  - FPR # False Positive Rate
+  - FPS # Frames Per Second
+extra_cfgs:
+  mode: per_frame # per_video, per_frame

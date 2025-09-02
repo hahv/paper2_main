@@ -1,1 +1,5 @@
-params: null
+params:
+  model:
+    base_timm_model: hgnetv2_b5.ssld_stage2_ft_in1k
+    model_path: models/prof_hgnetv2_b5.ssld_stage2_ft_in1k-20250620-50-98.78.pth
+    class_names: [Fire, None, SmokeOnly]
