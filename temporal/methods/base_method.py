@@ -2,24 +2,19 @@ import cv2
 import time
 import timm
 import torch
-from abc import ABC, abstractmethod
-
 from halib import *
 
-from temporal.config import Config
 from temporal.rs_handler import *
+from temporal.config import Config
 
-from halib import *
-from halib.common import seed_everything
-from halib.research.base_exp import BaseExperiment
-from halib.research.metrics import MetricsBackend
+from abc import ABC, abstractmethod
 
 class BaseMethod(ABC):
     """
     An abstract base class for video inference that decouples inference logic
     from output handling (e.g., saving CSVs or videos) via a handler system.
     """
-    REQUIRED_INFER_RS = ["logits", "probs", "labelIdx", "predLabel"]
+    REQUIRED_INFER_RS = ["logits", "probs", "predLabelIdx", "predLabel"]
 
     def __init__(self, cfg: Config, rs_handlers: list[RSHandlerBase] = None):
         """
@@ -38,10 +33,6 @@ class BaseMethod(ABC):
 
         # Store the list of handlers that will process the results
         self.result_handlers = rs_handlers if rs_handlers is not None else []
-
-        # Save the configuration file to the output directory for reproducibility
-        self.cfg_out_file = os.path.join(self.outdir, "__config.yaml")
-        self.cfg.to_yaml_file(self.cfg_out_file)
 
     # --------------------------------------------------------------------------
     # Abstract Methods - To be implemented by subclasses
@@ -151,12 +142,15 @@ class BaseMethod(ABC):
             )
 
         frame_idx = 0
+        limit = self.cfg.infer_cfg.limit
         try:
             while cap.isOpened():
                 ret, frame_bgr = cap.read()
                 if not ret:
                     break  # End of video
                 frame_idx += 1
+                if limit > 0 and frame_idx > limit:
+                    pprint(f"Frame limit reached: {limit}, stop")
 
                 start_time = time.perf_counter()
 

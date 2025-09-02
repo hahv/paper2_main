@@ -6,6 +6,7 @@ from halib.system import filesys as fs
 from halib.filetype import csvfile
 import torch
 import torch.nn.functional as F
+from collections import OrderedDict
 
 class RSHandlerBase(ABC):
     """Abstract base class for handling inference results."""
@@ -33,32 +34,9 @@ class CsvRSHandler(RSHandlerBase):
         "video",  # video name
         "num_frames",  # total number of frames in the video
         "frame_idx",  # frame index
-        "do_infer",  # whether to perform inference on this frame
         "elapsed_time",  # infer elapsed time in seconds
+        # "do_infer",  # whether to perform inference on this frame
     ]
-    def infer_results_to_list(self, frame_rs_dict):
-        # csv_infer_cols = [<class_names>, <logits>, <probs>, <pred_label_idx>, <pred_label>]
-        infer_row_data = []
-        className = self.cfg.model_cfg.class_names
-        logits = frame_rs_dict["logits"] if frame_rs_dict else None
-        probs = (
-            torch.nn.functional.softmax(torch.tensor(logits), dim=0).numpy().tolist()
-            if logits
-            else None
-        )
-        pred_labelIdx = frame_rs_dict["pred_labelIdx"] if frame_rs_dict else None
-        pred_label = (
-            className[pred_labelIdx]
-            if className and pred_labelIdx is not None
-            else None
-        )
-        infer_row_data.append(className)
-        infer_row_data.append(logits)
-        infer_row_data.append(probs)
-        infer_row_data.append(pred_labelIdx)
-        infer_row_data.append(pred_label)
-        return infer_row_data
-
     def __init__(self, cfg: Config):
         self.cfg = cfg
         assert self.cfg.infer_cfg.save_csv_results, "CSV saving is disabled in the config"
@@ -67,32 +45,45 @@ class CsvRSHandler(RSHandlerBase):
         self.csv_rows = []
         self.out_csv_file = None
         self.outdir = os.path.abspath(cfg.get_outdir())
+        self.extra_cols = self.cfg.infer_cfg.csv_columns
+        self.csv_columns = CsvRSHandler.CSV_FIXED_COLUMNS + self.extra_cols
 
     def before_video(self, video_path: str, **kwargs):
         if not self.cfg.infer_cfg.save_csv_results:
             return
 
-        extra_cols = kwargs.get("extra_csv_columns", [])
         video_name = os.path.splitext(os.path.basename(video_path))[0]
         self.dfmk = csvfile.DFCreator()
-        columns = CsvRSHandler.CSV_FIXED_COLUMNS + extra_cols
-        self.dfmk.create_table(video_name, columns=columns)
+        self.dfmk.create_table(video_name, columns=self.csv_columns)
         self.table_name = video_name
         self.out_csv_file = os.path.join(self.outdir, f"{video_name}_results.csv")
         self.csv_rows = []
 
+    # ! can be override
+    def prepare_csv_row(self, frame_rs_dict: dict):
+        """Prepare a CSV row dictionary from frame results."""
+        row_dict = OrderedDict()
+        for col in CsvRSHandler.CSV_FIXED_COLUMNS:
+            row_dict[col] = frame_rs_dict[col]
+
+        row_dict['class_names'] = self.cfg.model_cfg.class_names
+        infer_dict = frame_rs_dict['infer_rs']
+        row_dict['logits'] = infer_dict['logits']
+        row_dict['probs'] = infer_dict['probs']
+        row_dict['pred_label_idx'] = infer_dict['predLabelIdx']
+        row_dict['pred_label'] = infer_dict['predLabel']
+        return row_dict
+
     def handle_frame_results(self, frame_bgr, frame_rs_dict: dict):
         # Unpack data from the dictionary
-        assert (
-            "csv_row" in frame_rs_dict
-        ), "Missing 'csv_row' in frame_data for CsvRSHandler"
-        row_data = frame_rs_dict["csv_row"]
-        self.csv_rows.append(row_data)
+        row_dict = self.prepare_csv_row(frame_rs_dict)
+        # pprint(row_dict)
+        row_array = list(row_dict.values())
+        self.csv_rows.append(row_array)
 
     def after_video(self):
         if not self.cfg.infer_cfg.save_csv_results or self.dfmk is None:
             return
-
         self.dfmk.insert_rows(self.table_name, self.csv_rows)
         self.dfmk.fill_table_from_row_pool(self.table_name)
         self.dfmk[self.table_name].to_csv(
@@ -121,8 +112,7 @@ class BaseVideoRSHandler(RSHandlerBase):
     @staticmethod
     def annotate_frame(
         frame_bgr,  # ! make sure that this frame is in BGR format
-        label_value_dict,  # {"label": value} pairs, e.g., {"FrameIdx": "1/100", etc.}
-        vis_data_results=None,
+        label_value_dict
     ):
         """Annotate frame with class names and probabilities; debug temporal stabilization info if available."""
 

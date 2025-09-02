@@ -14,7 +14,7 @@ from temporal.metrics import FPS, FPR
 import importlib
 import importlib
 from temporal.rs_handler import *
-from temporal.methods.base_mt import BaseMethod
+from temporal.methods.base_method import BaseMethod
 
 class MethodFactory:
     @staticmethod
@@ -95,7 +95,7 @@ class OurExp(BaseExperiment):
         Prepare the metrics for the experiment.
         This method should be implemented in subclasses.
         """
-        num_classes = self.full_cfg.model_cfg.class_names
+        num_classes = len(self.full_cfg.model_cfg.class_names)
         if num_classes > 2:
             task = "multiclass"
         else:
@@ -136,7 +136,7 @@ class OurExp(BaseExperiment):
         console.rule(f"Exec Experiment")
         console.print(f"[red]{self.config.get_cfg_name()}[/red]")
 
-        metric_infos = self.metric_backend.metric_info # {key: torch_metrics}
+        # metric_infos = self.metric_backend.metric_info # {key: torch_metrics}
         method_instance = MethodFactory.create_method(self.config)
         assert isinstance(method_instance, BaseMethod), "Method instance is not of type BaseMethod"
         method: BaseMethod = method_instance

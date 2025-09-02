@@ -1,11 +1,12 @@
 pybgs_env
+__pycache__
 env
 .venv*
 datasets
 models
 test
 zout
-
+*.pyc
 # keep models folder structure
 !models/
 models/*
