@@ -1,1 +1,2 @@
-extra_cfgs: null
+extra_cfgs:
+  video_rs_handler: BaseVideoRSHandler

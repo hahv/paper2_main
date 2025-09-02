@@ -14,7 +14,7 @@ from halib.common import seed_everything
 from halib.research.base_exp import BaseExperiment
 from halib.research.metrics import MetricsBackend
 
-class EvalBase(ABC):
+class BaseMethod(ABC):
     """
     An abstract base class for video inference that decouples inference logic
     from output handling (e.g., saving CSVs or videos) via a handler system.
@@ -32,7 +32,7 @@ class EvalBase(ABC):
         self.cfg = cfg
         self.model = None
         self.gpu_monitor = None
-        self.outdir = os.path.abspath(cfg.get_output_dir())
+        self.outdir = os.path.abspath(cfg.get_outdir())
         os.makedirs(self.outdir, exist_ok=True)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -68,16 +68,7 @@ class EvalBase(ABC):
         pass
 
     @abstractmethod
-    def annotate_frame(
-        self,
-        frame,
-        frame_idx: int,
-        total_frames: int,
-        infer_results: dict = None,
-        vis_data_results: dict = None,
-        gpu_stats: dict = None,
-    ) -> any:
-        """Annotates the frame with detection results and returns the annotated frame."""
+    def eval(self):
         pass
 
     # --------------------------------------------------------------------------
@@ -172,9 +163,9 @@ class EvalBase(ABC):
                 infer_rs = self.infer_frame(
                     frame_bgr, frame_idx
                 )
-                if not all(key in infer_rs for key in EvalBase.REQUIRED_INFER_RS):
+                if not all(key in infer_rs for key in BaseMethod.REQUIRED_INFER_RS):
                     raise ValueError(
-                        f"Missing required inference results: {EvalBase.REQUIRED_INFER_RS}"
+                        f"Missing required inference results: {BaseMethod.REQUIRED_INFER_RS}"
                     )
 
                 elapsed_time = time.perf_counter() - start_time

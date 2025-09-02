@@ -1,7 +1,6 @@
-from temporal.methods.eval_base import *
+from temporal.methods.base_mt import *
 
-class EvalNoTemp(EvalBase):
-
+class NoTempMethod(BaseMethod):
     def infer_frame(self, frame, frame_idx: int) -> dict:
         """Perform inference on the pre-processed frame."""
         assert self.model is not None, "Model is not loaded."
@@ -29,3 +28,6 @@ class EvalNoTemp(EvalBase):
             "predLabelIdx": labelIdx,
             "predLabel": pred_label,
         }
+
+    def eval(self):
+        pass

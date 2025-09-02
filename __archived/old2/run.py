@@ -1,6 +1,6 @@
 from halib import *
 from halib.filetype import yamlfile
-from temporal.methods.eval_proposed import ProposedDetector
+from temporal.methods.temp_stabilize import ProposedDetector
 from temporal.archived.config_bk import Config
 import time
 import itertools

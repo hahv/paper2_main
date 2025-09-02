@@ -157,7 +157,7 @@ class BaseVideoRSHandler(RSHandlerBase):
         assert self.cfg.infer_cfg.save_video_results, "Video saving is disabled in the config"
         self.video_writer = None
         self.video_output_path = None
-        self.outdir = os.path.abspath(cfg.get_output_dir())
+        self.outdir = os.path.abspath(cfg.get_outdir())
 
     def before_video(self, video_path: str, **kwargs):
         fname = fs.get_file_name(video_path, split_file_ext=True)[0]
