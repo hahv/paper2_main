@@ -38,5 +38,5 @@ infer_cfg:
     - probs
     - pred_label_idx
     - pred_label
-  calc_metrics: false
+  calc_metrics: true
   verbose: false

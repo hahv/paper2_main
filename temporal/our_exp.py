@@ -119,6 +119,7 @@ class OurExp(BaseExperiment):
         This method should be implemented in subclasses.
         """
         num_classes = len(self.full_cfg.model_cfg.class_names)
+        num_classes = 2 # force binary classification (fire_smoke OR none)
         if num_classes > 2:
             task = "multiclass"
         else:
@@ -169,16 +170,27 @@ class OurExp(BaseExperiment):
         exp_rs = eval_data_dict, extra_data
         return exp_rs
 
-def main():
-    config = Config.from_custom_yaml_file(r"config/base.yaml")
-    experiment = OurExp(config)
-    results, outfile = experiment.run_exp(
-        do_calc_metrics=config.infer_cfg.calc_metrics, outdir=config.get_outdir(), return_df=True
-    )
-    console.rule(f"Experiment Results")
-    csvfile.fn_display_df(results)
-    pprint_local_path(outfile)
+    def run_exp(self, do_calc_metrics=True, *args, **kwargs):
+        self.init_general(self.config.get_general_cfg())
+        self.prepare_dataset(self.config.get_dataset_cfg())
+        self.prepare_metrics(self.config.get_metric_cfg())
 
+        # Save config before running
+        self.config.save_to_outdir()
 
-if __name__ == "__main__":
-    main()
+        # Execute experiment
+        results = self.exec_exp(*args, **kwargs)
+        if do_calc_metrics:
+            mode_metrics_data_dict, _ = results
+            for mode in mode_metrics_data_dict:
+                console.rule(f"Calculating metrics for mode: {mode}")
+                metrics_data = mode_metrics_data_dict[mode]
+                CSV_FILE_POSTFIX = "__perf"
+                outfile = self.full_cfg.get_outdir() + f"/{self.full_cfg.get_cfg_name()}__{mode}{CSV_FILE_POSTFIX}.csv"
+                perf_results, outfile = self.calc_and_save_exp_perfs(
+                    raw_metrics_data=metrics_data, extra_data=None,
+                    outfile=outfile, return_df=True,
+                    *args, **kwargs
+                )
+                csvfile.fn_display_df(perf_results)
+                pprint_local_path(outfile)

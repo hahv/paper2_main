@@ -76,7 +76,7 @@ class TestDSMetricSource(BaseMetricSource):
             # Compute FPS from raw_data
             per_video_preds_all = []
             for per_video_data in per_video_out_list:
-                per_video_preds_all.append(per_video_data[1]['elapsed_time'].tolist())
+                per_video_preds_all.append(per_video_data[1]['elapsed_time'].tolist()[1:])  # skip first frame, which is always two slow due to model initialization
 
             return per_video_preds_all  # list of list of elapse_time
         else:
@@ -105,7 +105,8 @@ class TestDSMetricSource(BaseMetricSource):
     def proc_data_by_mode(self, metric: str, mode: str, metric_data: Dict[str, Any], **kwargs):
         if metric == "FPS":
             flatten = True
-            return self.proc_list_to_tensor(data_list=metric_data, flatten=flatten, dtype=torch.float)
+            torch_data =  self.proc_list_to_tensor(data_list=metric_data, flatten=flatten, dtype=torch.float)
+            return torch_data
         else:
             if mode == "per_frame":
                 flatten = True
