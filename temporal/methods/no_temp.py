@@ -2,7 +2,7 @@ from temporal.methods.base_method import *
 from torchvision import transforms
 from PIL import Image
 from temporal.config import Config
-from temporal.metric_src.test_metric_src import TestDSMetricSource
+from temporal.metric_src.test_metric_src import TestDSMetricSrc
 
 class NoTempMethod(BaseMethod):
     def _pre_process_frame(self, frame):
@@ -70,8 +70,3 @@ class NoTempMethod(BaseMethod):
             "predLabelIdx": labelIdx,
             "predLabel": pred_label,
         }
-
-    def eval(self, **kwargs):
-        perf_dir = self.cfg.get_outdir()
-        metric_source = TestDSMetricSource(self.cfg)
-        return metric_source.get_data_metrics(in_dir=perf_dir)

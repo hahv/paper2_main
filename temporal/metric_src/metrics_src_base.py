@@ -8,7 +8,27 @@ from abc import ABC, abstractmethod
 from typing import Dict, Any, Callable
 
 
-class BaseMetricSource(ABC):
+from temporal.utils import get_cls
+class MetricSrcFactory:
+    @staticmethod
+    def create_metric_source(config: Config, *args, **kwargs):
+
+        def ds_name_to_metric_source(
+            dsname: str, suffix: str = "DSMetricSrc"
+        ) -> str:
+            return dsname + suffix
+
+        dataset_name = config.dataset_cfg.dataset_used.name
+        pkg_name = "temporal.metric_src"  # package name (folder)
+        module_name = f"{dataset_name.lower()}_metric_src"  # py file name
+        cls_name = ds_name_to_metric_source(dataset_name)  # class name
+        cls = get_cls(f"{pkg_name}.{module_name}.{cls_name}")  # e.g.,
+        assert cls is not None, f"Class '{cls_name}' not found in module '{pkg_name}'."
+        kwargs = {"cfg": config}
+        return cls(**kwargs)
+
+
+class BaseMetricSrc(ABC):
     """
     Abstract base class for metric data sources. Each concrete subclass represents
     a specific dataset and handles data retrieval for various metrics and modes.

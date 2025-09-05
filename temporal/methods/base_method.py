@@ -8,6 +8,44 @@ from temporal.rs_handler import *
 from temporal.config import Config
 
 from abc import ABC, abstractmethod
+import importlib
+from temporal.utils import get_cls
+from temporal.metric_src.metrics_src_base import MetricSrcFactory, BaseMetricSrc
+
+class MethodFactory:
+    @staticmethod
+    def create_method(config: Config, *args, **kwargs):
+        def method_name_to_cls_name(name: str, suffix: str = "Method") -> str:
+            """
+            Convert snake_case string to PascalCase and append suffix.
+            Example: "no_temp" -> "NoTempMethod"
+            """
+            parts = name.split("_")
+            pascal = "".join(word.capitalize() for word in parts)
+            return pascal + suffix
+
+        pkg_name = "temporal.methods"
+        # ! method_name == module_name
+        module_name = config.method_cfg.method_used.name
+        cls_name = method_name_to_cls_name(module_name)
+        cls = get_cls(f"{pkg_name}.{module_name}.{cls_name}")
+        assert cls is not None, f"Class '{cls_name}' not found in module '{pkg_name}'."
+
+        rs_handler_list: list[RSHandlerBase] = []
+        if config.infer_cfg.save_csv_results:
+            rs_handler_list.append(CsvRSHandler(config))
+        if config.infer_cfg.save_video_results:
+            pkg_name = "temporal.rs_handler"
+            chosen_video_handler = config.method_cfg.method_used.extra_cfgs.get(
+                "video_rs_handler", "BaseVideoRSHandler"
+            )
+            rs_handler_list.append(
+                get_cls(f"{pkg_name}.{chosen_video_handler}")(cfg=config)
+            )
+
+        kwargs = {"cfg": config, "rs_handlers": rs_handler_list}
+        return cls(**kwargs)
+
 
 class BaseMethod(ABC):
     """
@@ -57,10 +95,15 @@ class BaseMethod(ABC):
                 extra: if needed
         """
         pass
-
-    @abstractmethod
-    def eval(self, **kwargs):
-        pass
+    # ! override if needed
+    def prepare_metric_src(self, **kwargs):
+        """
+        Prepares the metric source and retrieves metric data.
+        """
+        perf_dir = self.cfg.get_outdir()
+        metric_source = MetricSrcFactory.create_metric_source(self.cfg)
+        base_metric_src: BaseMetricSrc = metric_source
+        return base_metric_src.get_data_metrics(in_dir=perf_dir, **kwargs)
 
     # --------------------------------------------------------------------------
     # Core Methods

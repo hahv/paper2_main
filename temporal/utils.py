@@ -1,4 +1,5 @@
 import seaborn as sns
+import importlib
 
 def getColor(classIdx):
     # main palette
@@ -9,9 +10,11 @@ def getColor(classIdx):
     color_255 = (int(r * 255), int(g * 255), int(b * 255))
     return color_255
 
+
 def bgr_to_rgb(bgr):
     """Convert BGR color to RGB."""
     return (bgr[2], bgr[1], bgr[0])
+
 
 def validate_detect_frame_return(func):
     def wrapper(*args, **kwargs):
@@ -37,3 +40,14 @@ def validate_detect_frame_return(func):
         return result
 
     return wrapper
+
+
+def get_cls(class_path: str, *args, **kwargs):
+    """
+    Dynamically import class and create instance.
+    class_path format: 'mypkg.shapes.circle.Circle'
+    """
+    module_name, class_name = class_path.rsplit(".", 1)
+    module = importlib.import_module(module_name)
+    cls = getattr(module, class_name)
+    return cls

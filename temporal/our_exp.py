@@ -14,69 +14,7 @@ from temporal.metrics import FPS, FPR
 import importlib
 import importlib
 from temporal.rs_handler import *
-from temporal.methods.base_method import BaseMethod
-
-
-def get_cls(class_path: str, *args, **kwargs):
-    """
-    Dynamically import class and create instance.
-    class_path format: 'mypkg.shapes.circle.Circle'
-    """
-    module_name, class_name = class_path.rsplit(".", 1)
-    module = importlib.import_module(module_name)
-    cls = getattr(module, class_name)
-    return cls
-
-
-class MethodFactory:
-    @staticmethod
-    def create_method(config: Config, *args, **kwargs):
-        def method_name_to_cls_name(name: str, suffix: str = "Method") -> str:
-            """
-            Convert snake_case string to PascalCase and append suffix.
-            Example: "no_temp" -> "NoTempMethod"
-            """
-            parts = name.split("_")
-            pascal = "".join(word.capitalize() for word in parts)
-            return pascal + suffix
-
-        pkg_name = "temporal.methods"
-        # ! method_name == module_name
-        module_name = config.method_cfg.method_used.name
-        cls_name = method_name_to_cls_name(module_name)
-        cls = get_cls(f"{pkg_name}.{module_name}.{cls_name}")
-        assert cls is not None, f"Class '{cls_name}' not found in module '{pkg_name}'."
-
-        rs_handler_list: list[RSHandlerBase] = []
-        if config.infer_cfg.save_csv_results:
-            rs_handler_list.append(CsvRSHandler(config))
-        if config.infer_cfg.save_video_results:
-            pkg_name = "temporal.rs_handler"
-            chosen_video_handler = config.method_cfg.method_used.extra_cfgs.get("video_rs_handler", "BaseVideoRSHandler")
-            rs_handler_list.append(get_cls(f"{pkg_name}.{chosen_video_handler}")(cfg=config))
-
-        kwargs = {"cfg": config, "rs_handlers": rs_handler_list}
-        return cls(**kwargs)
-
-
-class MetricSourceFactory:
-    @staticmethod
-    def create_metric_source(config: Config, *args, **kwargs):
-
-        def ds_name_to_metric_source(
-            dsname: str, suffix: str = "DSMetricSource"
-        ) -> str:
-            return dsname + suffix
-
-        dataset_name = config.dataset_cfg.dataset_used.name
-        pkg_name = "temporal.metrics_src" # package name (folder)
-        module_name = f'{dataset_name.lower()}_metric_src' # py file name
-        cls_name = ds_name_to_metric_source(dataset_name) # class name
-        cls = get_cls(f"{pkg_name}.{module_name}.{cls_name}") # e.g.,
-        assert cls is not None, f"Class '{cls_name}' not found in module '{pkg_name}'."
-        kwargs = {"cfg": config}
-        return cls(**kwargs)
-
+from temporal.methods.base_method import BaseMethod, MethodFactory
 
 class OurExp(BaseExperiment):
     """
@@ -165,7 +103,7 @@ class OurExp(BaseExperiment):
         assert isinstance(method_instance, BaseMethod), "Method instance is not of type BaseMethod"
         method: BaseMethod = method_instance
         method.infer_video_dir(self.video_dir_path)
-        eval_data_dict = method.eval() # {metric: <value for compute metrics>}
+        eval_data_dict = method.prepare_metric_src() # {metric: <value for compute metrics>}
         extra_data = None
         exp_rs = eval_data_dict, extra_data
         return exp_rs
@@ -192,5 +130,14 @@ class OurExp(BaseExperiment):
                     outfile=outfile, return_df=True,
                     *args, **kwargs
                 )
-                csvfile.fn_display_df(perf_results)
+                df = pd.read_csv(outfile, sep=";", encoding="utf-8")
+                # get row 0
+                df.at[0, "experiment"] = f"{self.full_cfg.get_cfg_name()}_{mode}"
+
+                df.to_csv(outfile, sep=";", encoding="utf-8", index=False)
+                csvfile.fn_display_df(df)
                 pprint_local_path(outfile)
+        exp_dir = self.full_cfg.general.outdir
+        from halib.research.perfcalc import PerfCalc
+        pertb = PerfCalc.gen_perf_report_for_multip_exps(indir=exp_dir)
+        pertb.plot(save_path=f"{exp_dir}/all_exps_perf.png", open_plot=True)

@@ -4,7 +4,7 @@ from typing import Dict, Any
 from temporal.metric_src.metrics_src_base import *
 import torch
 
-class TestDSMetricSource(BaseMetricSource):
+class TestDSMetricSrc(BaseMetricSrc):
     """
     Concrete data source for a hypothetical video dataset.
     Assumes data structure: videos with frames, each frame has gt_label, pred_label, timestamp, etc.
@@ -51,9 +51,9 @@ class TestDSMetricSource(BaseMetricSource):
         for csv_file in csv_files:
             video_name = fs.get_file_name(csv_file, split_file_ext=True)[0]
             gt = (
-                TestDSMetricSource.NEG_LABEL
+                TestDSMetricSrc.NEG_LABEL
                 if "nofire" in video_name
-                else TestDSMetricSource.POS_LABEL
+                else TestDSMetricSrc.POS_LABEL
             )
             df = pd.read_csv(csv_file, sep=';', encoding='utf-8', dtype= {'pred_label': str, 'elapsed_time': float}, keep_default_na=False)
             # pprint(csv_file)
@@ -86,10 +86,10 @@ class TestDSMetricSource(BaseMetricSource):
                 per_video_pred_df = per_video_data[1]
                 # pprint(per_video_pred_df.columns)
                 preds = per_video_pred_df["pred_label"].tolist()
-                preds = np.array(preds) == TestDSMetricSource.POS_LABEL
+                preds = np.array(preds) == TestDSMetricSrc.POS_LABEL
                 preds = preds.astype(int).tolist()  # convert to int
                 gts = per_video_data[0]  # already numpy
-                gts = np.array(gts) == TestDSMetricSource.POS_LABEL
+                gts = np.array(gts) == TestDSMetricSrc.POS_LABEL
                 gts = gts.astype(int).tolist()  # convert to int
                 per_video_preds_all.append(preds)
                 per_video_gts_all.append(gts)
