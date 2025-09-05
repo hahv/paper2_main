@@ -12,11 +12,12 @@ def main():
         outdir=config.get_outdir(),
         return_df=True,
     )
-    if isinstance(exp_results, tuple) and len(exp_results) == 2 and isinstance(exp_results[0], pd.DataFrame):
-        csvfile.fn_display_df(exp_results[0])
-        pprint_local_path(exp_results[1])
-    else:
-        pprint(exp_results)
+    with ConsoleLog("Final results:"):
+        if isinstance(exp_results, tuple) and len(exp_results) == 2 and isinstance(exp_results[0], pd.DataFrame):
+            csvfile.fn_display_df(exp_results[0])
+            pprint_local_path(exp_results[1])
+        else:
+            pprint(exp_results)
 
 if __name__ == "__main__":
     main()

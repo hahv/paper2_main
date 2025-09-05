@@ -20,6 +20,9 @@ class DatasetInfo(YAMLWizard, NamedConfig):
     def get_name(self):
         return self.name
 
+    def get_num_videos(self, recursive=False):
+        video_files = fs.filter_files_by_extension(self.dir_path, [".mp4", ".avi", ".mov"], recursive=recursive)
+        return len(video_files)
 
 @dataclass
 class MetricSet(YAMLWizard, NamedConfig):

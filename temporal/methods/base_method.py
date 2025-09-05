@@ -59,7 +59,7 @@ class BaseMethod(ABC):
         pass
 
     @abstractmethod
-    def eval(self):
+    def eval(self, **kwargs):
         pass
 
     # --------------------------------------------------------------------------
@@ -151,6 +151,7 @@ class BaseMethod(ABC):
                 frame_idx += 1
                 if limit > 0 and frame_idx > limit:
                     pprint(f"Frame limit reached: {limit}, stop")
+                    break
 
                 start_time = time.perf_counter()
 

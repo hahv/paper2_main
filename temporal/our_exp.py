@@ -16,19 +16,21 @@ import importlib
 from temporal.rs_handler import *
 from temporal.methods.base_method import BaseMethod
 
+
+def get_cls(class_path: str, *args, **kwargs):
+    """
+    Dynamically import class and create instance.
+    class_path format: 'mypkg.shapes.circle.Circle'
+    """
+    module_name, class_name = class_path.rsplit(".", 1)
+    module = importlib.import_module(module_name)
+    cls = getattr(module, class_name)
+    return cls
+
+
 class MethodFactory:
     @staticmethod
     def create_method(config: Config, *args, **kwargs):
-        def get_cls(class_path: str, *args, **kwargs):
-            """
-            Dynamically import class and create instance.
-            class_path format: 'mypkg.shapes.circle.Circle'
-            """
-            module_name, class_name = class_path.rsplit(".", 1)
-            module = importlib.import_module(module_name)
-            cls = getattr(module, class_name)
-            return cls
-
         def method_name_to_cls_name(name: str, suffix: str = "Method") -> str:
             """
             Convert snake_case string to PascalCase and append suffix.
@@ -38,22 +40,43 @@ class MethodFactory:
             pascal = "".join(word.capitalize() for word in parts)
             return pascal + suffix
 
-        module_name = "temporal.methods"
-        selected_method = config.method_cfg.method_used.name # no_temp
-        method_cls_name = method_name_to_cls_name(selected_method)
-        cls = get_cls(f"{module_name}.{selected_method}.{method_cls_name}")
-        assert cls is not None, f"Class '{method_cls_name}' not found in module '{module_name}'."
+        pkg_name = "temporal.methods"
+        # ! method_name == module_name
+        module_name = config.method_cfg.method_used.name
+        cls_name = method_name_to_cls_name(module_name)
+        cls = get_cls(f"{pkg_name}.{module_name}.{cls_name}")
+        assert cls is not None, f"Class '{cls_name}' not found in module '{pkg_name}'."
+
         rs_handler_list: list[RSHandlerBase] = []
         if config.infer_cfg.save_csv_results:
             rs_handler_list.append(CsvRSHandler(config))
         if config.infer_cfg.save_video_results:
-            module_name = "temporal.rs_handler"
+            pkg_name = "temporal.rs_handler"
             chosen_video_handler = config.method_cfg.method_used.extra_cfgs.get("video_rs_handler", "BaseVideoRSHandler")
-            rs_handler_list.append(get_cls(f"{module_name}.{chosen_video_handler}")(cfg=config))
+            rs_handler_list.append(get_cls(f"{pkg_name}.{chosen_video_handler}")(cfg=config))
 
         kwargs = {"cfg": config, "rs_handlers": rs_handler_list}
-
         return cls(**kwargs)
+
+
+class MetricSourceFactory:
+    @staticmethod
+    def create_metric_source(config: Config, *args, **kwargs):
+
+        def ds_name_to_metric_source(
+            dsname: str, suffix: str = "DSMetricSource"
+        ) -> str:
+            return dsname + suffix
+
+        dataset_name = config.dataset_cfg.dataset_used.name
+        pkg_name = "temporal.metrics_src" # package name (folder)
+        module_name = f'{dataset_name.lower()}_metric_src' # py file name
+        cls_name = ds_name_to_metric_source(dataset_name) # class name
+        cls = get_cls(f"{pkg_name}.{module_name}.{cls_name}") # e.g.,
+        assert cls is not None, f"Class '{cls_name}' not found in module '{pkg_name}'."
+        kwargs = {"cfg": config}
+        return cls(**kwargs)
+
 
 class OurExp(BaseExperiment):
     """
