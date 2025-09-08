@@ -152,12 +152,20 @@ SCALE_VIDEO_OUTPUT = 0.25
 CUSTOM_ALGORITHM_LIST = True
 GRID_SIZE = 0
 
+
 def process_video(video_file, algorithm):
     """
     Process each frame of the specified video file with the given algorithm.
     Displays original video frame, foreground mask, and background model.
     """
-    global dfmk, outfile, SAVE_CSV, FRAME_BY_FRAME, SHOW_FOREGROUND_MASK, GRID_SIZE, SCALE_VIDEO_OUTPUT
+    global \
+        dfmk, \
+        outfile, \
+        SAVE_CSV, \
+        FRAME_BY_FRAME, \
+        SHOW_FOREGROUND_MASK, \
+        GRID_SIZE, \
+        SCALE_VIDEO_OUTPUT
     frame_res = None
     dfmk = csvfile.DFCreator()
     dfmk.create_table("speed", ["Algorithm", "FPS", "Video File"])
@@ -221,15 +229,19 @@ def process_video(video_file, algorithm):
 
                 # Draw vertical lines
                 for x in range(0, width, block_size):
-                    cv2.line(img_grid, (x, 0), (x, height), color=(0, 255, 0), thickness=1)
+                    cv2.line(
+                        img_grid, (x, 0), (x, height), color=(0, 255, 0), thickness=1
+                    )
 
                 # Draw horizontal lines
                 for y in range(0, height, block_size):
-                    cv2.line(img_grid, (0, y), (width, y), color=(0, 255, 0), thickness=1)
+                    cv2.line(
+                        img_grid, (0, y), (width, y), color=(0, 255, 0), thickness=1
+                    )
 
                 fg_mask = img_grid
             if SCALE_VIDEO_OUTPUT < 1.0:
-                    # Resize the foreground mask if SCALE_VIDEO_OUTPUT is less than 1.0
+                # Resize the foreground mask if SCALE_VIDEO_OUTPUT is less than 1.0
                 fg_mask = cv2.resize(
                     fg_mask,
                     (0, 0),  # 0,0 means the size is computed from fx, fy
@@ -243,7 +255,7 @@ def process_video(video_file, algorithm):
         frame_cnt += 1
 
         if frame_cnt >= SLOW_CNT_CHECK:
-            current_avg_fps = sum(fps_ls)/ len(fps_ls)
+            current_avg_fps = sum(fps_ls) / len(fps_ls)
             if current_avg_fps < 5.0:
                 print(f"FPS too low ({current_avg_fps:.2f}), stopping processing.")
                 break

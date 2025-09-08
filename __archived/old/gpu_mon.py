@@ -5,6 +5,7 @@ import time
 import threading
 from rich.pretty import pprint
 
+
 class GPUMonitor:
     def __init__(self, gpu_index=0, interval=0.01):
         self.nvsmi = nvidia_smi.getInstance()

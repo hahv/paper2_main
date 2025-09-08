@@ -302,6 +302,7 @@ def skip_module(
         zprofiler.step_end("skip_module", "resize_frame")
     zprofiler.step_start("skip_module", "bg_subtract")
     fg_mask = algorithm.apply(cv2_bgr_frame)
+    pprint(fg_mask)
     zprofiler.step_end("skip_module", "bg_subtract")
     zprofiler.step_start("skip_module", "block_data_prepare")
     H, W = cv2_bgr_frame.shape[:2]
@@ -466,11 +467,11 @@ def main():
     print(f"Processed {frame_idx} frames. Avg FPS: {avg_fps:.2f}")
     zprofiler.ctx_end("big_model_infer")
     zprofiler.meta_info()
-    tag = f"{extract_block_func_name}_scaled_{SKIP_MODULE_FRAME_SCALED_RATIO:.2f}"
-    zprofiler.report_and_plot(
-        outdir=f"docs/profiler/{extract_block_func_name}_{SKIP_MODULE_FRAME_SCALED_RATIO:.2f}",
-        tag=tag,
-    )
+    # tag = f"{extract_block_func_name}_scaled_{SKIP_MODULE_FRAME_SCALED_RATIO:.2f}"
+    # zprofiler.report_and_plot(
+    #     outdir=f"docs/profiler/{extract_block_func_name}_{SKIP_MODULE_FRAME_SCALED_RATIO:.2f}",
+    #     tag=tag,
+    # )
 
 
 if __name__ == "__main__":

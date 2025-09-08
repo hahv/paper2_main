@@ -8,6 +8,7 @@ import torch
 import torch.nn.functional as F
 from collections import OrderedDict
 
+
 class RSHandlerBase(ABC):
     """Abstract base class for handling inference results."""
 
@@ -37,9 +38,12 @@ class CsvRSHandler(RSHandlerBase):
         "elapsed_time",  # infer elapsed time in seconds
         # "do_infer",  # whether to perform inference on this frame
     ]
+
     def __init__(self, cfg: Config):
         self.cfg = cfg
-        assert self.cfg.infer_cfg.save_csv_results, "CSV saving is disabled in the config"
+        assert self.cfg.infer_cfg.save_csv_results, (
+            "CSV saving is disabled in the config"
+        )
         self.dfmk = None
         self.table_name = None
         self.csv_rows = []
@@ -66,12 +70,12 @@ class CsvRSHandler(RSHandlerBase):
         for col in CsvRSHandler.CSV_FIXED_COLUMNS:
             row_dict[col] = frame_rs_dict[col]
 
-        row_dict['class_names'] = self.cfg.model_cfg.class_names
-        infer_dict = frame_rs_dict['infer_rs']
-        row_dict['logits'] = infer_dict['logits']
-        row_dict['probs'] = infer_dict['probs']
-        row_dict['pred_label_idx'] = infer_dict['predLabelIdx']
-        row_dict['pred_label'] = infer_dict['predLabel']
+        row_dict["class_names"] = self.cfg.model_cfg.class_names
+        infer_dict = frame_rs_dict["infer_rs"]
+        row_dict["logits"] = infer_dict["logits"]
+        row_dict["probs"] = infer_dict["probs"]
+        row_dict["pred_label_idx"] = infer_dict["predLabelIdx"]
+        row_dict["pred_label"] = infer_dict["predLabel"]
         return row_dict
 
     def handle_frame_results(self, frame_bgr, frame_rs_dict: dict):
@@ -112,7 +116,7 @@ class BaseVideoRSHandler(RSHandlerBase):
     @staticmethod
     def annotate_frame(
         frame_bgr,  # ! make sure that this frame is in BGR format
-        label_value_dict
+        label_value_dict,
     ):
         """Annotate frame with class names and probabilities; debug temporal stabilization info if available."""
 
@@ -144,7 +148,9 @@ class BaseVideoRSHandler(RSHandlerBase):
 
     def __init__(self, cfg: Config):
         self.cfg = cfg
-        assert self.cfg.infer_cfg.save_video_results, "Video saving is disabled in the config"
+        assert self.cfg.infer_cfg.save_video_results, (
+            "Video saving is disabled in the config"
+        )
         self.video_writer = None
         self.video_output_path = None
         self.outdir = os.path.abspath(cfg.get_outdir())
@@ -154,22 +160,23 @@ class BaseVideoRSHandler(RSHandlerBase):
         self.video_output_path = os.path.join(self.outdir, f"{fname}_out.mp4")
         fourcc = cv2.VideoWriter_fourcc(*"mp4v")
 
-        fps = kwargs['fps']
-        frame_size = kwargs['frame_size']
+        fps = kwargs["fps"]
+        frame_size = kwargs["frame_size"]
         self.video_writer = cv2.VideoWriter(
             self.video_output_path, fourcc, fps, frame_size
         )
+
     def handle_frame_results(self, frame_bgr, frame_rs_dict: dict):
         lb_val_dict = {}
-        frame_idx = frame_rs_dict['frame_idx']
-        total_frames = frame_rs_dict['num_frames']
-        lb_val_dict['fps'] = frame_rs_dict['fps']
+        frame_idx = frame_rs_dict["frame_idx"]
+        total_frames = frame_rs_dict["num_frames"]
+        lb_val_dict["fps"] = frame_rs_dict["fps"]
         lb_val_dict["frameidx"] = f"{frame_idx + 1}/{total_frames}"
-        infer_rs = frame_rs_dict['infer_rs']
-        probs = infer_rs['probs']
-        labelIdx = infer_rs['predLabelIdx']
-        predLabel = infer_rs['predLabel']
-        pred_str = f"{predLabel} ({probs[labelIdx]*100:.1f}%)"
+        infer_rs = frame_rs_dict["infer_rs"]
+        probs = infer_rs["probs"]
+        labelIdx = infer_rs["predLabelIdx"]
+        predLabel = infer_rs["predLabel"]
+        pred_str = f"{predLabel} ({probs[labelIdx] * 100:.1f}%)"
         lb_val_dict["pred---"] = pred_str
         frame_vis = BaseVideoRSHandler.annotate_frame(frame_bgr, lb_val_dict)
         self.video_writer.write(frame_vis)

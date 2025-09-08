@@ -75,7 +75,7 @@ def main():
         time_ls.append(elapsed)
 
         # Overlay prediction on frame
-        label = f"{class_names[pred_class]} ({conf.item()*100:.1f}%)"
+        label = f"{class_names[pred_class]} ({conf.item() * 100:.1f}%)"
         fps = 1.0 / elapsed if elapsed > 0 else 0
         cv2.putText(
             frame,

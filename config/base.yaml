@@ -19,8 +19,7 @@ metric_cfg:
 
 method_cfg:
   list_methods: [] # empty, will populate from config/methods
-  selected_method_name: temp_tpt #no_temp
-
+  selected_method_name: temp_stabilize #temp_tpt #no_temp #temp_stabilize
 model_cfg:
   base_model: hgnetv2_b5.ssld_stage2_ft_in1k # timm
   model_path: models/prof_hgnetv2_b5.ssld_stage2_ft_in1k-20250620-50-98.78.pth
@@ -29,7 +28,7 @@ model_cfg:
 infer_cfg:
   do_infer: true
   skip_if_exists: true
-  limit: 10 # -1 for no limit
+  limit: 100 # -1 for no limit
   save_video_results: true
   save_csv_results: true
   csv_columns:

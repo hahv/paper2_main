@@ -10,6 +10,7 @@ import yaml
 
 SEP = "__"
 
+
 @dataclass
 class DatasetInfo(YAMLWizard, NamedConfig):
     name: str = None

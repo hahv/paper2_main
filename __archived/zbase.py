@@ -19,6 +19,7 @@ video_source = r"dataset/smallfire.mp4"
 # video_source = r"dataset/wrong_fd_cam_stream.mp4"
 # video_source = r"dataset/f6.mp4"
 
+
 def load_model(base_timm_model, class_names, model_path):
     model = timm.create_model(
         base_timm_model,
@@ -71,13 +72,12 @@ def main():
             probs = torch.softmax(outputs, dim=1)[0]
             conf, pred_class = torch.max(probs, 0)
 
-
         # !Measure elapsed time
         elapsed = time.time() - start_time
         time_ls.append(elapsed)
 
         # Overlay prediction on frame
-        label = f"{class_names[pred_class]} ({conf.item()*100:.1f}%)"
+        label = f"{class_names[pred_class]} ({conf.item() * 100:.1f}%)"
         fps = 1.0 / elapsed if elapsed > 0 else 0
         cv2.putText(
             frame,
@@ -89,7 +89,9 @@ def main():
             2,
         )
         SCALE = 0.5
-        frame = cv2.resize(frame, (0, 0), fx=SCALE, fy=SCALE, interpolation=cv2.INTER_LINEAR)
+        frame = cv2.resize(
+            frame, (0, 0), fx=SCALE, fy=SCALE, interpolation=cv2.INTER_LINEAR
+        )
         cv2.imshow("Prediction", frame)
 
         # stop after NUM_FRAME_TRIAL or ESC

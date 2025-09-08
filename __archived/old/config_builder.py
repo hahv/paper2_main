@@ -22,8 +22,8 @@ class ConfigFactory:
             name = file.stem
             params = self._load_yaml(str(file))["params"]
             if params is None:
-                params = {} # in case no params are defined in the method file, like "no_temp.yaml"
-            params['method_name'] = name  # Ensure method name is included in params
+                params = {}  # in case no params are defined in the method file, like "no_temp.yaml"
+            params["method_name"] = name  # Ensure method name is included in params
             methods[name] = MethodConfig(params=params)
         return methods
 
@@ -47,5 +47,10 @@ class ConfigFactory:
         )
 
         return FullConfig(
-            general=general, dataset=dataset, model=model, expConfig=temporal, infer=infer, raw_dict=main_cfg
+            general=general,
+            dataset=dataset,
+            model=model,
+            expConfig=temporal,
+            infer=infer,
+            raw_dict=main_cfg,
         )

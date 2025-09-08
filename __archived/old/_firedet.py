@@ -14,24 +14,26 @@ from _archived.zz_config import FullConfig
 FD_CLASS_FIRE = 0
 FD_CLASS_SMOKE = 1
 
-class FireDetector:
 
+class FireDetector:
     def __init__(self, cfg: FullConfig):
         self.cfg = cfg
         self.temporalStabilizationEnable = cfg.expConfig.enabled
         self.drawBlockDebug = cfg.expConfig.draw_block_debug
         # save masks when running temporal stabilization
-        self.save_masks = (cfg.expConfig.save_masks and self.temporalStabilizationEnable)
+        self.save_masks = cfg.expConfig.save_masks and self.temporalStabilizationEnable
         if self.temporalStabilizationEnable:
             self.temporalMethod = cfg.expConfig.methodUsed()
-            self.windowSize = self.temporalMethod.params.get('window_size', 5)
-            self.grid_size = self.temporalMethod.params.get('grid_size', 4)
-            self.diff_frame_threshold = self.temporalMethod.params.get('diff_frame_threshold', 1)
-            self.impack_plus_one = self.temporalMethod.params.get('impack_plus_one', 5)
-            self.mask_threshold = self.temporalMethod.params.get('mask_threshold', 10)
-            self.roi_threshold = self.temporalMethod.params.get('roi_threshold', 200)
-            self.minimum_size = self.temporalMethod.params.get('minimum_size', 0.75)
-            self.nonZeroTH = self.temporalMethod.params.get('nonZeroTH', 200)
+            self.windowSize = self.temporalMethod.params.get("window_size", 5)
+            self.grid_size = self.temporalMethod.params.get("grid_size", 4)
+            self.diff_frame_threshold = self.temporalMethod.params.get(
+                "diff_frame_threshold", 1
+            )
+            self.impack_plus_one = self.temporalMethod.params.get("impack_plus_one", 5)
+            self.mask_threshold = self.temporalMethod.params.get("mask_threshold", 10)
+            self.roi_threshold = self.temporalMethod.params.get("roi_threshold", 200)
+            self.minimum_size = self.temporalMethod.params.get("minimum_size", 0.75)
+            self.nonZeroTH = self.temporalMethod.params.get("nonZeroTH", 200)
         else:
             self.temporalMethod = None
 
@@ -53,11 +55,12 @@ class FireDetector:
     def custom_load_model(self):
         """Custom method to load the model if needed."""
         return timm.create_model(
-                self.cfg.model.base_timm_model,
-                pretrained=False,
-                num_classes=len(self.cfg.model.class_names),
-                checkpoint_path=self.cfg.model.model_path,
-            )
+            self.cfg.model.base_timm_model,
+            pretrained=False,
+            num_classes=len(self.cfg.model.class_names),
+            checkpoint_path=self.cfg.model.model_path,
+        )
+
     def loadModel(self):
         if self.model is None:
             self.model = self.custom_load_model()
@@ -165,11 +168,11 @@ class FireDetector:
         if not cap.isOpened():
             raise ValueError("Error: Could not open video.")
 
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
         fps = cap.get(cv2.CAP_PROP_FPS)
         frame_size = (
             int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
-            int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)),
         )
         cap.release()
 
@@ -189,11 +192,11 @@ class FireDetector:
         if not cap.isOpened():
             raise ValueError("Error: Could not open video.")
 
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
         fps = cap.get(cv2.CAP_PROP_FPS)
         frame_size = (
             int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
-            int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)),
         )
         cap.release()
 
@@ -206,11 +209,11 @@ class FireDetector:
         if not cap.isOpened():
             raise ValueError("Error: Could not open video.")
 
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
         fps = cap.get(cv2.CAP_PROP_FPS)
         frame_size = (
             int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
-            int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)),
         )
         cap.release()
 
@@ -224,7 +227,7 @@ class FireDetector:
         console.print(
             f"{prefix} frame {frame_idx}/{total_frames} ({percentage:.2f}%)...",
             end="\r",
-            highlight=False
+            highlight=False,
         )
 
     def _bgr_to_rgb(self, bgr):
@@ -280,16 +283,24 @@ class FireDetector:
         # --- Step 1: Delta Computation ---
         delta = cv2.absdiff(self.prev_frame, cframe)
         delta_gray = cv2.cvtColor(delta, cv2.COLOR_BGR2GRAY)
-        _, delta_bin = cv2.threshold(delta_gray, self.diff_frame_threshold,
-                                    self.impack_plus_one, cv2.THRESH_BINARY)
+        _, delta_bin = cv2.threshold(
+            delta_gray,
+            self.diff_frame_threshold,
+            self.impack_plus_one,
+            cv2.THRESH_BINARY,
+        )
 
         MASK_CLIP_MAX = 25
-        self.deltaMasks = np.minimum(self.deltaMasks + delta_bin, MASK_CLIP_MAX).astype(np.uint8)
+        self.deltaMasks = np.minimum(self.deltaMasks + delta_bin, MASK_CLIP_MAX).astype(
+            np.uint8
+        )
         self.deltaMasks = cv2.subtract(self.deltaMasks, 1)
 
         # Optional: Visualization of masks
         if self.save_masks:
-            normalized = (self.deltaMasks.astype(np.float32) * 255 / MASK_CLIP_MAX).astype(np.uint8)
+            normalized = (
+                self.deltaMasks.astype(np.float32) * 255 / MASK_CLIP_MAX
+            ).astype(np.uint8)
             colormap = cv2.applyColorMap(normalized, cv2.COLORMAP_JET)
             maskFrame = cv2.addWeighted(cframe, 0.7, colormap, 0.3, 0)
 
@@ -306,7 +317,7 @@ class FireDetector:
             for col in range(0, cols_as_width, self.colStep):
                 h = min(self.rowStep, rows_as_height - row)
                 w = min(self.colStep, cols_as_width - col)
-                block = curMask[row:row + h, col:col + w]
+                block = curMask[row : row + h, col : col + w]
                 nonZero = cv2.countNonZero(block)
 
                 nonZeroTotal += nonZero
@@ -336,10 +347,18 @@ class FireDetector:
 
             # what if the ROI is too small
             if roi_width < self.minWs:
-                x0 = max(0, min(cols_as_width - self.minWs, x0 - (self.minWs - roi_width) // 2))
+                x0 = max(
+                    0,
+                    min(cols_as_width - self.minWs, x0 - (self.minWs - roi_width) // 2),
+                )
                 roi_width = self.minWs
             if roi_height < self.minHs:
-                y0 = max(0, min(rows_as_height - self.minHs, y0 - (self.minHs - roi_height) // 2))
+                y0 = max(
+                    0,
+                    min(
+                        rows_as_height - self.minHs, y0 - (self.minHs - roi_height) // 2
+                    ),
+                )
                 roi_height = self.minHs
 
             x1 = x0 + roi_width
@@ -352,13 +371,25 @@ class FireDetector:
 
         return shouldDoInfer, (topLeft, rightBottom), vis_meta_dict, maskFrame
 
-    def _annotate_frame(self, frame_idx, frame_rgb, probs, vis_meta_dict=None, topLeft_rightBottom_tupple=None, extract_info=None):
+    def _annotate_frame(
+        self,
+        frame_idx,
+        frame_rgb,
+        probs,
+        vis_meta_dict=None,
+        topLeft_rightBottom_tupple=None,
+        extract_info=None,
+    ):
         """Annotate frame with class names and probabilities; debug temporal stabilization info if available."""
         class_probs = None
         if probs:
             class_probs = list(zip(self.cfg.model.class_names, probs))
         frame_bgr = cv2.cvtColor(frame_rgb, cv2.COLOR_RGB2BGR)
-        label_values = [("FrameIdx", frame_idx)] + class_probs if class_probs else [("FrameIdx", frame_idx)]
+        label_values = (
+            [("FrameIdx", frame_idx)] + class_probs
+            if class_probs
+            else [("FrameIdx", frame_idx)]
+        )
 
         if self.drawBlockDebug and vis_meta_dict is not None:
             nonZeroCountTotal = vis_meta_dict.get("nonZeroCountTotal", 0)
@@ -366,7 +397,11 @@ class FireDetector:
             label_values.append(("DEBUG", "--Block Analysis"))
             label_values.append(("NonZeroTotal", nonZeroCountTotal))
             label_values.append(("NonZeroInside", nonZeroCountInside))
-        if extract_info is not None and isinstance(extract_info, tuple) and len(extract_info) == 2:
+        if (
+            extract_info is not None
+            and isinstance(extract_info, tuple)
+            and len(extract_info) == 2
+        ):
             # COLORMAP_JET
             label_values.append((extract_info[0], extract_info[1]))
 
@@ -380,7 +415,11 @@ class FireDetector:
         # Add text annotations
         for i, (label, value) in enumerate(label_values):
             color = self._bgr_to_rgb(self.getColor(i))
-            text = f"{label}: {value:.2f}" if isinstance(value, float) else f"{label}: {value}"
+            text = (
+                f"{label}: {value:.2f}"
+                if isinstance(value, float)
+                else f"{label}: {value}"
+            )
             cv2.putText(
                 frame_bgr,
                 text,
@@ -399,7 +438,9 @@ class FireDetector:
 
         return frame_bgr
 
-    def _process_video_frames(self, video_path, dfmk, vwriter_and_path, mask_vwriter_and_path):
+    def _process_video_frames(
+        self, video_path, dfmk, vwriter_and_path, mask_vwriter_and_path
+    ):
         """Process each frame of the video."""
         cap = cv2.VideoCapture(video_path)
         if not cap.isOpened():
@@ -420,8 +461,10 @@ class FireDetector:
 
                 frame_idx += 1
                 if num_limit_frame > 0 and frame_idx > num_limit_frame:
-                    console.print(f"Reached frame limit: {num_limit_frame}. Stopping inference.")
-                    time.sleep(2) # pause a bit to let the user see the message
+                    console.print(
+                        f"Reached frame limit: {num_limit_frame}. Stopping inference."
+                    )
+                    time.sleep(2)  # pause a bit to let the user see the message
                     break
                 topLeft = (0, 0)
                 rightBottom = (frame.shape[1], frame.shape[0])
@@ -429,10 +472,15 @@ class FireDetector:
                 vis_meta_dict = None
                 maskFrame = None
                 if self.temporalStabilizationEnable:
-                    shouldDoInfer, (
-                        topLeft,
-                        rightBottom,
-                    ), vis_meta_dict, maskFrame = self.temporalStabilization(frame)
+                    (
+                        shouldDoInfer,
+                        (
+                            topLeft,
+                            rightBottom,
+                        ),
+                        vis_meta_dict,
+                        maskFrame,
+                    ) = self.temporalStabilization(frame)
 
                 self._log_progress(frame_idx, total_frames, do_infer=shouldDoInfer)
                 logits = None
@@ -443,23 +491,54 @@ class FireDetector:
                 if shouldDoInfer:
                     pil_img = Image.fromarray(frame_rgb)
                     # Crop the frame to the ROI if needed
-                    if topLeft != (0, 0) or rightBottom != (frame.shape[1], frame.shape[0]):
+                    if topLeft != (0, 0) or rightBottom != (
+                        frame.shape[1],
+                        frame.shape[0],
+                    ):
                         x0, y0 = topLeft
                         x1, y1 = rightBottom
                         pil_img = pil_img.crop((x0, y0, x1, y1))
                     logits, label_idx, label = self._infer(pil_img)
-                    probs = torch.nn.functional.softmax(torch.tensor(logits), dim=0).numpy().tolist()
+                    probs = (
+                        torch.nn.functional.softmax(torch.tensor(logits), dim=0)
+                        .numpy()
+                        .tolist()
+                    )
 
                 if dfmk:
-                    rows.append([video_path, frame_idx, self.cfg.model.class_names, logits, probs, label_idx, label])
+                    rows.append(
+                        [
+                            video_path,
+                            frame_idx,
+                            self.cfg.model.class_names,
+                            logits,
+                            probs,
+                            label_idx,
+                            label,
+                        ]
+                    )
 
                 if vwriter_and_path:
-                    topLeft_rightBottom_tupple = (topLeft, rightBottom) if self.drawBlockDebug and shouldDoInfer else None
-                    frame_bgr = self._annotate_frame(frame_idx, frame_rgb, probs, vis_meta_dict, topLeft_rightBottom_tupple)
+                    topLeft_rightBottom_tupple = (
+                        (topLeft, rightBottom)
+                        if self.drawBlockDebug and shouldDoInfer
+                        else None
+                    )
+                    frame_bgr = self._annotate_frame(
+                        frame_idx,
+                        frame_rgb,
+                        probs,
+                        vis_meta_dict,
+                        topLeft_rightBottom_tupple,
+                    )
                     vwriter_and_path[0].write(frame_bgr)
                 if mask_vwriter_and_path and maskFrame is not None:
                     # If maskFrame is None, we skip writing the mask frame
-                    topLeft_rightBottom_tupple = (topLeft, rightBottom) if self.drawBlockDebug and shouldDoInfer else None
+                    topLeft_rightBottom_tupple = (
+                        (topLeft, rightBottom)
+                        if self.drawBlockDebug and shouldDoInfer
+                        else None
+                    )
                     extract_info = ("HeatMap", "Blue(low), Green(medium), Red(high)")
                     maskFrame = self._annotate_frame(
                         frame_idx,
@@ -467,7 +546,7 @@ class FireDetector:
                         probs,
                         vis_meta_dict,
                         topLeft_rightBottom_tupple,
-                        extract_info
+                        extract_info,
                     )
                     mask_vwriter_and_path[0].write(maskFrame)
 
@@ -475,7 +554,10 @@ class FireDetector:
             cap.release()
             cv2.destroyAllWindows()
 
-        return {"rows": rows, "out_video_path": vwriter_and_path[1] if vwriter_and_path else None}
+        return {
+            "rows": rows,
+            "out_video_path": vwriter_and_path[1] if vwriter_and_path else None,
+        }
 
     def infer_video(self, video_path):
         """Main function to process video inference."""
@@ -512,12 +594,12 @@ class FireDetector:
             )
             # mask (for temporal stabilization visualization)
             mask_vwriter_and_path = (
-                self._init_mask_writer(video_path, fname)
-                if self.save_masks
-                else None
+                self._init_mask_writer(video_path, fname) if self.save_masks else None
             )
 
-            results = self._process_video_frames(video_path, dfmk, vwriter_and_path, mask_vwriter_and_path)
+            results = self._process_video_frames(
+                video_path, dfmk, vwriter_and_path, mask_vwriter_and_path
+            )
             if dfmk is not None:
                 self._save_csv_results(dfmk, fname, results["rows"])
             if vwriter_and_path is not None:

@@ -4,6 +4,7 @@ from PIL import Image
 from temporal.config import Config
 from temporal.metric_src.test_metric_src import TestDSMetricSrc
 
+
 class NoTempMethod(BaseMethod):
     def _pre_process_frame(self, frame):
         """Pre-process the frame before inference.
@@ -11,9 +12,13 @@ class NoTempMethod(BaseMethod):
         """
         # Convert BGR to RGB
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        assert isinstance(self.cfg, Config), "current method Cfg is not an instance of temporal.Config"
+        assert isinstance(self.cfg, Config), (
+            "current method Cfg is not an instance of temporal.Config"
+        )
         full_cfg: Config = self.cfg
-        model_name: str = fs.get_file_name(full_cfg.model_cfg.model_path, split_file_ext=True)[0]
+        model_name: str = fs.get_file_name(
+            full_cfg.model_cfg.model_path, split_file_ext=True
+        )[0]
         pil_img = Image.fromarray(frame_rgb)
         if "prof" in model_name.lower():
             transform = transforms.Compose(

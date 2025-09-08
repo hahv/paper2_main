@@ -9,13 +9,12 @@ from typing import Dict, Any, Callable
 
 
 from temporal.utils import get_cls
+
+
 class MetricSrcFactory:
     @staticmethod
     def create_metric_source(config: Config, *args, **kwargs):
-
-        def ds_name_to_metric_source(
-            dsname: str, suffix: str = "DSMetricSrc"
-        ) -> str:
+        def ds_name_to_metric_source(dsname: str, suffix: str = "DSMetricSrc") -> str:
             return dsname + suffix
 
         dataset_name = config.dataset_cfg.dataset_used.name
@@ -45,7 +44,9 @@ class BaseMetricSrc(ABC):
         if len(self.mode_processors_dict) == 0:
             self.mode_processors_dict["default"] = self.default_mode_processor
 
-    def default_mode_processor(self, metric: str, mode: str, metric_data: Dict[str, Any], **kwargs) -> Dict[str, Any]:
+    def default_mode_processor(
+        self, metric: str, mode: str, metric_data: Dict[str, Any], **kwargs
+    ) -> Dict[str, Any]:
         """
         Default processor for handling raw metric data.
         Can be overridden by specific modes if needed.
@@ -74,7 +75,9 @@ class BaseMetricSrc(ABC):
         return data format:
         {"mode": {"metric1": metric1_data, "metric2": metric2_data, ...}}
         """
-        assert len(self.metric_data_getters_dict) > 0, "No metric data getters registered"
+        assert len(self.metric_data_getters_dict) > 0, (
+            "No metric data getters registered"
+        )
         metrics = self.metric_data_getters_dict.keys()
 
         final_data = {}
@@ -83,8 +86,10 @@ class BaseMetricSrc(ABC):
             mode_proc_dict = {}
             for metric in metrics:
                 metric_data_getter = self.metric_data_getters_dict.get(metric)
-                metric_data = metric_data_getter(metric=metric,**kwargs)
-                proc_data = mode_proc(metric=metric, mode=mode, metric_data=metric_data, **kwargs)
+                metric_data = metric_data_getter(metric=metric, **kwargs)
+                proc_data = mode_proc(
+                    metric=metric, mode=mode, metric_data=metric_data, **kwargs
+                )
                 mode_proc_dict[metric] = proc_data
             final_data[mode] = mode_proc_dict
         return final_data

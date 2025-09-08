@@ -39,7 +39,7 @@ class DatasetEntry(YAMLWizard):
 class MetricSet(YAMLWizard):
     metric_set_name: str
     metric_names: List[str]
-    metric_set_cfgs: Dict[str, Any]=None  # e.g. {'mode': 'per_video'}
+    metric_set_cfgs: Dict[str, Any] = None  # e.g. {'mode': 'per_video'}
 
 
 @dataclass
@@ -195,13 +195,13 @@ class Config(YAMLWizard):
         if len(instance.method.list_methods) == 0:
             method_dir = instance.method.method_cfg_dir
             assert method_dir, "Method configuration directory must be specified."
-            assert os.path.exists(
-                method_dir
-            ), f"Method configuration directory '{method_dir}' does not exist."
+            assert os.path.exists(method_dir), (
+                f"Method configuration directory '{method_dir}' does not exist."
+            )
             method_yaml_files = fs.filter_files_by_extension(method_dir, ".yaml")
-            assert (
-                len(method_yaml_files) > 0
-            ), f"No YAML files found in method configuration directory '{method_dir}'."
+            assert len(method_yaml_files) > 0, (
+                f"No YAML files found in method configuration directory '{method_dir}'."
+            )
             method_list = []
             for method_yaml in method_yaml_files:
                 fname = fs.get_file_name(method_yaml, split_file_ext=True)[0]
@@ -220,13 +220,16 @@ class Config(YAMLWizard):
             abbr = self.general.computer_name
         else:
             import socket
+
             computer_name = socket.gethostname()
             df_computer = pd.read_csv("./config/__list_pc.csv", sep=";")
             # cols: pc_name;abbr
             # get all rows of dfcomputer and find the row for the current computer
             computer_row = df_computer[df_computer["pc_name"] == computer_name]
             if computer_row.empty:
-                raise ValueError(f"Computer '{computer_name}' not found in __list_pc.csv")
+                raise ValueError(
+                    f"Computer '{computer_name}' not found in __list_pc.csv"
+                )
             abbr = computer_row["abbr"].values[0]
             self.general.computer_name = abbr  # set computer name in general config
         if self.general.time_stamp is None:

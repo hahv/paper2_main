@@ -1,11 +1,10 @@
 extra_cfgs:
-  grid_size: 4 # size of the grid for spatial analysis
-  diff_frame_thres: 1 # difference threshold for frame comparison
-  impack_plus_one: 5 # difference threshold for frame
-  non_zero_thres: 200 # threshold for non-zero pixel values in the mask
-  mask_thres: 10 # threshold for accumulated changes in the mask
-  min_size: 0.75 # minimum size of the ROI to be considered valid
-  # window_size: 5  # !NOT directly related; size of temporal smoothing window (avg over frames for final prediction)
-  debug:
-    draw_block_debug: true
-    save_masks: true
+  diff_thres: 5           # pixel diff threshold for temporal stabilization
+  frame_diff_cfg: "config/FrameDifference.xml"
+  scale_factor: 0.5      # scale factor for frame diff
+  blk_size: 64             # block size for activity check
+  blk_act_thres: 0.1       # % pixels active in block to mark block active
+  frm_act_thres: 0.5       # % active blocks to mark frame active
+  fire_cls_thres: 0.5      # fire/smoke classification threshold
+  min_roi: 0.7             # min ROI size (relative to frame) for BIG model
+  tiny_model: "models/tinycnn.pth"  # tiny CNN model path

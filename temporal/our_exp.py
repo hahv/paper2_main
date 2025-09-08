@@ -16,6 +16,7 @@ import importlib
 from temporal.res_hdl import *
 from temporal.methods.base_method import BaseMethod, MethodFactory
 
+
 class OurExp(BaseExperiment):
     """
     Custom experiment class that extends BaseExperiment.
@@ -57,7 +58,7 @@ class OurExp(BaseExperiment):
         This method should be implemented in subclasses.
         """
         num_classes = len(self.full_cfg.model_cfg.class_names)
-        num_classes = 2 # force binary classification (fire_smoke OR none)
+        num_classes = 2  # force binary classification (fire_smoke OR none)
         if num_classes > 2:
             task = "multiclass"
         else:
@@ -100,10 +101,14 @@ class OurExp(BaseExperiment):
 
         # metric_infos = self.metric_backend.metric_info # {key: torch_metrics}
         method_instance = MethodFactory.create_method(self.config)
-        assert isinstance(method_instance, BaseMethod), "Method instance is not of type BaseMethod"
+        assert isinstance(
+            method_instance, BaseMethod
+        ), "Method instance is not of type BaseMethod"
         method: BaseMethod = method_instance
         method.infer_video_dir(self.video_dir_path)
-        eval_data_dict = method.prepare_metric_src() # {metric: <value for compute metrics>}
+        eval_data_dict = (
+            method.prepare_metric_src()
+        )  # {metric: <value for compute metrics>}
         extra_data = None
         exp_rs = eval_data_dict, extra_data
         return exp_rs
@@ -124,11 +129,17 @@ class OurExp(BaseExperiment):
                 console.rule(f"Calculating metrics for mode: {mode}")
                 metrics_data = mode_metrics_data_dict[mode]
                 CSV_FILE_POSTFIX = "__perf"
-                outfile = self.full_cfg.get_outdir() + f"/{self.full_cfg.get_cfg_name()}__{mode}{CSV_FILE_POSTFIX}.csv"
+                outfile = (
+                    self.full_cfg.get_outdir()
+                    + f"/{self.full_cfg.get_cfg_name()}__{mode}{CSV_FILE_POSTFIX}.csv"
+                )
                 perf_results, outfile = self.calc_and_save_exp_perfs(
-                    raw_metrics_data=metrics_data, extra_data=None,
-                    outfile=outfile, return_df=True,
-                    *args, **kwargs
+                    raw_metrics_data=metrics_data,
+                    extra_data=None,
+                    outfile=outfile,
+                    return_df=True,
+                    *args,
+                    **kwargs,
                 )
                 df = pd.read_csv(outfile, sep=";", encoding="utf-8")
                 # get row 0
@@ -139,5 +150,6 @@ class OurExp(BaseExperiment):
                 pprint_local_path(outfile)
         exp_dir = self.full_cfg.general.outdir
         from halib.research.perfcalc import PerfCalc
+
         pertb = PerfCalc.gen_perf_report_for_multip_exps(indir=exp_dir)
         pertb.plot(save_path=f"{exp_dir}/all_exps_perf.png", open_plot=True)

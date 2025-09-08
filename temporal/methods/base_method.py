@@ -12,6 +12,7 @@ import importlib
 from temporal.utils import get_cls
 from temporal.metric_src.metrics_src_base import MetricSrcFactory, BaseMetricSrc
 
+
 class MethodFactory:
     @staticmethod
     def create_method(config: Config, *args, **kwargs):
@@ -52,6 +53,7 @@ class BaseMethod(ABC):
     An abstract base class for video inference that decouples inference logic
     from output handling (e.g., saving CSVs or videos) via a handler system.
     """
+
     REQUIRED_INFER_RS = ["logits", "probs", "predLabelIdx", "predLabel"]
 
     def __init__(self, cfg: Config, rs_handlers: list[RSHandlerBase] = None):
@@ -95,6 +97,7 @@ class BaseMethod(ABC):
                 extra: if needed
         """
         pass
+
     # ! override if needed
     def prepare_metric_src(self, **kwargs):
         """
@@ -136,6 +139,12 @@ class BaseMethod(ABC):
             highlight=False,
         )
 
+    def before_infer_video_dir(self, video_dir: str):
+        """Hook method called before starting inference on a video directory."""
+        pass
+
+    # ! override if needed
+
     def infer_video_dir(self, video_dir: str, recursive: bool = True):
         """Processes all videos in a specified directory."""
         assert os.path.exists(video_dir), f"Video directory {video_dir} does not exist."
@@ -143,6 +152,7 @@ class BaseMethod(ABC):
             video_dir, [".mp4", ".avi", ".mov", ".mkv"], recursive=recursive
         )
         assert len(video_files) > 0, f"No video files found in {video_dir}."
+        self.before_infer_video_dir(video_dir)
 
         for i, video_path in enumerate(video_files):
             self.infer_video(video_path, video_idx=i, total_videos=len(video_files))
@@ -204,9 +214,7 @@ class BaseMethod(ABC):
 
                 start_time = time.perf_counter()
 
-                infer_rs = self.infer_frame(
-                    frame_bgr, frame_idx
-                )
+                infer_rs = self.infer_frame(frame_bgr, frame_idx)
                 if not all(key in infer_rs for key in BaseMethod.REQUIRED_INFER_RS):
                     raise ValueError(
                         f"Missing required inference results: {BaseMethod.REQUIRED_INFER_RS}"
@@ -226,7 +234,7 @@ class BaseMethod(ABC):
                     "infer_rs": infer_rs,
                     "vfps": vfps,
                     "frame_size": frame_size,
-                    "fps": fps
+                    "fps": fps,
                 }
                 # --- Delegate the packet to all registered handlers ---
                 for handler in self.result_handlers:

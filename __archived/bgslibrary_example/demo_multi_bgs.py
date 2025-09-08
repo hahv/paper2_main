@@ -52,7 +52,7 @@ video_file = "dataset/wrong_fd_cam_stream.mp4"
 # video_file = (
 # r"/mnt/e/NextCloud/paper3/datasets/TestVideos/5816532-hd_1920_1080_25fps.mp4"
 # )
-img_array = sorted(glob.iglob(img_folder + '/*.png')) if image_mode else []
+img_array = sorted(glob.iglob(img_folder + "/*.png")) if image_mode else []
 
 # Process each algorithm on the chosen media type
 for algorithm in algorithms:

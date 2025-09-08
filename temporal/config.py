@@ -11,6 +11,7 @@ import yaml
 
 SEP = "__"
 
+
 @dataclass
 class DatasetInfo(YAMLWizard, NamedConfig):
     name: str = None
@@ -21,8 +22,11 @@ class DatasetInfo(YAMLWizard, NamedConfig):
         return self.name
 
     def get_num_videos(self, recursive=False):
-        video_files = fs.filter_files_by_extension(self.dir_path, [".mp4", ".avi", ".mov"], recursive=recursive)
+        video_files = fs.filter_files_by_extension(
+            self.dir_path, [".mp4", ".avi", ".mov"], recursive=recursive
+        )
         return len(video_files)
+
 
 @dataclass
 class MetricSet(YAMLWizard, NamedConfig):
@@ -116,6 +120,7 @@ class MetricConfig(YAMLWizard):
             f"Metric set '{self.selected_metric_set_name}' not found in the configuration."
         )
 
+
 @dataclass
 class MethodConfig(YAMLWizard):
     list_methods: List[Method]
@@ -149,11 +154,13 @@ class InferConfig(YAMLWizard):
     calc_metrics: bool
     verbose: bool
 
+
 @dataclass
 class ModelConfig(YAMLWizard):
     base_model: str
     model_path: str
     class_names: List[str]
+
 
 @dataclass
 class Config(ExpBaseConfig):

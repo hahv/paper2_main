@@ -14,6 +14,7 @@ import os
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
+
 class zProfiler:
     """A singleton profiler to measure execution time of contexts and steps.
 
@@ -95,9 +96,9 @@ class zProfiler:
         │   │   │   [278091.230944486, 278091.251378469],
         │   }
         """
-        assert (
-            len(ctx_step_dict.keys()) > 1
-        ), "step_dict must have only one key (step_name) for detail."
+        assert len(ctx_step_dict.keys()) > 1, (
+            "step_dict must have only one key (step_name) for detail."
+        )
 
         for step_name, time_list in ctx_step_dict.items():
             normed_ctx_step_dict = {}
@@ -110,7 +111,7 @@ class zProfiler:
                 if len(time_data) == 2:
                     start, end = time_data[0], time_data[1]
                     elapsed_time = end - start
-                normed_time_ls.append((idx, elapsed_time)) # including step
+                normed_time_ls.append((idx, elapsed_time))  # including step
             normed_ctx_step_dict[step_name] = normed_time_ls
             return normed_ctx_step_dict
 
@@ -126,7 +127,9 @@ class zProfiler:
             }
 
             if with_detail:
-                report_dict[ctx_name]["step_dict"]["detail"] = self._step_dict_to_detail(ctx_dict["step_dict"])
+                report_dict[ctx_name]["step_dict"]["detail"] = (
+                    self._step_dict_to_detail(ctx_dict["step_dict"])
+                )
             avg_time_list = []
             epsilon = 1e-5
             for step_name, step_list in ctx_dict["step_dict"].items():
@@ -158,9 +161,9 @@ class zProfiler:
                 report_dict[ctx_name]["step_dict"]["summary"]["avg_time"][
                     f"avg_{step_name}"
                 ] = avg_time
-            report_dict[ctx_name]["step_dict"]["summary"][
-                "total_avg_time"
-            ] = total_avg_time
+            report_dict[ctx_name]["step_dict"]["summary"]["total_avg_time"] = (
+                total_avg_time
+            )
             report_dict[ctx_name]["step_dict"]["summary"] = dict(
                 sorted(report_dict[ctx_name]["step_dict"]["summary"].items())
             )
@@ -215,9 +218,7 @@ class zProfiler:
                 "#7f7f7f",
                 "#bcbd22",
                 "#17becf",
-            ][
-                : len(step_names)
-            ]  # Use enough colors for the steps
+            ][: len(step_names)]  # Use enough colors for the steps
 
             # Create a color map to ensure consistency
             color_map = dict(zip(step_names, colors))
@@ -227,7 +228,7 @@ class zProfiler:
                 go.Bar(
                     x=step_names,
                     y=list(avg_times.values()),
-                    text=[f"{v*1000:.2f} ms" for v in avg_times.values()],
+                    text=[f"{v * 1000:.2f} ms" for v in avg_times.values()],
                     textposition="outside",
                     marker=dict(
                         color=[
@@ -249,7 +250,9 @@ class zProfiler:
                     labels=step_names,
                     values=list(percent_times.values()),
                     marker=dict(
-                        colors=[color_map[name] for name in step_names],  # Use same colors
+                        colors=[
+                            color_map[name] for name in step_names
+                        ],  # Use same colors
                         # Patterns are not supported in pie charts
                     ),
                     name="",  # Same legend name as bar chart
@@ -293,8 +296,7 @@ class zProfiler:
             results[ctx] = fig
         return results
 
-    def report_and_plot(self,outdir=None, file_format="png", do_show=False
-    ):
+    def report_and_plot(self, outdir=None, file_format="png", do_show=False):
         """
         Generate the profiling report and plot the formatted data.
 
@@ -386,10 +388,14 @@ def testPlot():
     }
 
     # --- Run test ---
-    zProfiler.plot_formatted_data(test_data, outdir="zprof_plot", file_format="png", do_show=False)
+    zProfiler.plot_formatted_data(
+        test_data, outdir="zprof_plot", file_format="png", do_show=False
+    )
 
 
 from halib import *
+
+
 def main():
     prof = zProfiler()
     for i in tqdm(range(10)):
@@ -397,6 +403,7 @@ def main():
     pprint(prof.get_report_dict(with_detail=False))
     prof.report_and_plot(outdir="zprof_plot", file_format="png", do_show=False)
     # testPlot()
+
 
 if __name__ == "__main__":
     main()

@@ -12,6 +12,7 @@ import yaml
 
 SEP = "__"
 
+
 @dataclass
 class WandbCfg:
     project: str
@@ -27,10 +28,13 @@ class General:
         None  # will be set automatically using halib.now_str() if not provided
     )
 
+
 @dataclass
 class MetricSet:
     metric_names: List[str]
-    metric_cfgs: Dict[str, Any] = None # configuration for metrics, e.g., mode: "per_video" or "per_frame"
+    metric_cfgs: Dict[str, Any] = (
+        None  # configuration for metrics, e.g., mode: "per_video" or "per_frame"
+    )
 
 
 @dataclass
@@ -39,11 +43,13 @@ class DatasetEntry:
     metric_set: MetricSet
     test_dir: str
 
+
 @dataclass
 class DatasetCfg:
     all_datasets: List[DatasetEntry]
     metric_sets: Dict[str, MetricSet]
     selected_ds: DatasetEntry
+
     @property
     def ds_metrics_dict(self) -> Dict[str, Metric]:
         """
@@ -67,6 +73,7 @@ class DatasetCfg:
                 raise ValueError(f"Metric '{metric_name}' not recognized")
             metrics_dict[metric_name] = metric_item
         return metrics_dict
+
 
 @dataclass
 class ModelConfig:
@@ -116,14 +123,15 @@ class InferCfg:
 class ExpConfig:
     selected_method: str
     list_methods: Dict[str, MethodConfig]
+
     @property
     def methodUsed(self) -> Optional[MethodConfig]:
-        assert (
-            self.selected_method is not None or len(self.list_methods) > 0
-        ), "No method selected in the configuration"
-        assert (
-            self.selected_method in self.list_methods
-        ), f"Selected method '{self.selected_method}' not found in list of methods; available methods: {list(self.list_methods.keys())}"
+        assert self.selected_method is not None or len(self.list_methods) > 0, (
+            "No method selected in the configuration"
+        )
+        assert self.selected_method in self.list_methods, (
+            f"Selected method '{self.selected_method}' not found in list of methods; available methods: {list(self.list_methods.keys())}"
+        )
         return self.list_methods[self.selected_method]
 
     def all_available_methods(self) -> List[str]:
@@ -183,7 +191,6 @@ class FullConfig:
 
     @classmethod
     def from_dict(cls, main_cfg: dict) -> "FullConfig":
-
         def _build_methods(method_dir) -> Dict[str, MethodConfig]:
             """
             Build a dictionary of MethodConfig objects from the method configuration directory.
@@ -194,9 +201,7 @@ class FullConfig:
                 name = file.stem
                 params = FullConfig.load_yaml(str(file))["params"]
                 if params is None:
-                    params = (
-                        {}
-                    )  # in case no params are defined in the method file, like "no_temp.yaml"
+                    params = {}  # in case no params are defined in the method file, like "no_temp.yaml"
                 params["method_name"] = name  # Ensure method name is included in params
                 methods[name] = MethodConfig(method_cfg_dir=method_dir, params=params)
             return methods
@@ -214,7 +219,7 @@ class FullConfig:
         for set_name, metric_set_values in all_metric_sets.items():
             a_metric_set = MetricSet(
                 metric_names=metric_set_values["metric_names"],
-                metric_cfgs=metric_set_values.get("metric_cfgs", {})
+                metric_cfgs=metric_set_values.get("metric_cfgs", {}),
             )
             all_metric_sets[set_name] = a_metric_set
 
@@ -222,28 +227,30 @@ class FullConfig:
         for ds_name in main_cfg["dataset"]["all_datasets"]:
             ds_cfg = main_cfg["dataset"]["all_datasets"][ds_name]
             if "metric_set" not in ds_cfg:
-                raise ValueError(f"Dataset '{ds_name}' does not have metric_set defined")
+                raise ValueError(
+                    f"Dataset '{ds_name}' does not have metric_set defined"
+                )
             ds_metric = all_metric_sets.get(ds_cfg["metric_set"], None)
-            assert (
-                ds_metric is not None
-            ), f"Metric set '{ds_cfg['metric_set']}' not found in metric sets"
+            assert ds_metric is not None, (
+                f"Metric set '{ds_cfg['metric_set']}' not found in metric sets"
+            )
             all_datasets.append(
                 DatasetEntry(
-                    name=ds_name, metric_set=ds_metric, test_dir=ds_cfg.get("test_dir", "")
+                    name=ds_name,
+                    metric_set=ds_metric,
+                    test_dir=ds_cfg.get("test_dir", ""),
                 )
             )
         selected_ds_name = main_cfg["dataset"].get("selected_dataset", None)
-        assert (
-            selected_ds_name is not None
-        ), "No dataset selected in the configuration"
+        assert selected_ds_name is not None, "No dataset selected in the configuration"
         selected_ds = None
         for ds in all_datasets:
             if ds.name == selected_ds_name:
                 selected_ds = ds
                 break
-        assert (
-            selected_ds is not None
-        ), f"Selected dataset '{selected_ds_name}' not found in all datasets"
+        assert selected_ds is not None, (
+            f"Selected dataset '{selected_ds_name}' not found in all datasets"
+        )
         dataset = DatasetCfg(
             all_datasets=all_datasets,
             metric_sets=all_metric_sets,

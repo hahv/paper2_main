@@ -4,6 +4,7 @@ from typing import Dict, Any
 from temporal.metric_src.metrics_src_base import *
 import torch
 
+
 class TestDSMetricSrc(BaseMetricSrc):
     """
     Concrete data source for a hypothetical video dataset.
@@ -42,9 +43,9 @@ class TestDSMetricSrc(BaseMetricSrc):
         num_videos = self.cfg.dataset_cfg.dataset_used.get_num_videos(recursive=False)
 
         csv_files = fs.filter_files_by_extension(indir, [".csv"], recursive=False)
-        assert (
-            len(csv_files) == num_videos
-        ), f"Number of CSV files ({len(csv_files)}) does not match number of video files ({num_videos})"
+        assert len(csv_files) == num_videos, (
+            f"Number of CSV files ({len(csv_files)}) does not match number of video files ({num_videos})"
+        )
 
         # return video_name, gt, and df
         per_video_out_list = []  # gt, df for each frames in each video
@@ -55,15 +56,19 @@ class TestDSMetricSrc(BaseMetricSrc):
                 if "nofire" in video_name
                 else TestDSMetricSrc.POS_LABEL
             )
-            df = pd.read_csv(csv_file, sep=';', encoding='utf-8', dtype= {'pred_label': str, 'elapsed_time': float}, keep_default_na=False)
+            df = pd.read_csv(
+                csv_file,
+                sep=";",
+                encoding="utf-8",
+                dtype={"pred_label": str, "elapsed_time": float},
+                keep_default_na=False,
+            )
             # pprint(csv_file)
             # pprint(df.columns)
             # csvfile.fn_display_df(df.head(3))
             # pprint(list(df.columns))
             # ! fix this code to load correct gt (i.g. in case of per-frame gt; CURRENT is per-video), i.e all frames have the same gt as video
-            gt = [gt] * len(
-                df
-            )
+            gt = [gt] * len(df)
             # both are numpy
             per_video_out_list.append((gt, df))
         return per_video_out_list
@@ -76,7 +81,9 @@ class TestDSMetricSrc(BaseMetricSrc):
             # Compute FPS from raw_data
             per_video_preds_all = []
             for per_video_data in per_video_out_list:
-                per_video_preds_all.append(per_video_data[1]['elapsed_time'].tolist()[1:])  # skip first frame, which is always two slow due to model initialization
+                per_video_preds_all.append(
+                    per_video_data[1]["elapsed_time"].tolist()[1:]
+                )  # skip first frame, which is always two slow due to model initialization
 
             return per_video_preds_all  # list of list of elapse_time
         else:
@@ -102,17 +109,25 @@ class TestDSMetricSrc(BaseMetricSrc):
             data_npy = data_npy.flatten()
         return torch.from_numpy(data_npy).to(dtype)
 
-    def proc_data_by_mode(self, metric: str, mode: str, metric_data: Dict[str, Any], **kwargs):
+    def proc_data_by_mode(
+        self, metric: str, mode: str, metric_data: Dict[str, Any], **kwargs
+    ):
         if metric == "FPS":
             flatten = True
-            torch_data =  self.proc_list_to_tensor(data_list=metric_data, flatten=flatten, dtype=torch.float)
+            torch_data = self.proc_list_to_tensor(
+                data_list=metric_data, flatten=flatten, dtype=torch.float
+            )
             return torch_data
         else:
             if mode == "per_frame":
                 flatten = True
                 per_video_preds, per_video_gts = metric_data
-                preds_tensor = self.proc_list_to_tensor(data_list=per_video_preds, flatten=flatten, dtype=torch.int)
-                gts_tensor = self.proc_list_to_tensor(data_list=per_video_gts, flatten=flatten, dtype=torch.int)
+                preds_tensor = self.proc_list_to_tensor(
+                    data_list=per_video_preds, flatten=flatten, dtype=torch.int
+                )
+                gts_tensor = self.proc_list_to_tensor(
+                    data_list=per_video_gts, flatten=flatten, dtype=torch.int
+                )
                 return (preds_tensor, gts_tensor)
 
             elif mode == "per_video":
@@ -127,8 +142,12 @@ class TestDSMetricSrc(BaseMetricSrc):
                     video_level_preds.append(video_pred)
                     video_level_gts.append(video_gt)
 
-                preds_tensor = self.proc_list_to_tensor(data_list=video_level_preds, flatten=flatten, dtype=torch.int)
-                gts_tensor = self.proc_list_to_tensor(data_list=video_level_gts, flatten=flatten, dtype=torch.int)
+                preds_tensor = self.proc_list_to_tensor(
+                    data_list=video_level_preds, flatten=flatten, dtype=torch.int
+                )
+                gts_tensor = self.proc_list_to_tensor(
+                    data_list=video_level_gts, flatten=flatten, dtype=torch.int
+                )
                 return (preds_tensor, gts_tensor)
             else:
                 raise NotImplementedError(f"Mode {mode} not implemented yet")

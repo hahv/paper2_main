@@ -60,12 +60,11 @@ while True:
             else:
                 decision = "PROCESS (possible fire/smoke)"
 
-
             # --- Visualization ---
             for i, (new, old) in enumerate(zip(good_new, good_old)):
                 a, b = new.ravel()
                 c, d = old.ravel()
-                a, b, c, d = int(a), int(b), int(c), int(d)   # <-- convert to int
+                a, b, c, d = int(a), int(b), int(c), int(d)  # <-- convert to int
                 frame = cv2.line(frame, (a, b), (c, d), color, 2)
                 frame = cv2.circle(frame, (a, b), 5, color, -1)
 

@@ -18,6 +18,7 @@ CSV_FIXED_COLUMNS = [
     "elapsed_time",  # infer elapsed time in seconds
 ]
 
+
 # Abstract Base Class
 class DetectorBase(ABC):
     def __init__(self, cfg: Config):
@@ -77,11 +78,27 @@ class DetectorBase(ABC):
         pass
 
     @abstractmethod
-    def annotate_frame(self, frame, frame_idx, total_frames, infer_results=None, vis_data_results=None, gpu_stats=None):
+    def annotate_frame(
+        self,
+        frame,
+        frame_idx,
+        total_frames,
+        infer_results=None,
+        vis_data_results=None,
+        gpu_stats=None,
+    ):
         """Annotate the frame with detection results."""
         pass
 
-    def after_detect_frame(self, frame, frame_idx, total_frames, infer_results, vis_data_results, gpu_stats=None):
+    def after_detect_frame(
+        self,
+        frame,
+        frame_idx,
+        total_frames,
+        infer_results,
+        vis_data_results,
+        gpu_stats=None,
+    ):
         """Handle the results after detecting a frame."""
         pass
 
@@ -90,7 +107,11 @@ class DetectorBase(ABC):
         self,
     ):  # appart from video and frame_idx, what columns to write to csv
         """Return the columns to be written to the CSV file."""
-        fixed_column = CSV_FIXED_COLUMNS + GPU_MONITOR_COLUMNS if self.gpu_monitor else CSV_FIXED_COLUMNS
+        fixed_column = (
+            CSV_FIXED_COLUMNS + GPU_MONITOR_COLUMNS
+            if self.gpu_monitor
+            else CSV_FIXED_COLUMNS
+        )
         return fixed_column + self.cfg.infer.csv_columns
 
     def _init_csv_writer(self, video_path):
@@ -101,9 +122,7 @@ class DetectorBase(ABC):
             columns = self.csv_columns()
             self.dfmk.create_table(video_name, columns=columns)
             self.table_name = video_name
-            self.out_csv_file = os.path.join(
-                self.outdir, f"{video_name}_results.csv"
-            )
+            self.out_csv_file = os.path.join(self.outdir, f"{video_name}_results.csv")
             # pprint(f"Output CSV file: {self.out_csv_file}")
 
     def _init_video_writer(self, video_path):
@@ -125,7 +144,16 @@ class DetectorBase(ABC):
             self.video_output_path = out_video_path
             self.video_writer = cv2.VideoWriter(out_video_path, fourcc, fps, frame_size)
 
-    def handle_infer_results(self, video, frame_idx, total_frames, do_infer, infer_results, elapsed_time, gpu_stats=None):
+    def handle_infer_results(
+        self,
+        video,
+        frame_idx,
+        total_frames,
+        do_infer,
+        infer_results,
+        elapsed_time,
+        gpu_stats=None,
+    ):
         if self.cfg.infer.save_results:
             basic = [video, total_frames, frame_idx, do_infer, elapsed_time]
             if gpu_stats:
@@ -144,11 +172,13 @@ class DetectorBase(ABC):
     def after_video_infer(self, video_path):
         """Perform any necessary cleanup after inference ends."""
         console.print(f"Finished infer: {video_path}")
-        if self.cfg.infer.save_results and hasattr(self, "dfmk") and self.dfmk is not None:
+        if (
+            self.cfg.infer.save_results
+            and hasattr(self, "dfmk")
+            and self.dfmk is not None
+        ):
             # write to csv file
-            self.dfmk.insert_rows(
-                self.table_name, self.csv_rows
-            )
+            self.dfmk.insert_rows(self.table_name, self.csv_rows)
             self.dfmk.fill_table_from_row_pool(self.table_name)
             self.dfmk[self.table_name].to_csv(
                 self.out_csv_file, index=False, sep=";", encoding="utf-8"
@@ -162,7 +192,13 @@ class DetectorBase(ABC):
                 pprint_local_path(self.video_output_path)
 
     def handle_vis_data_results(
-        self, frame, frame_idx, total_frames, infer_results=None, vis_data_results=None, gpu_stats=None
+        self,
+        frame,
+        frame_idx,
+        total_frames,
+        infer_results=None,
+        vis_data_results=None,
+        gpu_stats=None,
     ):
         frame_bgr = self.annotate_frame(
             frame=frame,
@@ -190,13 +226,14 @@ class DetectorBase(ABC):
         """Process all videos in a directory."""
         assert os.path.exists(video_dir), f"Video directory {video_dir} does not exist."
 
-        video_files = fs.filter_files_by_extension(video_dir, [".mp4", ".avi", ".mov"], recursive=recursive)
+        video_files = fs.filter_files_by_extension(
+            video_dir, [".mp4", ".avi", ".mov"], recursive=recursive
+        )
         assert len(video_files) > 0, f"No video files found in {video_dir}."
         num_videos = len(video_files)
         for video_idx, video_path in enumerate(video_files):
             # self._init_csv_writer(video_path)
             self.infer_video(video_path, video_idx=video_idx, total_videos=num_videos)
-
 
     def infer_video(self, video_path, video_idx=None, total_videos=None, verbose=True):
         """Process each frame of the video."""
@@ -209,7 +246,11 @@ class DetectorBase(ABC):
                 )
                 return
         if verbose:
-            progress_str = "" if (video_idx is None or total_videos is None) else f" [{video_idx + 1}/{total_videos}]"
+            progress_str = (
+                ""
+                if (video_idx is None or total_videos is None)
+                else f" [{video_idx + 1}/{total_videos}]"
+            )
             pprint(f"{progress_str} infer: {video_path}")
 
         self.load_model()
@@ -240,9 +281,7 @@ class DetectorBase(ABC):
                 start = time.perf_counter()
                 if self.gpu_monitor:
                     self.gpu_monitor.start()
-                do_infer, infer_results, vis_data_results = self.infer_frame(
-                    frame
-                )
+                do_infer, infer_results, vis_data_results = self.infer_frame(frame)
                 elapsed_time = time.perf_counter() - start
                 gpu_stats = None
                 if self.gpu_monitor:
@@ -250,24 +289,30 @@ class DetectorBase(ABC):
                     gpu_stats = self.gpu_monitor.get_stats()
                 self._log_progress(frame_idx, total_frames, do_infer=do_infer)
                 self.handle_infer_results(
-                    video_path, frame_idx, total_frames, do_infer, infer_results, elapsed_time, gpu_stats
+                    video_path,
+                    frame_idx,
+                    total_frames,
+                    do_infer,
+                    infer_results,
+                    elapsed_time,
+                    gpu_stats,
                 )
                 self.handle_vis_data_results(
-                    frame = frame,
-                    frame_idx = frame_idx,
-                    total_frames = total_frames,
-                    infer_results = infer_results,
-                    vis_data_results = vis_data_results,
-                    gpu_stats = gpu_stats
+                    frame=frame,
+                    frame_idx=frame_idx,
+                    total_frames=total_frames,
+                    infer_results=infer_results,
+                    vis_data_results=vis_data_results,
+                    gpu_stats=gpu_stats,
                 )
                 # ! do some extra task (like mask visualization) after detection
                 self.after_detect_frame(
-                    frame= frame,
-                    frame_idx= frame_idx,
-                    total_frames= total_frames,
-                    infer_results= infer_results,
-                    vis_data_results= vis_data_results,
-                    gpu_stats= gpu_stats
+                    frame=frame,
+                    frame_idx=frame_idx,
+                    total_frames=total_frames,
+                    infer_results=infer_results,
+                    vis_data_results=vis_data_results,
+                    gpu_stats=gpu_stats,
                 )
 
         except Exception as e:

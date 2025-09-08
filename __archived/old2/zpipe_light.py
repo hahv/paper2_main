@@ -11,6 +11,7 @@ import torchvision.models as models
 import line_profiler
 import cv2
 
+
 class FireSmokeCNN(nn.Module):
     def __init__(self):
         super(FireSmokeCNN, self).__init__()
@@ -50,6 +51,7 @@ class FireSmokeCNN(nn.Module):
 
 
 # Function to divide image into 16x16 grid and select blocks
+
 
 # @line_profiler.profile
 # --- Block extraction ---
@@ -111,6 +113,7 @@ def get_video_info(video_path: str):
     cap.release()
     return width, height, fps, frames
 
+
 @line_profiler.profile
 def main():
     # Device configuration
@@ -141,11 +144,14 @@ def main():
         pil_img = Image.fromarray(rgb_frame)
 
         # Normalize the full frame
-        preprocess = transforms.Compose([
-            transforms.ToTensor(),  # (C,H,W) in [0,1]
-            transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                std=[0.229, 0.224, 0.225]),
-        ])
+        preprocess = transforms.Compose(
+            [
+                transforms.ToTensor(),  # (C,H,W) in [0,1]
+                transforms.Normalize(
+                    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+                ),
+            ]
+        )
         # num_block = np.random.randint(1, maximum_block_count + 1)  # Random number of blocks
         num_block = maximum_block_count
         normed_tensor = preprocess(pil_img)  # (3,H,W)
@@ -157,9 +163,7 @@ def main():
         with timebudget(f">> Infer - block {num_block}"):
             start_infer_time = time.time()
             # Perform inference on the synthetic blocks
-            infer_batch(
-                model=model, blocks=synthetic_block_img, device=device
-            )
+            infer_batch(model=model, blocks=synthetic_block_img, device=device)
             infer_time = time.time() - start_infer_time
 
             total_time = time.time() - start_time
@@ -177,6 +181,7 @@ def main():
     print(f"Average Data Preparation Time: {avg_data_time:.4f} seconds")
     print(f"Average Inference Time: {avg_infer_time:.4f} seconds")
     print(f"Average Total Time: {avg_total_time:.4f} seconds")
+
 
 # Main execution
 if __name__ == "__main__":

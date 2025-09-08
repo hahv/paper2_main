@@ -25,6 +25,7 @@ SKIP_ENABLED = True  # skip module enabled
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 video_source = r"dataset/smallfire.mp4"
 
+
 def frame_to_batch_blocks(frame, block_size=32):
     # Step 2: Convert BGR to RGB and scale to [0, 1]
     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # Shape: (H, W, 3)
@@ -62,7 +63,9 @@ def frame_to_batch_blocks(frame, block_size=32):
 
     return batch_blocks
 
+
 zprofile = zProfiler()
+
 
 def proc_data_prepare(frame, rgb_frame, proc_func):
     global zprofile
@@ -75,6 +78,7 @@ def proc_data_prepare(frame, rgb_frame, proc_func):
     # get the name of the function
     func_name = proc_func.__name__
     return func_name
+
 
 # @line_profiler.profile
 def main():

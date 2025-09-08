@@ -1,6 +1,7 @@
 import torch
 from torchmetrics import Metric
 
+
 class FPS(Metric):
     def __init__(self):
         super().__init__()
@@ -30,7 +31,7 @@ class FPS(Metric):
         return f"{self.compute():.2f} FPS"
 
 
-class FPR(Metric): # False Positive Rate
+class FPR(Metric):  # False Positive Rate
     def __init__(self):
         super().__init__()
         self.add_state("fp", default=torch.tensor(0), dist_reduce_fx="sum")
@@ -46,15 +47,19 @@ class FPR(Metric): # False Positive Rate
         total = self.fp + self.tn
         return self.fp.float() / total if total > 0 else torch.tensor(0.0)
 
+
 def testFPS():
     fps = FPS()
     fps.update([0.033, 0.040, 0.042, 0.037])  # Simulate frame timings
     print(f"Computed FPS: {fps.compute():.2f}")
+
+
 def testFPR():
     preds = torch.tensor([1, 0, 1, 0, 1])
     target = torch.tensor([0, 0, 1, 0, 1])
 
     from torchmetrics.classification import ConfusionMatrix
+
     # Compute confusion matrix
     confmat = ConfusionMatrix(task="binary")
     cm = confmat(preds, target)  # shape: [2, 2]
@@ -72,9 +77,11 @@ def testFPR():
     cfpr.update(preds, target)
     print(f"Computed FPR: {cfpr.compute():.4f}")
 
+
 def main():
     testFPS()
     testFPR()
+
 
 if __name__ == "__main__":
     main()

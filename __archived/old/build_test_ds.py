@@ -1,6 +1,7 @@
 from halib import *
 from halib.filetype import textfile
 
+
 def main():
     indir = r"E:\NextCloud\paper3\datasets\DFire"
     testfile = os.path.join(indir, "video_test.txt")

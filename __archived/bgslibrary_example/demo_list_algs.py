@@ -22,5 +22,7 @@ algorithms = initialize_algorithms()
 print("Number of available algorithms: ", len(algorithms))
 
 # List the available algorithms with their index numbers
-for index, algorithm in enumerate(algorithms, start=1):  # start=1 begins counting from 1 instead of 0
+for index, algorithm in enumerate(
+    algorithms, start=1
+):  # start=1 begins counting from 1 instead of 0
     print(f"{index}: {type(algorithm).__name__}")

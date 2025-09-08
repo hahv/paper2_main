@@ -1,14 +1,20 @@
 from halib import *
 from argparse import ArgumentParser
-from halib.research.perfcalc import PerfCalc, validate_torch_metrics, valid_custom_fields
+from halib.research.perfcalc import (
+    PerfCalc,
+    validate_torch_metrics,
+    valid_custom_fields,
+)
 import torchmetrics
 import torch
+
 
 class PerfTest(PerfCalc):
     """
     A class for performance testing, inheriting from PerfCalc.
     It can be extended with additional methods or properties specific to performance testing.
     """
+
     # override abstract methods if needed
     @validate_torch_metrics
     def get_exp_torch_metrics(self):
@@ -21,12 +27,8 @@ class PerfTest(PerfCalc):
         p = torchmetrics.Precision(task="binary")
         r = torchmetrics.Recall(task="binary")
         f1 = torchmetrics.F1Score(task="binary")
-        return {
-            "accuracy": acc,
-            "precision": p,
-            "recall": r,
-            "f1": f1
-        }
+        return {"accuracy": acc, "precision": p, "recall": r, "f1": f1}
+
     def get_dataset_name(self):
         return "TestDataset"
 

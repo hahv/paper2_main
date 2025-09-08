@@ -1,6 +1,7 @@
 import seaborn as sns
 import importlib
 
+
 def getColor(classIdx):
     # main palette
     palette = sns.color_palette(palette="gist_rainbow")

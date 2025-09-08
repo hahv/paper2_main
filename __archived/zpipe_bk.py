@@ -13,6 +13,7 @@ from torchvision import transforms
 from timebudget import timebudget
 import pybgs as bgs
 from pyinstrument import Profiler
+
 # import torchvision.transforms.v2 as transforms
 from halib.research.profiler import zProfiler
 from numpy.lib.stride_tricks import as_strided
@@ -25,7 +26,7 @@ class_names = [
     "Normal",
     "SmokeOnly",
 ]
-algorithm = bgs.FrameDifference() #background subtraction algorithm
+algorithm = bgs.FrameDifference()  # background subtraction algorithm
 
 extract_block_func_name = ""
 
@@ -52,6 +53,7 @@ small_model_transform = transforms.Compose(
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ]
 )
+
 
 def load_model(base_timm_model, class_names, model_path):
     model = timm.create_model(
@@ -356,7 +358,11 @@ def skip_module(tiny_model, cv2_bgr_frame, pil_img_frame, extract_func_name):
     zprofiler.step_start("skip_module", "bg_subtract")
     scale_factor = 0.75  # scale factor for resizing
     cv2_bgr_frame = cv2.resize(
-        cv2_bgr_frame, None, fx=scale_factor, fy=scale_factor, interpolation=cv2.INTER_AREA
+        cv2_bgr_frame,
+        None,
+        fx=scale_factor,
+        fy=scale_factor,
+        interpolation=cv2.INTER_AREA,
     )
     fg_mask = algorithm.apply(cv2_bgr_frame)
     zprofiler.step_end("skip_module", "bg_subtract")
@@ -392,7 +398,15 @@ def do_infer(model, input_tensor):
 
 # @line_profiler.profile
 def main():
-    global base_timm_model, class_names, model_path, video_source, NUM_FRAME_TRIAL, SCALE, SKIP_ENABLED, big_model_transform
+    global \
+        base_timm_model, \
+        class_names, \
+        model_path, \
+        video_source, \
+        NUM_FRAME_TRIAL, \
+        SCALE, \
+        SKIP_ENABLED, \
+        big_model_transform
     global extract_block_func_name
 
     global zProfiler
@@ -480,10 +494,16 @@ def main():
             grid_h = H // BLOCK_SIZE
             grid_w = W // BLOCK_SIZE
             for i in range(grid_h):
-                cv2.line(fg_mask, (0, i * BLOCK_SIZE), (W, i * BLOCK_SIZE), (255, 0, 0), 1)
+                cv2.line(
+                    fg_mask, (0, i * BLOCK_SIZE), (W, i * BLOCK_SIZE), (255, 0, 0), 1
+                )
             for j in range(grid_w):
-                cv2.line(fg_mask, (j * BLOCK_SIZE, 0), (j * BLOCK_SIZE, H), (255, 0, 0), 1)
-            fg_mask = cv2.resize(fg_mask, (0, 0), fx=SCALE, fy=SCALE, interpolation=cv2.INTER_LINEAR)
+                cv2.line(
+                    fg_mask, (j * BLOCK_SIZE, 0), (j * BLOCK_SIZE, H), (255, 0, 0), 1
+                )
+            fg_mask = cv2.resize(
+                fg_mask, (0, 0), fx=SCALE, fy=SCALE, interpolation=cv2.INTER_LINEAR
+            )
             cv2.imshow("Foreground Mask", fg_mask)
 
         # stop after NUM_FRAME_TRIAL or ESC

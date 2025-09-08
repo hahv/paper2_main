@@ -437,7 +437,6 @@ class ProposedDetector(EvalBase, PerfCalc):
 
         # in case we visualize mask
         if vis_data_results is not None:
-
             if "nonZeroCountTotal" in vis_data_results:
                 label_values_dict["nonZeroCountTotal"] = vis_data_results[
                     "nonZeroCountTotal"
@@ -566,7 +565,9 @@ class ProposedDetector(EvalBase, PerfCalc):
             else:
                 return self.POSITIVE_LABEL
         elif self.cfg.dataset.target_ds_name == "pexels":
-            return self.POSITIVE_LABEL # currently, all pexels videos are considered positive
+            return (
+                self.POSITIVE_LABEL
+            )  # currently, all pexels videos are considered positive
         else:
             raise NotImplementedError(
                 f"CSV file to video ground truth conversion is not implemented for dataset <<{self.cfg.dataset.target_ds_name}>>."
@@ -599,10 +600,10 @@ class ProposedDetector(EvalBase, PerfCalc):
             # pprint(row)
             pred_lb = row["pred_label"]
             pred_lb_lower = pred_lb.lower()
-            is_fire_or_smoke = ('fire' in pred_lb_lower) or ('smoke' in pred_lb_lower)
+            is_fire_or_smoke = ("fire" in pred_lb_lower) or ("smoke" in pred_lb_lower)
             if is_fire_or_smoke:
                 temporal_buffer[pos] = True
-            pos = (idx + 1) % self.window_size # circular buffer
+            pos = (idx + 1) % self.window_size  # circular buffer
             # Check if the buffer has enough positive predictions
             num_det_frames = np.sum(temporal_buffer)
             if num_det_frames >= persistence_thres * self.window_size:
@@ -616,7 +617,7 @@ class ProposedDetector(EvalBase, PerfCalc):
         This function should be overridden by the subclass if needed.
         """
         if self.cfg.model.base_timm_model == "hgnetv2_b5.ssld_stage2_ft_in1k":
-            NO_POSTPROC_METHODS = ['no_temp', 'temp_stabilize']
+            NO_POSTPROC_METHODS = ["no_temp", "temp_stabilize"]
             if self.methodUsed.method_name in NO_POSTPROC_METHODS:
                 # prof model
                 # read that csv file:
@@ -633,7 +634,9 @@ class ProposedDetector(EvalBase, PerfCalc):
                     if ("fire" in pred) or ("smoke" in pred):
                         found_fire_or_smoke = True
                         break
-                return self.POSITIVE_LABEL if found_fire_or_smoke else self.NEGATIVE_LABEL
+                return (
+                    self.POSITIVE_LABEL if found_fire_or_smoke else self.NEGATIVE_LABEL
+                )
             elif self.methodUsed.method_name == "temp_tpt":
                 df = self._read_pred_csv(csv_file)
                 # get tpt_pred for the video df
@@ -700,7 +703,7 @@ class ProposedDetector(EvalBase, PerfCalc):
 
                     dfmk.insert_rows("raw_data", rows)
                     dfmk.fill_table_from_row_pool("raw_data")
-                    df = dfmk['raw_data']
+                    df = dfmk["raw_data"]
                     # new columns named "corrected?" and set to 1 if preds == target, else 0
                     df["corrected?"] = (df["preds"] == df["target"]).astype(int)
                     df = df.sort_values(by="corrected?", ascending=True)
@@ -741,9 +744,9 @@ class ProposedDetector(EvalBase, PerfCalc):
         metric_set = self.cfg.dataset.selected_metricSet
         METHOD_MODES = ["per_video", "per_frame"]
         metric_mode = metric_set.metric_set_cfgs.get("mode", "per_video")
-        assert (
-            metric_mode in METHOD_MODES
-        ), f"Metric mode must be one of {METHOD_MODES}, got {metric_mode}."
+        assert metric_mode in METHOD_MODES, (
+            f"Metric mode must be one of {METHOD_MODES}, got {metric_mode}."
+        )
         out_dict = {}
         for metric_name in metric_names:
             out_dict.update(self._data_from_metric(metric_mode, metric_name))
