@@ -13,7 +13,7 @@ import torchmetrics
 from temporal.metrics import FPS, FPR
 import importlib
 import importlib
-from temporal.rs_handler import *
+from temporal.res_hdl import *
 from temporal.methods.base_method import BaseMethod, MethodFactory
 
 class OurExp(BaseExperiment):

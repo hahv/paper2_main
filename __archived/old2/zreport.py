@@ -1,6 +1,6 @@
 from halib import *
 from argparse import ArgumentParser
-from temporal.methods.temp_stabilize import ProposedDetector
+from temporal.methods.__temp_stabilize import ProposedDetector
 from temporal.archived.config_bk import Config
 
 from halib.research.perfcalc import PerfCalc

@@ -1,7 +1,7 @@
 from halib import *
 from PIL import Image
 from _archived.config_builder import ConfigFactory
-from temporal.methods.temp_stabilize import ProposedDetector
+from temporal.methods.__temp_stabilize import ProposedDetector
 
 factory = ConfigFactory("./config/_base.yaml", "./config/methods")
 cfg = factory.build()

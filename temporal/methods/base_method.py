@@ -4,7 +4,7 @@ import timm
 import torch
 from halib import *
 
-from temporal.rs_handler import *
+from temporal.res_hdl import *
 from temporal.config import Config
 
 from abc import ABC, abstractmethod
@@ -35,7 +35,7 @@ class MethodFactory:
         if config.infer_cfg.save_csv_results:
             rs_handler_list.append(CsvRSHandler(config))
         if config.infer_cfg.save_video_results:
-            pkg_name = "temporal.rs_handler"
+            pkg_name = "temporal.res_hdl"
             chosen_video_handler = config.method_cfg.method_used.extra_cfgs.get(
                 "video_rs_handler", "BaseVideoRSHandler"
             )
@@ -147,6 +147,11 @@ class BaseMethod(ABC):
         for i, video_path in enumerate(video_files):
             self.infer_video(video_path, video_idx=i, total_videos=len(video_files))
 
+    #! override if needed
+    def before_infer_video(self, video_path: str):
+        """Hook method called before starting inference on a video."""
+        pass
+
     def infer_video(
         self, video_path: str, video_idx: int = None, total_videos: int = None
     ):
@@ -160,6 +165,7 @@ class BaseMethod(ABC):
             else f"[{video_idx + 1}/{total_videos}]"
         )
         pprint(f"{progress_str} Starting inference for: {video_path}")
+        self.before_infer_video(video_path)
 
         self.prepare_model()
         cap = cv2.VideoCapture(video_path)
