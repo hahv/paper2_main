@@ -11,6 +11,7 @@ from abc import ABC, abstractmethod
 import importlib
 from temporal.utils import get_cls
 from temporal.metric_src.metrics_src_base import MetricSrcFactory, BaseMetricSrc
+from halib.research.profiler import zProfiler
 
 
 class MethodFactory:
@@ -70,6 +71,7 @@ class BaseMethod(ABC):
         self.outdir = os.path.abspath(cfg.get_outdir())
         os.makedirs(self.outdir, exist_ok=True)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.profiler = zProfiler()
 
         # Store the list of handlers that will process the results
         self.result_handlers = rs_handlers if rs_handlers is not None else []
@@ -143,6 +145,10 @@ class BaseMethod(ABC):
         """Hook method called before starting inference on a video directory."""
         pass
 
+    def after_infer_video_dir(self, video_dir: str):
+        """Hook method called after completing inference on a video directory."""
+        pass
+
     # ! override if needed
 
     def infer_video_dir(self, video_dir: str, recursive: bool = True):
@@ -156,6 +162,7 @@ class BaseMethod(ABC):
 
         for i, video_path in enumerate(video_files):
             self.infer_video(video_path, video_idx=i, total_videos=len(video_files))
+        self.after_infer_video_dir(video_dir)
 
     #! override if needed
     def before_infer_video(self, video_path: str):

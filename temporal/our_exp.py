@@ -15,6 +15,7 @@ import importlib
 import importlib
 from temporal.res_hdl import *
 from temporal.methods.base_method import BaseMethod, MethodFactory
+from halib.research.perfcalc import PerfCalc
 
 
 class OurExp(BaseExperiment):
@@ -101,9 +102,9 @@ class OurExp(BaseExperiment):
 
         # metric_infos = self.metric_backend.metric_info # {key: torch_metrics}
         method_instance = MethodFactory.create_method(self.config)
-        assert isinstance(
-            method_instance, BaseMethod
-        ), "Method instance is not of type BaseMethod"
+        assert isinstance(method_instance, BaseMethod), (
+            "Method instance is not of type BaseMethod"
+        )
         method: BaseMethod = method_instance
         method.infer_video_dir(self.video_dir_path)
         eval_data_dict = (
@@ -148,8 +149,7 @@ class OurExp(BaseExperiment):
                 df.to_csv(outfile, sep=";", encoding="utf-8", index=False)
                 csvfile.fn_display_df(df)
                 pprint_local_path(outfile)
-        exp_dir = self.full_cfg.general.outdir
-        from halib.research.perfcalc import PerfCalc
-
-        pertb = PerfCalc.gen_perf_report_for_multip_exps(indir=exp_dir)
-        pertb.plot(save_path=f"{exp_dir}/all_exps_perf.png", open_plot=True)
+        # plot all experiments results
+        # exp_dir = self.full_cfg.general.outdir
+        # pertb = PerfCalc.gen_perf_report_for_multip_exps(indir=exp_dir)
+        # pertb.plot(save_path=f"{exp_dir}/all_exps_perf.png", open_plot=True)
