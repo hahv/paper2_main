@@ -4,7 +4,7 @@ import timm
 import torch
 from halib import *
 
-from temporal.res_hdl import *
+from temporal.rs_hdl import *
 from temporal.config import Config
 
 from abc import ABC, abstractmethod
@@ -33,11 +33,11 @@ class MethodFactory:
         cls = get_cls(f"{pkg_name}.{module_name}.{cls_name}")
         assert cls is not None, f"Class '{cls_name}' not found in module '{pkg_name}'."
 
-        rs_handler_list: list[RSHandlerBase] = []
+        rs_handler_list: list[BaseRSHandler] = []
         if config.infer_cfg.save_csv_results:
             rs_handler_list.append(CsvRSHandler(config))
         if config.infer_cfg.save_video_results:
-            pkg_name = "temporal.res_hdl"
+            pkg_name = "temporal.rs_hdl"
             chosen_video_handler = config.method_cfg.method_used.extra_cfgs.get(
                 "video_rs_handler", "BaseVideoRSHandler"
             )
@@ -57,7 +57,7 @@ class BaseMethod(ABC):
 
     REQUIRED_INFER_RS = ["logits", "probs", "predLabelIdx", "predLabel"]
 
-    def __init__(self, cfg: Config, rs_handlers: list[RSHandlerBase] = None):
+    def __init__(self, cfg: Config, rs_handlers: list[BaseRSHandler] = None):
         """
         Initializes the detector.
 

@@ -1,13 +1,9 @@
 from temporal.methods.base_method import *
 from temporal.methods.no_temp import NoTempMethod
-from torchvision import transforms
-from PIL import Image
-from temporal.config import Config
-from temporal.metric_src.test_metric_src import TestDSMetricSrc
 from temporal.tiny_cnn import *
 import pybgs as bgs
 import xml.etree.ElementTree as ET
-from halib.research.profiler import zProfiler
+import torch.nn.functional as F
 
 
 class TempStabilizeMethod(NoTempMethod):

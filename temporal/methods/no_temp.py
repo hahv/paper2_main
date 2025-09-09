@@ -3,6 +3,7 @@ from torchvision import transforms
 from PIL import Image
 from temporal.config import Config
 from temporal.metric_src.test_metric_src import TestDSMetricSrc
+import torch.nn.functional as F
 
 
 class NoTempMethod(BaseMethod):
