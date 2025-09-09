@@ -258,6 +258,7 @@ class TempStabilizeMethod(NoTempMethod):
         return False, roi_rect, fg_mask
 
     def after_infer_video_dir(self, video_dir):
+        self.profiler.save_report_dict(output_file=f"{self.cfg.get_outdir()}/profiler_report.json", with_detail=True)
         self.profiler.report_and_plot(self.cfg.get_outdir())
 
     def infer_frame(self, frame, frame_idx: int) -> dict:
