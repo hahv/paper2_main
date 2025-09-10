@@ -21,7 +21,7 @@ class BaseRSHandler(ABC):
         pass
 
     @abstractmethod
-    def handle_frame_results(self, frame_bgr, frame_rs_dict: dict):
+    def handle_frame_results(self, frame_bgr, frame_rs_dict: dict) -> Any:
         """Called for each frame to handle its results."""
         pass
 

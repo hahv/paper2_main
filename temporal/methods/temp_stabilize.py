@@ -58,12 +58,12 @@ class TempStabilizeMethod(NoTempMethod):
     def before_infer_video(self, video_path: str):
         self.algorithm = bgs.FrameDifference()  # background subtraction algorithm
 
-    def do_infer(self, model, input_tensor):
+    def do_tinycnn_infer(self, model, input_tensor):
         with torch.no_grad():
             outputs = model(input_tensor)
             probs = F.softmax(outputs, dim=1)
             preds = torch.argmax(outputs, dim=1)
-        return preds
+        return preds, probs
 
     def extract_blocks_torch(self, scaled_frame_bgr, block_size):
         # frame_bgr: (H,W,3) uint8 numpy
@@ -79,7 +79,7 @@ class TempStabilizeMethod(NoTempMethod):
         blocks = blocks.contiguous().view(3, -1, block_size, block_size)
         return blocks.permute(1, 0, 2, 3)  # (num_blocks,C,block_size,block_size)
 
-    def _active_blocks(self, fg_mask, threshold=0.1):
+    def _active_motion_blocks(self, fg_mask, threshold=0.1):
         """
         fg_mask: (H,W) uint8 numpy (0 or 255)
         returns: 1D array of active block indices
@@ -99,12 +99,15 @@ class TempStabilizeMethod(NoTempMethod):
         counts = (blocks > 0).sum(axis=(2, 3))
         total_pixels = self.blk_size * self.blk_size
 
+        # percentage of active pixels in each block
+        percentages = counts / total_pixels
         # boolean mask of active blocks
-        active_mask = counts / total_pixels > threshold
+        active_mask = percentages > threshold
 
         # convert to 1D indices (row-major order)
         active_indices = np.flatnonzero(active_mask)
-        return active_indices, blk_h, blk_w
+        active_percentages = percentages.flatten()[active_indices]
+        return active_indices, active_percentages, blk_h, blk_w
 
     def _calculate_roi_from_indices(
         self, firesmoke_active_indices, blk_w, scale_factor, orig_shape
@@ -189,12 +192,33 @@ class TempStabilizeMethod(NoTempMethod):
         # Step 2.1: Identify blocks with motion using the foreground mask
         self.profiler.step_start(ctx_name="skip_module", step_name="fg_mask")
         fg_mask = self.algorithm.apply(scaled_frame_bgr)
+
+        # ! this is for visualization
+        fg_mask_dict = {
+            "fg_mask": fg_mask,
+            "block_size": self.blk_size,
+            "active_motion_blocks_info": [],
+            "firesmoke_blocks_cls_info": {
+                "all_active_blocks": [],
+                "firesmoke_active_blocks": [],
+            },
+            "ROI_rect": None,
+            "active_percent": 0.0,
+            "global_info": {
+                "o_shape": (o_H, o_W),
+                "scale_factor": scale_factor,
+            },
+        }
+
         self.profiler.step_end(ctx_name="skip_module", step_name="fg_mask")
         # Step 2.2: Determine active blocks based on the foreground mask
         self.profiler.step_start(ctx_name="skip_module", step_name="active_blocks")
-        active_indices, blk_h, blk_w = self._active_blocks(
+        active_indices, active_percentages,blk_h, blk_w = self._active_motion_blocks(
             fg_mask, threshold=self.blk_act_thres
         )
+        # ! udate fg_mask_dict
+        fg_mask_dict["active_motion_blocks_info"] = list(zip(active_indices, active_percentages))
+
         self.profiler.step_end(ctx_name="skip_module", step_name="active_blocks")
 
         max_num_blocks = blk_h * blk_w
@@ -202,9 +226,10 @@ class TempStabilizeMethod(NoTempMethod):
         # Case A: No motion detected -> SKIP the frame
         if len(active_indices) == 0:
             console.print(f"[{frame_idx}] No motion detected. Skipping frame.")
-            return True, None, fg_mask
+            return True, None, fg_mask_dict
 
         active_percent = len(active_indices) / max_num_blocks
+        fg_mask_dict["active_percent"] = active_percent
         console.print(
             f"[{frame_idx}] Active motion blocks: [red]{len(active_indices)}[/red]/{max_num_blocks} ({active_percent:.2%})"
         )
@@ -215,23 +240,33 @@ class TempStabilizeMethod(NoTempMethod):
                 f"[{frame_idx}] Motion exceeds threshold. Processing full frame."
             )
             roi_rect = (0, 0, o_W, o_H)
-            return False, roi_rect, fg_mask
-
+            return False, roi_rect, fg_mask_dict
 
         # Case C: Reasonable motion -> Run classifier on active blocks
         self.profiler.step_start(ctx_name="skip_module", step_name="firesmoke_active_blocks")
 
         blocks_cpu = extract_func(scaled_frame_bgr, block_size=self.blk_size)
         blocks_active = blocks_cpu[active_indices]
-        preds = (
-            self.do_infer(self.tiny_block_model, blocks_active.to(self.device))
-            .cpu()
-            .numpy()
+        preds, probs = self.do_tinycnn_infer(
+            self.tiny_block_model, blocks_active.to(self.device)
         )
+        preds = preds.cpu().numpy()
+        probs = probs.cpu().numpy()   # shape: (num_active_blocks, num_classes)
 
-        FIRE_SMOKE_CLASS_IDX = 0
-        firesmoke_mask = preds == FIRE_SMOKE_CLASS_IDX
+        # mask of blocks predicted as fire_smoke
+        firesmoke_mask = preds == TinyCNN.FIRE_SMOKE_CLASS_IDX
         firesmoke_active_indices = active_indices[firesmoke_mask]
+
+        # raw probabilities (percentages) for each active block
+        firesmoke_probs = probs[:, TinyCNN.FIRE_SMOKE_CLASS_IDX]   # take probability of fire_smoke
+        firesmoke_active_probs = firesmoke_probs[firesmoke_mask]
+
+        # ! update fg_mask_dict
+        # vis all active blocks and their probs
+        fg_mask_dict["firesmoke_blocks_cls_info"]["all_active_blocks"] = list(zip(active_indices, firesmoke_probs))
+
+        # vis only blocks classified as fire/smoke
+        fg_mask_dict["firesmoke_blocks_cls_info"]["firesmoke_active_blocks"] = firesmoke_active_indices
 
         console.print(
             f"[{frame_idx}] Blocks classified as fire/smoke: [green]{len(firesmoke_active_indices)}[/green]/{len(active_indices)}"
@@ -239,11 +274,9 @@ class TempStabilizeMethod(NoTempMethod):
 
         self.profiler.step_end(ctx_name="skip_module", step_name="firesmoke_active_blocks")
 
-
         # Subcase C1: Motion was found, but none was classified as fire/smoke -> SKIP the frame
         if len(firesmoke_active_indices) == 0:
-            return True, None, fg_mask
-
+            return True, None, fg_mask_dict
 
         # Subcase C2: Fire/smoke blocks found -> Calculate a tight ROI and PROCESS it
         self.profiler.step_start(ctx_name="skip_module", step_name="calc_roi")
@@ -251,7 +284,7 @@ class TempStabilizeMethod(NoTempMethod):
             firesmoke_active_indices, blk_w, scale_factor, (o_H, o_W)
         )
         self.profiler.step_end(ctx_name="skip_module", step_name="calc_roi")
-        return False, roi_rect, fg_mask
+        return False, roi_rect, fg_mask_dict
 
     def after_infer_video_dir(self, video_dir):
         self.profiler.save_report_dict(output_file=f"{self.cfg.get_outdir()}/profiler_report.json", with_detail=True)
@@ -264,12 +297,13 @@ class TempStabilizeMethod(NoTempMethod):
         self.profiler.step_start(ctx_name="infer_frame", step_name="skip_module")
         self.profiler.ctx_start(ctx_name="skip_module")
 
-        should_skip, roi_rect, fg_mask = self.skip_module(
+        should_skip, roi_rect, fg_mask_dict = self.skip_module(
             frame_idx,
             frame,
             extract_func=self.extract_blocks_torch,
             scale_factor=self.scale_factor,
         )
+        fg_mask_dict["ROI_rect"] = roi_rect
         self.profiler.ctx_end("skip_module")
         self.profiler.step_end(ctx_name="infer_frame", step_name="skip_module")
         if roi_rect is not None:
@@ -281,12 +315,16 @@ class TempStabilizeMethod(NoTempMethod):
             res = super().infer_frame(frame, frame_idx)
             self.profiler.step_end(ctx_name="infer_frame", step_name="big_infer")
             self.profiler.ctx_end("infer_frame")
+            # add fg_mask_dict to res
+            res["fg_mask_dict"] = fg_mask_dict
             return res
         else:
             # pprint(f"Frame {frame_idx} skipped by skip module.")
-            return {
+            res = {
                 "logits": [0.0] * len(self.cfg.model_cfg.class_names),
                 "probs": [0.0] * len(self.cfg.model_cfg.class_names),
                 "predLabelIdx": -1,
                 "predLabel": "skipped",
             }
+            res["fg_mask_dict"] = fg_mask_dict
+            return res

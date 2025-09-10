@@ -28,7 +28,7 @@ model_cfg:
 infer_cfg:
   do_infer: true
   skip_if_exists: true
-  limit: -1 # -1 for no limit
+  limit: 100 # -1 for no limit
   save_video_results: true
   save_csv_results: true
   csv_columns:

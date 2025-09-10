@@ -3,6 +3,8 @@ import torch.nn as nn
 
 # A smaller CNN model for quick inference block classification (fire/smoke vs None)
 class TinyCNN(nn.Module):
+    FIRE_SMOKE_CLASS_NAMES = ['fire_smoke', 'none']
+    FIRE_SMOKE_CLASS_IDX = 0  # index of fire/smoke class
     def __init__(self, num_classes=2):
         super(TinyCNN, self).__init__()
         self.features = nn.Sequential(

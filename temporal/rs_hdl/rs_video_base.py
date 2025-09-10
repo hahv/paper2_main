@@ -78,7 +78,8 @@ class BaseVideoRSHandler(BaseRSHandler):
             self.video_output_path, fourcc, fps, frame_size
         )
 
-    def handle_frame_results(self, frame_bgr, frame_rs_dict: dict):
+    def prepare_frame_vwriter(self, frame_bgr, frame_rs_dict: dict, extra_info=None):
+        """Prepares the frame for writing to video. Override if needed."""
         lb_val_dict = {}
         frame_idx = frame_rs_dict["frame_idx"]
         total_frames = frame_rs_dict["num_frames"]
@@ -90,8 +91,15 @@ class BaseVideoRSHandler(BaseRSHandler):
         predLabel = infer_rs["predLabel"]
         pred_str = f"{predLabel} ({probs[labelIdx] * 100:.1f}%)"
         lb_val_dict["pred---"] = pred_str
+        if extra_info is not None:
+            lb_val_dict.update(extra_info)
         frame_vis = BaseVideoRSHandler.annotate_frame(frame_bgr, lb_val_dict)
+        return frame_vis, lb_val_dict
+
+    def handle_frame_results(self, frame_bgr, frame_rs_dict: dict):
+        frame_vis, lb_val_dict = self.prepare_frame_vwriter(frame_bgr, frame_rs_dict)
         self.video_writer.write(frame_vis)
+        return lb_val_dict
 
     def after_video(self):
         if self.video_writer is not None:
