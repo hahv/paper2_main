@@ -25,7 +25,8 @@
         "**/CVS": true,
         "**/.venv": true,
         "**/__pycache__": true,
-        "**/.vscode": true
+        "**/.vscode": true,
+        "~$zzpaper2.xlsx": true
     },
     "explorerExclude.backup": {},
     // "python.linting.enabled": true,

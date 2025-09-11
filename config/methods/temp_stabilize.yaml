@@ -5,7 +5,7 @@ extra_cfgs:
   blk_size: 64             # block size for activity check
   blk_act_thres: 0.05       # % pixels active in block to mark block active
   frm_act_thres: 0.5       # % active blocks to mark frame active
-  fire_cls_thres: 0.5      # fire/smoke classification threshold
+  firesmoke_cls_thres: 0.3      # fire/smoke classification threshold
   min_roi: 0.7             # min ROI size (relative to frame) for BIG model
   tiny_model: "models/tinycnn.pth"  # tiny CNN model path
   video_rs_handler: FGMaskRSHandler

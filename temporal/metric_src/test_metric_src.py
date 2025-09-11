@@ -63,6 +63,18 @@ class TestDSMetricSrc(BaseMetricSrc):
                 dtype={"pred_label": str, "elapsed_time": float},
                 keep_default_na=False,
             )
+            # Convert labels
+            df["pred_label"] = (
+                df["pred_label"]
+                .str.lower()
+                .apply(
+                    lambda x: (
+                        TestDSMetricSrc.POS_LABEL
+                        if ("fire" in x or "smoke" in x)
+                        else TestDSMetricSrc.NEG_LABEL
+                    )
+                )
+            )
             # pprint(csv_file)
             # pprint(df.columns)
             # csvfile.fn_display_df(df.head(3))
@@ -76,6 +88,8 @@ class TestDSMetricSrc(BaseMetricSrc):
     def _get_cls_data(self, metric, **kwargs) -> Dict[str, Any]:
         # Load raw data tailored for classification metrics (labels)
         per_video_out_list = self._load_raw_metric_data(**kwargs)
+        # pprint(f"Loaded raw data for {len(per_video_out_list)} videos.")
+        # pprint()
         # pprint(per_video_out_list)
         if metric == "FPS":
             # Compute FPS from raw_data
@@ -104,9 +118,13 @@ class TestDSMetricSrc(BaseMetricSrc):
             return per_video_preds_all, per_video_gts_all
 
     def proc_list_to_tensor(self, data_list, flatten, dtype):
-        data_npy = np.array(data_list)
         if flatten:
-            data_npy = data_npy.flatten()
+        # np.concatenate takes a list of lists/arrays and joins them into one.
+            data_npy = np.concatenate(data_list)
+        else:
+            # If not flattening, create the array as before.
+            data_npy = np.array(data_list)
+
         return torch.from_numpy(data_npy).to(dtype)
 
     def proc_data_by_mode(

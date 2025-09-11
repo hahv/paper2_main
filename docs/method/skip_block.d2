@@ -1,0 +1,110 @@
+direction: down
+infer_frame: {
+  label: "infer_frame(frame)"
+  shape: rectangle
+  style: { stroke: "#000"; fill: "#f0f0f0"; }
+}
+
+skip_module: {
+  label: "skip_module(frame)"
+  shape: rectangle
+  style: { stroke: "#000"; fill: "#e0e0ff"; }
+
+  preprocess: {
+    label: "1. Pre-process Frame"
+    shape: rectangle
+    style: { stroke: "#000"; fill: "#d0f0d0"; }
+    scale: { label: "Scale frame down by 🔴scale_factor (e.g., 50%)"; shape: rectangle }
+    pad: { label: "Pad frame to be divisible by 🔴block_size (64)"; shape: rectangle }
+    scale -> pad
+  }
+
+  detect_motion: {
+    label: "2. Detect Motion"
+    shape: rectangle
+    style: { stroke: "#000"; fill: "#d0f0d0"; }
+    frame_diff: { label: "Use FrameDifference for foreground mask"; shape: rectangle }
+    grid: { label: "Divide mask into grid of blocks with 🔴block_size"; shape: rectangle }
+    active_blocks: { label: "Identify active blocks (num_pixel_fg_motion > 🔴blk_act_thres (e.g. 0.05))"; shape: rectangle }
+    frame_diff -> grid -> active_blocks
+  }
+
+  decision_active: {
+    label: "Any active blocks AND % active blocks < 🔴 frm_act_thres-0.5 (% activate block per total block in frame)?"
+    shape: diamond
+    style: { stroke: "#000"; fill: "#ffd0d0"; }
+  }
+
+  motion_yes: {
+    label: "YES (Motion detected, not excessive)"
+    shape: rectangle
+    style: { stroke: "#000"; fill: "#e0ffe0"; }
+
+    classify_motion: {
+      label: "3. Classify Motion"
+      shape: rectangle
+      style: { stroke: "#000"; fill: "#d0f0d0"; }
+      extract: { label: "Extract active blocks from scaled frame"; shape: rectangle }
+      tiny_cnn: { label: "Feed blocks to tiny_block_model (TinyCNN)"; shape: rectangle }
+      predict: { label: "Get predictions (fire/smoke vs not)"; shape: rectangle }
+      extract -> tiny_cnn -> predict
+    }
+
+    define_roi: {
+      label: "4. Define Region of Interest (ROI)"
+      shape: rectangle
+      style: { stroke: "#000"; fill: "#d0f0d0"; }
+      identify: { label: "Identify fire/smoke blocks using 🔴firesmoke_cls_thres (0.5)"; shape: rectangle }
+      bounding_box: { label: "Calculate b_box wrapped all fire/smoke blocks"; shape: rectangle }
+      expand: { label: "Expand box if < min_roi_original_frame to match <🔴min_roi_o_frame (e.g.0.7)>"; shape: rectangle }
+      set_roi: { label: "Set roi_rect to bounding box"; shape: rectangle }
+      identify -> bounding_box -> expand -> set_roi
+    }
+    classify_motion -> define_roi
+  }
+
+  motion_no: {
+    label: "NO (No motion or whole scene changing)"
+    shape: rectangle
+    style: { stroke: "#000"; fill: "#e0ffe0"; }
+    set_none: { label: "Set roi_rect to None"; shape: rectangle }
+    set_skip: { label: "Set should_skip to False"; shape: rectangle }
+  }
+
+  preprocess -> detect_motion -> decision_active
+  decision_active -> motion_yes: YES
+  decision_active -> motion_no: NO
+}
+
+infer_frame -> skip_module
+
+return_skip: {
+  label: "Return should_skip, roi_rect, fg_mask"
+  shape: rectangle
+  style: { stroke: "#000"; fill: "#f0f0f0"; }
+}
+skip_module -> return_skip
+
+decision_skip: {
+  label: "should_skip flag?"
+  shape: diamond
+  style: { stroke: "#000"; fill: "#ffd0d0"; }
+}
+return_skip -> decision_skip
+
+skip_yes: {
+  label: "YES (Frame skippable)"
+  shape: rectangle
+  style: { stroke: "#000"; fill: "#e0ffe0"; }
+  return_dict: { label: "Return 'skipped' result dictionary"; shape: rectangle }
+}
+
+skip_no: {
+  label: "NO (Frame NOT skippable)"
+  shape: rectangle
+  style: { stroke: "#000"; fill: "#e0ffe0"; }
+  main_infer: { label: "Call super().infer_frame(frame)"; shape: rectangle }
+}
+
+decision_skip -> skip_yes: YES
+decision_skip -> skip_no: NO

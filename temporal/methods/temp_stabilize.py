@@ -28,7 +28,7 @@ class TempStabilizeMethod(NoTempMethod):
         self.blk_size = method_dict["blk_size"]
         self.blk_act_thres = method_dict["blk_act_thres"]
         self.frm_act_thres = method_dict["frm_act_thres"]
-        self.fire_cls_thres = method_dict["fire_cls_thres"]
+        self.firesmoke_cls_thres = method_dict["firesmoke_cls_thres"]
         self.min_roi = method_dict["min_roi"]
         self.tiny_model_path = method_dict["tiny_model"]
         frame_diff_cfg = method_dict["frame_diff_cfg"]
@@ -253,13 +253,17 @@ class TempStabilizeMethod(NoTempMethod):
         preds = preds.cpu().numpy()
         probs = probs.cpu().numpy()   # shape: (num_active_blocks, num_classes)
 
-        # mask of blocks predicted as fire_smoke
-        firesmoke_mask = preds == TinyCNN.FIRE_SMOKE_CLASS_IDX
-        firesmoke_active_indices = active_indices[firesmoke_mask]
+        prob_thres = self.firesmoke_cls_thres
 
-        # raw probabilities (percentages) for each active block
-        firesmoke_probs = probs[:, TinyCNN.FIRE_SMOKE_CLASS_IDX]   # take probability of fire_smoke
-        firesmoke_active_probs = firesmoke_probs[firesmoke_mask]
+        # raw probabilities (percentages) for each active block (for FIRE_SMOKE class)
+        firesmoke_probs = probs[:, TinyCNN.FIRE_SMOKE_CLASS_IDX]
+
+        # mask of blocks predicted as fire_smoke based on probability threshold
+        firesmoke_mask = firesmoke_probs >= prob_thres
+
+        # active indices and probabilities that passed threshold
+        firesmoke_active_indices = active_indices[firesmoke_mask]
+        # firesmoke_active_probs = firesmoke_probs[firesmoke_mask]
 
         # ! update fg_mask_dict
         # vis all active blocks and their probs
@@ -312,7 +316,10 @@ class TempStabilizeMethod(NoTempMethod):
         # should_skip = False
         if not should_skip:
             self.profiler.step_start(ctx_name="infer_frame", step_name="big_infer")
-            res = super().infer_frame(frame, frame_idx)
+            assert roi_rect is not None, "ROI should not be None if not skipping."
+            x1, y1, x2, y2 = roi_rect
+            cropped_frame = frame[y1:y2, x1:x2]
+            res = super().infer_frame(cropped_frame, frame_idx)
             self.profiler.step_end(ctx_name="infer_frame", step_name="big_infer")
             self.profiler.ctx_end("infer_frame")
             # add fg_mask_dict to res

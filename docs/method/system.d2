@@ -1,0 +1,41 @@
+vars: {
+  d2-config: {
+    layout-engine: elk
+    theme-id: 300
+  }
+}
+direction: up
+
+input: input video frames
+
+skip_chk: Video Skip Detection
+skip_chk.task: |`
+    + check if frame should **be skipped**, e.g., based on motion etc.
+    + if `eager_mode` is `TRUE`, SKIP must be `FALSE`
+`|
+infer: FD DL model detection
+pos: Post-Processing
+infer_check: have_fire_smoke? {shape: diamond}
+
+pos.task: |`
+    + filter out false fire detection (e.g., base on motion)
+    + use the raw input res OR the input of DL model? for post-processing
+`|
+
+eager_mode: Eager Mode = TRUE, Window_Size = 30 frames
+eager_mode_update: Eager Mode Update (if needed)
+eager_mode_update.task: |`
+    + number of `no fire` frames >= Eager Mode  Window_Size?
+    + if yes, set Eager Mode = FALSE
+`|
+
+input ->  skip_chk: 1. skip check
+skip_chk -> input: 2. do skip, next frame
+skip_chk -> infer: 3. No skip (or eager_mode), process
+infer -> infer_check: 4. infer
+infer_check -> eager_mode_update: 5. No
+eager_mode_update -> input: 6. next frame
+infer_check -> pos: 7. Yes
+
+pos -> eager_mode: 7. enter
+eager_mode -> input: 8. next frame
