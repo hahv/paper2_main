@@ -47,26 +47,6 @@ def parse_args():
 
     return parser.parse_args()
 
-
-def prepre_trial_dict(trial: Trial):
-
-    method_cfg_dict = {
-        "scale_factor": trial.suggest_categorical(
-            "scale_factor", SEARCH_SPACE["scale_factor"]
-        ),
-        "blk_act_thres": trial.suggest_categorical(
-            "blk_act_thres", SEARCH_SPACE["blk_act_thres"]
-        ),
-        "frm_act_thres": trial.suggest_categorical(
-            "frm_act_thres", SEARCH_SPACE["frm_act_thres"]
-        ),
-        "firesmoke_cls_thres": trial.suggest_categorical(
-            "firesmoke_cls_thres", SEARCH_SPACE["firesmoke_cls_thres"]
-        ),
-    }
-    return method_cfg_dict
-
-
 def run_pipeline(exp_cfg_file, method_cfg_dict):
     config = Config.from_custom_yaml_file(exp_cfg_file)
     experiment = OurExp(config)
@@ -100,7 +80,7 @@ def objective(trial: Trial):
     # ---- Run your pipeline with these hyperparams ----
     global current_exp_cfg_file
     metrics = None
-    with ConsoleLog(f"Running trial {trial.number+1}/{num_trials}"):
+    with ConsoleLog(f"Running trial {trial.number}/{num_trials}"):
         print(f"param set :")
         pprint(trial_param_set)
         metrics = run_pipeline(exp_cfg_file=current_exp_cfg_file, method_cfg_dict=trial_param_set
@@ -133,9 +113,8 @@ def main():
 
     # Persistent storage
     storage_url = "sqlite:////mnt/e/NextCloud/paper2_main/zout/tune/optuna_study.db"
-
     study = optuna.create_study(
-        study_name="fire_smoke_opt_study",
+        study_name=f"temp_stabilize_opt_{now_str()}",
         direction="maximize",
         sampler=sampler,
         storage=storage_url,
