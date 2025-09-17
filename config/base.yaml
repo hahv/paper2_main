@@ -11,15 +11,15 @@ general:
 
 dataset_cfg:
   list_datasets: [] # empty, will populate from config/datasets
-  selected_dataset_name: Test
+  selected_dataset_name: DFire
 
 metric_cfg:
   list_metrics: [] # empty, will populate from config/metrics
-  selected_metric_set_name: metric_per_frame # metric_per_video
+  selected_metric_set_name: metric_per_video # metric_per_video
 
 method_cfg:
   list_methods: [] # empty, will populate from config/methods
-  selected_method_name: temp_stabilize #temp_tpt #no_temp #temp_stabilize
+  selected_method_name: no_temp #temp_tpt #no_temp #temp_stabilize
 model_cfg:
   base_model: hgnetv2_b5.ssld_stage2_ft_in1k # timm
   model_path: models/prof_hgnetv2_b5.ssld_stage2_ft_in1k-20250620-50-98.78.pth
@@ -28,7 +28,7 @@ model_cfg:
 infer_cfg:
   do_infer: true
   skip_if_exists: true
-  limit: 100 # -1 for no limit
+  limit: -1 # -1 for no limit
   save_video_results: false
   save_csv_results: true
   csv_columns:

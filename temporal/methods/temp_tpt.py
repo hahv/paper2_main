@@ -2,7 +2,7 @@ from temporal.methods.base_method import *
 from torchvision import transforms
 from PIL import Image
 from temporal.config import Config
-from temporal.metric_src.test_metric_src import TestDSMetricSrc
+from temporal.metric_src.testvidoes_metric_src import TestDSMetricSrc
 from temporal.methods.no_temp import NoTempMethod
 import copy
 import glob

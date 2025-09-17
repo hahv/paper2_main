@@ -5,7 +5,7 @@ from temporal.metric_src.metrics_src_base import *
 import torch
 
 
-class TestDSMetricSrc(BaseMetricSrc):
+class TestVideosDSMetricSrc(BaseMetricSrc):
     """
     Concrete data source for a hypothetical video dataset.
     Assumes data structure: videos with frames, each frame has gt_label, pred_label, timestamp, etc.
@@ -52,9 +52,9 @@ class TestDSMetricSrc(BaseMetricSrc):
         for csv_file in csv_files:
             video_name = fs.get_file_name(csv_file, split_file_ext=True)[0]
             gt = (
-                TestDSMetricSrc.NEG_LABEL
+                TestVideosDSMetricSrc.NEG_LABEL
                 if "nofire" in video_name
-                else TestDSMetricSrc.POS_LABEL
+                else TestVideosDSMetricSrc.POS_LABEL
             )
             df = pd.read_csv(
                 csv_file,
@@ -69,9 +69,9 @@ class TestDSMetricSrc(BaseMetricSrc):
                 .str.lower()
                 .apply(
                     lambda x: (
-                        TestDSMetricSrc.POS_LABEL
+                        TestVideosDSMetricSrc.POS_LABEL
                         if ("fire" in x or "smoke" in x)
-                        else TestDSMetricSrc.NEG_LABEL
+                        else TestVideosDSMetricSrc.NEG_LABEL
                     )
                 )
             )
@@ -107,10 +107,10 @@ class TestDSMetricSrc(BaseMetricSrc):
                 per_video_pred_df = per_video_data[1]
                 # pprint(per_video_pred_df.columns)
                 preds = per_video_pred_df["pred_label"].tolist()
-                preds = np.array(preds) == TestDSMetricSrc.POS_LABEL
+                preds = np.array(preds) == TestVideosDSMetricSrc.POS_LABEL
                 preds = preds.astype(int).tolist()  # convert to int
                 gts = per_video_data[0]  # already numpy
-                gts = np.array(gts) == TestDSMetricSrc.POS_LABEL
+                gts = np.array(gts) == TestVideosDSMetricSrc.POS_LABEL
                 gts = gts.astype(int).tolist()  # convert to int
                 per_video_preds_all.append(preds)
                 per_video_gts_all.append(gts)

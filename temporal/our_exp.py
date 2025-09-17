@@ -79,9 +79,9 @@ class OurExp(BaseExperiment):
         if "recall (TPR)" in metric_names:
             r = torchmetrics.Recall(task=task, num_classes=num_classes)
             name_and_tmetric["recall (TPR)"] = r
-        if "FPR" in metric_names:
+        if "FPR (False Alarm Rate)" in metric_names:
             fpr = FPR()
-            name_and_tmetric["FPR"] = fpr
+            name_and_tmetric["FPR (False Alarm Rate)"] = fpr
         if "FPS" in metric_names:
             fps = FPS()
             name_and_tmetric["FPS"] = fps
