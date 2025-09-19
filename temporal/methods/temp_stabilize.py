@@ -209,6 +209,11 @@ class TempStabilizeMethod(NoTempMethod):
                 "scale_factor": scale_factor,
             },
         }
+        if frame_idx == 1:
+            # ! for the first frame, always return no skip, full frame as ROI
+            console.print(f"[{frame_idx}] First frame, no skip, full frame as ROI.")
+            roi_rect = None
+            return False, roi_rect, fg_mask_dict
 
         self.profiler.step_end(ctx_name="skip_module", step_name="fg_mask")
         # Step 2.2: Determine active blocks based on the foreground mask
