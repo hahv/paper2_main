@@ -3,9 +3,40 @@ from torchvision import transforms
 from PIL import Image
 from temporal.config import Config
 import torch.nn.functional as F
+from timm.data import resolve_data_config, create_transform
 
 
 class NoTempMethod(BaseMethod):
+    def _get_transform(self, model_name: str):
+        """Get the appropriate transformation based on the model name."""
+        if "efficientnet_b0" in model_name.lower():
+            assert self.model is not None, "Model is not loaded."
+            cfg = resolve_data_config(model=self.model)
+            test_transform = create_transform(**cfg, is_training=False)
+            return test_transform
+
+        if "prof" in model_name.lower():
+            return transforms.Compose(
+                [
+                    transforms.Resize((360, 640)),
+                    transforms.ToTensor(),
+                    transforms.Normalize(
+                        mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+                    ),
+                ]
+            )
+        if 'tinycnn' in model_name.lower():
+            return transforms.Compose(
+                [
+                    transforms.Resize((224, 224)),
+                    transforms.ToTensor(),
+                    transforms.Normalize(
+                        mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+                    ),
+                ]
+            )
+        raise ValueError(f"Unsupported model: {model_name}")
+
     def _pre_process_frame(self, frame):
         """Pre-process the frame before inference.
         if roi is provided, it will crop the frame to the ROI.
@@ -20,26 +51,7 @@ class NoTempMethod(BaseMethod):
             full_cfg.model_cfg.model_path, split_file_ext=True
         )[0]
         pil_img = Image.fromarray(frame_rgb)
-        if "prof" in model_name.lower():
-            transform = transforms.Compose(
-                [
-                    transforms.Resize((360, 640)),
-                    transforms.ToTensor(),
-                    transforms.Normalize(
-                        mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
-                    ),
-                ]
-            )
-        else:
-            transform = transforms.Compose(
-                [
-                    transforms.Resize((224, 224)),
-                    transforms.ToTensor(),
-                    transforms.Normalize(
-                        mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
-                    ),
-                ]
-            )
+        transform = self._get_transform(model_name)
         # Apply the transformation
         frame_batch = transform(pil_img).unsqueeze(0)  # Add batch dimension
         # Move the frame batch to the appropriate device

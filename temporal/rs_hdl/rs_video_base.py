@@ -84,7 +84,7 @@ class BaseVideoRSHandler(BaseRSHandler):
         frame_idx = frame_rs_dict["frame_idx"]
         total_frames = frame_rs_dict["num_frames"]
         lb_val_dict["fps"] = frame_rs_dict["fps"]
-        lb_val_dict["frameidx"] = f"{frame_idx + 1}/{total_frames}"
+        lb_val_dict["frame_idx"] = f"{frame_idx}/{total_frames}"
         infer_rs = frame_rs_dict["infer_rs"]
         probs = infer_rs["probs"]
         labelIdx = infer_rs["predLabelIdx"]

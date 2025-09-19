@@ -18,6 +18,8 @@ class DFireDSMetricSrc(BaseMetricSrc):
     def __init__(self, cfg: Config):
         self.cfg = cfg
         super().__init__(cfg.dataset_cfg.dataset_used.name)
+        self.save_raw_metrics = False
+        self.per_video_out_list = None
 
     def _register_handlers(self):
         metric_set_meta = self.cfg.metric_cfg.metricSet_used
@@ -30,11 +32,42 @@ class DFireDSMetricSrc(BaseMetricSrc):
         for mode in modes:
             self.mode_processors_dict[mode] = self.proc_data_by_mode
 
+    def save_raw_metric_src(self, mode: str, per_video_out_list: Any):
+        # gt = [gt] * len(df)
+        # per_video_out_list.append((gt, df))
+        if not self.save_raw_metrics:
+            # pprint(f'call save_raw_metric_src for mode "{mode}"')
+            dfmk = csvfile.DFCreator()
+            dfmk.create_table("raw_preds", ["video_name", "gt", "pred", "correct"])
+            # pprint(per_video_out_list)
+            # assert False, "stop here to check per_video_out_list"
+            if mode == "per_video":
+                rows = []
+                for gt, df in per_video_out_list:
+                    video_name = df["video"].iloc[0]
+                    gt = gt[0]  # all frames have same gt
+                    v_pred = DFireDSMetricSrc.NEG_LABEL
+                    preds = df["pred_label"].unique().tolist()
+                    if DFireDSMetricSrc.POS_LABEL in preds:
+                        v_pred = DFireDSMetricSrc.POS_LABEL
+                    # pprint(f"{video_name}: gt={gt}, pred={v_pred}")
+                    rows.append([video_name, gt, v_pred, int(v_pred == gt)])
+                dfmk.insert_rows("raw_preds", rows)
+                dfmk.fill_table_from_row_pool("raw_preds")
+                dfmk["raw_preds"].to_csv(
+                    os.path.join(self.cfg.get_outdir(), f"[{mode}]_raw_metric_src_.csv"), sep=";", encoding="utf-8", index=False
+                )
+            else:
+                raise NotImplementedError(f"Mode {mode} not implemented yet")
+            self.save_raw_metrics = True
+
     def _load_raw_metric_data(self, **kwargs) -> Dict[str, Any]:
         # Implementation-specific: Load ground truths and predictions.
         # For flexibility, use kwargs to specify paths, filters, etc.
         # Example: Simulate loading video data with frames.
         # In real code, this would read from files/databases.
+        if self.per_video_out_list is not None:
+            return self.per_video_out_list
         indir = kwargs.get("indir", None)
         if indir is None:
             indir = self.cfg.get_outdir()
@@ -43,9 +76,18 @@ class DFireDSMetricSrc(BaseMetricSrc):
         num_videos = self.cfg.dataset_cfg.dataset_used.get_num_videos(recursive=False)
 
         csv_files = fs.filter_files_by_extension(indir, [".csv"], recursive=False)
-        assert len(csv_files) == num_videos, (
-            f"Number of CSV files ({len(csv_files)}) does not match number of video files ({num_videos})"
-        )
+        # only keep those with "_results" in the name
+        console.rule("Filtered CSV files for metric data")
+        # pprint(csv_files)
+        filterd_csv_files = []
+        for csv_file in csv_files:
+            if "_results" in os.path.basename(csv_file):
+                filterd_csv_files.append(csv_file)
+        # pprintfilterd_csv_files)
+        csv_files = filterd_csv_files
+        assert (
+            len(csv_files) == num_videos
+        ), f"Number of CSV files ({len(csv_files)}) does not match number of video files ({num_videos})"
 
         # return video_name, gt, and df
         per_video_out_list = []  # gt, df for each frames in each video
@@ -83,11 +125,13 @@ class DFireDSMetricSrc(BaseMetricSrc):
             gt = [gt] * len(df)
             # both are numpy
             per_video_out_list.append((gt, df))
-        return per_video_out_list
+        self.per_video_out_list = per_video_out_list
+        return self.per_video_out_list
 
-    def _get_cls_data(self, metric, **kwargs) -> Dict[str, Any]:
+    def _get_cls_data(self, metric, mode, **kwargs) -> Dict[str, Any]:
         # Load raw data tailored for classification metrics (labels)
         per_video_out_list = self._load_raw_metric_data(**kwargs)
+        self.save_raw_metric_src(mode=mode, per_video_out_list=per_video_out_list)
         # pprint(f"Loaded raw data for {len(per_video_out_list)} videos.")
         # pprint()
         # pprint(per_video_out_list)

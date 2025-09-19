@@ -208,7 +208,7 @@ class BaseMethod(ABC):
             )
 
         frame_idx = 0
-        limit = self.cfg.infer_cfg.limit
+        limit = self.cfg.infer_cfg.limit if self.cfg.infer_cfg.limit > 0 else total_frames
         try:
             while cap.isOpened():
                 ret, frame_bgr = cap.read()

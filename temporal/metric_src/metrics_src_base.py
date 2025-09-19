@@ -86,7 +86,7 @@ class BaseMetricSrc(ABC):
             mode_proc_dict = {}
             for metric in metrics:
                 metric_data_getter = self.metric_data_getters_dict.get(metric)
-                metric_data = metric_data_getter(metric=metric, **kwargs)
+                metric_data = metric_data_getter(metric=metric, mode=mode, **kwargs)
                 proc_data = mode_proc(
                     metric=metric, mode=mode, metric_data=metric_data, **kwargs
                 )
