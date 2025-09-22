@@ -212,7 +212,7 @@ class TempStabilizeMethod(NoTempMethod):
         if frame_idx == 1:
             # ! for the first frame, always return no skip, full frame as ROI
             console.print(f"[{frame_idx}] First frame, no skip, full frame as ROI.")
-            roi_rect = None
+            roi_rect = (0, 0, o_W, o_H)
             return False, roi_rect, fg_mask_dict
 
         self.profiler.step_end(ctx_name="skip_module", step_name="fg_mask")

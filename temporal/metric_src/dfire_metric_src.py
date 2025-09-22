@@ -55,7 +55,7 @@ class DFireDSMetricSrc(BaseMetricSrc):
                 dfmk.insert_rows("raw_preds", rows)
                 dfmk.fill_table_from_row_pool("raw_preds")
                 dfmk["raw_preds"].to_csv(
-                    os.path.join(self.cfg.get_outdir(), f"[{mode}]_raw_metric_src_.csv"), sep=";", encoding="utf-8", index=False
+                    os.path.join(self.cfg.get_outdir(), f"[___{mode}]_raw_metric_src_.csv"), sep=";", encoding="utf-8", index=False
                 )
             else:
                 raise NotImplementedError(f"Mode {mode} not implemented yet")

@@ -11,7 +11,6 @@ import yaml
 
 SEP = "__"
 
-
 @dataclass
 class DatasetInfo(YAMLWizard, NamedConfig):
     name: str = None
@@ -160,6 +159,7 @@ class ModelConfig(YAMLWizard):
     base_model: str
     model_path: str
     class_names: List[str]
+    input_size: List[int]
 
 
 @dataclass
@@ -190,11 +190,16 @@ class Config(ExpBaseConfig):
         if self.general.time_stamp is None:
             # set time_stamp to current time
             self.general.time_stamp = now_str()
+        model_info = f'{self.model_cfg.base_model}'
+        model_input_size = 'x'.join(map(str, self.model_cfg.input_size))
+        if model_input_size:
+            model_info += f'_{model_input_size}'
 
-        name_parts = [
+        name_parts = ['___',
             abbr,
             f"ds_{self.dataset_cfg.dataset_used.name}",
             f"mt_{self.method_cfg.method_used.name}",
+            f"md_{model_info}",
             self.general.time_stamp,
         ]
         self.cfg_name = SEP.join(name_parts)
@@ -208,6 +213,7 @@ class Config(ExpBaseConfig):
             return cfg_dict
 
         cfg_dict = load_yaml(yaml_file)
+        pprint(cfg_dict)
         yaml_str = yaml.dump(cfg_dict, default_flow_style=False)
         instance = Config.from_yaml(yaml_str)
 

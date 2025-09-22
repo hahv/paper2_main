@@ -4,16 +4,12 @@ from PIL import Image
 from temporal.config import Config
 import torch.nn.functional as F
 from timm.data import resolve_data_config, create_transform
+from typing import List, Optional
 
 
 class NoTempMethod(BaseMethod):
-    def _get_transform(self, model_name: str):
+    def _get_transform(self, model_name: str, input_size: Optional[List[int]] = None):
         """Get the appropriate transformation based on the model name."""
-        if "efficientnet_b0" in model_name.lower():
-            assert self.model is not None, "Model is not loaded."
-            cfg = resolve_data_config(model=self.model)
-            test_transform = create_transform(**cfg, is_training=False)
-            return test_transform
 
         if "prof" in model_name.lower():
             return transforms.Compose(
@@ -25,7 +21,7 @@ class NoTempMethod(BaseMethod):
                     ),
                 ]
             )
-        if 'tinycnn' in model_name.lower():
+        if "tinycnn" in model_name.lower():
             return transforms.Compose(
                 [
                     transforms.Resize((224, 224)),
@@ -35,6 +31,19 @@ class NoTempMethod(BaseMethod):
                     ),
                 ]
             )
+        if ("efficientnet_b0" in model_name.lower()) or (
+            "hgnetv2_b5.ssld_stage2_ft_in1k" in model_name.lower()
+        ):
+            assert input_size is not None, "input_size must be provided for timm models"
+            assert (
+                isinstance(input_size, (list, tuple)) and len(input_size) == 2
+            ), "input_size must be a list or tuple of two integers"
+            cfg = resolve_data_config(model=model_name)
+            # ! disable color jitter since fire/smoke are sensitive to color changes
+            cfg["color_jitter"] = None
+            cfg["input_size"] = (3, input_size[0], input_size[1])  # C, H, W
+            return create_transform(**cfg, is_training=False)
+
         raise ValueError(f"Unsupported model: {model_name}")
 
     def _pre_process_frame(self, frame):
@@ -43,15 +52,15 @@ class NoTempMethod(BaseMethod):
         """
         # Convert BGR to RGB
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        assert isinstance(self.cfg, Config), (
-            "current method Cfg is not an instance of temporal.Config"
-        )
+        assert isinstance(
+            self.cfg, Config
+        ), "current method Cfg is not an instance of temporal.Config"
         full_cfg: Config = self.cfg
         model_name: str = fs.get_file_name(
             full_cfg.model_cfg.model_path, split_file_ext=True
         )[0]
         pil_img = Image.fromarray(frame_rgb)
-        transform = self._get_transform(model_name)
+        transform = self._get_transform(model_name, full_cfg.model_cfg.input_size)
         # Apply the transformation
         frame_batch = transform(pil_img).unsqueeze(0)  # Add batch dimension
         # Move the frame batch to the appropriate device

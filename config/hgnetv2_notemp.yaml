@@ -1,0 +1,22 @@
+__base__: config/eb0_notemp.yaml
+
+model_cfg:
+  base_model: hgnetv2_b5.ssld_stage2_ft_in1k # timm
+  model_path: models/DFire_hgnetv2_b5.ssld_stage2_ft_in1k_4090_SV_20250919.181654_best.pth
+  class_names: [fire_smoke, None]
+  input_size: [360, 640] # [H, W], for timm models
+
+infer_cfg:
+  do_infer: true
+  skip_if_exists: true
+  limit: -1 # -1 for no limit
+  save_video_results: true
+  save_csv_results: true
+  csv_columns:
+    - class_names
+    - logits
+    - probs
+    - pred_label_idx
+    - pred_label
+  calc_metrics: true
+  verbose: false
