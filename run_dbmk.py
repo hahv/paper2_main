@@ -1,5 +1,5 @@
 from halib import *
-from video_db.hrwen_provider import HpwrenLbProvider
+from video_db.archived.hrwen_provider import HpwrenLbProvider
 from video_db.newdb_provider import NewDBLbProvider
 
 

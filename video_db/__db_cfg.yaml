@@ -1,0 +1,4 @@
+dataset_name: dataset_all
+dataset_path: /mnt/d/ZDev/__new_dataset/dataset_all
+label_file_posfix: __labels
+search_recursive: true

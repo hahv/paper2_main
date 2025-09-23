@@ -2,8 +2,8 @@ general:
   seed: 1
   computer_name: null # PC name that run the experiment
   outdir: zout/perf
-  # time_stamp: 20250729.171542 #  add to outdir automatically, allow to resume training
-  time_stamp: null # will be set to current time if not provided
+  time_stamp: 20250922.160543 #  add to outdir automatically, allow to resume training
+  # time_stamp: null # will be set to current time if not provided
   log_cfg:
     wandb_cfg:
       project: "paper2_main"

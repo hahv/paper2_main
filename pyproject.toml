@@ -16,7 +16,7 @@ dependencies = [
     "torchmetrics>=1.8.1",
     "numpy",
     "opencv-python",
-    # "pybgs"
+    # "pybgs",
     "line-profiler>=5.0.0",
     "pyinstrument>=5.1.1",
     "optuna",

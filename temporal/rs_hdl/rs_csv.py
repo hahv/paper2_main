@@ -30,16 +30,23 @@ class CsvRSHandler(BaseRSHandler):
         self.outdir = os.path.abspath(cfg.get_outdir())
         self.extra_cols = self.cfg.infer_cfg.csv_columns
         self.csv_columns = CsvRSHandler.CSV_FIXED_COLUMNS + self.extra_cols
+        self.outfile_exists = False
 
     def before_video(self, video_path: str, **kwargs):
         if not self.cfg.infer_cfg.save_csv_results:
             return
-
         video_name = os.path.splitext(os.path.basename(video_path))[0]
+        self.out_csv_file = os.path.join(self.outdir, f"{video_name}_results.csv")
+
+        skip_if_exists = self.cfg.infer_cfg.skip_if_exists
+        if skip_if_exists and os.path.exists(self.out_csv_file):
+            self.outfile_exists = True
+            print(f"CSV file already exists, skipping: {self.out_csv_file}")
+            return # skip creating dfmk and table
+
         self.dfmk = csvfile.DFCreator()
         self.dfmk.create_table(video_name, columns=self.csv_columns)
         self.table_name = video_name
-        self.out_csv_file = os.path.join(self.outdir, f"{video_name}_results.csv")
         self.csv_rows = []
 
     # ! can be override
@@ -65,8 +72,12 @@ class CsvRSHandler(BaseRSHandler):
         self.csv_rows.append(row_array)
 
     def after_video(self):
+        if self.outfile_exists:
+            self.outfile_exists = False # reset for next video
+            return
         if not self.cfg.infer_cfg.save_csv_results or self.dfmk is None:
             return
+
         self.dfmk.insert_rows(self.table_name, self.csv_rows)
         self.dfmk.fill_table_from_row_pool(self.table_name)
         self.dfmk[self.table_name].to_csv(
@@ -133,10 +144,16 @@ class BaseVideoRSHandler(BaseRSHandler):
         self.video_writer = None
         self.video_output_path = None
         self.outdir = os.path.abspath(cfg.get_outdir())
+        self.outfile_exists = False
+
 
     def before_video(self, video_path: str, **kwargs):
         fname = fs.get_file_name(video_path, split_file_ext=True)[0]
         self.video_output_path = os.path.join(self.outdir, f"{fname}_out.mp4")
+        if os.path.exists(self.video_output_path) and self.cfg.infer_cfg.skip_if_exists:
+            print(f"Output video already exists, skipping: {self.video_output_path}")
+            self.outfile_exists = True
+            return
         fourcc = cv2.VideoWriter_fourcc(*"mp4v")
 
         fps = kwargs["fps"]
@@ -161,6 +178,9 @@ class BaseVideoRSHandler(BaseRSHandler):
         self.video_writer.write(frame_vis)
 
     def after_video(self):
+        if self.outfile_exists:
+            self.outfile_exists = False # reset for next video
+            return
         if self.video_writer is not None:
             self.video_writer.release()
             print(f"Annotated video saved to: {self.video_output_path}")

@@ -6,7 +6,7 @@ import cv2
 import yaml
 import pandas as pd
 from tqdm import tqdm
-from halib import console
+from halib import *
 from halib.filetype import csvfile
 from halib.system import filesys as fs
 
@@ -14,18 +14,17 @@ from halib.system import filesys as fs
 class LabelProviderBase(ABC):
     """Base class for label providers handling video processing and labeling."""
 
-    def __init__(self, output_dir: str = "datasets/___annotations"):
+    def __init__(self):
         self.video_list: List[str] = []
         self.dataset_name: Optional[str] = None
         self.dataset_path: Optional[str] = None
-        self.output_dir: str = output_dir
+        self.label_file_posfix: str = "_labels.csv"
 
     def _generate_config(self) -> dict:
         """Generate configuration dictionary for the dataset."""
         return {
             "dataset_name": self.dataset_name,
             "dataset_path": self.dataset_path,
-            "output_dir": self.output_dir,
             "num_videos": len(self.video_list),
         }
 
@@ -35,15 +34,11 @@ class LabelProviderBase(ABC):
             raise ValueError("Video list is empty. Populate it before processing.")
         if not self.dataset_name:
             raise ValueError("Dataset name is not set.")
-        if not self.output_dir:
-            raise ValueError("Output directory is not set.")
 
         console.rule(f"Processing labeling for {self.dataset_name}")
-        output_dir = os.path.join(self.output_dir, self.dataset_name)
-        os.makedirs(output_dir, exist_ok=True)
+        # Save configuration to YAML (directly in dataset path)
+        config_file = os.path.join(self.dataset_path, "__cfg.yaml")
 
-        # Save configuration to YAML
-        config_file = os.path.join(output_dir, "__cfg.yaml")
         with open(config_file, "w") as f:
             yaml.dump(self._generate_config(), f)
 
@@ -51,11 +46,18 @@ class LabelProviderBase(ABC):
             """Process a single video and save labels if required."""
             label_df = self.get_labels(video_path)
             if to_csv:
-                output_file = os.path.join(
-                    output_dir, f"{os.path.basename(video_path)}.csv"
+                # get parent dir of video_path
+                parent_dir = os.path.dirname(video_path)
+                fname = fs.get_file_name(video_path, split_file_ext=True)[0]
+                fname_csv = f"{fname}{self.label_file_posfix}.csv"
+                outfile = os.path.join(
+                    parent_dir,
+                    fname_csv,
                 )
-                console.print(f"Saving to [green]{output_file}[/green]")
-                label_df.to_csv(output_file, index=False, sep=";")
+                console.print(f"Saving label to:")
+                pprint_local_path(outfile, get_wins_path=True)
+                print('\n\n')
+                label_df.to_csv(outfile, index=False, sep=";")
             return video_path
 
         if max_workers < 1: # do not use threading

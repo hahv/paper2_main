@@ -205,53 +205,64 @@ class BaseMethod(ABC):
                 total_frames=total_frames,
                 fps=vfps,
                 frame_size=frame_size,
+                skip_if_exists=self.cfg.infer_cfg.skip_if_exists,
             )
 
+        # find CsvRSHandler in self.result_handlers
+        csv_handler = None
+        for handler in self.result_handlers:
+            if isinstance(handler, CsvRSHandler):
+                csv_handler = handler
+                break
+        assert csv_handler is not None, "CsvRSHandler not found in result_handlers, it is required."
+        SKIP_INFER = csv_handler.outfile_exists
         frame_idx = 0
         limit = self.cfg.infer_cfg.limit if self.cfg.infer_cfg.limit > 0 else total_frames
-        try:
-            while cap.isOpened():
-                ret, frame_bgr = cap.read()
-                if not ret:
-                    break  # End of video
-                frame_idx += 1
-                if limit > 0 and frame_idx > limit:
-                    pprint(f"Frame limit reached: {limit}, stop")
-                    break
+        if not SKIP_INFER:
+            try:
+                while cap.isOpened():
+                    ret, frame_bgr = cap.read()
+                    if not ret:
+                        break  # End of video
+                    frame_idx += 1
+                    if limit > 0 and frame_idx > limit:
+                        pprint(f"Frame limit reached: {limit}, stop")
+                        break
 
-                start_time = time.perf_counter()
+                    start_time = time.perf_counter()
 
-                infer_rs = self.infer_frame(frame_bgr, frame_idx)
-                if not all(key in infer_rs for key in BaseMethod.REQUIRED_INFER_RS):
-                    raise ValueError(
-                        f"Missing required inference results: {BaseMethod.REQUIRED_INFER_RS}"
-                    )
+                    infer_rs = self.infer_frame(frame_bgr, frame_idx)
+                    if not all(key in infer_rs for key in BaseMethod.REQUIRED_INFER_RS):
+                        raise ValueError(
+                            f"Missing required inference results: {BaseMethod.REQUIRED_INFER_RS}"
+                        )
 
-                elapsed_time = time.perf_counter() - start_time
+                    elapsed_time = time.perf_counter() - start_time
 
-                # infer fps
-                fps = 1.0 / elapsed_time if elapsed_time > 0 else 0
-                fps = f"{fps:.2f}"
+                    # infer fps
+                    fps = 1.0 / elapsed_time if elapsed_time > 0 else 0
+                    fps = f"{fps:.2f}"
 
-                frame_rs_dict = {
-                    "video": os.path.basename(video_path),
-                    "num_frames": total_frames,
-                    "frame_idx": frame_idx,
-                    "elapsed_time": elapsed_time,
-                    "infer_rs": infer_rs,
-                    "vfps": vfps,
-                    "frame_size": frame_size,
-                    "fps": fps,
-                }
-                # --- Delegate the packet to all registered handlers ---
-                for handler in self.result_handlers:
-                    handler.handle_frame_results(frame_bgr, frame_rs_dict)
-                self._log_progress(frame_idx, total_frames)
+                    frame_rs_dict = {
+                        "video": os.path.basename(video_path),
+                        "num_frames": total_frames,
+                        "frame_idx": frame_idx,
+                        "elapsed_time": elapsed_time,
+                        "infer_rs": infer_rs,
+                        "vfps": vfps,
+                        "frame_size": frame_size,
+                        "fps": fps,
+                    }
+                    # --- Delegate the packet to all registered handlers ---
+                    for handler in self.result_handlers:
+                        handler.handle_frame_results(frame_bgr, frame_rs_dict)
+                    self._log_progress(frame_idx, total_frames)
 
-        finally:
-            cap.release()
-            cv2.destroyAllWindows()
-            # Notify all handlers that the video processing is complete
-            for handler in self.result_handlers:
+            finally:
+                cap.release()
+                # cv2.destroyAllWindows()
+                # Notify all handlers that the video processing is complete
+        #! even if SKIP_INFER, we still need to call after_video to do some clean up
+        for handler in self.result_handlers:
                 handler.after_video()
-            print(f"\nFinished inference for: {video_path}\n")
+        print(f"\nFinished inference for: {video_path}\n")
