@@ -66,10 +66,18 @@ class BaseVideoRSHandler(BaseRSHandler):
         self.video_writer = None
         self.video_output_path = None
         self.outdir = os.path.abspath(cfg.get_outdir())
+        self.outfile_exists = False
 
     def before_video(self, video_path: str, **kwargs):
+        if not self.cfg.infer_cfg.save_csv_results:
+            return
         fname = fs.get_file_name(video_path, split_file_ext=True)[0]
         self.video_output_path = os.path.join(self.outdir, f"{fname}_out.mp4")
+        skip_if_exists = self.cfg.infer_cfg.skip_if_exists
+        if skip_if_exists and os.path.exists(self.video_output_path):
+            self.outfile_exists = True
+            print(f"Video file already exists, skipping: {self.video_output_path}")
+            return # skip creating dfmk and table
         fourcc = cv2.VideoWriter_fourcc(*"mp4v")
 
         fps = kwargs["fps"]
@@ -102,6 +110,9 @@ class BaseVideoRSHandler(BaseRSHandler):
         return lb_val_dict
 
     def after_video(self):
+        if self.outfile_exists:
+            self.outfile_exists = False # reset for next video
+            return
         if self.video_writer is not None:
             self.video_writer.release()
             print(f"Annotated video saved to: {self.video_output_path}")

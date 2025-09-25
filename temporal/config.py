@@ -206,6 +206,7 @@ class Config(ExpBaseConfig):
             tag = tag.strip()
             tag_str = f"tag_{tag}"
         name_parts = [
+            "___",
             tag_str, # tag (if any)
             abbr,
             f"ds_{self.dataset_cfg.dataset_used.name}",

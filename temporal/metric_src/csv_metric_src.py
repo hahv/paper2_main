@@ -108,6 +108,8 @@ class CsvDSMetricSrc(BaseMetricSrc):
                 keep_default_na=False,
             )
             gt_col_list = gt_df["label"].tolist()
+            # ! make sure num_frames match
+            gt_col_list = gt_col_list[:num_frames]
             for label in gt_col_list:
                 if "fire" in label.lower() or "smoke" in label.lower():
                     gt.append(CsvDSMetricSrc.POS_LABEL)
@@ -115,6 +117,7 @@ class CsvDSMetricSrc(BaseMetricSrc):
                     gt.append(CsvDSMetricSrc.NEG_LABEL)
             return gt
         else:
+            pprint(locals())
             # there is no csv labels so should be infer gt from "video_name" in csv_file
             video_name = video_name.replace("_results", "")
             gt = CsvDSMetricSrc.POS_LABEL
@@ -183,13 +186,13 @@ class CsvDSMetricSrc(BaseMetricSrc):
         csv_labels = self.cfg.dataset_cfg.dataset_used.get_csv_labels(recursive=False)
         has_csv_label = len(csv_labels) > 0
         for csv_file in csv_files:
-            df_pred, df_gt = self.pred_csv_to_pred_gt_df(
+            df_pred, gt = self.pred_csv_to_pred_gt_df(
                 csv_file,
                 mode=mode,
                 dataset_name=self.cfg.dataset_cfg.dataset_used.name,
                 has_csv_label=has_csv_label,
             )
-            pervideo_pred_gt_ls.append((df_pred, df_gt))
+            pervideo_pred_gt_ls.append((df_pred, gt))
         self.per_video_out_list = pervideo_pred_gt_ls
         return self.per_video_out_list
 

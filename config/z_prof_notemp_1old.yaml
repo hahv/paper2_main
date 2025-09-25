@@ -1,5 +1,14 @@
 __base__: config/eb0_notemp.yaml
 
+general:
+  seed: 1
+  computer_name: null # PC name that run the experiment
+  outdir: zout/perf
+  time_stamp: 20250925.173913
+  log_cfg:
+    wandb_cfg:
+      project: "paper2_main"
+      mode: "online"
 metric_cfg:
   list_metrics: [] # empty, will populate from config/metrics
   selected_metric_set_name: metric_per_frame # metric_per_video
@@ -20,7 +29,7 @@ model_cfg:
 
 infer_cfg:
   do_infer: true
-  skip_if_exists: true
+  skip_if_exists: false
   limit: -1 # -1 for no limit
   save_video_results: true
   save_csv_results: true
