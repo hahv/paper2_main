@@ -125,6 +125,7 @@ class MethodConfig(YAMLWizard):
     list_methods: List[Method]
     selected_method_name: str = None
     method_used: Optional[Method] = None
+    tag : Optional[str] = None
 
     def post_init(self):
         """

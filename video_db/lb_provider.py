@@ -19,6 +19,7 @@ class LabelProviderBase(ABC):
         self.dataset_name: Optional[str] = None
         self.dataset_path: Optional[str] = None
         self.label_file_posfix: str = "_labels.csv"
+        self.skip_existing: bool = True
 
     def _generate_config(self) -> dict:
         """Generate configuration dictionary for the dataset."""
@@ -44,29 +45,32 @@ class LabelProviderBase(ABC):
 
         def process_single_video(video_path: str) -> str:
             """Process a single video and save labels if required."""
+            # get parent dir of video_path
+            parent_dir = os.path.dirname(video_path)
+            fname = fs.get_file_name(video_path, split_file_ext=True)[0]
+            fname_csv = f"{fname}{self.label_file_posfix}.csv"
+            outfile = os.path.join(
+                parent_dir,
+                fname_csv,
+            )
+            if os.path.exists(outfile):
+                console.print(f"Label file already exists, skipping: {outfile}")
+                return video_path
             label_df = self.get_labels(video_path)
             if to_csv:
-                # get parent dir of video_path
-                parent_dir = os.path.dirname(video_path)
-                fname = fs.get_file_name(video_path, split_file_ext=True)[0]
-                fname_csv = f"{fname}{self.label_file_posfix}.csv"
-                outfile = os.path.join(
-                    parent_dir,
-                    fname_csv,
-                )
                 console.print(f"Saving label to:")
                 pprint_local_path(outfile, get_wins_path=True)
-                print('\n\n')
+                print("\n\n")
                 label_df.to_csv(outfile, index=False, sep=";")
             return video_path
 
-        if max_workers < 1: # do not use threading
+        if max_workers < 1:  # do not use threading
             for video in tqdm(self.video_list, desc="Processing videos"):
                 try:
                     process_single_video(video)
                 except Exception as e:
                     console.print(f"[red]⚠️ Error processing video: {e}[/red]")
-        else: # use threading
+        else:  # use threading
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
                 futures = [
                     executor.submit(process_single_video, video)
