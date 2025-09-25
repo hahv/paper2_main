@@ -34,8 +34,8 @@ class FPS(Metric):
 class FPR(Metric):  # False Positive Rate
     def __init__(self):
         super().__init__()
-        self.add_state("fp", default=torch.tensor(0), dist_reduce_fx="sum")
-        self.add_state("tn", default=torch.tensor(0), dist_reduce_fx="sum")
+        self.add_state("fp", default=torch.tensor(0.0), dist_reduce_fx="sum")
+        self.add_state("tn", default=torch.tensor(0.0), dist_reduce_fx="sum")
 
     def update(self, preds: torch.Tensor, target: torch.Tensor):
         preds = preds.int()
