@@ -1,0 +1,12 @@
+__base__: config/z_prof_notemp_1old.yaml
+
+method_cfg:
+  list_methods: [] # empty, will populate from config/methods
+  selected_method_name: no_temp #temp_tpt #no_temp #temp_stabilize
+  tag: "NEW_Model"
+
+model_cfg:
+  base_model: hgnetv2_b5.ssld_stage2_ft_in1k # timm
+  model_path: models/prof_NEW_hgnetv2_b5.ssld_stage2_ft_in1k-20250924-9-98.65.pth
+  class_names: [Fire, None, SmokeOnly]
+  input_size: [360, 640] # [H, W], for timm models

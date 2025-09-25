@@ -4,7 +4,7 @@ metric_names:
   - f1_score
   - precision
   - recall (TPR)
-  - FPR # False Positive Rate
+  - FPR (False Alarm Rate) # False Positive Rate
   - FPS # Frames Per Second
 extra_cfgs:
-  mode: [per_frame] # per_video, per_frame
+  mode: [per_video, per_frame] # per_video, per_frame

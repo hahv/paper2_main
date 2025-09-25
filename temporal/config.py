@@ -25,7 +25,11 @@ class DatasetInfo(YAMLWizard, NamedConfig):
             self.dir_path, [".mp4", ".avi", ".mov"], recursive=recursive
         )
         return len(video_files)
-
+    def get_csv_labels(self, recursive=False):
+        csv_files = fs.filter_files_by_extension(
+            self.dir_path, [".csv"], recursive=recursive
+        )
+        return csv_files
 
 @dataclass
 class MetricSet(YAMLWizard, NamedConfig):
@@ -196,7 +200,13 @@ class Config(ExpBaseConfig):
         if model_input_size:
             model_info += f'_{model_input_size}'
 
-        name_parts = ['___',
+        tag = self.method_cfg.tag
+        tag_str = ""
+        if tag and len(tag) > 0:
+            tag = tag.strip()
+            tag_str = f"tag_{tag}"
+        name_parts = [
+            tag_str, # tag (if any)
             abbr,
             f"ds_{self.dataset_cfg.dataset_used.name}",
             f"mt_{self.method_cfg.method_used.name}",

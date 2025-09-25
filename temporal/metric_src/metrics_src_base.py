@@ -14,18 +14,12 @@ from temporal.utils import get_cls
 class MetricSrcFactory:
     @staticmethod
     def create_metric_source(config: Config, *args, **kwargs):
-        def ds_name_to_metric_source(dsname: str, suffix: str = "DSMetricSrc") -> str:
-            return dsname + suffix
-
-        dataset_name = config.dataset_cfg.dataset_used.name
-        pkg_name = "temporal.metric_src"  # package name (folder)
-        module_name = f"{dataset_name.lower()}_metric_src"  # py file name
-        cls_name = ds_name_to_metric_source(dataset_name)  # class name
-        cls = get_cls(f"{pkg_name}.{module_name}.{cls_name}")  # e.g.,
-        assert cls is not None, f"Class '{cls_name}' not found in module '{pkg_name}'."
+        # ! instead of create each metric src for each dataset, we specify the metric src class in the dataset config => mulitple datasets can share the same metric src class
+        ds_metric_src  = config.dataset_cfg.dataset_used.extra_cfgs.get("ds_metric_src", None)
+        cls = get_cls(ds_metric_src)
+        assert cls is not None, f"Dataset metric source class not found for {ds_metric_src}"
         kwargs = {"cfg": config}
         return cls(**kwargs)
-
 
 class BaseMetricSrc(ABC):
     """
@@ -36,9 +30,9 @@ class BaseMetricSrc(ABC):
     def __init__(self, dataset_name: str):
         self.dataset_name = dataset_name
 
-        # metric_name => func_to_get_data for that metric
+        # ! metric_name => func_to_get_data for that metric
         self.metric_data_getters_dict: Dict[str, Callable[..., Dict[str, Any]]] = {}
-        # mode_name (per-video, per-frame, etc) => func_to_process_data for that mode (data processor use the metric_data_getters to get data for each metric)
+        # ! mode_name (per-video, per-frame, etc) => func_to_process_data for that mode (data processor use the metric_data_getters to get data for each metric)
         self.mode_processors_dict: Dict[str, Callable[..., Dict[str, Any]]] = {}
         self._register_handlers()
         if len(self.mode_processors_dict) == 0:
@@ -86,7 +80,9 @@ class BaseMetricSrc(ABC):
             mode_proc_dict = {}
             for metric in metrics:
                 metric_data_getter = self.metric_data_getters_dict.get(metric)
+                # ! get raw data for that metric
                 metric_data = metric_data_getter(metric=metric, mode=mode, **kwargs)
+                # ! the metric data getter func will give raw data for that metric, then the mode processor will process the raw data to get the final data for that metric and mode
                 proc_data = mode_proc(
                     metric=metric, mode=mode, metric_data=metric_data, **kwargs
                 )

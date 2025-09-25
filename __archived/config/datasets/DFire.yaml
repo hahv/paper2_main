@@ -1,0 +1,4 @@
+# name : BowFire
+dir_path: datasets/DFire/test
+extra_cfgs:
+  ds_metric_src: temporal.metric_src.prof_metric_src.ProfDSMetricSrc
