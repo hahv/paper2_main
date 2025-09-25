@@ -6,7 +6,7 @@ diff_thres:
 # scale factor for frame diff
 scale_factor:
   type: list
-  values: [1, 0.5] 
+  values: [1, 0.5]
 
 # block size for activity check
 blk_size:

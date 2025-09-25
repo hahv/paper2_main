@@ -21,3 +21,5 @@ datasets/*
 !zout/
 zout/*
 !zout/.gitkeep
+
+__archived/datasets

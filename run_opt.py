@@ -1,23 +1,3 @@
-# This script is use Optuna to optimize the hyperparameters
-# extra_cfgs:
-#   diff_thres: 5           # pixel diff threshold for temporal stabilization
-#   frame_diff_cfg: "config/FrameDifference.xml"
-#   scale_factor: 1.0      # scale factor for frame diff
-#   blk_size: 64             # block size for activity check
-#   blk_act_thres: 0.05       # % pixels active in block to mark block active
-#   frm_act_thres: 0.5       # % active blocks to mark frame active
-#   firesmoke_cls_thres: 0.3      # fire/smoke classification threshold
-#   min_roi: 0.7             # min ROI size (relative to frame) for BIG model
-#   tiny_model: "models/tinycnn.pth"  # tiny CNN model path
-
-# We need to optimize:
-# scale_factor
-# blk_size
-# blk_act_thres
-# frm_act_thres
-# firesmoke_cls_thres
-# min_roi
-
 from halib import *
 from halib.filetype import yamlfile
 from argparse import ArgumentParser
@@ -35,14 +15,14 @@ from temporal.our_exp import OurExp
 def parse_args():
     parser = ArgumentParser(description="desc text")
     parser.add_argument(
-        "-cfg", "--cfg", type=str, help="config file", default=r"./config/base.yaml"
+        "-cfg", "--cfg", type=str, help="config file", default=r"./config/__base.yaml"
     )
     parser.add_argument(
         "-optcfg",
         "--optcfg",
         type=str,
         help="optimization config file",
-        default=r"./config/opt_cfg.yaml",
+        default=r"./config/__opt_cfg.yaml",
     )
 
     return parser.parse_args()
