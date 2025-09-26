@@ -177,6 +177,14 @@ class Config(ExpBaseConfig):
     model_cfg: ModelConfig
     cfg_name: Optional[str] = None
 
+    ABBR_WORKING_DISK = {
+        "MainPC": "E:",
+        "MSI_Laptop": "D:",
+        "4090_SV": "E:",
+        "4GPU_SV": "D:",
+        "1GPU_SV": "D:",
+    }
+
     def post_init(self):
         selected_method = self.method_cfg.method_used
         assert selected_method is not None, "No method selected in the configuration"
@@ -218,13 +226,15 @@ class Config(ExpBaseConfig):
 
     @classmethod
     def from_custom_yaml_file(cls, yaml_file: str) -> "Config":
-        def load_yaml(yaml_file_path: str) -> Dict[str, Any]:
-            cfg_dict = yamlfile.load_yaml(yaml_file_path, to_dict=True)
+        def _load_yaml_ext(yaml_file_path: str) -> Dict[str, Any]:
+            cfg_dict = yamlfile.load_yaml_with_PC_abbr(
+                yaml_file_path, pc_abbr_to_working_disk=cls.ABBR_WORKING_DISK
+            )
             if "__base__" in cfg_dict:
                 del cfg_dict["__base__"]
             return cfg_dict
 
-        cfg_dict = load_yaml(yaml_file)
+        cfg_dict = _load_yaml_ext(yaml_file)
         pprint(cfg_dict)
         yaml_str = yaml.dump(cfg_dict, default_flow_style=False)
         instance = Config.from_yaml(yaml_str)
@@ -258,7 +268,7 @@ class Config(ExpBaseConfig):
             )
             for yaml_file in yaml_files:
                 # load the yaml file
-                yaml_data_dict = load_yaml(yaml_file)
+                yaml_data_dict = _load_yaml_ext(yaml_file)
                 fname = fs.get_file_name(yaml_file, split_file_ext=True)[0]
                 # dump yaml_data_dict to yaml string
                 yaml_data_dict["name"] = (
