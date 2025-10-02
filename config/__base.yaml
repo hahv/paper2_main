@@ -20,7 +20,7 @@ metric_cfg:
 method_cfg:
   list_methods: [] # empty, will populate from config/methods
   selected_method_name: no_temp #temp_tpt #no_temp #temp_stabilize
-  tag: 'no_tag'
+  tag: null
 
 model_cfg:
   base_model: hgnetv2_b5.ssld_stage2_ft_in1k # timm

@@ -6,6 +6,7 @@ import torch.nn.functional as F
 from timm.data import resolve_data_config, create_transform
 from typing import List, Optional
 
+LOG_TRANSFORM = False
 
 class NoTempMethod(BaseMethod):
     def _get_transform(self, model_name: str, input_size: Optional[List[int]] = None):
@@ -39,10 +40,25 @@ class NoTempMethod(BaseMethod):
                 isinstance(input_size, (list, tuple)) and len(input_size) == 2
             ), "input_size must be a list or tuple of two integers"
             cfg = resolve_data_config(model=model_name)
-            # ! disable color jitter since fire/smoke are sensitive to color changes
+             # ! disable color jitter since fire/smoke are sensitive to color changes
             cfg["color_jitter"] = None
             cfg["input_size"] = (3, input_size[0], input_size[1])  # C, H, W
-            return create_transform(**cfg, is_training=False)
+            # val: Compose(
+            #     ResizeKeepRatio(size=(411, 731), interpolation=torch.bilinear, longest=0.000, random_scale_prob=0.000, random_scale_range=(0.850, 1.110), random_aspect_prob=0.000, random_aspect_range=(0.900, 1.110))
+            #     CenterCrop(size=(360, 640))
+            #     MaybeToTensor()
+            #     Normalize(mean=tensor([0.4850, 0.4560, 0.4060]), std=tensor([0.2290, 0.2240, 0.2250]))
+            # )
+            # ! replace ResizeKeepRatio + CenterCrop with a simple Resize
+            val_tfm = create_transform(**cfg, is_training=False)
+            tfms = list(val_tfm.transforms)
+            tfms[0] = transforms.Resize(
+                (360, 640), interpolation=transforms.InterpolationMode.BICUBIC
+            )
+            tfms = [tfm for tfm in tfms if not isinstance(tfm, transforms.CenterCrop)] # remove CenterCrop
+            val_tfm = transforms.Compose(tfms)
+
+            return val_tfm
 
         raise ValueError(f"Unsupported model: {model_name}")
 
@@ -60,7 +76,11 @@ class NoTempMethod(BaseMethod):
             full_cfg.model_cfg.model_path, split_file_ext=True
         )[0]
         pil_img = Image.fromarray(frame_rgb)
+        # global LOG_TRANSFORM
         transform = self._get_transform(model_name, full_cfg.model_cfg.input_size)
+        # if not LOG_TRANSFORM:
+        #     with ConsoleLog('Infer transform'):
+        #         pprint(transform)
         # Apply the transformation
         frame_batch = transform(pil_img).unsqueeze(0)  # Add batch dimension
         # Move the frame batch to the appropriate device

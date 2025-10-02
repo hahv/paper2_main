@@ -203,7 +203,9 @@ class Config(ExpBaseConfig):
         if self.general.time_stamp is None:
             # set time_stamp to current time
             self.general.time_stamp = now_str()
-        model_info = f'{self.model_cfg.base_model}'
+        # model_info = f'{self.model_cfg.base_model}'
+        model_name = fs.get_file_name(self.model_cfg.model_path, split_file_ext=True)[0]
+        model_info = f'{model_name}'
         model_input_size = 'x'.join(map(str, self.model_cfg.input_size))
         if model_input_size:
             model_info += f'_{model_input_size}'
