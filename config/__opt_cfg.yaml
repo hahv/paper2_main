@@ -1,12 +1,12 @@
 # pixel diff threshold for temporal stabilization
 diff_thres:
-  type: list # raw_list or range [start, end, step]
-  values: [5]
+  type: range # raw_list or range [start, end, step]
+  values: [8, 13, 2]
 
 # scale factor for frame diff
 scale_factor:
   type: list
-  values: [1, 0.5]
+  values: [1.0]
 
 # block size for activity check
 blk_size:
@@ -16,12 +16,12 @@ blk_size:
 # % pixels active in block to mark block active
 blk_act_thres:
   type: range
-  values: [0.05, 0.15, 0.05]
+  values: [0.05, 0.21, 0.05]
 
-# % active blocks to mark frame active and trigger whole frame processing
+# % percentage of active blocks (per total blocks) to mark frame active and trigger whole frame processing
 frm_act_thres:
   type: list
-  values: [0.4, 0.7]
+  values: [0.7]
 
 # fire/smoke classification threshold
 firesmoke_cls_thres:
@@ -30,5 +30,5 @@ firesmoke_cls_thres:
 
 # min ROI size (relative to frame) for BIG typel
 min_roi:
-  type: range
-  values: [0.5, 0.71, 0.1]
+  type: list
+  values: [0.6]

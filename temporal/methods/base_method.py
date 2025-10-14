@@ -169,6 +169,11 @@ class BaseMethod(ABC):
         """Hook method called before starting inference on a video."""
         pass
 
+    #! override if needed
+    def after_infer_video(self, video_path: str):
+        """Hook method called after completing inference on a video."""
+        pass
+
     def infer_video(
         self, video_path: str, video_idx: int = None, total_videos: int = None
     ):
@@ -264,5 +269,7 @@ class BaseMethod(ABC):
                 # Notify all handlers that the video processing is complete
         #! even if SKIP_INFER, we still need to call after_video to do some clean up
         for handler in self.result_handlers:
-                handler.after_video()
+            handler.after_video()
         print(f"\nFinished inference for: {video_path}\n")
+        # Call the hook method after video inference
+        self.after_infer_video(video_path)

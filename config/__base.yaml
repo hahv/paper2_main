@@ -1,7 +1,7 @@
 general:
   seed: 1
   computer_name: null # PC name that run the experiment
-  outdir: zout/perf
+  outdir: zout/perf/tune
   # time_stamp: 20250922.160543 #  add to outdir automatically, allow to resume training
   time_stamp: null # will be set to current time if not provided
   log_cfg:
@@ -24,8 +24,10 @@ method_cfg:
 
 model_cfg:
   base_model: hgnetv2_b5.ssld_stage2_ft_in1k # timm
-  model_path: models/prof_hgnetv2_b5.ssld_stage2_ft_in1k-20250620-50-98.78.pth
-  class_names: [Fire, None, SmokeOnly]
+  model_path: models/prof_2classes_hgnetv2_b5.ssld_stage2_ft_in1k-20251002-2-96-99.11.pth
+  # class_names: [Fire, None, SmokeOnly]
+  class_names: [FireSmoke, None]
+
 
 infer_cfg:
   do_infer: true

@@ -105,6 +105,7 @@ class NoTempMethod(BaseMethod):
         # 4. Convert tensors to lists for easier handling
         logits = logits.cpu().squeeze().tolist()
         probs = probs.cpu().squeeze().tolist()
+        assert len(probs) == len(self.cfg.model_cfg.class_names), "Mismatch in number of classes and probabilities."
 
         # 5. Get the predicted class name
         classNames = self.cfg.model_cfg.class_names

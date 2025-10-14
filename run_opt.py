@@ -92,7 +92,7 @@ def main():
     sampler = optuna.samplers.GridSampler(SEARCH_SPACE)
 
     # Persistent storage
-    storage_url = "sqlite:////mnt/e/NextCloud/paper2_main/zout/tune/optuna_study.db"
+    storage_url = "sqlite:////mnt/e/SyncData/paper2_main/zout/tune/optuna_study.db"
     study = optuna.create_study(
         study_name=f"temp_stabilize_opt_{now_str()}",
         direction="maximize",
@@ -100,6 +100,9 @@ def main():
         storage=storage_url,
         load_if_exists=True,
     )
+    num_trials = calc_num_trials(SEARCH_SPACE)
+    console.rule(f"Total trials to run: {num_trials}")
+    time.sleep(5)
     # Run optimization
     study.optimize(objective)
 

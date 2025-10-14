@@ -6,9 +6,10 @@ method_cfg:
 
 model_cfg:
   base_model: hgnetv2_b5.ssld_stage2_ft_in1k # timm
-  model_path: models/prof_OLD_hgnetv2_b5.ssld_stage2_ft_in1k-20250620-50-98.78.pth
-  # class_names: [fire_smoke, None]
-  class_names: [fire_smoke, None, smoke_only]
+  model_path: models/prof_2classes_hgnetv2_b5.ssld_stage2_ft_in1k-20251002-2-96-99.11.pth
+  # model_path: models/prof_3classess_hgnetv2_b5.ssld_stage2_ft_in1k-20251002-9-98.63.pth
+  class_names: [fire_smoke, None]
+  # class_names: [fire_smoke, None, smoke_only]
   input_size: [360, 640] # [H, W], for timm models
 
 infer_cfg:

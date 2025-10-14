@@ -1,0 +1,5 @@
+video;gt;total_frames;prof_hgnetv2b5_2classes_notemp_correct;prof_hgnetv2b5_2classes_notemp_num_wrong_frames;prof_hgnetv2b5_3classes_notemp_correct;prof_hgnetv2b5_3classes_notemp_num_wrong_frames;yolov5s_notemp_correct;yolov5s_notemp_num_wrong_frames;yolov5l_notemp_correct;yolov5l_notemp_num_wrong_frames
+FP13;X_None;60;True;0;True;0;False;13;False;7
+FP39;X_None;456;False;354;False;33;False;55;False;70
+VP16;O_Fire_smoke;60;True;0;True;0;True;0;True;0
+VP8;O_Fire_smoke;60;True;56;False;60;True;24;True;27

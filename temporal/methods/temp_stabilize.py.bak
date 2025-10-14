@@ -55,28 +55,8 @@ class TempStabilizeMethod(NoTempMethod):
         self._load_temp_stabilize_cfg()
         self._load_block_tiny_cnn_model()
 
-    def get_fg_mask_mog2(self, frame_BGR, learningRate=-1):
-        mask = self.fgbg.apply(frame_BGR, learningRate=learningRate)
-        # mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, self.fg_kernel)
-        # mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
-        return mask
-
-    # ! Override
     def before_infer_video(self, video_path: str):
-        # self.algorithm = bgs.FrameDifference()  # background subtraction algorithm
-        # ! change to use BG subtraction MOG2
-        console.print(f"Using BackgroundSubtractorMOG2 with varThreshold={self.diff_thres}")
-        time.sleep(2)
-        self.fgbg = cv2.createBackgroundSubtractorMOG2(
-            history=500, varThreshold=self.diff_thres, detectShadows=False
-        )
-        self.fg_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
-
-    # ! Override
-    def after_infer_video(self, video_path: str):
-        # Release resources if needed
-        self.fgbg = None
-        self.fg_kernel = None
+        self.algorithm = bgs.FrameDifference()  # background subtraction algorithm
 
     def do_tinycnn_infer(self, model, input_tensor):
         with torch.no_grad():
@@ -211,8 +191,7 @@ class TempStabilizeMethod(NoTempMethod):
 
         # Step 2.1: Identify blocks with motion using the foreground mask
         self.profiler.step_start(ctx_name="skip_module", step_name="fg_mask")
-        # fg_mask = self.algorithm.apply(scaled_frame_bgr)
-        fg_mask = self.get_fg_mask_mog2(scaled_frame_bgr)
+        fg_mask = self.algorithm.apply(scaled_frame_bgr)
 
         # ! this is for visualization
         fg_mask_dict = {
