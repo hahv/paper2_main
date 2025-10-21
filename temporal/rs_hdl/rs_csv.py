@@ -71,7 +71,7 @@ class CsvRSHandler(BaseRSHandler):
         row_array = list(row_dict.values())
         self.csv_rows.append(row_array)
 
-    def after_video(self):
+    def after_video(self, video_path: str, **kwargs):
         if self.outfile_exists:
             self.outfile_exists = False # reset for next video
             return

@@ -69,6 +69,9 @@ class BaseVideoRSHandler(BaseRSHandler):
         self.outfile_exists = False
 
     def before_video(self, video_path: str, **kwargs):
+        # if video_path is not a video (e.g., image folder), skip video writer creation
+        if fs.is_directory(video_path):
+            return
         if not self.cfg.infer_cfg.save_csv_results:
             return
         fname = fs.get_file_name(video_path, split_file_ext=True)[0]
@@ -109,7 +112,9 @@ class BaseVideoRSHandler(BaseRSHandler):
         self.video_writer.write(frame_vis)
         return lb_val_dict
 
-    def after_video(self):
+    def after_video(self, video_path: str, **kwargs):
+        if fs.is_directory(video_path): # a image folder, skip
+            return
         if self.outfile_exists:
             self.outfile_exists = False # reset for next video
             return

@@ -3,6 +3,7 @@
 import os
 import pandas as pd
 from pprint import pprint
+from halib import *
 from halib import fs, csvfile
 from sklearn.metrics import (
     accuracy_score,
@@ -63,12 +64,18 @@ def verify_csv_video(methods, indir, videodir):
         csv_files = fs.filter_files_by_extension(method_dir, ".csv", recursive=False)
         # only '_results.csv' files
         csv_files = [
-            f for f in csv_files if f.endswith("_results.csv") or f.endswith("_od.csv")
+            f
+            for f in csv_files
+            if f.endswith("_results.csv")
+            or f.endswith("_od.csv")
+            or f.endswith("_pred.csv")
         ]
         vis_files = fs.filter_files_by_extension(method_dir, ".mp4", recursive=True)
         # remove all mask files
         vis_files = [
-            f for f in vis_files if "fg_mask" not in fs.get_file_name(f, split_file_ext=True)[0]
+            f
+            for f in vis_files
+            if "fg_mask" not in fs.get_file_name(f, split_file_ext=True)[0]
         ]
         # ! if no vis files, use video files as placeholders
         if len(vis_files) == 0:
@@ -78,6 +85,7 @@ def verify_csv_video(methods, indir, videodir):
             lambda x: sorted(x, key=sort_key),
             [video_files, gt_files, csv_files, vis_files],
         )
+        # pprint(f'[INFO] Method: {method}, CSV files: {len(csv_files)}, VIS files: {len(vis_files)}, VIDEO files: {len(video_files)}, GT files: {len(gt_files)}')
 
         assert len(csv_files) == len(video_files) == len(gt_files), (
             f"[ERROR] Mismatch in file counts for method {method}, "
@@ -141,8 +149,24 @@ def rs_dict_to_dataframe(rs_dict):
 # -----------------------------
 def calc_perf(video, gt_label, total_frames, mt_name, csv_path):
     """Calculate performance metrics per video per method."""
-    is_YOLO_pred_csv = True if 'yolo' in mt_name.lower() else False
-    if is_YOLO_pred_csv is False:
+    is_YOLO_pred_csv = True if "yolo" in mt_name.lower() else False
+    # pprint(f"[INFO] Calculating performance for video: {video}, method: {mt_name}")
+    if is_YOLO_pred_csv: # YOLO models: VP5_od.csv
+        df_pred = pd.read_csv(csv_path, sep=";", encoding="utf-8")
+    elif 'firenet' in mt_name.lower() or 'mobilenet' in mt_name.lower():
+            df_pred = pd.read_csv(
+                csv_path,
+                sep=";",
+                encoding="utf-8",
+                dtype={"label": str, "elapsed_time": float},
+                keep_default_na=False,
+            )
+            df_pred = df_pred.rename(columns={"label": "pred_label"})
+            # convert 'none' to 'None'
+            df_pred["pred_label"] = df_pred["pred_label"].apply(
+                lambda x: "None" if x.lower() == "none" else x
+            )
+    else:
         df_pred = pd.read_csv(
             csv_path,
             sep=";",
@@ -154,15 +178,27 @@ def calc_perf(video, gt_label, total_frames, mt_name, csv_path):
         df_pred["pred_label"] = df_pred["pred_label"].apply(
             lambda x: "None" if x.lower() == "skipped" else x
         )
-    else:
-        df_pred = pd.read_csv(csv_path, sep=";", encoding="utf-8")
+
 
     if len(df_pred) > total_frames:
         total_frames = len(df_pred)
 
     pred_lb, correct, num_wrong = None, False, 0
 
-    if is_YOLO_pred_csv is False:
+    if is_YOLO_pred_csv:
+        df_pred.drop_duplicates(subset=["frame_id"], keep="first", inplace=True) # keep first prediction of bboxes in a frame
+        if gt_label == POS:
+            correct = len(df_pred) > 0
+            pred_lb = POS if correct else NEG
+            num_wrong = total_frames - len(df_pred) if correct else total_frames
+        elif gt_label == NEG:
+            correct = len(df_pred) == 0
+            pred_lb = NEG if correct else POS
+            num_wrong = 0 if correct else len(df_pred)
+        else:
+            raise ValueError(f"Unknown GT label {gt_label} for {video}")
+
+    else:  # YOLO models
         if gt_label == POS:
             pred_lb_pos = df_pred[df_pred["pred_label"] != "None"]
             if len(pred_lb_pos) > 0:
@@ -185,27 +221,26 @@ def calc_perf(video, gt_label, total_frames, mt_name, csv_path):
                 num_wrong = 0
         else:
             raise ValueError(f"Unknown gt label {gt_label} for video {video}")
-    else:  # YOLO models
-        df_pred.drop_duplicates(subset=["frame_id"], keep="first", inplace=True)
-        if gt_label == POS:
-            correct = len(df_pred) > 0
-            pred_lb = POS if correct else NEG
-            num_wrong = total_frames - len(df_pred) if correct else total_frames
-        elif gt_label == NEG:
-            correct = len(df_pred) == 0
-            pred_lb = NEG if correct else POS
-            num_wrong = 0 if correct else len(df_pred)
-        else:
-            raise ValueError(f"Unknown GT label {gt_label} for {video}")
+
     # pprint(
     #     f"[DEBUG] Video: {video}, GT: {gt_label}, Pred: {pred_lb}, Correct: {correct}, Num Wrong Frames: {num_wrong}"
     # )
-    return pred_lb, correct, num_wrong
+    total_elapsed_time = (
+        df_pred["elapsed_time"].sum() if "elapsed_time" in df_pred.columns else 0.0
+    )
+    total_elapsed_time = df_pred["elapsed_time"].sum()
+    num_of_frame_with_time = len(df_pred)
+    return pred_lb, correct, num_wrong, total_elapsed_time, num_of_frame_with_time
 
 
 # -----------------------------
 # Main Evaluation Process
 # -----------------------------
+# ! Input DataFrame format:
+# video	        gt	            trial_01_csv
+# VP11          VP11_gt.csv     trial_01/VP11_results.csv
+
+
 def process_videos(df, methods):
     """Compute per-video performance across all methods."""
     dfmk = csvfile.DFCreator()
@@ -213,7 +248,9 @@ def process_videos(df, methods):
         "perf",
         ["video", "gt", "total_frames"]
         + [
-            f"{m}_{x}" for m in methods for x in ["pred", "correct", "num_wrong_frames"]
+            f"{m}_{x}"
+            for m in methods
+            for x in ["pred", "correct", "num_wrong_frames", "total_elapsed_time", "num_of_frame_with_time"]
         ],
     )
     rows = []
@@ -227,10 +264,16 @@ def process_videos(df, methods):
 
         row_data = [video, gt_label, total_frames]
         for mt_name in methods:
-            pred_lb, correct, num_wrong = calc_perf(
+            pred_lb, correct, num_wrong, total_elapsed_time, num_of_frame_with_time = calc_perf(
                 video, gt_label, total_frames, mt_name, row[f"{mt_name}_csv"]
             )
-            row_data += [pred_lb, correct, num_wrong]
+            row_data += [
+                pred_lb,
+                correct,
+                num_wrong,
+                total_elapsed_time,
+                num_of_frame_with_time,
+            ]
 
         rows.append(row_data)
 
@@ -248,9 +291,9 @@ def process_videos(df, methods):
 # -----------------------------
 # Save Results
 # -----------------------------
-def save_results(final_df, methods, outdir):
+def save_raw_results(final_df, methods, outdir, filename="_cmp_raw_results.csv"):
     os.makedirs(outdir, exist_ok=True)
-    outfile = os.path.join(outdir, "_cmp_raw_results.csv")
+    outfile = os.path.join(outdir, filename)
     final_df.to_csv(outfile, index=False, sep=";", encoding="utf-8")
 
     correct_cols = [f"{m}_correct" for m in methods]
@@ -281,7 +324,7 @@ def invert_label(label):
         raise ValueError(f"Unknown label: {label}")
 
 
-def get_gt_and_pred(df, method, mode="per_video"):  # mode: per_frame or per_video
+def get_gt_pred_and_time_info(df, method, mode="per_video"):  # mode: per_frame or per_video
     assert mode in [
         "per_frame",
         "per_video",
@@ -315,7 +358,10 @@ def get_gt_and_pred(df, method, mode="per_video"):  # mode: per_frame or per_vid
             y_pred.extend([invert_label(y_true_video[i])] * num_wrong_frames)
     else:
         raise ValueError(f"Unknown mode: {mode}")
-    return y_true, y_pred
+    # num_frame_allvideos = df["total_frames"].sum()
+    num_frame_with_time_allvideos = df[f"{method}_num_of_frame_with_time"].sum()
+    elapsed_time_allvideos = df[f"{method}_total_elapsed_time"].sum()
+    return y_true, y_pred, num_frame_with_time_allvideos, elapsed_time_allvideos
 
 
 def cal_metric(df, methods, mode="per_video"):  # mode: per_frame or per_video
@@ -323,16 +369,20 @@ def cal_metric(df, methods, mode="per_video"):  # mode: per_frame or per_video
         "per_frame",
         "per_video",
     ], "mode should be 'per_frame' or 'per_video'"
+    # csvfile.fn_display_df(df)
+    # assert False, "Debug stop"
     results = []
     for method in methods:
         method_rs_dict = {"method": method}
-        y_true, y_pred = get_gt_and_pred(df, method, mode=mode)
+        y_true, y_pred, num_frame_with_time_allvideos, elapsed_time_allvideos = get_gt_pred_and_time_info(df, method, mode=mode)
         try:
             # Calculate metrics
             accuracy = accuracy_score(y_true, y_pred)
             precision = precision_score(y_true, y_pred, pos_label=POS)
             recall = recall_score(y_true, y_pred, pos_label=POS)
             f1 = f1_score(y_true, y_pred, pos_label=POS)
+            avg_proc_time =  elapsed_time_allvideos * 1.0 / num_frame_with_time_allvideos if num_frame_with_time_allvideos > 0 else 0.0
+            fps = 1.0 / avg_proc_time if avg_proc_time > 0 else 0.0
 
             # Compute confusion matrix (labels ordered as [negative, positive])
             tn, fp, fn, tp = confusion_matrix(y_true, y_pred, labels=[NEG, POS]).ravel()
@@ -342,9 +392,10 @@ def cal_metric(df, methods, mode="per_video"):  # mode: per_frame or per_video
                 {
                     "accuracy": accuracy * 100.0,
                     "f1_score": f1 * 100.0,
-                    "recall": recall * 100.0,
-                    "FAR (false_alarm_rate)": false_alarm_rate * 100.0,
+                    "Recall": recall * 100.0,
+                    "FAR": false_alarm_rate * 100.0,
                     "precision": precision * 100.0,
+                    "fps": fps,
                 }
             )
             results.append(method_rs_dict)
@@ -359,7 +410,7 @@ def cal_metric(df, methods, mode="per_video"):  # mode: per_frame or per_video
     return results_df
 
 
-def calc_metrics_and_compare(raw_cmp_csv, outdir, modes=["per_video", "per_frame"]):
+def calc_metrics_and_report(raw_cmp_csv, outdir, modes=["per_video", "per_frame"], log=True):
     df = pd.read_csv(raw_cmp_csv, sep=";", encoding="utf-8")
     methods_used = []
     methods_used = [
@@ -370,6 +421,9 @@ def calc_metrics_and_compare(raw_cmp_csv, outdir, modes=["per_video", "per_frame
         out_mode_csv = os.path.join(outdir, f"__perf_{mode}_results.csv")
         per_mode_df.to_csv(out_mode_csv, index=False, sep=";", encoding="utf-8")
         print(f"[INFO] <<{mode}>> metrics saved to {out_mode_csv}")
+        if log:
+            console.rule(f'Mode={mode}')
+            csvfile.fn_display_df(per_mode_df, max_col_width=60)
 
 
 # -----------------------------
@@ -387,23 +441,33 @@ def main():
     #     "prof_no_temp",
     #     "prof_temp_stabilize",
     # ]
-    INDIR = "/mnt/e/SyncData/paper2_baseline/zout/DFire_Val"
-    METHODS = os.listdir(INDIR)
+    # INDIR = "/mnt/e/SyncData/paper2_main/zcompare/znew_model/__all_cases"
+    INDIR = "/mnt/e/SyncData/paper2_main/zcompare/all_new_no_temp/__archived"
+    METHODS = fs.list_dirs(INDIR)
+    IGNORE = ["__archived", "_archived_static", "__error"]
+    METHODS = [m for m in METHODS if m not in IGNORE]
+    # pprint(METHODS)
     # INDIR = "/mnt/e/SyncData/paper2_baseline/zout/DFire_test"
 
-    VIDEODIR = "/mnt/e/SyncData/paper2_main/datasets/DFireVal/valid"
+    # VIDEODIR = "/mnt/e/SyncData/paper2_main/datasets/DFireVal/valid"
+    # VIDEODIR = "/mnt/e/SyncData/paper2_main/datasets/DFireNonStatic/test"
+    VIDEODIR = "/mnt/e/SyncData/paper2_main/datasets/DFire/test"
+    # VIDEODIR = "/mnt/e/SyncData/paper2_main/datasets/DFireStatic/test"
+
     OUTDIR = INDIR
     os.makedirs(OUTDIR, exist_ok=True)
     rs_dict = verify_csv_video(methods=METHODS, indir=INDIR, videodir=VIDEODIR)
     df = rs_dict_to_dataframe(rs_dict)
-    outfile = os.path.join(OUTDIR, "cmp_raw_data_source.csv")
     df.to_csv(
-        outfile, index=False, sep=";", encoding="utf-8"
+        os.path.join(OUTDIR, "cmp_raw_data_source.csv"),
+        index=False,
+        sep=";",
+        encoding="utf-8",
     )
 
     final_df = process_videos(df=df, methods=METHODS)
-    raw_cmp_csv = save_results(final_df=final_df, methods=METHODS, outdir=OUTDIR)
-    calc_metrics_and_compare(raw_cmp_csv, OUTDIR)
+    raw_cmp_csv = save_raw_results(final_df=final_df, methods=METHODS, outdir=OUTDIR, filename="_cmp_raw_results.csv")
+    calc_metrics_and_report(raw_cmp_csv, OUTDIR)
 
 
 # -----------------------------

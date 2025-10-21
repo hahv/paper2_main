@@ -6,11 +6,14 @@ method_cfg:
 
 model_cfg:
   base_model: hgnetv2_b5.ssld_stage2_ft_in1k # timm
-  model_path: models/prof_2classes_hgnetv2_b5.ssld_stage2_ft_in1k-20251002-2-96-99.11.pth
-  # model_path: models/prof_3classess_hgnetv2_b5.ssld_stage2_ft_in1k-20251002-9-98.63.pth
+  model_path: models/hgnetv2_b5.ssld_stage2_ft_in1k-20251014-4-97.50.pth
   class_names: [fire_smoke, None]
   # class_names: [fire_smoke, None, smoke_only]
   input_size: [360, 640] # [H, W], for timm models
+
+dataset_cfg:
+  list_datasets: [] # empty, will populate from config/datasets
+  selected_dataset_name: DFire
 
 infer_cfg:
   do_infer: true
@@ -26,3 +29,7 @@ infer_cfg:
     - pred_label
   calc_metrics: true
   verbose: false
+
+# dataset_cfg:
+#   list_datasets: [] # empty, will populate from config/datasets
+#   selected_dataset_name: VP9

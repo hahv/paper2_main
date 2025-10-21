@@ -35,16 +35,36 @@ class TempStabilizeMethod(NoTempMethod):
         self.scale_factor = method_dict["scale_factor"]
         self.update_threshold(frame_diff_cfg, self.diff_thres)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # ! #TO_SET BG subtraction algorithm
+        self.USE_MOG2 = True # use MOG2 for background subtraction
+
+    def __load_tiny_model(self, tiny_model_path):
+        model_name = fs.get_file_name(tiny_model_path, split_file_ext=True)[0]
+        pprint(f"Loading tiny model: {model_name} from {tiny_model_path}")
+        # find last '_' to get the base model name
+        last_underscore_idx = model_name.rfind('_')
+        base_model_name = None
+        if last_underscore_idx != -1:
+            base_model_name = model_name[:last_underscore_idx]
+
+        assert base_model_name, f"Invalid tiny model name: {model_name}"
+        return timm.create_model(
+            base_model_name,
+            pretrained=False,
+            num_classes=2, # ['fire_smoke', 'none'] for block classifier
+            checkpoint_path=tiny_model_path
+        )
 
     def _load_block_tiny_cnn_model(self):
         assert self.tiny_model_path is not None, "Tiny model path is not set."
         assert os.path.isfile(self.tiny_model_path), (
             f"Tiny model file does not exist: {self.tiny_model_path}"
         )
-        self.tiny_block_model = TinyCNN(num_classes=2)
-        self.tiny_block_model.load_state_dict(
-            torch.load(self.tiny_model_path, map_location=self.device)
-        )
+        # self.tiny_block_model = TinyCNN(num_classes=2)
+        # self.tiny_block_model.load_state_dict(
+        #     torch.load(self.tiny_model_path, map_location=self.device)
+        # )
+        self.tiny_block_model = self.__load_tiny_model(self.tiny_model_path)
         self.tiny_block_model.to(self.device)
         self.tiny_block_model.eval()
 
@@ -55,22 +75,28 @@ class TempStabilizeMethod(NoTempMethod):
         self._load_temp_stabilize_cfg()
         self._load_block_tiny_cnn_model()
 
-    def get_fg_mask_mog2(self, frame_BGR, learningRate=-1):
-        mask = self.fgbg.apply(frame_BGR, learningRate=learningRate)
-        # mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, self.fg_kernel)
+    def get_fg_mask(self, frame_BGR, learningRate=-1):
+        if not self.USE_MOG2:
+            mask = self.algorithm.apply(frame_BGR)
+            # mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, self.fg_kernel)
+        else:
+            mask = self.fgbg.apply(frame_BGR, learningRate=learningRate)
+            mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, self.fg_kernel)
         # mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
         return mask
 
     # ! Override
     def before_infer_video(self, video_path: str):
-        # self.algorithm = bgs.FrameDifference()  # background subtraction algorithm
-        # ! change to use BG subtraction MOG2
-        console.print(f"Using BackgroundSubtractorMOG2 with varThreshold={self.diff_thres}")
-        time.sleep(2)
-        self.fgbg = cv2.createBackgroundSubtractorMOG2(
-            history=500, varThreshold=self.diff_thres, detectShadows=False
-        )
         self.fg_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+        if not self.USE_MOG2:
+            self.algorithm = bgs.FrameDifference()  # background subtraction algorithm
+        else:
+            # ! change to use BG subtraction MOG2
+            # console.print(f"Using BackgroundSubtractorMOG2 with varThreshold={self.diff_thres}")
+            time.sleep(2)
+            self.fgbg = cv2.createBackgroundSubtractorMOG2(
+                history=500, varThreshold=self.diff_thres, detectShadows=False
+            )
 
     # ! Override
     def after_infer_video(self, video_path: str):
@@ -212,7 +238,7 @@ class TempStabilizeMethod(NoTempMethod):
         # Step 2.1: Identify blocks with motion using the foreground mask
         self.profiler.step_start(ctx_name="skip_module", step_name="fg_mask")
         # fg_mask = self.algorithm.apply(scaled_frame_bgr)
-        fg_mask = self.get_fg_mask_mog2(scaled_frame_bgr)
+        fg_mask = self.get_fg_mask(scaled_frame_bgr)
 
         # ! this is for visualization
         fg_mask_dict = {
@@ -271,11 +297,21 @@ class TempStabilizeMethod(NoTempMethod):
         # Case C: Reasonable motion -> Run classifier on active blocks
         self.profiler.step_start(ctx_name="skip_module", step_name="firesmoke_active_blocks")
 
+        self.profiler.ctx_start(ctx_name="tiny_infer")
+        self.profiler.step_start(ctx_name="tiny_infer", step_name="prepare_data")
+
         blocks_cpu = extract_func(scaled_frame_bgr, block_size=self.blk_size)
         blocks_active = blocks_cpu[active_indices]
+        self.profiler.step_end(ctx_name="tiny_infer", step_name="prepare_data")
+
+        self.profiler.step_start(ctx_name="tiny_infer", step_name="tiny_model_infer")
+
         preds, probs = self.do_tinycnn_infer(
             self.tiny_block_model, blocks_active.to(self.device)
         )
+        self.profiler.step_end(ctx_name="tiny_infer", step_name="tiny_model_infer")
+        self.profiler.ctx_end(ctx_name="tiny_infer")
+
         preds = preds.cpu().numpy()
         probs = probs.cpu().numpy()   # shape: (num_active_blocks, num_classes)
 

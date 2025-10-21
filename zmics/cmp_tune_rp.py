@@ -37,7 +37,7 @@ def main():
 
     all_dirs = fs.list_dirs(indir)
     all_dirs = sorted(all_dirs)  # asc order
-    pprint(all_dirs)
+    # pprint(all_dirs)
     trial_dict_ls = []
     ignore_cols = ["tiny_model", "video_rs_handler", "frame_diff_cfg"]
     for idx, d in enumerate(tqdm(all_dirs)):
@@ -60,10 +60,16 @@ def main():
         INDEX_OF_METHOD_COLS = tune_df.columns.to_list().index('method')
         for col in tune_df.columns.tolist()[:INDEX_OF_METHOD_COLS]:
             unique_vals = tune_df[col].unique()
+            # remove "nan" from unique_vals
+            unique_vals = [val for val in unique_vals if not (isinstance(val, float) and np.isnan(val))]
+            pprint(unique_vals)
             if len(unique_vals) == 1:
                 col_have_only_one_value.append(col)
         col_have_only_one_value.append('method') # also drop the 'method' col
+        # pprint(f"Columns with only one unique value (to be dropped): {col_have_only_one_value}")
         tune_df = tune_df.drop(columns=col_have_only_one_value, errors='ignore')
+        # pprint(tune_df.columns.tolist())
+    tune_df = tune_df.sort_values(by=["accuracy", "f1_score", "fps"], ascending=[False, False, False])
     csvfile.fn_display_df(tune_df)
     tune_df.to_csv('./zreport/tuning_results.csv', index=False, sep=';', encoding='utf-8')
 

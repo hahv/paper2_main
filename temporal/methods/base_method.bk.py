@@ -178,31 +178,44 @@ class BaseMethod(ABC):
         self, video_path: str, video_idx: int = None, total_videos: int = None
     ):
         """
-        Processes each frame of a single video, performing inference and delegating
-        the results to the registered handlers.
+        Perform inference on either a video file or a directory of images.
+        - If input_path is a video: process each frame.
+        - If input_path is a directory: process each image as a frame.
         """
         progress_str = (
-            ""
-            if (video_idx is None or total_videos is None)
+            "" if (video_idx is None or total_videos is None)
             else f"[{video_idx + 1}/{total_videos}]"
         )
         pprint(f"{progress_str} Starting inference for: {video_path}")
         self.before_infer_video(video_path)
-
         self.prepare_model()
-        cap = cv2.VideoCapture(video_path)
-        if not cap.isOpened():
-            raise ValueError(f"Error: Could not open video: {video_path}")
 
-        # Get video properties to pass to handlers
-        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-        vfps = cap.get(cv2.CAP_PROP_FPS)
-        frame_size = (
-            int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
-            int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)),
-        )
+        # --- Check input type ---
+        if os.path.isdir(video_path):
+            is_video = False
+            image_files = sorted([
+                os.path.join(video_path, f)
+                for f in os.listdir(video_path)
+                if f.lower().endswith((".jpg", ".jpeg", ".png", ".bmp"))
+            ])
+            total_frames = len(image_files)
+            if total_frames == 0:
+                raise ValueError(f"No image files found in directory: {video_path}")
+            frame_size = cv2.imread(image_files[0]).shape[:2][::-1]
+            vfps = 1  # Dummy FPS for images
+        else:
+            is_video = True
+            cap = cv2.VideoCapture(video_path)
+            if not cap.isOpened():
+                raise ValueError(f"Error: Could not open video: {video_path}")
+            total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+            vfps = cap.get(cv2.CAP_PROP_FPS)
+            frame_size = (
+                int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
+                int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)),
+            )
 
-        # Notify all handlers that a new video is starting
+        # --- Notify handlers ---
         for handler in self.result_handlers:
             handler.before_video(
                 video_path,
@@ -213,40 +226,42 @@ class BaseMethod(ABC):
                 skip_if_exists=self.cfg.infer_cfg.skip_if_exists,
             )
 
-        # find CsvRSHandler in self.result_handlers
-        csv_handler = None
-        for handler in self.result_handlers:
-            if isinstance(handler, CsvRSHandler):
-                csv_handler = handler
-                break
-        assert csv_handler is not None, "CsvRSHandler not found in result_handlers, it is required."
+        csv_handler = next(
+            (h for h in self.result_handlers if isinstance(h, CsvRSHandler)), None
+        )
+        assert csv_handler, "CsvRSHandler not found in result_handlers."
         SKIP_INFER = csv_handler.outfile_exists
+        limit = (
+            self.cfg.infer_cfg.limit
+            if self.cfg.infer_cfg.limit > 0
+            else total_frames
+        )
+
+        # --- Main inference loop ---
         frame_idx = 0
-        limit = self.cfg.infer_cfg.limit if self.cfg.infer_cfg.limit > 0 else total_frames
         if not SKIP_INFER:
             try:
-                while cap.isOpened():
-                    ret, frame_bgr = cap.read()
-                    if not ret:
-                        break  # End of video
+                while frame_idx < total_frames:
+                    if is_video:
+                        ret, frame_bgr = cap.read()
+                        if not ret:
+                            break
+                    else:
+                        frame_bgr = cv2.imread(image_files[frame_idx])
+                        if frame_bgr is None:
+                            pprint(f"Warning: Failed to read {image_files[frame_idx]}")
+                            frame_idx += 1
+                            continue
+
                     frame_idx += 1
                     if limit > 0 and frame_idx > limit:
                         pprint(f"Frame limit reached: {limit}, stop")
                         break
 
                     start_time = time.perf_counter()
-
                     infer_rs = self.infer_frame(frame_bgr, frame_idx)
-                    if not all(key in infer_rs for key in BaseMethod.REQUIRED_INFER_RS):
-                        raise ValueError(
-                            f"Missing required inference results: {BaseMethod.REQUIRED_INFER_RS}"
-                        )
-
                     elapsed_time = time.perf_counter() - start_time
-
-                    # infer fps
-                    fps = 1.0 / elapsed_time if elapsed_time > 0 else 0
-                    fps = f"{fps:.2f}"
+                    fps = f"{1.0 / elapsed_time:.2f}" if elapsed_time > 0 else "0.00"
 
                     frame_rs_dict = {
                         "video": os.path.basename(video_path),
@@ -258,18 +273,17 @@ class BaseMethod(ABC):
                         "frame_size": frame_size,
                         "fps": fps,
                     }
-                    # --- Delegate the packet to all registered handlers ---
                     for handler in self.result_handlers:
                         handler.handle_frame_results(frame_bgr, frame_rs_dict)
                     self._log_progress(frame_idx, total_frames)
 
             finally:
-                cap.release()
-                # cv2.destroyAllWindows()
-                # Notify all handlers that the video processing is complete
-        #! even if SKIP_INFER, we still need to call after_video to do some clean up
+                if is_video:
+                    cap.release()
+
+        # --- Post-processing ---
         for handler in self.result_handlers:
             handler.after_video(video_path=video_path)
+
         print(f"\nFinished inference for: {video_path}\n")
-        # Call the hook method after video inference
-        self.after_infer_video(video_path=video_path)
+        self.after_infer_video(video_path)

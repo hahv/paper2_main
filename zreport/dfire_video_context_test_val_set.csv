@@ -1,0 +1,37 @@
+TEST VIDEO;;;;;VALID VIDEO;
+video;context;video;context;;video;context
+FP1;mountain black;VP1;factor - small smoke;;FP5;moutain view - blur
+FP2;moutain cam blur;VP3;factor - medium smoke;;FP6;campus - cam switch
+FP3;factory;VP5;factor - small smoke;;FP7;moutain view
+FP4;moutain blur;VP6;factor - medium smoke;;FP9;campus - cam static
+FP8;moutain - sun light;VP7;mountain - right big smoke;;FP10;campus - cam static
+FP11;campus - cam switch;VP8;mountain - left small slow smoke;;FP15;moutain view
+FP12;campus - cam switch;VP9;mountain - left small slow smoke;;FP16;campus - cam switch
+FP13;campus - cam switch;VP10;factor - medium smoke;;FP17;campus - cam switch
+FP14;campus - cam switch;VP12;factor - medium smoke;;FP24;campus - cam switch
+FP18;campus - cam switch;VP13;moutain - small slow middle smoke over forest;;FP30;campus - cam switch
+FP19;moutain blur;VP14;moutain - small slow middle smoke  over houses;;FP33;desert and cloud
+FP20;mountain - rain drop;VP15;moutain - medium slow middle smoke  over houses;;FP44;cloud over forest - drone
+FP21;mountain - rain drop;VP16;moutain - big slow middle smoke  over houses;;FP47;cloud over forest - drone
+FP22;moutain - len blur;VP17;moutain - big slow middle smoke  over houses;;FP49;sunset with house and blue car
+FP23;campus - cam switch;VP19;factor - medium smoke;;FP50;subway, train coming
+FP25;campus - cam switch;VP20;factor - big smoke;;VP2;factory - slow small smoke
+FP26;campus - cam switch;VP21;factor - big smoke;;VP4;mountain - left small slow smoke
+FP27;campus - cam switch;VP22;moutain - medium slow tall smoke over forest;;VP11;factor - small smoke
+FP28;campus - cam switch;VP25;factor - medium smoke;;VP18;moutain - small slow middle smoke  over houses
+FP29;campus - cam switch;VP26;factor - medium smoke;;VP23;moutain - small very slow middle smoke  over houses
+FP31;car at night - low res;VP27;factor - medium smoke;;VP24;factor - small smoke
+FP32;car at night - low res;VP28;factor - big smoke;;VP32;factor - big smoke
+FP34;cloud over forest - drone;VP29;factor - small smoke;;VP33;factor - big smoke
+FP35;cloud over forest - drone;VP30;factor - big smoke;;VP34;factor - big smoke
+FP36;fog over land;VP31;factor - big smoke;;VP35;factor - small slow smoke
+FP37;cloud over forest - drone;VP36;factor - big smoke;;VP38;factor - big smoke
+FP38;cloud over forest - drone;VP37;factor - big smoke;;VP40;factor - big smoke
+FP39;contruction site night;VP39;factor - small growing smoke;;VP42;moutain - medium slow tall smoke over forest
+FP40;car washing - water fly;VP41;moutain - small slow middle smoke over forest;;VP48;factor - big smoke
+FP41;dancing light stick night;VP43;factor - big smoke;;VP50;factor - medium smoke
+FP42;christmast tree night;VP44;factor - very big smoke;;;
+FP43;cloud over forest - drone;VP45;factor - very big smoke;;;
+FP45;car run - high way night ;VP46;factor - medium slow smoke;;;
+FP46;cloud over forest - drone;VP47;factor - big smoke;;;
+FP48;fog in forest (with light reflect);VP49;factor - big smoke;;;

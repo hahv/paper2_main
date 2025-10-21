@@ -1,0 +1,4 @@
+# name : BowFire
+dir_path: datasets/VP9
+extra_cfgs:
+  ds_metric_src: temporal.metric_src.csv_metric_src.CsvDSMetricSrc

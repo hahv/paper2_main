@@ -104,7 +104,7 @@ class FGMaskRSHandler(BaseVideoRSHandler):
             cv2.rectangle(vis, (x0, y0), (x1, y1), (0, 255, 255), 2)  # yellow
             cv2.putText(
                 vis,
-                f"{percent:.1f}%",
+                f"{percent:.1f}",
                 (x0 + 2, y0 + 16),  # shift a bit lower for larger text
                 cv2.FONT_HERSHEY_SIMPLEX,
                 fontScale=0.7,  # bigger (default ~0.4)
@@ -177,8 +177,8 @@ class FGMaskRSHandler(BaseVideoRSHandler):
         fg_mask_vis = BaseVideoRSHandler.annotate_frame(fg_mask_vis, lb_val_dict)
         self.fg_mask_video_writer.write(fg_mask_vis)
 
-    def after_video(self):
-        super().after_video()
+    def after_video(self, video_path: str, **kwargs):
+        super().after_video(video_path=video_path, **kwargs)
         if self.fg_mask_video_writer is not None:
             self.fg_mask_video_writer.release()
             print(f"Foreground mask video saved to: {self.fg_mask_video_output_path}")

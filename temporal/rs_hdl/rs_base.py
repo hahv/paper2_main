@@ -25,6 +25,6 @@ class BaseRSHandler(ABC):
         """Called for each frame to handle its results."""
         pass
 
-    def after_video(self):
+    def after_video(self, video_path: str, **kwargs):
         """Called once after processing a video is complete."""
         pass

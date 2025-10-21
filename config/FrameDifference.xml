@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <opencv_storage>
 <enableThreshold>1</enableThreshold>
-<threshold>8</threshold>
+<threshold>3</threshold>
 <showOutput>1</showOutput>
 </opencv_storage>
