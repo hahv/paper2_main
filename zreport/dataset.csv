@@ -1,0 +1,16 @@
+;video_path;width;height;frame_count;fps
+0;/mnt/d/zdataset_paper2/build_video_dataset/__firesmoke_dataset_pool/video_USTC_smoke_lin2017smoke/video_test_set/test-1.avi;1920;1080;1501;25.0
+1;/mnt/d/zdataset_paper2/build_video_dataset/__firesmoke_dataset_pool/video_USTC_smoke_lin2017smoke/video_test_set/test-10.avi;1920;1080;721;24.0
+2;/mnt/d/zdataset_paper2/build_video_dataset/__firesmoke_dataset_pool/video_USTC_smoke_lin2017smoke/video_test_set/test-11.avi;1920;1080;1896;24.0
+3;/mnt/d/zdataset_paper2/build_video_dataset/__firesmoke_dataset_pool/video_USTC_smoke_lin2017smoke/video_test_set/test-12.avi;1920;1080;1501;25.0
+4;/mnt/d/zdataset_paper2/build_video_dataset/__firesmoke_dataset_pool/video_USTC_smoke_lin2017smoke/video_test_set/test-13.avi;1920;1080;471;24.0
+5;/mnt/d/zdataset_paper2/build_video_dataset/__firesmoke_dataset_pool/video_USTC_smoke_lin2017smoke/video_test_set/test-14.avi;1920;1080;961;24.0
+6;/mnt/d/zdataset_paper2/build_video_dataset/__firesmoke_dataset_pool/video_USTC_smoke_lin2017smoke/video_test_set/test-15.avi;1920;1080;1441;24.0
+7;/mnt/d/zdataset_paper2/build_video_dataset/__firesmoke_dataset_pool/video_USTC_smoke_lin2017smoke/video_test_set/test-2.avi;1920;1080;1332;24.0
+8;/mnt/d/zdataset_paper2/build_video_dataset/__firesmoke_dataset_pool/video_USTC_smoke_lin2017smoke/video_test_set/test-3.avi;1920;1080;951;25.0
+9;/mnt/d/zdataset_paper2/build_video_dataset/__firesmoke_dataset_pool/video_USTC_smoke_lin2017smoke/video_test_set/test-4.avi;1920;1080;1501;25.0
+10;/mnt/d/zdataset_paper2/build_video_dataset/__firesmoke_dataset_pool/video_USTC_smoke_lin2017smoke/video_test_set/test-5.avi;1920;1080;1681;24.0
+11;/mnt/d/zdataset_paper2/build_video_dataset/__firesmoke_dataset_pool/video_USTC_smoke_lin2017smoke/video_test_set/test-6.avi;1920;1080;961;24.0
+12;/mnt/d/zdataset_paper2/build_video_dataset/__firesmoke_dataset_pool/video_USTC_smoke_lin2017smoke/video_test_set/test-7.avi;1920;1080;2251;25.0
+13;/mnt/d/zdataset_paper2/build_video_dataset/__firesmoke_dataset_pool/video_USTC_smoke_lin2017smoke/video_test_set/test-8.avi;1920;1080;3001;25.0
+14;/mnt/d/zdataset_paper2/build_video_dataset/__firesmoke_dataset_pool/video_USTC_smoke_lin2017smoke/video_test_set/test-9.avi;1920;1080;1441;24.0

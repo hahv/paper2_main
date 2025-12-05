@@ -36,7 +36,7 @@ class TempStabilizeMethod(NoTempMethod):
         self.update_threshold(frame_diff_cfg, self.diff_thres)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         # ! #TO_SET BG subtraction algorithm
-        self.USE_MOG2 = False # use MOG2 for background subtraction
+        self.USE_MOG2 = True # use MOG2 for background subtraction
 
     def __load_tiny_model(self, tiny_model_path):
         model_name = fs.get_file_name(tiny_model_path, split_file_ext=True)[0]
@@ -148,15 +148,7 @@ class TempStabilizeMethod(NoTempMethod):
         # percentage of active pixels in each block
         percentages = counts / total_pixels
         # boolean mask of active blocks
-        avg_percentage = np.mean(percentages) if percentages.size > 0 else 0
-
-        # adaptively adjust threshold based on average percentage
-        # Increase threshold linearly with average, with a minimum of initial threshold
-        adapted_threshold = max(threshold, threshold + (avg_percentage * 0.1))
-        pprint(f"Avg active percentage: {avg_percentage:.4f}, Adapted threshold: {adapted_threshold:.4f}")
-
-        # boolean mask of active blocks
-        active_mask = percentages > adapted_threshold
+        active_mask = percentages > threshold
 
         # convert to 1D indices (row-major order)
         active_indices = np.flatnonzero(active_mask)

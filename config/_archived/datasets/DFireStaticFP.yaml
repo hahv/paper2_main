@@ -1,0 +1,5 @@
+# name : BowFire
+dir_path: datasets/DFireStaticFP/test
+# dir_path: datasets/DFireStatic_framediff/test
+extra_cfgs:
+  ds_metric_src: temporal.metric_src.csv_metric_src.CsvDSMetricSrc
