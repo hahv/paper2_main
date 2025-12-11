@@ -21,7 +21,8 @@ dependencies = [
     "pyinstrument>=5.1.1",
     "optuna",
     "optuna-dashboard",
-    "moviepy==1.0.3"
+    "moviepy==1.0.3",
+    "ipynbname"
 
 ]
 

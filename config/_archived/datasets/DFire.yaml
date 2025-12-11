@@ -1,4 +1,4 @@
 # name : BowFire
 dir_path: datasets/DFire/test
 extra_cfgs:
-  ds_metric_src: temporal.metric_src.csv_metric_src.CsvDSMetricSrc
+  ds_metric_src: temporal.metric_src.prof_metric_src.ProfDSMetricSrc
