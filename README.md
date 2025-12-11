@@ -1,0 +1,1 @@
+# PAPER 2: Skip module for fire/smoke detection in VIDEOS
