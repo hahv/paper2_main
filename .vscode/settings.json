@@ -25,11 +25,13 @@
         "**/CVS": true,
         "**/.venv": true,
         "**/__pycache__": true,
-        "**/.vscode": true,
+        "**/.vscode": false,
         "~$zzpaper2.xlsx": true,
         "zreport/~$available_dataset.xlsx": true
     },
     "explorerExclude.backup": {},
+    // Disable the Python language server; using ty (Astral.sh) for faster linting and formatting
+    // "python.languageServer": "None"
     // "python.linting.enabled": true,
     // "python.linting.pylintEnabled": false,
     // "python.linting.flake8Enabled": false,
