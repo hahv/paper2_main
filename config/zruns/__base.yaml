@@ -1,33 +1,34 @@
 general:
   seed: 1
+  project_dir: /mnt/e/SyncData/paper2_main
+  outdir: zout/zruns
   computer_name: null # PC name that run the experiment
-  outdir: zout/perf
-  # time_stamp: 20250922.160543 #  add to outdir automatically, allow to resume training
+  # time_stamp: 20250729.171542 #  add to outdir automatically, allow to resume training
   time_stamp: null # will be set to current time if not provided
   log_cfg:
     wandb_cfg:
       project: "paper2_main"
       mode: "online"
+      wandb_key: 85a60f274011647ab0472ad62fe73da5b1704808
 
-dataset_cfg:
-  list_datasets: [] # empty, will populate from config/datasets
-  selected_dataset_name: DFire
+dbset_selector:
+  list_dbsets: [] # empty, will populate from config/dbsets
+  selected_dbset: DFire # will be set later
 
-metric_cfg:
+metric_selector:
   list_metrics: [] # empty, will populate from config/metrics
-  selected_metric_set_name: metric_per_video # metric_per_video
+  selected_metric: metric_per_frame # will be set later
 
-method_cfg:
+method_selector:
   list_methods: [] # empty, will populate from config/methods
-  selected_method_name: no_temp #temp_tpt #no_temp #temp_stabilize
-  tag: null
+  selected_method: no_temp # will be set later
 
 model_cfg:
   base_model: hgnetv2_b5.ssld_stage2_ft_in1k # timm
   model_path: models/prof_2classes_hgnetv2_b5.ssld_stage2_ft_in1k-20251002-2-96-99.11.pth
+  input_size: [360, 640] # [H, W], for timm models
   # class_names: [Fire, None, SmokeOnly]
   class_names: [FireSmoke, None]
-
 
 infer_cfg:
   do_infer: true
