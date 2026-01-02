@@ -4,12 +4,17 @@ import cv2
 
 
 def parse_args():
-    parser = ArgumentParser(
-        description="desc text")
-    parser.add_argument('-indir', '--indir', type=str,
-                        help='test video dir', default='./datasets/DFire/test')
-    parser.add_argument('-outdir', '--outdir', type=str,
-                        help='output dir', default='./zout/dfire_vimgs')
+    parser = ArgumentParser(description="desc text")
+    parser.add_argument(
+        "-indir",
+        "--indir",
+        type=str,
+        help="test video dir",
+        default="./datasets/DFire/test",
+    )
+    parser.add_argument(
+        "-outdir", "--outdir", type=str, help="output dir", default="./zout/dfire_vimgs"
+    )
     return parser.parse_args()
 
 
@@ -19,12 +24,14 @@ def main():
     outdir = args.outdir
     assert os.path.exists(indir), f"{indir} not exists"
     os.makedirs(outdir, exist_ok=True)
-    video_list = fs.filter_files_by_extension(indir, ['.mp4', '.avi'], recursive=False)
+    video_list = fs.filter_files_by_extension(indir, [".mp4", ".avi"], recursive=False)
+
     def video_name_to_cls(video_name):
-        if 'FP' in video_name:
-            return 'none'
+        if "FP" in video_name:
+            return "none"
         else:
-            return 'fire_smoke'
+            return "fire_smoke"
+
     for video_path in tqdm(video_list):
         video_name = fs.get_file_name(video_path, split_file_ext=True)[0]
         # video_outdir = os.path.join(outdir, fname)
@@ -34,7 +41,9 @@ def main():
         # divide num_frames into 10 parts of equal length (if possible)
         frame_indices_parts = np.array_split(np.arange(num_frames), 10)
         # get random index from each part
-        selected_frame_indices = [np.random.choice(part) for part in frame_indices_parts if len(part) > 0]
+        selected_frame_indices = [
+            np.random.choice(part) for part in frame_indices_parts if len(part) > 0
+        ]
         cls_name = video_name_to_cls(video_name)
         video_outdir = os.path.join(outdir, cls_name)
         os.makedirs(video_outdir, exist_ok=True)
@@ -48,7 +57,10 @@ def main():
             frame_path = os.path.join(video_outdir, frame_fname)
             cv2.imwrite(frame_path, frame)
         cap.release()
-        print(f"Extracted {len(selected_frame_indices)} frames from {video_path} to {video_outdir}")
+        print(
+            f"Extracted {len(selected_frame_indices)} frames from {video_path} to {video_outdir}"
+        )
+
 
 if __name__ == "__main__":
     main()

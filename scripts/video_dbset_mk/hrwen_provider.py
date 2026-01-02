@@ -110,7 +110,9 @@ class HpwrenLbProvider(LabelProviderBase):
             label = (
                 "none"
                 if label_part.startswith("-")
-                else "fire_smoke" if label_part.startswith("+") else None
+                else "fire_smoke"
+                if label_part.startswith("+")
+                else None
             )
             if label is None:
                 raise ValueError(f"Unexpected label format in frame name: {frame_name}")

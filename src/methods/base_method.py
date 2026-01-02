@@ -219,10 +219,14 @@ class BaseMethod(ABC):
             if isinstance(handler, CsvRSHandler):
                 csv_handler = handler
                 break
-        assert csv_handler is not None, "CsvRSHandler not found in result_handlers, it is required."
+        assert csv_handler is not None, (
+            "CsvRSHandler not found in result_handlers, it is required."
+        )
         SKIP_INFER = csv_handler.outfile_exists
         frame_idx = 0
-        limit = self.cfg.infer_cfg.limit if self.cfg.infer_cfg.limit > 0 else total_frames
+        limit = (
+            self.cfg.infer_cfg.limit if self.cfg.infer_cfg.limit > 0 else total_frames
+        )
         if not SKIP_INFER:
             try:
                 while cap.isOpened():

@@ -9,6 +9,7 @@ import torch.nn.functional as F
 from collections import OrderedDict
 from temporal.rs_hdl.rs_video_base import *
 
+
 class FGMaskRSHandler(BaseVideoRSHandler):
     @staticmethod
     def getColor(classIdx):
@@ -66,7 +67,9 @@ class FGMaskRSHandler(BaseVideoRSHandler):
     def before_video(self, video_path: str, **kwargs):
         super().before_video(video_path, **kwargs)
         fname = fs.get_file_name(video_path, split_file_ext=True)[0]
-        self.fg_mask_video_output_path = os.path.join(self.outdir, f"{fname}_fg_mask.mp4")
+        self.fg_mask_video_output_path = os.path.join(
+            self.outdir, f"{fname}_fg_mask.mp4"
+        )
         self.fg_mask_video_writer = None
         self.fps = kwargs["fps"]
 
@@ -147,15 +150,17 @@ class FGMaskRSHandler(BaseVideoRSHandler):
     def handle_frame_results(self, frame_bgr, frame_rs_dict: dict):
         # write to normal RGB video
         infer_rs = frame_rs_dict["infer_rs"]
-        assert (
-            "fg_mask_dict" in infer_rs
-        ), "Foreground mask 'fg_mask_dict' not found in inference results"
+        assert "fg_mask_dict" in infer_rs, (
+            "Foreground mask 'fg_mask_dict' not found in inference results"
+        )
         fg_mask_dict = infer_rs["fg_mask_dict"]
         # 1. write mask info into rgb video
         extra_info = {
-            "active_block/frames": f"{fg_mask_dict.get('active_percent', 0.0)*100:.1f}%",
+            "active_block/frames": f"{fg_mask_dict.get('active_percent', 0.0) * 100:.1f}%",
         }
-        frame_vis, lb_val_dict = super().prepare_frame_vwriter(frame_bgr, frame_rs_dict, extra_info=extra_info)
+        frame_vis, lb_val_dict = super().prepare_frame_vwriter(
+            frame_bgr, frame_rs_dict, extra_info=extra_info
+        )
 
         frame_vis = self.annotate_fg_mask(
             fg_mask_dict=fg_mask_dict, vis_frame=frame_vis
@@ -169,8 +174,8 @@ class FGMaskRSHandler(BaseVideoRSHandler):
             fps = self.fps
             frame_size = (fg_mask.shape[1], fg_mask.shape[0])
             self.fg_mask_video_writer = cv2.VideoWriter(
-                    self.fg_mask_video_output_path, fourcc, self.fps, frame_size
-                )
+                self.fg_mask_video_output_path, fourcc, self.fps, frame_size
+            )
         # visualize fg mask (with block info: which block activated, which block classified as fire/smoke, ROI box, etc.)
         fg_mask_vis = self.annotate_fg_mask(fg_mask_dict=fg_mask_dict)
         # add annotations to fg mask video

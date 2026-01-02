@@ -26,6 +26,7 @@ class WanDBCfg(YAMLWizard):
     mode: str
     wandb_key: str
 
+
 @dataclass
 class LogCfg(YAMLWizard):
     wandb_cfg: Optional[WanDBCfg] = None
@@ -79,6 +80,7 @@ class ModelConfig(YAMLWizard):
     class_names: List[str]
     input_size: Optional[List[int]] = None
 
+
 # -----------------------------------------------------------------------------
 # 3. SELECTION CONFIGS
 # -----------------------------------------------------------------------------
@@ -122,6 +124,7 @@ class DatasetSelector(BaseSelectorCfg[DatasetCfg]):
             self.list_dbsets, self.selected_dbset, "dataset"
         )
 
+
 @dataclass
 class MetricSelector(BaseSelectorCfg[MetricSetCfg]):
     list_metrics: List[MetricSetCfg] = field(default_factory=list)
@@ -144,6 +147,7 @@ class MethodSelector(BaseSelectorCfg[MethodCfg]):
         self.method_used = self._resolve_selection(
             self.list_methods, self.selected_method, "method"
         )
+
 
 # -----------------------------------------------------------------------------
 # 5. MAIN CONFIG

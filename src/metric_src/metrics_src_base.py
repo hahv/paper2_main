@@ -15,11 +15,16 @@ class MetricSrcFactory:
     @staticmethod
     def create_metric_source(config: Config, *args, **kwargs):
         # ! instead of create each metric src for each dataset, we specify the metric src class in the dataset config => mulitple datasets can share the same metric src class
-        ds_metric_src  = config.dataset_cfg.dataset_used.extra_cfgs.get("ds_metric_src", None)
+        ds_metric_src = config.dataset_cfg.dataset_used.extra_cfgs.get(
+            "ds_metric_src", None
+        )
         cls = get_cls(ds_metric_src)
-        assert cls is not None, f"Dataset metric source class not found for {ds_metric_src}"
+        assert cls is not None, (
+            f"Dataset metric source class not found for {ds_metric_src}"
+        )
         kwargs = {"cfg": config}
         return cls(**kwargs)
+
 
 class BaseMetricSrc(ABC):
     """

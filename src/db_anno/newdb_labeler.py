@@ -1,12 +1,12 @@
 from halib import *
 from halib.filetype import yamlfile
-from video_db.lb_provider import LabelProviderBase
+from src.db_anno.video_labeler import VideoLabelerBase
 from typing import List, Optional, Callable
 import cv2
 from halib.utils.video import VideoUtils
 
 
-class NewDBLbProvider(LabelProviderBase):
+class NewDBLabeler(VideoLabelerBase):
     """Label provider for NewDBConsole dataset, handling video metadata and frame labeling."""
 
     VALID_EXTENSIONS = [".mp4", ".avi", ".mov", ".mkv"]
@@ -15,7 +15,11 @@ class NewDBLbProvider(LabelProviderBase):
     LABEL_NEGATIVE = "None"
     LABEL_MIXED = "Mixed"
 
-    def __init__(self, cfg_yaml: str = "video_db/__db_cfg.yaml", video_path_to_label_func: Callable[[str, str], str] = None):
+    def __init__(
+        self,
+        cfg_yaml: str = "video_db/__db_cfg.yaml",
+        video_path_to_label_func: Callable[[str, str], str] = None,
+    ):
         cfg_dict = yamlfile.load_yaml(cfg_yaml, to_dict=True)
         self.dataset_name = cfg_dict.get("dataset_name", "NewDB")
         self.dataset_path = cfg_dict.get("dataset_path", "./videos")
@@ -29,7 +33,11 @@ class NewDBLbProvider(LabelProviderBase):
             columns=["video_path", "frame_count", "fps", "frame_width", "frame_height"],
         )
         # ! must call before _collect_videos
-        self.get_all_frames_label_func = video_path_to_label_func if video_path_to_label_func else self.map_video_to_label
+        self.get_all_frames_label_func = (
+            video_path_to_label_func
+            if video_path_to_label_func
+            else self.map_video_to_label
+        )
         self._collect_videos()
 
     @staticmethod
@@ -37,32 +45,41 @@ class NewDBLbProvider(LabelProviderBase):
         fname = fs.get_file_name(video_path, split_file_ext=True)[0]
         if dataset_name == "NewDB":
             """Map video file name to its label based on naming conventions."""
-            if '__lb_none__' in fname:
-                return NewDBLbProvider.LABEL_NEGATIVE
-            elif '__lb_fire_smoke__' in fname and '__all_fires' in fname:
-                return NewDBLbProvider.LABEL_POSITIVE
+            if "__lb_none__" in fname:
+                return NewDBLabeler.LABEL_NEGATIVE
+            elif "__lb_fire_smoke__" in fname and "__all_fires" in fname:
+                return NewDBLabeler.LABEL_POSITIVE
             else:
-                return NewDBLbProvider.LABEL_MIXED
+                return NewDBLabeler.LABEL_MIXED
         elif dataset_name == "DFire":
             if fname.startswith("FP"):
-                return NewDBLbProvider.LABEL_NEGATIVE
+                return NewDBLabeler.LABEL_NEGATIVE
             else:
-                return NewDBLbProvider.LABEL_MIXED
+                return NewDBLabeler.LABEL_MIXED
         else:
             raise ValueError(f"Unsupported dataset: {dataset_name}")
 
     def _collect_videos(self) -> None:
         """Collect video files and their directories from the dataset path."""
-        self.video_list = fs.filter_files_by_extension(directory=
-            self.dataset_path, ext=[".mp4", ".avi", ".mov", ".mkv"], recursive=self.search_recursive
+        self.video_list = fs.filter_files_by_extension(
+            directory=self.dataset_path,
+            ext=[".mp4", ".avi", ".mov", ".mkv"],
+            recursive=self.search_recursive,
         )
-        self.video_priority_list = [0]*len(self.video_list)
+        self.video_priority_list = [0] * len(self.video_list)
         for idx, video in enumerate(self.video_list):
-            all_video_lb = self.get_all_frames_label_func(dataset_name=self.dataset_name, video_path=video)
+            all_video_lb = self.get_all_frames_label_func(
+                dataset_name=self.dataset_name, video_path=video
+            )
             if all_video_lb != self.LABEL_MIXED:
                 self.video_priority_list[idx] = 1
         # Sort videos by priority (non-mixed first)
-        sorted_videos = [v for _, v in sorted(zip(self.video_priority_list, self.video_list), reverse=True)]
+        sorted_videos = [
+            v
+            for _, v in sorted(
+                zip(self.video_priority_list, self.video_list), reverse=True
+            )
+        ]
         self.video_list = sorted_videos
 
     def get_labels(self, video_path: str) -> pd.DataFrame:
@@ -93,16 +110,24 @@ class NewDBLbProvider(LabelProviderBase):
             ]
             df_creator.insert_rows(table_name=table_name, singleRow_or_rowList=rows)
             df_creator.fill_table_from_row_pool(table_name=table_name)
-        else: # Mixed labels, need manual input
+        else:  # Mixed labels, need manual input
             # Interactive input for fire_smoke ranges
             fire_ranges = []
             while True:
-                start = 1 # !1-based indexing
-                end = frame_count # default to full range
+                start = 1  # !1-based indexing
+                end = frame_count  # default to full range
                 console.print(f"Total frames: [red]{frame_count}[red]")
-                c_firesmoke_range = ", ".join([f"[{s},{e}]" for s, e in fire_ranges]) if fire_ranges else "None"
-                console.print(f"Current fire_smoke ranges: [green]{c_firesmoke_range}[/green]")
-                entry = input(f"Enter fire_smoke range ({start=}, {end=}) OR 'all' OR 'done': ").strip()
+                c_firesmoke_range = (
+                    ", ".join([f"[{s},{e}]" for s, e in fire_ranges])
+                    if fire_ranges
+                    else "None"
+                )
+                console.print(
+                    f"Current fire_smoke ranges: [green]{c_firesmoke_range}[/green]"
+                )
+                entry = input(
+                    f"Enter fire_smoke range ({start=}, {end=}) OR 'all' OR 'done': "
+                ).strip()
                 if entry.lower() == "done":
                     break
                 if entry.lower() == "all":
@@ -128,6 +153,10 @@ class NewDBLbProvider(LabelProviderBase):
         return df_creator[table_name]
 
     def after_process_labeling(self) -> None:
-
         # Save dataset metadata after labeling process."""
-        VideoUtils.get_video_dir_meta_df(video_dir=self.dataset_path,csv_outfile=os.path.join(self.dataset_path, f"___{self.dataset_name}_meta_info.csv"))
+        VideoUtils.get_video_dir_meta_df(
+            video_dir=self.dataset_path,
+            csv_outfile=os.path.join(
+                self.dataset_path, f"___{self.dataset_name}_meta_info.csv"
+            ),
+        )

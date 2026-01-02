@@ -9,6 +9,7 @@ import torch.nn.functional as F
 from collections import OrderedDict
 from temporal.rs_hdl.rs_base import *
 
+
 class BaseVideoRSHandler(BaseRSHandler):
     @staticmethod
     def getColor(classIdx):
@@ -80,7 +81,7 @@ class BaseVideoRSHandler(BaseRSHandler):
         if skip_if_exists and os.path.exists(self.video_output_path):
             self.outfile_exists = True
             print(f"Video file already exists, skipping: {self.video_output_path}")
-            return # skip creating dfmk and table
+            return  # skip creating dfmk and table
         fourcc = cv2.VideoWriter_fourcc(*"mp4v")
 
         fps = kwargs["fps"]
@@ -113,10 +114,10 @@ class BaseVideoRSHandler(BaseRSHandler):
         return lb_val_dict
 
     def after_video(self, video_path: str, **kwargs):
-        if fs.is_directory(video_path): # a image folder, skip
+        if fs.is_directory(video_path):  # a image folder, skip
             return
         if self.outfile_exists:
-            self.outfile_exists = False # reset for next video
+            self.outfile_exists = False  # reset for next video
             return
         if self.video_writer is not None:
             self.video_writer.release()

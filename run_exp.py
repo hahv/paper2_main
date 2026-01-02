@@ -7,10 +7,13 @@ from argparse import ArgumentParser
 
 
 def parse_args():
-    parser = ArgumentParser(
-        description="desc text")
+    parser = ArgumentParser(description="desc text")
     parser.add_argument(
-        "-cfg", "--cfg", type=str, help="config file path", default=r"config/base_eb0.yaml"
+        "-cfg",
+        "--cfg",
+        type=str,
+        help="config file path",
+        default=r"config/base_eb0.yaml",
     )
     return parser.parse_args()
 
@@ -23,6 +26,7 @@ def main():
     experiment.run_exp(
         do_calc_metrics=config.infer_cfg.calc_metrics, outdir=config.get_outdir()
     )
+
 
 if __name__ == "__main__":
     main()

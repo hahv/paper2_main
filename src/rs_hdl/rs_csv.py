@@ -9,6 +9,7 @@ import torch.nn.functional as F
 from collections import OrderedDict
 from temporal.rs_hdl.rs_video_base import *
 
+
 class CsvRSHandler(BaseRSHandler):
     CSV_FIXED_COLUMNS = [
         "video",  # video name
@@ -42,7 +43,7 @@ class CsvRSHandler(BaseRSHandler):
         if skip_if_exists and os.path.exists(self.out_csv_file):
             self.outfile_exists = True
             print(f"CSV file already exists, skipping: {self.out_csv_file}")
-            return # skip creating dfmk and table
+            return  # skip creating dfmk and table
 
         self.dfmk = csvfile.DFCreator()
         self.dfmk.create_table(video_name, columns=self.csv_columns)
@@ -73,7 +74,7 @@ class CsvRSHandler(BaseRSHandler):
 
     def after_video(self, video_path: str, **kwargs):
         if self.outfile_exists:
-            self.outfile_exists = False # reset for next video
+            self.outfile_exists = False  # reset for next video
             return
         if not self.cfg.infer_cfg.save_csv_results or self.dfmk is None:
             return
@@ -146,7 +147,6 @@ class BaseVideoRSHandler(BaseRSHandler):
         self.outdir = os.path.abspath(cfg.get_outdir())
         self.outfile_exists = False
 
-
     def before_video(self, video_path: str, **kwargs):
         fname = fs.get_file_name(video_path, split_file_ext=True)[0]
         self.video_output_path = os.path.join(self.outdir, f"{fname}_out.mp4")
@@ -179,7 +179,7 @@ class BaseVideoRSHandler(BaseRSHandler):
 
     def after_video(self):
         if self.outfile_exists:
-            self.outfile_exists = False # reset for next video
+            self.outfile_exists = False  # reset for next video
             return
         if self.video_writer is not None:
             self.video_writer.release()

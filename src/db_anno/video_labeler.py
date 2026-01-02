@@ -1,17 +1,12 @@
-import os
+import yaml
+from halib import *
+
+from typing import List, Optional
 from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import List, Tuple, Optional
-import cv2
-import yaml
-import pandas as pd
-from tqdm import tqdm
-from halib import *
-from halib.filetype import csvfile
-from halib.system import filesys as fs
 
 
-class LabelProviderBase(ABC):
+class VideoLabelerBase(ABC):
     """Base class for label providers handling video processing and labeling."""
 
     def __init__(self):

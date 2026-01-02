@@ -78,7 +78,7 @@ class CsvDSMetricSrc(BaseMetricSrc):
                     outdf["correct"] = outdf["gt"] == outdf["pred"]
                     # only rows if correct is False
                     outdf = outdf[outdf["correct"] == False]
-                    if len(outdf) > 0: # only save if there are some incorrect frames
+                    if len(outdf) > 0:  # only save if there are some incorrect frames
                         video_name = outdf["video"].iloc[0]
                         outdf.to_csv(
                             os.path.join(
@@ -177,9 +177,9 @@ class CsvDSMetricSrc(BaseMetricSrc):
             if "_results" in os.path.basename(csv_file):
                 filtered_csv_files.append(csv_file)
         csv_files = filtered_csv_files
-        assert (
-            len(csv_files) == num_videos
-        ), f"Number of CSV files ({len(csv_files)}) does not match number of video files ({num_videos})"
+        assert len(csv_files) == num_videos, (
+            f"Number of CSV files ({len(csv_files)}) does not match number of video files ({num_videos})"
+        )
 
         # return video_name, gt, and df
         pervideo_pred_gt_ls = []  # gt, df for each frames in each video

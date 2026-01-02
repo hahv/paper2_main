@@ -25,9 +25,11 @@
         "**/CVS": true,
         "**/.venv": true,
         "**/__pycache__": true,
-        "**/.vscode": false,
+        "**/.vscode": true,
         "~$zzpaper2.xlsx": true,
-        "zreport/~$available_dataset.xlsx": true
+        "zreport/~$available_dataset.xlsx": true,
+        "**/.ruff_cache": true,
+        "uv.lock": true
     },
     "explorerExclude.backup": {},
     // Disable the Python language server; using ty (Astral.sh) for faster linting and formatting

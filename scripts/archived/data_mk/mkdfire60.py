@@ -26,7 +26,7 @@ def main():
     # if num_frame of video > 60, then make a copy with only first 60 frames
     # del the src video after making the copy
     for video_file in video_files:
-        pprint(f'Processing {video_file}...')
+        pprint(f"Processing {video_file}...")
         cap = cv2.VideoCapture(video_file)
         if not cap.isOpened():
             continue

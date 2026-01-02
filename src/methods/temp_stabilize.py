@@ -36,13 +36,13 @@ class TempStabilizeMethod(NoTempMethod):
         self.update_threshold(frame_diff_cfg, self.diff_thres)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         # ! #TO_SET BG subtraction algorithm
-        self.USE_MOG2 = False # use MOG2 for background subtraction
+        self.USE_MOG2 = False  # use MOG2 for background subtraction
 
     def __load_tiny_model(self, tiny_model_path):
         model_name = fs.get_file_name(tiny_model_path, split_file_ext=True)[0]
         pprint(f"Loading tiny model: {model_name} from {tiny_model_path}")
         # find last '_' to get the base model name
-        last_underscore_idx = model_name.rfind('_')
+        last_underscore_idx = model_name.rfind("_")
         base_model_name = None
         if last_underscore_idx != -1:
             base_model_name = model_name[:last_underscore_idx]
@@ -51,8 +51,8 @@ class TempStabilizeMethod(NoTempMethod):
         return timm.create_model(
             base_model_name,
             pretrained=False,
-            num_classes=2, # ['fire_smoke', 'none'] for block classifier
-            checkpoint_path=tiny_model_path
+            num_classes=2,  # ['fire_smoke', 'none'] for block classifier
+            checkpoint_path=tiny_model_path,
         )
 
     def _load_block_tiny_cnn_model(self):
@@ -153,7 +153,9 @@ class TempStabilizeMethod(NoTempMethod):
         # adaptively adjust threshold based on average percentage
         # Increase threshold linearly with average, with a minimum of initial threshold
         adapted_threshold = max(threshold, threshold + (avg_percentage * 0.1))
-        pprint(f"Avg active percentage: {avg_percentage:.4f}, Adapted threshold: {adapted_threshold:.4f}")
+        pprint(
+            f"Avg active percentage: {avg_percentage:.4f}, Adapted threshold: {adapted_threshold:.4f}"
+        )
 
         # boolean mask of active blocks
         active_mask = percentages > adapted_threshold
@@ -273,11 +275,13 @@ class TempStabilizeMethod(NoTempMethod):
         self.profiler.step_end(ctx_name="skip_module", step_name="fg_mask")
         # Step 2.2: Determine active blocks based on the foreground mask
         self.profiler.step_start(ctx_name="skip_module", step_name="active_blocks")
-        active_indices, active_percentages,blk_h, blk_w = self._active_motion_blocks(
+        active_indices, active_percentages, blk_h, blk_w = self._active_motion_blocks(
             fg_mask, threshold=self.blk_act_thres
         )
         # ! udate fg_mask_dict
-        fg_mask_dict["active_motion_blocks_info"] = list(zip(active_indices, active_percentages))
+        fg_mask_dict["active_motion_blocks_info"] = list(
+            zip(active_indices, active_percentages)
+        )
 
         self.profiler.step_end(ctx_name="skip_module", step_name="active_blocks")
 
@@ -303,7 +307,9 @@ class TempStabilizeMethod(NoTempMethod):
             return False, roi_rect, fg_mask_dict
 
         # Case C: Reasonable motion -> Run classifier on active blocks
-        self.profiler.step_start(ctx_name="skip_module", step_name="firesmoke_active_blocks")
+        self.profiler.step_start(
+            ctx_name="skip_module", step_name="firesmoke_active_blocks"
+        )
 
         self.profiler.ctx_start(ctx_name="tiny_infer")
         self.profiler.step_start(ctx_name="tiny_infer", step_name="prepare_data")
@@ -321,7 +327,7 @@ class TempStabilizeMethod(NoTempMethod):
         self.profiler.ctx_end(ctx_name="tiny_infer")
 
         preds = preds.cpu().numpy()
-        probs = probs.cpu().numpy()   # shape: (num_active_blocks, num_classes)
+        probs = probs.cpu().numpy()  # shape: (num_active_blocks, num_classes)
 
         prob_thres = self.firesmoke_cls_thres
 
@@ -337,16 +343,22 @@ class TempStabilizeMethod(NoTempMethod):
 
         # ! update fg_mask_dict
         # vis all active blocks and their probs
-        fg_mask_dict["firesmoke_blocks_cls_info"]["all_active_blocks"] = list(zip(active_indices, firesmoke_probs))
+        fg_mask_dict["firesmoke_blocks_cls_info"]["all_active_blocks"] = list(
+            zip(active_indices, firesmoke_probs)
+        )
 
         # vis only blocks classified as fire/smoke
-        fg_mask_dict["firesmoke_blocks_cls_info"]["firesmoke_active_blocks"] = firesmoke_active_indices
+        fg_mask_dict["firesmoke_blocks_cls_info"]["firesmoke_active_blocks"] = (
+            firesmoke_active_indices
+        )
 
         console.print(
             f"[{frame_idx}] Blocks classified as fire/smoke: [green]{len(firesmoke_active_indices)}[/green]/{len(active_indices)}"
         )
 
-        self.profiler.step_end(ctx_name="skip_module", step_name="firesmoke_active_blocks")
+        self.profiler.step_end(
+            ctx_name="skip_module", step_name="firesmoke_active_blocks"
+        )
 
         # Subcase C1: Motion was found, but none was classified as fire/smoke -> SKIP the frame
         if len(firesmoke_active_indices) == 0:
@@ -361,7 +373,10 @@ class TempStabilizeMethod(NoTempMethod):
         return False, roi_rect, fg_mask_dict
 
     def after_infer_video_dir(self, video_dir):
-        self.profiler.save_report_dict(output_file=f"{self.cfg.get_outdir()}/profiler_report.json", with_detail=True)
+        self.profiler.save_report_dict(
+            output_file=f"{self.cfg.get_outdir()}/profiler_report.json",
+            with_detail=True,
+        )
         self.profiler.report_and_plot(self.cfg.get_outdir())
 
     def infer_frame(self, frame, frame_idx: int) -> dict:

@@ -27,24 +27,23 @@ def parse_args():
 
     return parser.parse_args()
 
+
 def run_pipeline(exp_cfg_file, method_cfg_dict):
     config = Config.from_custom_yaml_file(exp_cfg_file)
     experiment = OurExp(config)
-    assert (
-        config.method_cfg.method_used.name == "temp_stabilize"
-    ), "Only temporal stabilization method is supported in this optimization script."
-    config.method_cfg.method_used.extra_cfgs.update(
-        method_cfg_dict
+    assert config.method_cfg.method_used.name == "temp_stabilize", (
+        "Only temporal stabilization method is supported in this optimization script."
     )
+    config.method_cfg.method_used.extra_cfgs.update(method_cfg_dict)
     # update the method config with new hyperparameters
-    metric_rs = experiment.run_exp(
-        do_calc_metrics=config.infer_cfg.calc_metrics
-    )
+    metric_rs = experiment.run_exp(do_calc_metrics=config.infer_cfg.calc_metrics)
     pprint(metric_rs)
     return metric_rs
 
+
 SEARCH_SPACE = None
 current_exp_cfg_file = None
+
 
 # Define evaluation function
 def objective(trial: Trial):
@@ -63,11 +62,13 @@ def objective(trial: Trial):
     with ConsoleLog(f"Running trial {trial.number}/{num_trials}"):
         print(f"param set :")
         pprint(trial_param_set)
-        metrics = run_pipeline(exp_cfg_file=current_exp_cfg_file, method_cfg_dict=trial_param_set
+        metrics = run_pipeline(
+            exp_cfg_file=current_exp_cfg_file, method_cfg_dict=trial_param_set
         )
 
     # Return metric to maximize (e.g., F1 score)
     return np.random.rand()
+
 
 def calc_num_trials(search_space):
     count = 1
@@ -75,13 +76,14 @@ def calc_num_trials(search_space):
         count *= len(search_space[param])
     return count
 
+
 def main():
     # Load base config for experiments
     global current_exp_cfg_file
     current_exp_cfg_file = parse_args().cfg
-    assert os.path.exists(
-        current_exp_cfg_file
-    ), f"Config file {current_exp_cfg_file} does not exist."
+    assert os.path.exists(current_exp_cfg_file), (
+        f"Config file {current_exp_cfg_file} does not exist."
+    )
 
     # Load optimization config
     opt_cfg_file = parse_args().optcfg

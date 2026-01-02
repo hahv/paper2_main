@@ -8,6 +8,7 @@ from typing import List, Optional
 
 LOG_TRANSFORM = False
 
+
 class NoTempMethod(BaseMethod):
     def _get_transform(self, model_name: str, input_size: Optional[List[int]] = None):
         """Get the appropriate transformation based on the model name."""
@@ -36,11 +37,11 @@ class NoTempMethod(BaseMethod):
             "hgnetv2_b5.ssld_stage2_ft_in1k" in model_name.lower()
         ):
             assert input_size is not None, "input_size must be provided for timm models"
-            assert (
-                isinstance(input_size, (list, tuple)) and len(input_size) == 2
-            ), "input_size must be a list or tuple of two integers"
+            assert isinstance(input_size, (list, tuple)) and len(input_size) == 2, (
+                "input_size must be a list or tuple of two integers"
+            )
             cfg = resolve_data_config(model=model_name)
-             # ! disable color jitter since fire/smoke are sensitive to color changes
+            # ! disable color jitter since fire/smoke are sensitive to color changes
             cfg["color_jitter"] = None
             cfg["input_size"] = (3, input_size[0], input_size[1])  # C, H, W
             # val: Compose(
@@ -55,7 +56,9 @@ class NoTempMethod(BaseMethod):
             tfms[0] = transforms.Resize(
                 (360, 640), interpolation=transforms.InterpolationMode.BICUBIC
             )
-            tfms = [tfm for tfm in tfms if not isinstance(tfm, transforms.CenterCrop)] # remove CenterCrop
+            tfms = [
+                tfm for tfm in tfms if not isinstance(tfm, transforms.CenterCrop)
+            ]  # remove CenterCrop
             val_tfm = transforms.Compose(tfms)
 
             return val_tfm
@@ -68,9 +71,9 @@ class NoTempMethod(BaseMethod):
         """
         # Convert BGR to RGB
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        assert isinstance(
-            self.cfg, Config
-        ), "current method Cfg is not an instance of temporal.Config"
+        assert isinstance(self.cfg, Config), (
+            "current method Cfg is not an instance of temporal.Config"
+        )
         full_cfg: Config = self.cfg
         model_name: str = fs.get_file_name(
             full_cfg.model_cfg.model_path, split_file_ext=True
@@ -105,7 +108,9 @@ class NoTempMethod(BaseMethod):
         # 4. Convert tensors to lists for easier handling
         logits = logits.cpu().squeeze().tolist()
         probs = probs.cpu().squeeze().tolist()
-        assert len(probs) == len(self.cfg.model_cfg.class_names), "Mismatch in number of classes and probabilities."
+        assert len(probs) == len(self.cfg.model_cfg.class_names), (
+            "Mismatch in number of classes and probabilities."
+        )
 
         # 5. Get the predicted class name
         classNames = self.cfg.model_cfg.class_names

@@ -151,21 +151,21 @@ def calc_perf(video, gt_label, total_frames, mt_name, csv_path):
     """Calculate performance metrics per video per method."""
     is_YOLO_pred_csv = True if "yolo" in mt_name.lower() else False
     # pprint(f"[INFO] Calculating performance for video: {video}, method: {mt_name}")
-    if is_YOLO_pred_csv: # YOLO models: VP5_od.csv
+    if is_YOLO_pred_csv:  # YOLO models: VP5_od.csv
         df_pred = pd.read_csv(csv_path, sep=";", encoding="utf-8")
-    elif 'firenet' in mt_name.lower() or 'mobilenet' in mt_name.lower():
-            df_pred = pd.read_csv(
-                csv_path,
-                sep=";",
-                encoding="utf-8",
-                dtype={"label": str, "elapsed_time": float},
-                keep_default_na=False,
-            )
-            df_pred = df_pred.rename(columns={"label": "pred_label"})
-            # convert 'none' to 'None'
-            df_pred["pred_label"] = df_pred["pred_label"].apply(
-                lambda x: "None" if x.lower() == "none" else x
-            )
+    elif "firenet" in mt_name.lower() or "mobilenet" in mt_name.lower():
+        df_pred = pd.read_csv(
+            csv_path,
+            sep=";",
+            encoding="utf-8",
+            dtype={"label": str, "elapsed_time": float},
+            keep_default_na=False,
+        )
+        df_pred = df_pred.rename(columns={"label": "pred_label"})
+        # convert 'none' to 'None'
+        df_pred["pred_label"] = df_pred["pred_label"].apply(
+            lambda x: "None" if x.lower() == "none" else x
+        )
     else:
         df_pred = pd.read_csv(
             csv_path,
@@ -179,14 +179,15 @@ def calc_perf(video, gt_label, total_frames, mt_name, csv_path):
             lambda x: "None" if x.lower() == "skipped" else x
         )
 
-
     if len(df_pred) > total_frames:
         total_frames = len(df_pred)
 
     pred_lb, correct, num_wrong = None, False, 0
 
     if is_YOLO_pred_csv:
-        df_pred.drop_duplicates(subset=["frame_id"], keep="first", inplace=True) # keep first prediction of bboxes in a frame
+        df_pred.drop_duplicates(
+            subset=["frame_id"], keep="first", inplace=True
+        )  # keep first prediction of bboxes in a frame
         if gt_label == POS:
             correct = len(df_pred) > 0
             pred_lb = POS if correct else NEG
@@ -250,7 +251,13 @@ def process_videos(df, methods):
         + [
             f"{m}_{x}"
             for m in methods
-            for x in ["pred", "correct", "num_wrong_frames", "total_elapsed_time", "num_of_frame_with_time"]
+            for x in [
+                "pred",
+                "correct",
+                "num_wrong_frames",
+                "total_elapsed_time",
+                "num_of_frame_with_time",
+            ]
         ],
     )
     rows = []
@@ -264,8 +271,8 @@ def process_videos(df, methods):
 
         row_data = [video, gt_label, total_frames]
         for mt_name in methods:
-            pred_lb, correct, num_wrong, total_elapsed_time, num_of_frame_with_time = calc_perf(
-                video, gt_label, total_frames, mt_name, row[f"{mt_name}_csv"]
+            pred_lb, correct, num_wrong, total_elapsed_time, num_of_frame_with_time = (
+                calc_perf(video, gt_label, total_frames, mt_name, row[f"{mt_name}_csv"])
             )
             row_data += [
                 pred_lb,
@@ -324,7 +331,9 @@ def invert_label(label):
         raise ValueError(f"Unknown label: {label}")
 
 
-def get_gt_pred_and_time_info(df, method, mode="per_video"):  # mode: per_frame or per_video
+def get_gt_pred_and_time_info(
+    df, method, mode="per_video"
+):  # mode: per_frame or per_video
     assert mode in [
         "per_frame",
         "per_video",
@@ -374,14 +383,20 @@ def cal_metric(df, methods, mode="per_video"):  # mode: per_frame or per_video
     results = []
     for method in methods:
         method_rs_dict = {"method": method}
-        y_true, y_pred, num_frame_with_time_allvideos, elapsed_time_allvideos = get_gt_pred_and_time_info(df, method, mode=mode)
+        y_true, y_pred, num_frame_with_time_allvideos, elapsed_time_allvideos = (
+            get_gt_pred_and_time_info(df, method, mode=mode)
+        )
         try:
             # Calculate metrics
             accuracy = accuracy_score(y_true, y_pred)
             precision = precision_score(y_true, y_pred, pos_label=POS)
             recall = recall_score(y_true, y_pred, pos_label=POS)
             f1 = f1_score(y_true, y_pred, pos_label=POS)
-            avg_proc_time =  elapsed_time_allvideos * 1.0 / num_frame_with_time_allvideos if num_frame_with_time_allvideos > 0 else 0.0
+            avg_proc_time = (
+                elapsed_time_allvideos * 1.0 / num_frame_with_time_allvideos
+                if num_frame_with_time_allvideos > 0
+                else 0.0
+            )
             fps = 1.0 / avg_proc_time if avg_proc_time > 0 else 0.0
 
             # Compute confusion matrix (labels ordered as [negative, positive])
@@ -410,7 +425,9 @@ def cal_metric(df, methods, mode="per_video"):  # mode: per_frame or per_video
     return results_df
 
 
-def calc_metrics_and_report(raw_cmp_csv, outdir, modes=["per_video", "per_frame"], log=True):
+def calc_metrics_and_report(
+    raw_cmp_csv, outdir, modes=["per_video", "per_frame"], log=True
+):
     df = pd.read_csv(raw_cmp_csv, sep=";", encoding="utf-8")
     methods_used = []
     methods_used = [
@@ -422,7 +439,7 @@ def calc_metrics_and_report(raw_cmp_csv, outdir, modes=["per_video", "per_frame"
         per_mode_df.to_csv(out_mode_csv, index=False, sep=";", encoding="utf-8")
         print(f"[INFO] <<{mode}>> metrics saved to {out_mode_csv}")
         if log:
-            console.rule(f'Mode={mode}')
+            console.rule(f"Mode={mode}")
             csvfile.fn_display_df(per_mode_df, max_col_width=60)
 
 
@@ -466,7 +483,12 @@ def main():
     )
 
     final_df = process_videos(df=df, methods=METHODS)
-    raw_cmp_csv = save_raw_results(final_df=final_df, methods=METHODS, outdir=OUTDIR, filename="_cmp_raw_results.csv")
+    raw_cmp_csv = save_raw_results(
+        final_df=final_df,
+        methods=METHODS,
+        outdir=OUTDIR,
+        filename="_cmp_raw_results.csv",
+    )
     calc_metrics_and_report(raw_cmp_csv, OUTDIR)
 
 

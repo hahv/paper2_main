@@ -10,6 +10,7 @@ import random
 from moviepy.editor import VideoFileClip
 from loguru import logger
 
+
 def split_non_overlap_clips(
     video_path, target_dir, num_clips, min_duration, max_duration
 ):
@@ -71,12 +72,12 @@ def split_non_overlap_clips(
         # Step 4: Save chosen clips
         output_paths = []
         video_name = fs.get_file_name(video_path, split_file_ext=True)[0]
-        for i, (s, e) in tqdm(enumerate(chosen, 1), 'Saving clips'):
-            pprint(f'Saving clip {i} start={s}, end={e}')
+        for i, (s, e) in tqdm(enumerate(chosen, 1), "Saving clips"):
+            pprint(f"Saving clip {i} start={s}, end={e}")
             clip = video.subclip(s, e)
             out_path = os.path.join(target_dir, f"{video_name}_clip_{i}.mp4")
             if os.path.exists(out_path):
-                pprint(f'{out_path} already existed. Skip')
+                pprint(f"{out_path} already existed. Skip")
             else:
                 # clip.write_videofile(
                 #     out_path, codec="libx264", audio_codec="aac", fps=video.fps
@@ -97,7 +98,7 @@ def split_non_overlap_clips(
                     ]
                     subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 except:
-                    pprint(f'Error when saving clip {i}')
+                    pprint(f"Error when saving clip {i}")
             output_paths.append(out_path)
 
     return output_paths
@@ -137,7 +138,7 @@ def main():
         for test_video in video_ls:
             proc_video += 1
             # test_video = list(video_subdir_dict.values())[0][0]
-            console.rule(f'Proc {proc_video}/{total_video}')
+            console.rule(f"Proc {proc_video}/{total_video}")
             min_duration_secs = 180
             max_duration_secs = 360
             try:
