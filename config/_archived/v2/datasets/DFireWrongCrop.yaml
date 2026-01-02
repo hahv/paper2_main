@@ -1,4 +1,0 @@
-# name : BowFire
-dir_path: datasets/DFireWrongCrop
-extra_cfgs:
-  ds_metric_src: temporal.metric_src.csv_metric_src.CsvDSMetricSrc

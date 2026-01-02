@@ -1,4 +1,0 @@
-__base__: config/hgnetv2_notemp.yaml
-dataset_cfg:
-  list_datasets: [] # empty, will populate from config/datasets
-  selected_dataset_name: DFireWrongCrop
