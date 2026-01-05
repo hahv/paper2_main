@@ -7,10 +7,8 @@ from src.methods.noTemp_mt import NoTempMethod
 class TempBaselineTPTMethod(NoTempMethod):
 
     def before_infer_video(self, video_path: str):
-        method_name = self.cfg.methodCfg.name
-        assert method_name == "temp_tpt", (
-            f"Method {method_name} is not supported for this operation"
-        )
+        # ! do validation: method name in cfg matches class name
+        super()._validate_method_name()
         self.window_size = self.cfg.methodCfg.extra_cfgs["window_size"]
         self.persist_thres = self.cfg.methodCfg.extra_cfgs["persist_thres"]
         self.temporal_buffer = np.zeros(self.window_size, dtype=bool)

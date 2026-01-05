@@ -17,11 +17,11 @@ dbset_selector:
 
 metric_selector:
   list_metrics: [] # empty, will populate from config/metrics
-  selected_metric: metric_per_frame # will be set later
+  selected_metric: per_frame_metric # will be set later
 
 method_selector:
   list_methods: [] # empty, will populate from config/methods
-  selected_method: noTemp # will be set later
+  selected_method: tempBaselineTPT # noTemp
 
 modelCfg:
   base_model: hgnetv2_b5.ssld_stage2_ft_in1k

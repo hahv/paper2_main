@@ -10,6 +10,13 @@ from src.utils import get_transform
 
 
 class NoTempMethod(BaseMethod):
+    def _validate_method_name(self):
+        method_name = self.cfg.methodCfg.name
+        current_class_name = self.__class__.__name__
+        assert (
+            method_name.lower() in current_class_name.lower()
+        ), f"Config method '{method_name}' does not match class '{current_class_name}'"
+
     def _pre_process_frame(self, frame):
         """Pre-process the frame before inference.
         if roi is provided, it will crop the frame to the ROI.

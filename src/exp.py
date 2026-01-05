@@ -1,11 +1,8 @@
 import sys
 
-sys.path.append("E:/NextCloud/base_exp")
-
-import torchmetrics
 from halib import *
 from halib.common.common import seed_everything
-from halib.exp.core.base_exp import BaseExp, ExpHook
+from halib.exp.core.base_exp import BaseExp
 from halib.exp.perf.perfmetrics import MetricsBackend, TorchMetricsBackend
 
 from src.config import *
@@ -84,10 +81,9 @@ class Paper2Exp(BaseExp):
             for mode in mode_metrics_data_dict:
                 console.rule(f"Calculating metrics for mode: {mode}")
                 metrics_data = mode_metrics_data_dict[mode]
-                CSV_FILE_POSTFIX = "__perf"
                 outfile = (
                     self.full_cfg.get_outdir()
-                    + f"/{self.full_cfg.get_cfg_name()}__{mode}{CSV_FILE_POSTFIX}.csv"
+                    + f"/{self.full_cfg.get_cfg_name()}__{mode}.csv"
                 )
                 perf_results, outfile = self.calc_perfs(
                     raw_metrics_data=metrics_data,
