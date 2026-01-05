@@ -9,4 +9,4 @@ extra_cfgs:
   min_roi: 0.7             # min ROI size (relative to frame) for BIG model
   scale_factor: 1.0      # scale factor for frame diff
   tiny_model: models/tf_mobilenetv3_small_minimal_100.in1k_64x64.pth # tiny CNN model path
-  video_rs_handler: FGMaskRSHandler
+  video_rs_proc: FGMaskRSProc

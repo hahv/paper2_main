@@ -1,0 +1,67 @@
+from halib import *
+import torch
+import cv2
+from PIL import Image
+import torch.nn.functional as F
+
+from src.config import Config
+from src.methods.base_mt import BaseMethod
+from src.utils import get_transform
+
+
+class NoTempMethod(BaseMethod):
+    def _pre_process_frame(self, frame):
+        """Pre-process the frame before inference.
+        if roi is provided, it will crop the frame to the ROI.
+        """
+        # Convert BGR to RGB
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        assert isinstance(self.cfg, Config), (
+            "current method Cfg is not an instance of temporal.Config"
+        )
+        model_name: str = fs.get_file_name(
+            self.cfg.modelCfg.model_path, split_file_ext=True
+        )[0]
+        pil_img = Image.fromarray(frame_rgb)
+        # global LOG_TRANSFORM
+        val_transform = get_transform(model_name, self.cfg.modelCfg.input_size)
+        if not self.cfg.inferCfg.log_transforms:
+            with ConsoleLog("Infer transform"):
+                pprint(val_transform)
+        # Apply the transformation
+        frame_batch = val_transform(pil_img).unsqueeze(0)  # Add batch dimension
+        # Move the frame batch to the appropriate device
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        frame_batch = frame_batch.to(device)
+        return frame_batch
+
+    def infer_frame(self, frame, frame_idx: int) -> dict:
+        """Perform inference on the pre-processed frame."""
+        assert self.model is not None, "Model is not loaded."
+        with torch.no_grad():
+            frame = self._pre_process_frame(frame)
+            # 1. Get raw scores (logits) from the model
+            logits: torch.Tensor = self.model(frame)
+
+            # 2. Calculate probabilities using the softmax function
+            probs = F.softmax(logits, dim=1)
+
+        # 3. Get the index of the most likely class
+        labelIdx = torch.argmax(probs, dim=1).item()
+
+        # 4. Convert tensors to lists for easier handling
+        logits = logits.cpu().squeeze().tolist()
+        probs = probs.cpu().squeeze().tolist()
+        assert len(probs) == len(self.cfg.modelCfg.class_names), (
+            "Mismatch in number of classes and probabilities."
+        )
+        # 5. Get the predicted class name
+        classNames = self.cfg.modelCfg.class_names
+        assert labelIdx < len(classNames), "Class index out of range."
+        pred_label = classNames[labelIdx]
+        return {
+            "logits": logits,
+            "probs": probs,
+            "predLabelIdx": labelIdx,
+            "predLabel": pred_label,
+        }

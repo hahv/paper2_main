@@ -1,22 +1,18 @@
-from temporal.methods.base_method import *
-from torchvision import transforms
-from PIL import Image
-from temporal.config import Config
-from temporal.metric_src.testvidoes_metric_src import TestDSMetricSrc
-from temporal.methods.no_temp import NoTempMethod
-import copy
-import glob
-from halib.system import filesys as fs
 from halib import *
+import torch
+from torch.nn import functional as F
+from src.methods.noTemp_mt import NoTempMethod
 
 
-class TempTptMethod(NoTempMethod):
+class TempBaselineTPTMethod(NoTempMethod):
+
     def before_infer_video(self, video_path: str):
-        assert self.cfg.method_cfg.method_used.name == "temp_tpt", (
-            f"Method {self.cfg.method_cfg.method_used.name} is not supported for this operation"
+        method_name = self.cfg.methodCfg.name
+        assert method_name == "temp_tpt", (
+            f"Method {method_name} is not supported for this operation"
         )
-        self.window_size = self.cfg.method_cfg.method_used.extra_cfgs["window_size"]
-        self.persist_thres = self.cfg.method_cfg.method_used.extra_cfgs["persist_thres"]
+        self.window_size = self.cfg.methodCfg.extra_cfgs["window_size"]
+        self.persist_thres = self.cfg.methodCfg.extra_cfgs["persist_thres"]
         self.temporal_buffer = np.zeros(self.window_size, dtype=bool)
         self.pos = 0
 
@@ -26,7 +22,7 @@ class TempTptMethod(NoTempMethod):
         with torch.no_grad():
             frame = self._pre_process_frame(frame)
             # 1. Get raw scores (logits) from the model
-            logits = self.model(frame)
+            logits: torch.Tensor = self.model(frame)
 
             # 2. Calculate probabilities using the softmax function
             probs = F.softmax(logits, dim=1)
@@ -39,9 +35,9 @@ class TempTptMethod(NoTempMethod):
         probs = probs.cpu().squeeze().tolist()
 
         # 5. Get the predicted class name
-        classNames = self.cfg.model_cfg.class_names
+        classNames = self.cfg.modelCfg.class_names
         assert labelIdx < len(classNames), "Class index out of range."
-        pred_label = classNames[labelIdx]
+        pred_label: str = classNames[labelIdx]
         # implement Temporal Persistence Thresholding (TPT)
         if pred_label.lower() != "none":
             self.temporal_buffer[self.pos] = True

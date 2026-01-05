@@ -1,10 +1,8 @@
 from halib import *
-from temporal.config import *
-from temporal.our_exp import OurExp
-
-from halib import *
 from argparse import ArgumentParser
 
+from src.exp import Paper2Exp
+from src.config import Config
 
 def parse_args():
     parser = ArgumentParser(description="desc text")
@@ -13,20 +11,26 @@ def parse_args():
         "--cfg",
         type=str,
         help="config file path",
-        default=r"config/base_eb0.yaml",
+        default=r"config/zruns/__base.yaml",
     )
     return parser.parse_args()
+
+
+def run_single_exp(exp_cfg_file, method_cfg_dict=None):
+    cfg = Config.from_custom_yaml_file(exp_cfg_file)
+    experiment = Paper2Exp(cfg)
+    if method_cfg_dict is not None:
+        cfg.methodCfg.extra_cfgs.update(method_cfg_dict)
+    # update the method config with new hyperparameters
+    metric_rs = experiment.run_exp(do_calc_metrics=cfg.inferCfg.calc_metrics, outdir=cfg.get_outdir())
+    # pprint(metric_rs)
+    return metric_rs
 
 
 def main():
     args = parse_args()
     cfg_file = args.cfg
-    config = Config.from_custom_yaml_file(cfg_file)
-    experiment = OurExp(config)
-    experiment.run_exp(
-        do_calc_metrics=config.infer_cfg.calc_metrics, outdir=config.get_outdir()
-    )
-
+    run_single_exp(cfg_file)
 
 if __name__ == "__main__":
     main()

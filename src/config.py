@@ -70,6 +70,7 @@ class InferConfig(YAMLWizard):
     save_csv_results: bool
     csv_columns: List[str]
     calc_metrics: bool
+    log_transforms: bool
     verbose: bool
 
 
@@ -88,6 +89,18 @@ class ModelConfig(YAMLWizard):
 class DatasetCfg(AutoNamedCfg):
     dir_path: str = None
     extra_cfgs: Optional[Dict[str, Any]] = None
+    vname2path: Optional[Dict[str, str]] = None
+
+    def get_vname2path(self, recursive=True):
+        if self.vname2path is None:
+            video_files = fs.filter_files_by_extension(
+                self.dir_path, [".mp4", ".avi", ".mov"], recursive=recursive
+            )
+            self.vname2path = {
+                fs.get_file_name(fpath, split_file_ext=True)[0]: fpath
+                for fpath in video_files
+            }
+        return self.vname2path
 
     def get_num_videos(self, recursive=False):
         video_files = fs.filter_files_by_extension(
@@ -160,9 +173,8 @@ class Config(ExpBaseCfg):
     metric_selector: MetricSelector
     method_selector: MethodSelector
     general: GeneralCfg
-    infer_cfg: InferConfig
-    model_cfg: ModelConfig
-    cfg_name: Optional[str] = None
+    inferCfg: InferConfig
+    modelCfg: ModelConfig
 
     # --- Base Class Implementations ---
     def get_general_cfg(self) -> GeneralCfg:
@@ -183,7 +195,7 @@ class Config(ExpBaseCfg):
 
     def get_outdir(self):
         exp_outdir = self.expDir
-        pprint(f"Experiment output directory: {exp_outdir}")
+        # pprint(f"Experiment output directory: {exp_outdir}")
         return exp_outdir
 
     # --- SHORTCUT PROPERTIES (THE REQUESTED FEATURE) ---
@@ -202,17 +214,15 @@ class Config(ExpBaseCfg):
     @property
     def expDir(self) -> str:
         assert self.cfg_name is not None, "cfg_name is not set"
-        return os.path.join(
-            self.general.project_dir, self.general.outdir, self.cfg_name
-        )
+        return os.path.join(self.general.project_dir, self.general.outdir, self.cfg_name)
 
     def print_meta_info(self) -> str:
         with ConsoleLog("Meta Info"):
             pprint(self.dbsetCfg)
             pprint(self.methodCfg)
             pprint(self.metricCfg)
-            pprint(self.model_cfg)
-            pprint(self.infer_cfg)
+            pprint(self.modelCfg)
+            pprint(self.inferCfg)
 
     # ---------------------------------------------------
 

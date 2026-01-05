@@ -1,16 +1,9 @@
 from abc import ABC, abstractmethod
-import os
-import cv2
-from temporal.config import *
-from halib.system import filesys as fs
-from halib.filetype import csvfile
-import torch
-import torch.nn.functional as F
-from collections import OrderedDict
+from typing import Any
 
 
-class BaseRSHandler(ABC):
-    """Abstract base class for handling inference results."""
+class BaseRSProc(ABC):
+    """Abstract base class for processing inference results."""
 
     def before_video(
         self,

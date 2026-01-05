@@ -1,4 +1,5 @@
 import torch
+import torchmetrics
 from torchmetrics import Metric
 
 
@@ -46,6 +47,43 @@ class FPR(Metric):  # False Positive Rate
     def compute(self):
         total = self.fp + self.tn
         return self.fp.float() / total if total > 0 else torch.tensor(0.0)
+
+
+class MetricFactory:
+    @staticmethod
+    def create_metric(metric_name: str, num_classes: int = 2) -> Metric:
+        """
+        Factory method to create metric instances based on the metric name.
+        :param metric_name: Name of the metric to create.
+        :param num_classes: Number of classes for classification metrics.
+        :return: An instance of the requested metric.
+        """
+        if num_classes > 2:
+            task = "multiclass"
+        else:
+            task = "binary"
+
+        if metric_name == "accuracy":
+            return torchmetrics.Accuracy(task=task, num_classes=num_classes)
+        if metric_name == "f1_score":
+            return torchmetrics.F1Score(task=task, num_classes=num_classes)
+        if metric_name == "precision":
+            return torchmetrics.Precision(task=task, num_classes=num_classes)
+        if metric_name == "recall (TPR)":
+            return torchmetrics.Recall(task=task, num_classes=num_classes)
+        if metric_name == "FPR (False Alarm Rate)":
+            return FPR()
+        if metric_name == "FPS":
+            return FPS()
+        else:
+            raise ValueError(f"Unsupported metric: {metric_name}")
+
+    @staticmethod
+    def create_metrics(metric_names: list, num_classes: int = 2) -> dict:
+        metrics = {}
+        for name in metric_names:
+            metrics[name] = MetricFactory.create_metric(name, num_classes)
+        return metrics
 
 
 def testFPS():

@@ -1,16 +1,11 @@
-from abc import ABC, abstractmethod
-import os
+from halib import *
 import cv2
-from temporal.config import *
-from halib.system import filesys as fs
-from halib.filetype import csvfile
-import torch
-import torch.nn.functional as F
-from collections import OrderedDict
-from temporal.rs_hdl.rs_video_base import *
+
+from src.config import *
+from src.results.video_base_proc import *
 
 
-class FGMaskRSHandler(BaseVideoRSHandler):
+class FGMaskRSProc(VideoRSProc):
     @staticmethod
     def getColor(classIdx):
         # main palette
@@ -42,7 +37,7 @@ class FGMaskRSHandler(BaseVideoRSHandler):
         frame_bgr = cv2.addWeighted(overlay, 0.5, frame_bgr, 0.5, 0)
         # Add text annotations
         for i, (label, value) in enumerate(label_value_dict.items()):
-            color = BaseVideoRSHandler.bgr_to_rgb(BaseVideoRSHandler.getColor(i))
+            color = VideoRSProc.bgr_to_rgb(VideoRSProc.getColor(i))
             text = (
                 f"{label}: {value:.2f}"
                 if isinstance(value, float)
@@ -179,7 +174,7 @@ class FGMaskRSHandler(BaseVideoRSHandler):
         # visualize fg mask (with block info: which block activated, which block classified as fire/smoke, ROI box, etc.)
         fg_mask_vis = self.annotate_fg_mask(fg_mask_dict=fg_mask_dict)
         # add annotations to fg mask video
-        fg_mask_vis = BaseVideoRSHandler.annotate_frame(fg_mask_vis, lb_val_dict)
+        fg_mask_vis = VideoRSProc.annotate_frame(fg_mask_vis, lb_val_dict)
         self.fg_mask_video_writer.write(fg_mask_vis)
 
     def after_video(self, video_path: str, **kwargs):

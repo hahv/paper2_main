@@ -1,7 +1,7 @@
 # dataset_name: dataset_all
-dataset_name: DFire
+dataset_name: NewDB
 # dataset_path: /mnt/d/ZDev/__new_dataset/dataset_all
-dataset_path: /mnt/e/SyncData/paper2_main/datasets/DFire-Static_new/valid
+dataset_path: /mnt/e/SyncData/paper2_main/datasets/UFireIndoor
 label_file_posfix: __labels
 search_recursive: true
 skip_existing: true

@@ -1,14 +1,8 @@
-from temporal.config import *
-from halib.filetype import csvfile
-from typing import Dict, Any
-from temporal.metric_src.metrics_src_base import *
 import torch
-
-from temporal.config import *
-from halib.filetype import csvfile
+from halib import *
 from typing import Dict, Any
-from temporal.metric_src.metrics_src_base import *
-import torch
+from src.config import Config
+from src.metrics.base_metric_src import BaseMetricSrc
 
 
 class CsvDSMetricSrc(BaseMetricSrc):
@@ -23,11 +17,11 @@ class CsvDSMetricSrc(BaseMetricSrc):
 
     def __init__(self, cfg: Config):
         self.cfg = cfg
-        super().__init__(cfg.dataset_cfg.dataset_used.name)
+        super().__init__(cfg.dbsetCfg.name)
         self.per_video_out_list = None
 
     def _register_handlers(self):
-        metric_set_meta = self.cfg.metric_cfg.metricSet_used
+        metric_set_meta = self.cfg.metricCfg
         metric_names = metric_set_meta.metric_names
         modes = metric_set_meta.extra_cfgs.get("mode", ["per-video"])
         self.did_save_raw_pred_and_gt = {mode: False for mode in modes}
@@ -94,10 +88,16 @@ class CsvDSMetricSrc(BaseMetricSrc):
     def get_gt_df(self, csv_file, mode, dataset_name, num_frames, has_csv_label=False):
         video_name = fs.get_file_name(csv_file, split_file_ext=True)[0]
         video_name = video_name.replace("_results", "")
+        recursive = self.cfg.dbsetCfg.extra_cfgs.get("ds_recursive", False)
+        vname2path_dict = self.cfg.dbsetCfg.get_vname2path(
+            recursive=recursive
+        )
+
+
         if has_csv_label:
-            csv_file = os.path.join(
-                self.cfg.dataset_cfg.dataset_used.dir_path, f"{video_name}__labels.csv"
-            )
+            label_gt_file_name = f"{video_name}__labels.csv"
+            video_dir = os.path.dirname(vname2path_dict[video_name])
+            csv_file = os.path.join(video_dir, label_gt_file_name)
             assert os.path.exists(csv_file), f"CSV label file {csv_file} does not exist"
             gt = []
             gt_df = pd.read_csv(
@@ -168,7 +168,8 @@ class CsvDSMetricSrc(BaseMetricSrc):
             indir = self.cfg.get_outdir()
         assert indir is not None, "indir must be provided"
         # first list all video files
-        num_videos = self.cfg.dataset_cfg.dataset_used.get_num_videos(recursive=False)
+        recursive = self.cfg.dbsetCfg.extra_cfgs.get("ds_recursive", False)
+        num_videos = self.cfg.dbsetCfg.get_num_videos(recursive=recursive)
         csv_files = fs.filter_files_by_extension(indir, [".csv"], recursive=False)
         # only keep those with "_results" in the name
         # console.rule("Filtered CSV files for metric data")
@@ -183,13 +184,13 @@ class CsvDSMetricSrc(BaseMetricSrc):
 
         # return video_name, gt, and df
         pervideo_pred_gt_ls = []  # gt, df for each frames in each video
-        csv_labels = self.cfg.dataset_cfg.dataset_used.get_csv_labels(recursive=False)
+        csv_labels = self.cfg.dbsetCfg.get_csv_labels(recursive=False)
         has_csv_label = len(csv_labels) > 0
         for csv_file in csv_files:
             df_pred, gt = self.pred_csv_to_pred_gt_df(
                 csv_file,
                 mode=mode,
-                dataset_name=self.cfg.dataset_cfg.dataset_used.name,
+                dataset_name=self.cfg.dbsetCfg.name,
                 has_csv_label=has_csv_label,
             )
             pervideo_pred_gt_ls.append((df_pred, gt))

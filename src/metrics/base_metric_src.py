@@ -1,23 +1,15 @@
 from abc import ABC, abstractmethod
-
-from duckdb import torch
-from temporal.config import *
-from halib.filetype import csvfile
-
-from abc import ABC, abstractmethod
 from typing import Dict, Any, Callable
 
-
-from temporal.utils import get_cls
+from src.config import Config
+from src.utils import get_cls
 
 
 class MetricSrcFactory:
     @staticmethod
-    def create_metric_source(config: Config, *args, **kwargs):
+    def create_metric_src(config: Config, *args, **kwargs):
         # ! instead of create each metric src for each dataset, we specify the metric src class in the dataset config => mulitple datasets can share the same metric src class
-        ds_metric_src = config.dataset_cfg.dataset_used.extra_cfgs.get(
-            "ds_metric_src", None
-        )
+        ds_metric_src = config.dbsetCfg.extra_cfgs.get("ds_metric_src", None)
         cls = get_cls(ds_metric_src)
         assert cls is not None, (
             f"Dataset metric source class not found for {ds_metric_src}"

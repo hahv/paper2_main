@@ -43,11 +43,12 @@ class NewDBLabeler(VideoLabelerBase):
     @staticmethod
     def map_video_to_label(dataset_name: str, video_path: str) -> str:
         fname = fs.get_file_name(video_path, split_file_ext=True)[0]
+        target_fname_parts = ['__lb_fire', '__lb_smoke']
         if dataset_name == "NewDB":
             """Map video file name to its label based on naming conventions."""
-            if "__lb_none__" in fname:
+            if "__lb_none" in fname:
                 return NewDBLabeler.LABEL_NEGATIVE
-            elif "__lb_fire_smoke__" in fname and "__all_fires" in fname:
+            elif any(part in fname for part in target_fname_parts):
                 return NewDBLabeler.LABEL_POSITIVE
             else:
                 return NewDBLabeler.LABEL_MIXED
@@ -159,4 +160,5 @@ class NewDBLabeler(VideoLabelerBase):
             csv_outfile=os.path.join(
                 self.dataset_path, f"___{self.dataset_name}_meta_info.csv"
             ),
+            search_recursive=self.search_recursive,
         )

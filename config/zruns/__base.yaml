@@ -13,7 +13,7 @@ general:
 
 dbset_selector:
   list_dbsets: [] # empty, will populate from config/dbsets
-  selected_dbset: DFire # will be set later
+  selected_dbset: UFireIndoor # will be set later
 
 metric_selector:
   list_metrics: [] # empty, will populate from config/metrics
@@ -21,16 +21,16 @@ metric_selector:
 
 method_selector:
   list_methods: [] # empty, will populate from config/methods
-  selected_method: no_temp # will be set later
+  selected_method: noTemp # will be set later
 
-model_cfg:
-  base_model: hgnetv2_b5.ssld_stage2_ft_in1k # timm
-  model_path: models/prof_2classes_hgnetv2_b5.ssld_stage2_ft_in1k-20251002-2-96-99.11.pth
+modelCfg:
+  base_model: hgnetv2_b5.ssld_stage2_ft_in1k
+  model_path: models/_hgnetv2_b5.ssld_stage2_ft_in1k-20251218-93-98.91_2025.12.23.pth
   input_size: [360, 640] # [H, W], for timm models
-  # class_names: [Fire, None, SmokeOnly]
-  class_names: [FireSmoke, None]
+  class_names: [Fire, None, SmokeOnly]
+  # class_names: [FireSmoke, None]
 
-infer_cfg:
+inferCfg:
   do_infer: true
   skip_if_exists: true
   limit: -1 # -1 for no limit
@@ -43,4 +43,5 @@ infer_cfg:
     - pred_label_idx
     - pred_label
   calc_metrics: true
+  log_transforms: true
   verbose: false

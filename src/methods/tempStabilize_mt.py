@@ -1,9 +1,13 @@
-from temporal.methods.base_method import *
-from temporal.methods.no_temp import NoTempMethod
-from temporal.tiny_cnn import *
+from halib import *
+import cv2
+import timm
 import pybgs as bgs
-import xml.etree.ElementTree as ET
+import torch
 import torch.nn.functional as F
+import xml.etree.ElementTree as ET
+
+from src.models.tiny_cnn import TinyCNN
+from src.methods.noTemp_mt import NoTempMethod
 
 
 class TempStabilizeMethod(NoTempMethod):
@@ -21,7 +25,7 @@ class TempStabilizeMethod(NoTempMethod):
             print("<threshold> tag not found in the XML.")
 
     def _load_temp_stabilize_cfg(self):
-        method_dict = self.cfg.method_cfg.method_used.extra_cfgs
+        method_dict = self.cfg.methodCfg.extra_cfgs
         with ConsoleLog("temp_steablize cfg:"):
             pprint(method_dict)
         self.diff_thres = method_dict["diff_thres"]
@@ -69,8 +73,8 @@ class TempStabilizeMethod(NoTempMethod):
         self.tiny_block_model.eval()
 
     def before_infer_video_dir(self, video_dir: str):
-        assert self.cfg.method_cfg.method_used.name == "temp_stabilize", (
-            f"Method {self.cfg.method_cfg.method_used.name} is not supported for this operation"
+        assert self.cfg.methodCfg.name == "temp_stabilize", (
+            f"Method {self.cfg.methodCfg.name} is not supported for this operation"
         )
         self._load_temp_stabilize_cfg()
         self._load_block_tiny_cnn_model()
@@ -125,7 +129,7 @@ class TempStabilizeMethod(NoTempMethod):
         blocks = blocks.contiguous().view(3, -1, block_size, block_size)
         return blocks.permute(1, 0, 2, 3)  # (num_blocks,C,block_size,block_size)
 
-    def _active_motion_blocks(self, fg_mask, threshold=0.1):
+    def _active_motion_blocks(self, fg_mask: np.ndarray, threshold=0.1):
         """
         fg_mask: (H,W) uint8 numpy (0 or 255)
         returns: 1D array of active block indices
@@ -413,8 +417,8 @@ class TempStabilizeMethod(NoTempMethod):
         else:
             # pprint(f"Frame {frame_idx} skipped by skip module.")
             res = {
-                "logits": [0.0] * len(self.cfg.model_cfg.class_names),
-                "probs": [0.0] * len(self.cfg.model_cfg.class_names),
+                "logits": [0.0] * len(self.cfg.modelCfg.class_names),
+                "probs": [0.0] * len(self.cfg.modelCfg.class_names),
                 "predLabelIdx": -1,
                 "predLabel": "skipped",
             }

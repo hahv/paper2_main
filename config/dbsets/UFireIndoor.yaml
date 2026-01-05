@@ -1,0 +1,4 @@
+dir_path: datasets/UFireIndoor
+extra_cfgs:
+  ds_metric_src: src.metrics.csv_metric_src.CsvDSMetricSrc
+  ds_recursive: true

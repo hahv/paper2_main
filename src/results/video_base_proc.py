@@ -1,16 +1,10 @@
-from abc import ABC, abstractmethod
-import os
+from halib import *
 import cv2
-from temporal.config import *
-from halib.system import filesys as fs
-from halib.filetype import csvfile
-import torch
-import torch.nn.functional as F
-from collections import OrderedDict
-from temporal.rs_hdl.rs_base import *
+from src.config import *
+from src.results.base_rs_proc import *
 
 
-class BaseVideoRSHandler(BaseRSHandler):
+class VideoRSProc(BaseRSProc):
     @staticmethod
     def getColor(classIdx):
         # main palette
@@ -42,7 +36,7 @@ class BaseVideoRSHandler(BaseRSHandler):
         frame_bgr = cv2.addWeighted(overlay, 0.5, frame_bgr, 0.5, 0)
         # Add text annotations
         for i, (label, value) in enumerate(label_value_dict.items()):
-            color = BaseVideoRSHandler.bgr_to_rgb(BaseVideoRSHandler.getColor(i))
+            color = VideoRSProc.bgr_to_rgb(VideoRSProc.getColor(i))
             text = (
                 f"{label}: {value:.2f}"
                 if isinstance(value, float)
@@ -61,7 +55,7 @@ class BaseVideoRSHandler(BaseRSHandler):
 
     def __init__(self, cfg: Config):
         self.cfg = cfg
-        assert self.cfg.infer_cfg.save_video_results, (
+        assert self.cfg.inferCfg.save_video_results, (
             "Video saving is disabled in the config"
         )
         self.video_writer = None
@@ -73,11 +67,11 @@ class BaseVideoRSHandler(BaseRSHandler):
         # if video_path is not a video (e.g., image folder), skip video writer creation
         if fs.is_directory(video_path):
             return
-        if not self.cfg.infer_cfg.save_csv_results:
+        if not self.cfg.inferCfg.save_csv_results:
             return
         fname = fs.get_file_name(video_path, split_file_ext=True)[0]
         self.video_output_path = os.path.join(self.outdir, f"{fname}_out.mp4")
-        skip_if_exists = self.cfg.infer_cfg.skip_if_exists
+        skip_if_exists = self.cfg.inferCfg.skip_if_exists
         if skip_if_exists and os.path.exists(self.video_output_path):
             self.outfile_exists = True
             print(f"Video file already exists, skipping: {self.video_output_path}")
@@ -105,7 +99,7 @@ class BaseVideoRSHandler(BaseRSHandler):
         lb_val_dict["pred---"] = pred_str
         if extra_info is not None:
             lb_val_dict.update(extra_info)
-        frame_vis = BaseVideoRSHandler.annotate_frame(frame_bgr, lb_val_dict)
+        frame_vis = VideoRSProc.annotate_frame(frame_bgr, lb_val_dict)
         return frame_vis, lb_val_dict
 
     def handle_frame_results(self, frame_bgr, frame_rs_dict: dict):

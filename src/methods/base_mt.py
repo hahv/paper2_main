@@ -1,17 +1,18 @@
+from halib import *
+
 import cv2
 import time
 import timm
 import torch
-from halib import *
-
-from temporal.rs_hdl import *
-from temporal.config import Config
-
 from abc import ABC, abstractmethod
-import importlib
-from temporal.utils import get_cls
-from temporal.metric_src.metrics_src_base import MetricSrcFactory, BaseMetricSrc
-from halib.research.profiler import zProfiler
+from halib.exp.perf.profiler import zProfiler
+
+from src.results import *
+from src.config import Config
+from src.utils import get_cls
+from src.metrics.base_metric_src import *
+from src.results.base_rs_proc import BaseRSProc
+from src.results.csv_proc import CsvRSProc
 
 
 class MethodFactory:
@@ -22,24 +23,31 @@ class MethodFactory:
             Convert snake_case string to PascalCase and append suffix.
             Example: "no_temp" -> "NoTempMethod"
             """
-            parts = name.split("_")
-            pascal = "".join(word.capitalize() for word in parts)
+            parts = name.split("_")[:-1] # remove the 'mt' postfix
+            # Capitalize the first letter fo each part, but keep the rest as is
+            for i in range(len(parts)):
+                word = parts[i]
+                word = word[0].upper() + word[1:]
+                parts[i] = word
+            pascal = "".join(parts)
             return pascal + suffix
 
-        pkg_name = "temporal.methods"
+        pkg_name = "src.methods"
         # ! method_name == module_name
-        module_name = config.method_cfg.method_used.name
+        method_postfix = "mt"
+        module_name = f"{config.methodCfg.name}_{method_postfix}"
         cls_name = method_name_to_cls_name(module_name)
+        pprint(f'Creating method class: {pkg_name}.{module_name}.{cls_name}')
         cls = get_cls(f"{pkg_name}.{module_name}.{cls_name}")
         assert cls is not None, f"Class '{cls_name}' not found in module '{pkg_name}'."
 
-        rs_handler_list: list[BaseRSHandler] = []
-        if config.infer_cfg.save_csv_results:
-            rs_handler_list.append(CsvRSHandler(config))
-        if config.infer_cfg.save_video_results:
-            pkg_name = "temporal.rs_hdl"
-            chosen_video_handler = config.method_cfg.method_used.extra_cfgs.get(
-                "video_rs_handler", "BaseVideoRSHandler"
+        rs_handler_list: list[BaseRSProc] = []
+        if config.inferCfg.save_csv_results:
+            rs_handler_list.append(CsvRSProc(config))
+        if config.inferCfg.save_video_results:
+            pkg_name = "src.results"
+            chosen_video_handler = config.methodCfg.extra_cfgs.get(
+                "video_rs_proc", "VideoRSProc"
             )
             rs_handler_list.append(
                 get_cls(f"{pkg_name}.{chosen_video_handler}")(cfg=config)
@@ -57,7 +65,7 @@ class BaseMethod(ABC):
 
     REQUIRED_INFER_RS = ["logits", "probs", "predLabelIdx", "predLabel"]
 
-    def __init__(self, cfg: Config, rs_handlers: list[BaseRSHandler] = None):
+    def __init__(self, cfg: Config, rs_handlers: list[BaseRSProc] = None):
         """
         Initializes the detector.
 
@@ -75,15 +83,6 @@ class BaseMethod(ABC):
 
         # Store the list of handlers that will process the results
         self.result_handlers = rs_handlers if rs_handlers is not None else []
-
-    # --------------------------------------------------------------------------
-    # Abstract Methods - To be implemented by subclasses
-    # --------------------------------------------------------------------------
-
-    # @abstractmethod
-    # def infer_results_to_list(self, infer_results: dict) -> list:
-    #     """Converts raw model output dictionary to a list for CSV logging."""
-    #     pass
 
     @abstractmethod
     def infer_frame(self, frame, frame_idx: int) -> dict:
@@ -106,21 +105,21 @@ class BaseMethod(ABC):
         Prepares the metric source and retrieves metric data.
         """
         perf_dir = self.cfg.get_outdir()
-        metric_source = MetricSrcFactory.create_metric_source(self.cfg)
+        metric_source = MetricSrcFactory.create_metric_src(self.cfg)
         base_metric_src: BaseMetricSrc = metric_source
         return base_metric_src.get_data_metrics(in_dir=perf_dir, **kwargs)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Core Methods
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
     def load_model(self):
         """Custom method to load the model, can be overridden if needed."""
         return timm.create_model(
-            self.cfg.model_cfg.base_model,
+            self.cfg.modelCfg.base_model,
             pretrained=False,
-            num_classes=len(self.cfg.model_cfg.class_names),
-            checkpoint_path=self.cfg.model_cfg.model_path,
+            num_classes=len(self.cfg.modelCfg.class_names),
+            checkpoint_path=self.cfg.modelCfg.model_path,
         )
 
     def prepare_model(self):
@@ -141,6 +140,7 @@ class BaseMethod(ABC):
             highlight=False,
         )
 
+    # ! ----HOOK METHODS for process VIDEO DIR or SINGLE VIDEO-----------
     def before_infer_video_dir(self, video_dir: str):
         """Hook method called before starting inference on a video directory."""
         pass
@@ -149,7 +149,15 @@ class BaseMethod(ABC):
         """Hook method called after completing inference on a video directory."""
         pass
 
-    # ! override if needed
+    def before_infer_video(self, video_path: str):
+        """Hook method called before starting inference on a video."""
+        pass
+
+    def after_infer_video(self, video_path: str):
+        """Hook method called after completing inference on a video."""
+        pass
+
+    # !------End HOOKS------------------------------------------------------
 
     def infer_video_dir(self, video_dir: str, recursive: bool = True):
         """Processes all videos in a specified directory."""
@@ -158,21 +166,13 @@ class BaseMethod(ABC):
             video_dir, [".mp4", ".avi", ".mov", ".mkv"], recursive=recursive
         )
         assert len(video_files) > 0, f"No video files found in {video_dir}."
+
         self.before_infer_video_dir(video_dir)
 
         for i, video_path in enumerate(video_files):
             self.infer_video(video_path, video_idx=i, total_videos=len(video_files))
+
         self.after_infer_video_dir(video_dir)
-
-    #! override if needed
-    def before_infer_video(self, video_path: str):
-        """Hook method called before starting inference on a video."""
-        pass
-
-    #! override if needed
-    def after_infer_video(self, video_path: str):
-        """Hook method called after completing inference on a video."""
-        pass
 
     def infer_video(
         self, video_path: str, video_idx: int = None, total_videos: int = None
@@ -187,6 +187,7 @@ class BaseMethod(ABC):
             else f"[{video_idx + 1}/{total_videos}]"
         )
         pprint(f"{progress_str} Starting inference for: {video_path}")
+        # ! Hook: Call the hook method before video inference
         self.before_infer_video(video_path)
 
         self.prepare_model()
@@ -210,23 +211,21 @@ class BaseMethod(ABC):
                 total_frames=total_frames,
                 fps=vfps,
                 frame_size=frame_size,
-                skip_if_exists=self.cfg.infer_cfg.skip_if_exists,
+                skip_if_exists=self.cfg.inferCfg.skip_if_exists,
             )
 
         # find CsvRSHandler in self.result_handlers
         csv_handler = None
         for handler in self.result_handlers:
-            if isinstance(handler, CsvRSHandler):
+            if isinstance(handler, CsvRSProc):
                 csv_handler = handler
                 break
         assert csv_handler is not None, (
-            "CsvRSHandler not found in result_handlers, it is required."
+            "CsvRSProc not found in result_handlers, it is required."
         )
         SKIP_INFER = csv_handler.outfile_exists
         frame_idx = 0
-        limit = (
-            self.cfg.infer_cfg.limit if self.cfg.infer_cfg.limit > 0 else total_frames
-        )
+        limit = self.cfg.inferCfg.limit if self.cfg.inferCfg.limit > 0 else total_frames
         if not SKIP_INFER:
             try:
                 while cap.isOpened():
@@ -237,9 +236,9 @@ class BaseMethod(ABC):
                     if limit > 0 and frame_idx > limit:
                         pprint(f"Frame limit reached: {limit}, stop")
                         break
+                    self._log_progress(frame_idx, total_frames)
 
                     start_time = time.perf_counter()
-
                     infer_rs = self.infer_frame(frame_bgr, frame_idx)
                     if not all(key in infer_rs for key in BaseMethod.REQUIRED_INFER_RS):
                         raise ValueError(
@@ -265,15 +264,14 @@ class BaseMethod(ABC):
                     # --- Delegate the packet to all registered handlers ---
                     for handler in self.result_handlers:
                         handler.handle_frame_results(frame_bgr, frame_rs_dict)
-                    self._log_progress(frame_idx, total_frames)
 
             finally:
                 cap.release()
-                # cv2.destroyAllWindows()
                 # Notify all handlers that the video processing is complete
         #! even if SKIP_INFER, we still need to call after_video to do some clean up
         for handler in self.result_handlers:
             handler.after_video(video_path=video_path)
         print(f"\nFinished inference for: {video_path}\n")
-        # Call the hook method after video inference
+
+        # ! Hook: Call the hook method after video inference
         self.after_infer_video(video_path=video_path)

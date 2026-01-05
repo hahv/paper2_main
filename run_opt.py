@@ -8,37 +8,30 @@ from optuna.trial import Trial
 
 from halib import *
 from halib.research.params_gen import ParamGen
-from temporal.config import *
-from temporal.our_exp import OurExp
+from src.config import Config
+from src.exp import Paper2Exp
+from run_exp import run_single_exp
+from halib.system.path import *
 
 
 def parse_args():
-    parser = ArgumentParser(description="desc text")
+    parser = ArgumentParser(description="method parameter optimization")
     parser.add_argument(
-        "-cfg", "--cfg", type=str, help="config file", default=r"./config/__base.yaml"
+        "-cfg",
+        "--cfg",
+        type=str,
+        help="config file for the selected method",
+        default=r"./config/zruns/__base.yaml",
     )
     parser.add_argument(
         "-optcfg",
         "--optcfg",
         type=str,
-        help="optimization config file",
-        default=r"./config/__opt_cfg.yaml",
+        help="optimization config file for the selected method",
+        default=r"./config/zruns/__opt_cfg.yaml",
     )
 
     return parser.parse_args()
-
-
-def run_pipeline(exp_cfg_file, method_cfg_dict):
-    config = Config.from_custom_yaml_file(exp_cfg_file)
-    experiment = OurExp(config)
-    assert config.method_cfg.method_used.name == "temp_stabilize", (
-        "Only temporal stabilization method is supported in this optimization script."
-    )
-    config.method_cfg.method_used.extra_cfgs.update(method_cfg_dict)
-    # update the method config with new hyperparameters
-    metric_rs = experiment.run_exp(do_calc_metrics=config.infer_cfg.calc_metrics)
-    pprint(metric_rs)
-    return metric_rs
 
 
 SEARCH_SPACE = None
@@ -58,13 +51,10 @@ def objective(trial: Trial):
 
     # ---- Run your pipeline with these hyperparams ----
     global current_exp_cfg_file
-    metrics = None
     with ConsoleLog(f"Running trial {trial.number}/{num_trials}"):
         print(f"param set :")
         pprint(trial_param_set)
-        metrics = run_pipeline(
-            exp_cfg_file=current_exp_cfg_file, method_cfg_dict=trial_param_set
-        )
+        metrics = run_single_exp(current_exp_cfg_file, method_cfg_dict=trial_param_set)
 
     # Return metric to maximize (e.g., F1 score)
     return np.random.rand()
@@ -78,6 +68,10 @@ def calc_num_trials(search_space):
 
 
 def main():
+    # move to folder where the script is located
+    script_folder = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(script_folder)
+
     # Load base config for experiments
     global current_exp_cfg_file
     current_exp_cfg_file = parse_args().cfg
@@ -94,7 +88,12 @@ def main():
     sampler = optuna.samplers.GridSampler(SEARCH_SPACE)
 
     # Persistent storage
-    storage_url = "sqlite:////mnt/e/SyncData/paper2_main/zout/tune/optuna_study.db"
+    prefix = "sqlite:///"
+    sqlite_db_path = os.path.abspath(os.path.join(
+        script_folder, "zout/tune/optuna_study.db"
+    ))
+    sqlite_db_path = normalize_paths(sqlite_db_path)
+    storage_url = prefix + sqlite_db_path
     study = optuna.create_study(
         study_name=f"temp_stabilize_opt_{now_str()}",
         direction="maximize",
