@@ -13,7 +13,7 @@ from src.utils import get_cls
 from src.metrics.base_metric_src import *
 from src.results.base_rs_proc import BaseRSProc
 from src.results.csv_proc import CsvRSProc
-
+import sys
 
 class MethodFactory:
     @staticmethod
@@ -139,6 +139,7 @@ class BaseMethod(ABC):
             end="\r",
             highlight=False,
         )
+        sys.stdout.flush()  # Force the flush manually
 
     # ! ----HOOK METHODS for process VIDEO DIR or SINGLE VIDEO-----------
     def before_infer_video_dir(self, video_dir: str):

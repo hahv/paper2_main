@@ -1,0 +1,11 @@
+dbset:
+  type: list # raw_list or range [start, end, step]
+  values: ["UFireIndoor"] # ["BowFire", "UFire", "DFAN"]
+
+method:
+  type: list
+  values: ["noTemp", "tempBaselineTPT"]
+
+metric:
+  type: list
+  values: ["per_frame_metric"]

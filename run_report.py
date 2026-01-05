@@ -22,6 +22,8 @@ def parse_args():
         help="report output directory",
         default="./zout/reports",
     )
+    parser.add_argument("--now", action="store_true",
+                        help="use current timestamp for report dir")
     return parser.parse_args()
 
 def default_exp_csv_filter_fn(exp_file_name: str) -> bool:
@@ -36,7 +38,8 @@ def main():
     indir = args.indir
     metric_dir = args.metricDir
     report_dir = args.reportDir
-    report_dir = os.path.join(report_dir, now_str())
+    if args.now:
+        report_dir = os.path.join(report_dir, now_str())
     os.makedirs(report_dir, exist_ok=True)
 
     metric_files = fs.filter_files_by_extension(metric_dir, ".yaml")

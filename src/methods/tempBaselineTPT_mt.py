@@ -1,4 +1,5 @@
 from halib import *
+import sys
 import torch
 from torch.nn import functional as F
 from src.methods.noTemp_mt import NoTempMethod
@@ -43,9 +44,11 @@ class TempBaselineTPTMethod(NoTempMethod):
         if pred_label != "none":
             num_det_frames = np.sum(self.temporal_buffer)
             if num_det_frames <= self.persist_thres * self.window_size:
-                pprint(
-                    f"Suppressing `fire/smoke` detection at frame {frame_idx} by TPT."
+                console.print(
+                    f"Suppressing `fire/smoke` detection at frame [bold cyan]{frame_idx}[/] by TPT.",
+                    end="\r"
                 )
+                sys.stdout.flush()  # Force the flush manually
                 pred_label = "none"
         return {
             "logits": logits,

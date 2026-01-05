@@ -67,7 +67,7 @@ class Paper2Exp(BaseExp):
         exp_rs = eval_data_dict, extra_data
         return exp_rs
 
-    def run_exp(self, do_calc_metrics=True, *args, **kwargs):
+    def run_exp(self, should_calc_metrics=True, reload_env=False, *args, **kwargs):
         self.init_general(self.config.get_general_cfg())
         self.prepare_dataset(self.config.get_dataset_cfg())
         self.prepare_metrics(self.config.get_metric_cfg())
@@ -76,7 +76,7 @@ class Paper2Exp(BaseExp):
         self.config.save_to_outdir()
         # Execute experiment
         results = self.exec_exp(*args, **kwargs)
-        if do_calc_metrics:
+        if should_calc_metrics:
             mode_metrics_data_dict, _ = results
             for mode in mode_metrics_data_dict:
                 console.rule(f"Calculating metrics for mode: {mode}")
