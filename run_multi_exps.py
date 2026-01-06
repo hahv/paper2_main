@@ -17,28 +17,26 @@ def parse_args():
     return parser.parse_args()
 
 
-def get_cfg_run_list(search_space: dict, base_cfg_dict: dict) -> List[Config]:
+def update_base_cfg_fn(base_cfg: dict, combination_item: dict):
+    for key, value in combination_item.items():
+        selected_field = f"{key}_selector"
+        base_cfg[selected_field][f"selected_{key}"] = value
+    return base_cfg
+
+def get_cfg_run_list(base_cfg_dict: dict, param_file: str) -> List[Config]:
     """
     Given a search space and a base config dict, generate a list of Config objects.
     """
-    keys = search_space.keys()
-    values = search_space.values()
-    # list all combinations
-    cfg_list_dicts = [dict(zip(keys, combo)) for combo in product(*values)]
-    # pprint(cfg_list_dicts)
-    # replace values in base_cfg_dict and create Config objects
-    cfg_list: List[Config] = []
-    for cfg_combine in cfg_list_dicts:
-        # create a new config dict
-        new_cfg_dict = base_cfg_dict.copy()
-        for key, value in cfg_combine.items():
-            # set the selected_* field
-            selected_field = f"{key}_selector"
-            new_cfg_dict[selected_field][f"selected_{key}"] = value
-        # create Config object
-        cfg_obj = Config.from_custom_yaml_file_or_str(new_cfg_dict)
-        cfg_list.append(cfg_obj)
-    return cfg_list
+    ls_dict_cfgs = ParamGen.expand_from_file(
+        base_cfg=base_cfg_dict,
+        params_file=param_file,
+        update_base_cfg_fn=update_base_cfg_fn,
+    )
+    ls_run_cfgs: List[Config] = []
+    for cfg in ls_dict_cfgs:
+        cfg_obj = Config.from_custom_yaml_file_or_str(cfg)
+        ls_run_cfgs.append(cfg_obj)
+    return ls_run_cfgs
 
 
 def main():
@@ -49,7 +47,6 @@ def main():
     )
     num_cfgs = len(run_files)
 
-    RUN_SPACE = ParamGen.build_from_file("./config/zruns/_run_gen.yaml")
     base_yaml = "config/zruns/__base.yaml"
     base_cfg_dict = yamlfile.load_yaml(base_yaml, to_dict=True)
     # ! force base cfg to have time_stamp, to make sure each run using the same base cfg gets a unique time_stamp
@@ -57,7 +54,8 @@ def main():
     if "__base__" in base_cfg_dict:
         del base_cfg_dict["__base__"]
 
-    ls_run_cfgs: List[Config] = get_cfg_run_list(RUN_SPACE, base_cfg_dict)
+    param_file = r"./config/zruns/_run_gen.yaml"
+    ls_run_cfgs: List[Config] = get_cfg_run_list(base_cfg_dict, param_file)
     assert len(ls_run_cfgs) > 0, "No configs to run!"
 
     console.rule(f"Total {len(ls_run_cfgs)} configs to run")

@@ -7,7 +7,7 @@ import optuna
 from optuna.trial import Trial
 
 from halib import *
-from halib.research.params_gen import ParamGen
+from halib.exp.core.param_gen import ParamGen
 from src.config import Config
 from src.exp import Paper2Exp
 from run_exp import run_single_exp
@@ -82,7 +82,7 @@ def main():
     # Load optimization config
     opt_cfg_file = parse_args().optcfg
     global SEARCH_SPACE
-    SEARCH_SPACE = ParamGen.build_from_file(opt_cfg_file)
+    SEARCH_SPACE = ParamGen.from_file(opt_cfg_file).params
 
     # Create a GridSampler with your space
     sampler = optuna.samplers.GridSampler(SEARCH_SPACE)
