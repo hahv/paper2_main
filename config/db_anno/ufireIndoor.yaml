@@ -1,0 +1,6 @@
+# dataset_name: dataset_all
+dataset_name: NewDB
+dataset_path: /mnt/d/zdataset_paper2/build_video_dataset/my_firesmoke_indoor/
+label_file_posfix: __labels
+search_recursive: true
+skip_existing: true

@@ -13,7 +13,7 @@ class NewDBLabeler(VideoLabelerBase):
     VALID_IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png"]
     LABEL_POSITIVE = "Fire_Smoke"
     LABEL_NEGATIVE = "None"
-    LABEL_MIXED = "Mixed"
+    LABEL_MIXED = "Mixed" # Frames have mixed labels (some fire/smoke, some none)
 
     def __init__(
         self,
