@@ -68,7 +68,3 @@ explicit = true
 
 # TO install CPU torch: uv sync --extra cpu
 # TO install GPU torch: uv sync --extra gpu
-
-[tool.ruff.lint]
-# Add F405 to the ignore list
-extend-ignore = ["F405"]

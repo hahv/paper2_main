@@ -1,17 +1,13 @@
-from halib import *
-from halib.filetype import yamlfile
-from argparse import ArgumentParser
-import numpy as np
-
+from tap import *
 import optuna
 from optuna.trial import Trial
 
 from halib import *
-from halib.exp.core.param_gen import ParamGen
-from run_exp import run_single_exp
 from halib.system.path import *
+from halib.exp.core.param_gen import ParamGen
 
-from tap import *
+from run_exp import run_single_exp
+
 
 class RunOptArgs(Tap):
     cfg: str = r"./config/zruns/__base.yaml"
@@ -28,14 +24,14 @@ def objective(trial: Trial):
 
     trial_param_set = {}
     for params in SEARCH_SPACE:  # ty:ignore[not-iterable]
-        print(f"{params}: {SEARCH_SPACE[params]}")  # ty:ignore[non-subscriptable]
-        value = trial.suggest_categorical(params, SEARCH_SPACE[params])  # ty:ignore[non-subscriptable]
+        print(f"{params}: {SEARCH_SPACE[params]}")  # ty:ignore[not-subscriptable]
+        value = trial.suggest_categorical(params, SEARCH_SPACE[params])  # ty:ignore[not-subscriptable]
         trial_param_set[params] = value
 
     # ---- Run your pipeline with these hyperparams ----
     global current_exp_cfg_file
     with ConsoleLog(f"Running trial {trial.number}/{num_trials}"):
-        print(f"param set :")
+        print("param set :")
         pprint(trial_param_set)
         metrics = run_single_exp(current_exp_cfg_file, method_cfg_dict=trial_param_set)
 

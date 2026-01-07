@@ -33,25 +33,9 @@
     },
     "explorerExclude.backup": {},
     "notebook.formatOnSave.enabled": true,
-    "python.languageServer": "None",
     // Disable the Python language server; using ty (Astral.sh) for faster linting and formatting
-    // "python.languageServer": "None"
-    // "python.linting.enabled": true,
-    // "python.linting.pylintEnabled": false,
-    // "python.linting.flake8Enabled": false,
-    // "[python]": {
-    //     "editor.formatOnSave": true,
-    //     "editor.codeActionsOnSave": {
-    //         "source.fixAll": "explicit",
-    //         "source.organizeImports": "explicit"
-    //     },
-    //     "editor.defaultFormatter": "charliermarsh.ruff"
-    // }
-    // "[python]": {
-    //     "editor.formatOnSave": true,
-    //     "editor.defaultFormatter": "charliermarsh.ruff"
-    // },
-    // // Optional: Disable Pylint if you have it enabled, as Ruff replaces it
-    // "python.linting.pylintEnabled": false,
-    // "python.linting.enabled": true
+    "python.languageServer": "None",
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff"
+    }
 }

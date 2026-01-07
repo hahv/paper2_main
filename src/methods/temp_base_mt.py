@@ -1,18 +1,11 @@
 from halib import *
+
 from abc import abstractmethod
-import cv2
-import timm
-import pybgs as bgs  # ty:ignore[unresolved-import]
-import torch
-import torch.nn.functional as F
-import xml.etree.ElementTree as ET
 from typing import Optional, Tuple, Dict
-from src.models.tiny_cnn import TinyCNN
 from src.methods.noTemp_mt import NoTempMethod
 
 
 class TempBaseMethod(NoTempMethod):
-
     @abstractmethod
     def skip_module(self, frame_idx, cv2_bgr_frame) -> Tuple[bool, Optional[Dict]]:
         """

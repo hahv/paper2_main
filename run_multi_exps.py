@@ -1,22 +1,24 @@
-from halib import *  # noqa: F403
-from halib.filetype import yamlfile
-from argparse import ArgumentParser
-from src.config import Config
 from typing import List
-from itertools import product
 
-from src.exp import Paper2Exp
+from halib import *  # noqa: F403
 from halib.exp.core.param_gen import ParamGen
+from halib.filetype import yamlfile
 from tap import *
+
+from src.config import Config
+from src.exp import Paper2Exp
+
 
 class MultipleExpArgs(Tap):
     indir: str = "./config/zruns"  # input dir of run configs
+
 
 def update_base_cfg_fn(base_cfg: dict, combination_item: dict):
     for key, value in combination_item.items():
         selected_field = f"{key}_selector"
         base_cfg[selected_field][f"selected_{key}"] = value
     return base_cfg
+
 
 def get_cfg_run_list(base_cfg_dict: dict, param_file: str) -> List[Config]:
     """

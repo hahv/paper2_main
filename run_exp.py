@@ -1,9 +1,9 @@
 from halib import *
-from argparse import ArgumentParser
-
-from src.exp import Paper2Exp
-from src.config import Config
 from tap import Tap
+
+from src.config import Config
+from src.exp import Paper2Exp
+
 
 class RunExp(Tap):
     cfg: str = r"config/zruns/__base.yaml"  # config file path
