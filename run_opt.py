@@ -8,31 +8,14 @@ from optuna.trial import Trial
 
 from halib import *
 from halib.exp.core.param_gen import ParamGen
-from src.config import Config
-from src.exp import Paper2Exp
 from run_exp import run_single_exp
 from halib.system.path import *
 
+from tap import *
 
-def parse_args():
-    parser = ArgumentParser(description="method parameter optimization")
-    parser.add_argument(
-        "-cfg",
-        "--cfg",
-        type=str,
-        help="config file for the selected method",
-        default=r"./config/zruns/__base.yaml",
-    )
-    parser.add_argument(
-        "-optcfg",
-        "--optcfg",
-        type=str,
-        help="optimization config file for the selected method",
-        default=r"./config/zruns/__opt_cfg.yaml",
-    )
-
-    return parser.parse_args()
-
+class RunOptArgs(Tap):
+    cfg: str = r"./config/zruns/__base.yaml"
+    optcfg: str = r"./config/zruns/__opt_cfg.yaml"
 
 SEARCH_SPACE = None
 current_exp_cfg_file = None
@@ -44,9 +27,9 @@ def objective(trial: Trial):
     num_trials = calc_num_trials(SEARCH_SPACE)
 
     trial_param_set = {}
-    for params in SEARCH_SPACE:
-        print(f"{params}: {SEARCH_SPACE[params]}")
-        value = trial.suggest_categorical(params, SEARCH_SPACE[params])
+    for params in SEARCH_SPACE:  # ty:ignore[not-iterable]
+        print(f"{params}: {SEARCH_SPACE[params]}")  # ty:ignore[non-subscriptable]
+        value = trial.suggest_categorical(params, SEARCH_SPACE[params])  # ty:ignore[non-subscriptable]
         trial_param_set[params] = value
 
     # ---- Run your pipeline with these hyperparams ----
@@ -71,16 +54,17 @@ def main():
     # move to folder where the script is located
     script_folder = os.path.dirname(os.path.abspath(__file__))
     os.chdir(script_folder)
+    args = RunOptArgs().parse_args()
 
     # Load base config for experiments
     global current_exp_cfg_file
-    current_exp_cfg_file = parse_args().cfg
+    current_exp_cfg_file = args.cfg
     assert os.path.exists(current_exp_cfg_file), (
         f"Config file {current_exp_cfg_file} does not exist."
     )
 
     # Load optimization config
-    opt_cfg_file = parse_args().optcfg
+    opt_cfg_file = args.optcfg
     global SEARCH_SPACE
     SEARCH_SPACE = ParamGen.from_file(opt_cfg_file).params
 

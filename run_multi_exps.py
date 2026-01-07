@@ -7,15 +7,10 @@ from itertools import product
 
 from src.exp import Paper2Exp
 from halib.exp.core.param_gen import ParamGen
+from tap import *
 
-
-def parse_args():
-    parser = ArgumentParser(description="desc text")
-    parser.add_argument(
-        "-indir", "--indir", type=str, help="exp dir", default="./config/zruns"
-    )
-    return parser.parse_args()
-
+class MultipleExpArgs(Tap):
+    indir: str = "./config/zruns"  # input dir of run configs
 
 def update_base_cfg_fn(base_cfg: dict, combination_item: dict):
     for key, value in combination_item.items():
@@ -40,7 +35,7 @@ def get_cfg_run_list(base_cfg_dict: dict, param_file: str) -> List[Config]:
 
 
 def main():
-    args = parse_args()
+    args = MultipleExpArgs().parse_args()
     indir = args.indir
     run_files = fs.filter_files_by_extension(
         directory=indir, ext="yaml", recursive=False

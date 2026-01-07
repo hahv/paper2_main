@@ -22,7 +22,8 @@ dependencies = [
     "optuna",
     "optuna-dashboard",
     "moviepy==1.0.3",
-    "ipynbname"
+    "ipynbname",
+    "typed-argument-parser"
 
 ]
 
@@ -34,7 +35,7 @@ cpu = [
 ]
 gpu = [
   "torch>=2.7.0",
-  "torchvision>=0.22.0",
+  "torchvision>=0.22.0",..
 ]
 
 [tool.uv]
@@ -67,3 +68,7 @@ explicit = true
 
 # TO install CPU torch: uv sync --extra cpu
 # TO install GPU torch: uv sync --extra gpu
+
+[tool.ruff.lint]
+# Add F405 to the ignore list
+extend-ignore = ["F405"]

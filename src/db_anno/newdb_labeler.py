@@ -18,7 +18,7 @@ class NewDBLabeler(VideoLabelerBase):
     def __init__(
         self,
         cfg_yaml: str = "video_db/__db_cfg.yaml",
-        video_path_to_label_func: Callable[[str, str], str] = None,
+        video_path_to_label_func: Optional[Callable[[str, str], str]] = None,
     ):
         cfg_dict = yamlfile.load_yaml(cfg_yaml, to_dict=True)
         self.dataset_name = cfg_dict.get("dataset_name", "NewDB")
@@ -157,8 +157,8 @@ class NewDBLabeler(VideoLabelerBase):
         # Save dataset metadata after labeling process."""
         VideoUtils.get_video_dir_meta_df(
             video_dir=self.dataset_path,
-            csv_outfile=os.path.join(
+            csv_outfile= os.path.join(
                 self.dataset_path, f"___{self.dataset_name}_meta_info.csv"
-            ),
+            ),  # ty:ignore[no-matching-overload]
             search_recursive=self.search_recursive,
         )

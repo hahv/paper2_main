@@ -1,30 +1,13 @@
 from halib import * # noqa: F403
 from halib.exp.perf.perfcalc import PerfCalc, PerfTB
-from argparse import ArgumentParser
+from tap import *
 
+class ReportArgs(Tap):
+    indir: str = "./zout/zruns"  # output dir of runs
+    metricDir: str = "config/metrics"  # metric config directory
+    reportDir: str = "./zout/reports"  # report output directory
+    now: bool = False  # whether to use current timestamp for report dir
 
-def parse_args():
-    parser = ArgumentParser(
-        description="desc text")
-    parser.add_argument('-indir', '--indir', type=str,
-                        help='output dir of runs', default='./zout/zruns')
-    parser.add_argument(
-        "-metricDir",
-        "--metricDir",
-        type=str,
-        help="metric cfg directory",
-        default="config/metrics",
-    )
-    parser.add_argument(
-        "-reportDir",
-        "--reportDir",
-        type=str,
-        help="report output directory",
-        default="./zout/reports",
-    )
-    parser.add_argument("--now", action="store_true",
-                        help="use current timestamp for report dir")
-    return parser.parse_args()
 
 def default_exp_csv_filter_fn(exp_file_name: str) -> bool:
         """
@@ -34,10 +17,11 @@ def default_exp_csv_filter_fn(exp_file_name: str) -> bool:
         return "__perf.csv" in exp_file_name
 
 def main():
-    args = parse_args()
+    args = ReportArgs().parse_args()
     indir = args.indir
     metric_dir = args.metricDir
     report_dir = args.reportDir
+
     if args.now:
         report_dir = os.path.join(report_dir, now_str())
     os.makedirs(report_dir, exist_ok=True)

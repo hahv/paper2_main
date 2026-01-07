@@ -3,24 +3,16 @@ from argparse import ArgumentParser
 
 from src.exp import Paper2Exp
 from src.config import Config
+from tap import Tap
 
-def parse_args():
-    parser = ArgumentParser(description="desc text")
-    parser.add_argument(
-        "-cfg",
-        "--cfg",
-        type=str,
-        help="config file path",
-        default=r"config/zruns/__base.yaml",
-    )
-    return parser.parse_args()
-
+class RunExp(Tap):
+    cfg: str = r"config/zruns/__base.yaml"  # config file path
 
 def run_single_exp(exp_cfg_file, method_cfg_dict=None):
     cfg = Config.from_custom_yaml_file(exp_cfg_file)
     experiment = Paper2Exp(cfg)
     if method_cfg_dict is not None:
-        cfg.methodCfg.extra_cfgs.update(method_cfg_dict)
+        cfg.methodCfg.extra_cfgs.update(method_cfg_dict)  # ty:ignore[possibly-missing-attribute]
     # update the method config with new hyperparameters
     metric_rs = experiment.run_exp(do_calc_metrics=cfg.inferCfg.calc_metrics, outdir=cfg.get_outdir())
     # pprint(metric_rs)
@@ -28,7 +20,7 @@ def run_single_exp(exp_cfg_file, method_cfg_dict=None):
 
 
 def main():
-    args = parse_args()
+    args = RunExp().parse_args()
     cfg_file = args.cfg
     run_single_exp(cfg_file)
 

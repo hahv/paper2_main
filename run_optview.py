@@ -3,23 +3,12 @@ from halib.system import filesys as fs
 import click
 from argparse import ArgumentParser
 import os
+from tap import *
 
-
-def parse_args():
-    parser = ArgumentParser(description="desc text")
-    parser.add_argument(
-        "-indir",
-        "--indir",
-        type=str,
-        help="input dir of optuna dashboard",
-        default="./zout/tune",
-    )
-    parser.add_argument(
-        "-ext", "--ext", type=str, help="target ext", default=".db"
-    )  # can be .sqlite3
-    parser.add_argument("-port", "--port", type=int, help="port number", default=10000)
-    return parser.parse_args()
-
+class OptViewArgs(Tap):
+    indir: str = "./zout/tune"  # input dir of optuna dashboard
+    ext: str = ".db"  # target ext
+    port: int = 10000  # port number
 
 def open_optuna_dashboard(filepath, sqlite3_file_index, port):
     start_port = port
@@ -31,10 +20,11 @@ def open_optuna_dashboard(filepath, sqlite3_file_index, port):
 
 
 def main():
-    args = parse_args()
+    args = OptViewArgs().parse_args()
+    indir = args.indir
     target_ext = args.ext
     start_port = args.port
-    all_sqlite3_files = fs.filter_files_by_extension(args.indir, target_ext)
+    all_sqlite3_files = fs.filter_files_by_extension(indir, target_ext)
     idx_files = [(idx, f) for idx, f in enumerate(all_sqlite3_files)]
     pprint(idx_files)
     # use package click for user input a number(int)
