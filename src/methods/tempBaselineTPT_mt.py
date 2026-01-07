@@ -10,8 +10,8 @@ class TempBaselineTPTMethod(NoTempMethod):
     def before_infer_video(self, video_path: str):
         # ! do validation: method name in cfg matches class name
         super()._validate_method_name()
-        self.window_size = self.cfg.methodCfg.extra_cfgs["window_size"]
-        self.persist_thres = self.cfg.methodCfg.extra_cfgs["persist_thres"]
+        self.window_size = self.cfg.methodCfg.extra_cfgs["window_size"]  # ty:ignore[not-subscriptable]
+        self.persist_thres = self.cfg.methodCfg.extra_cfgs["persist_thres"]  # ty:ignore[not-subscriptable]
         self.temporal_buffer = np.zeros(self.window_size, dtype=bool)
         self.pos = 0
 
@@ -27,14 +27,14 @@ class TempBaselineTPTMethod(NoTempMethod):
             probs = F.softmax(logits, dim=1)
 
         # 3. Get the index of the most likely class
-        labelIdx = torch.argmax(probs, dim=1).item()
+        labelIdx = int(torch.argmax(probs, dim=1).item())
 
         # 4. Convert tensors to lists for easier handling
         logits = logits.cpu().squeeze().tolist()
         probs = probs.cpu().squeeze().tolist()
 
         # 5. Get the predicted class name
-        classNames = self.cfg.modelCfg.class_names
+        classNames: list[str] = self.cfg.modelCfg.class_names
         assert labelIdx < len(classNames), "Class index out of range."
         pred_label: str = classNames[labelIdx]
         # implement Temporal Persistence Thresholding (TPT)

@@ -71,6 +71,7 @@ class InferConfig(YAMLWizard):
     csv_columns: List[str]
     calc_metrics: bool
     log_transforms: bool
+    use_profiler: bool
     verbose: bool
 
 

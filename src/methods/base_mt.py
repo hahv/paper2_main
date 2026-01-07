@@ -5,6 +5,7 @@ import time
 import timm
 import torch
 from abc import ABC, abstractmethod
+from typing import Optional
 from halib.exp.perf.profiler import zProfiler
 
 from src.results import *
@@ -46,7 +47,7 @@ class MethodFactory:
             rs_handler_list.append(CsvRSProc(config))
         if config.inferCfg.save_video_results:
             pkg_name = "src.results"
-            chosen_video_handler = config.methodCfg.extra_cfgs.get(
+            chosen_video_handler = config.methodCfg.extra_cfgs.get(  # ty:ignore[possibly-missing-attribute]
                 "video_rs_proc", "VideoRSProc"
             )
             rs_handler_list.append(
@@ -65,21 +66,21 @@ class BaseMethod(ABC):
 
     REQUIRED_INFER_RS = ["logits", "probs", "predLabelIdx", "predLabel"]
 
-    def __init__(self, cfg: Config, rs_handlers: list[BaseRSProc] = None):
+    def __init__(self, cfg: Config, rs_handlers: Optional[list[BaseRSProc]] = None):
         """
         Initializes the detector.
 
         Args:
             cfg (Config): The configuration object.
-            result_handlers (list[ResultHandlerBase], optional): A list of handlers to process the inference results. Defaults to None.
+            rs_handlers (Optional[list[BaseRSProc]], optional): A list of handlers to process the inference results. Defaults to None.
         """
-        self.cfg = cfg
+        self.cfg: Config = cfg
         self.model = None
         self.gpu_monitor = None
         self.outdir = os.path.abspath(cfg.get_outdir())
         os.makedirs(self.outdir, exist_ok=True)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.profiler = zProfiler()
+        self.profiler = zProfiler(self.cfg.inferCfg.use_profiler)
 
         # Store the list of handlers that will process the results
         self.result_handlers = rs_handlers if rs_handlers is not None else []
@@ -176,7 +177,7 @@ class BaseMethod(ABC):
         self.after_infer_video_dir(video_dir)
 
     def infer_video(
-        self, video_path: str, video_idx: int = None, total_videos: int = None
+        self, video_path: str, video_idx: int, total_videos: int
     ):
         """
         Processes each frame of a single video, performing inference and delegating

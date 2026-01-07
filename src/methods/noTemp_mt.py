@@ -11,7 +11,7 @@ from src.utils import get_transform
 
 class NoTempMethod(BaseMethod):
     def _validate_method_name(self):
-        method_name = self.cfg.methodCfg.name
+        method_name: str = self.cfg.methodCfg.name  # ty:ignore[invalid-assignment]
         current_class_name = self.__class__.__name__
         assert (
             method_name.lower() in current_class_name.lower()
@@ -54,7 +54,7 @@ class NoTempMethod(BaseMethod):
             probs = F.softmax(logits, dim=1)
 
         # 3. Get the index of the most likely class
-        labelIdx = torch.argmax(probs, dim=1).item()
+        labelIdx = int(torch.argmax(probs, dim=1).item())
 
         # 4. Convert tensors to lists for easier handling
         logits = logits.cpu().squeeze().tolist()
@@ -63,7 +63,7 @@ class NoTempMethod(BaseMethod):
             "Mismatch in number of classes and probabilities."
         )
         # 5. Get the predicted class name
-        classNames = self.cfg.modelCfg.class_names
+        classNames: list[str] = self.cfg.modelCfg.class_names
         assert labelIdx < len(classNames), "Class index out of range."
         pred_label = classNames[labelIdx]
         return {
