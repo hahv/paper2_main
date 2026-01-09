@@ -1,10 +1,11 @@
-from typing import List
+from halib import *
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from halib import *  # noqa: F403
+from tap import *
+from typing import List
 from halib.exp.core.param_gen import ParamGen
 from halib.filetype import yamlfile
-from tap import *
-
 from src.config import Config
 from src.exp import Paper2Exp
 

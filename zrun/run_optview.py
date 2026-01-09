@@ -1,5 +1,4 @@
 from halib import *
-from halib.system import filesys as fs
 import click
 import os
 from tap import *

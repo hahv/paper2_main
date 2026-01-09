@@ -1,6 +1,8 @@
 from halib import *
-from tap import Tap
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from tap import Tap
 from src.config import Config
 from src.exp import Paper2Exp
 

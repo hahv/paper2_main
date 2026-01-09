@@ -1,8 +1,11 @@
+from halib import *
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from tap import *
+
 import optuna
 from optuna.trial import Trial
 
-from halib import *
 from halib.system.path import *
 from halib.exp.core.param_gen import ParamGen
 
