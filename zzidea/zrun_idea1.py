@@ -2,7 +2,6 @@ from torch.distributed.elastic.metrics.api import prof
 import cv2
 import numpy as np
 import pywt
-from collections import deque
 from halib import *  # noqa: F403
 from tap import *
 from halib.exp.perf.profiler import zProfiler

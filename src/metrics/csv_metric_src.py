@@ -5,7 +5,7 @@ from src.config import Config
 from src.metrics.base_metric_src import BaseMetricSrc
 
 
-class CsvDSMetricSrc(BaseMetricSrc):
+class CsvMetricSrc(BaseMetricSrc):
     """
     Concrete data source for a hypothetical video dataset.
     Assumes data structure: videos with frames, each frame has gt_label, pred_label, timestamp, etc.
@@ -17,13 +17,13 @@ class CsvDSMetricSrc(BaseMetricSrc):
 
     def __init__(self, cfg: Config):
         self.cfg = cfg
-        super().__init__(cfg.dbsetCfg.name)
+        super().__init__(cfg.dbsetCfg.name)  # ty:ignore[invalid-argument-type]
         self.per_video_out_list = None
 
     def _register_handlers(self):
         metric_set_meta = self.cfg.metricCfg
         metric_names = metric_set_meta.metric_names
-        modes = metric_set_meta.extra_cfgs.get("mode", ["per-video"])
+        modes = metric_set_meta.extra_cfgs.get("mode", ["per-video"])  # ty:ignore[possibly-missing-attribute]
         self.did_save_raw_pred_and_gt = {mode: False for mode in modes}
         # ! set up data getters
         for metric in metric_names:
@@ -45,10 +45,10 @@ class CsvDSMetricSrc(BaseMetricSrc):
                 for pred_df, gt in pervideo_pred_gt_ls:
                     video_name = pred_df["video"].iloc[0]
                     gt = gt[0]  # all frames have same gt
-                    v_pred = CsvDSMetricSrc.NEG_LABEL
+                    v_pred = CsvMetricSrc.NEG_LABEL
                     preds = pred_df["pred"].unique().tolist()
-                    if CsvDSMetricSrc.POS_LABEL in preds:
-                        v_pred = CsvDSMetricSrc.POS_LABEL
+                    if CsvMetricSrc.POS_LABEL in preds:
+                        v_pred = CsvMetricSrc.POS_LABEL
                     rows.append([video_name, gt, v_pred, int(v_pred == gt)])
                 dfmk.insert_rows("raw_preds", rows)
                 dfmk.fill_table_from_row_pool("raw_preds")
@@ -112,18 +112,18 @@ class CsvDSMetricSrc(BaseMetricSrc):
             gt_col_list = gt_col_list[:num_frames]
             for label in gt_col_list:
                 if "fire" in label.lower() or "smoke" in label.lower():
-                    gt.append(CsvDSMetricSrc.POS_LABEL)
+                    gt.append(CsvMetricSrc.POS_LABEL)
                 else:
-                    gt.append(CsvDSMetricSrc.NEG_LABEL)
+                    gt.append(CsvMetricSrc.NEG_LABEL)
             return gt
         else:
             pprint(locals())
             # there is no csv labels so should be infer gt from "video_name" in csv_file
             video_name = video_name.replace("_results", "")
-            gt = CsvDSMetricSrc.POS_LABEL
+            gt = CsvMetricSrc.POS_LABEL
             if dataset_name == "DFire":
                 if "FP" in video_name:
-                    gt = CsvDSMetricSrc.NEG_LABEL
+                    gt = CsvMetricSrc.NEG_LABEL
             else:
                 raise NotImplementedError(
                     f"get gt label for whole video in Dataset {dataset_name} not implemented yet"
@@ -145,9 +145,9 @@ class CsvDSMetricSrc(BaseMetricSrc):
             .str.lower()
             .apply(
                 lambda x: (
-                    CsvDSMetricSrc.POS_LABEL
+                    CsvMetricSrc.POS_LABEL
                     if ("fire" in x or "smoke" in x)
-                    else CsvDSMetricSrc.NEG_LABEL
+                    else CsvMetricSrc.NEG_LABEL
                 )
             )
         )
@@ -217,10 +217,10 @@ class CsvDSMetricSrc(BaseMetricSrc):
             for per_video_data in pervideo_pred_gt_ls:
                 per_video_pred_df = per_video_data[0]
                 preds = per_video_pred_df["pred"].tolist()
-                preds = np.array(preds) == CsvDSMetricSrc.POS_LABEL
+                preds = np.array(preds) == CsvMetricSrc.POS_LABEL
                 preds = preds.astype(int).tolist()  # convert to int
                 gts = per_video_data[1]  # already numpy
-                gts = np.array(gts) == CsvDSMetricSrc.POS_LABEL
+                gts = np.array(gts) == CsvMetricSrc.POS_LABEL
                 gts = gts.astype(int).tolist()  # convert to int
                 pervideo_preds_all.append(preds)
                 pervideo_gts_all.append(gts)

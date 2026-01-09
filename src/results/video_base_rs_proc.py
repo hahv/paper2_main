@@ -4,7 +4,7 @@ from src.config import *
 from src.results.base_rs_proc import *
 
 
-class VideoRSProc(BaseRSProc):
+class VideoBaseRsProc(BaseRsProc):
     @staticmethod
     def getColor(classIdx):
         # main palette
@@ -36,7 +36,7 @@ class VideoRSProc(BaseRSProc):
         frame_bgr = cv2.addWeighted(overlay, 0.5, frame_bgr, 0.5, 0)
         # Add text annotations
         for i, (label, value) in enumerate(label_value_dict.items()):
-            color = VideoRSProc.bgr_to_rgb(VideoRSProc.getColor(i))
+            color = VideoBaseRsProc.bgr_to_rgb(VideoBaseRsProc.getColor(i))
             text = (
                 f"{label}: {value:.2f}"
                 if isinstance(value, float)
@@ -65,7 +65,7 @@ class VideoRSProc(BaseRSProc):
 
     def before_video(self, video_path: str, **kwargs):
         # if video_path is not a video (e.g., image folder), skip video writer creation
-        if fs.is_directory(video_path):
+        if fs.is_dir(video_path):
             return
         if not self.cfg.inferCfg.save_csv_results:
             return
@@ -76,7 +76,7 @@ class VideoRSProc(BaseRSProc):
             self.outfile_exists = True
             print(f"Video file already exists, skipping: {self.video_output_path}")
             return  # skip creating dfmk and table
-        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")  # ty:ignore[unresolved-attribute]
 
         fps = kwargs["fps"]
         frame_size = kwargs["frame_size"]
@@ -99,16 +99,16 @@ class VideoRSProc(BaseRSProc):
         lb_val_dict["pred---"] = pred_str
         if extra_info is not None:
             lb_val_dict.update(extra_info)
-        frame_vis = VideoRSProc.annotate_frame(frame_bgr, lb_val_dict)
+        frame_vis = VideoBaseRsProc.annotate_frame(frame_bgr, lb_val_dict)
         return frame_vis, lb_val_dict
 
     def handle_frame_results(self, frame_bgr, frame_rs_dict: dict):
         frame_vis, lb_val_dict = self.prepare_frame_vwriter(frame_bgr, frame_rs_dict)
-        self.video_writer.write(frame_vis)
+        self.video_writer.write(frame_vis)  # ty:ignore[possibly-missing-attribute]
         return lb_val_dict
 
     def after_video(self, video_path: str, **kwargs):
-        if fs.is_directory(video_path):  # a image folder, skip
+        if fs.is_dir(video_path):  # a image folder, skip
             return
         if self.outfile_exists:
             self.outfile_exists = False  # reset for next video

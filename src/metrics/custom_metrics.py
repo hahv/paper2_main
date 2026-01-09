@@ -29,7 +29,7 @@ class FPS(Metric):
         return torch.tensor(0.0)
 
     def __str__(self):
-        return f"{self.compute():.2f} FPS"
+        return f"{self.compute():.2f} FPS"  # ty:ignore[missing-argument]
 
 
 class FPR(Metric):  # False Positive Rate
@@ -88,8 +88,8 @@ class MetricFactory:
 
 def testFPS():
     fps = FPS()
-    fps.update([0.033, 0.040, 0.042, 0.037])  # Simulate frame timings
-    print(f"Computed FPS: {fps.compute():.2f}")
+    fps.update([0.033, 0.040, 0.042, 0.037])  # Simulate frame timings  # ty:ignore[invalid-argument-type]
+    print(f"Computed FPS: {fps.compute():.2f}")  # ty:ignore[missing-argument]
 
 
 def testFPR():
@@ -112,8 +112,8 @@ def testFPR():
 
     # Using custom FPR metric
     cfpr = FPR()
-    cfpr.update(preds, target)
-    print(f"Computed FPR: {cfpr.compute():.4f}")
+    cfpr.update(preds, target)  # ty:ignore[invalid-argument-type]
+    print(f"Computed FPR: {cfpr.compute():.4f}")  # ty:ignore[missing-argument]
 
 
 def main():

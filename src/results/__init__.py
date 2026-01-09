@@ -1,6 +1,6 @@
-from .base_rs_proc import BaseRSProc
-from .csv_proc import CsvRSProc
-from .video_base_proc import VideoRSProc
-from .video_fgmask_proc import FGMaskRSProc
+from .base_rs_proc import BaseRsProc
+from .csv_rs_proc import CsvRsProc
+from .video_base_rs_proc import VideoBaseRsProc
+from .video_rs_fgmask_proc import VideoRsFgmaskProc
 
-__all__ = ["BaseRSProc", "CsvRSProc", "VideoRSProc", "FGMaskRSProc"]
+__all__ = ["BaseRsProc", "CsvRsProc", "VideoBaseRsProc", "VideoRsFgmaskProc"]

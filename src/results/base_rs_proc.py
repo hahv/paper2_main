@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 
-class BaseRSProc(ABC):
+class BaseRsProc(ABC):
     """Abstract base class for processing inference results."""
 
     def before_video(

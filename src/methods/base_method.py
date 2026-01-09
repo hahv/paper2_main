@@ -12,43 +12,32 @@ from src.results import *
 from src.config import Config
 from src.utils import get_cls
 from src.metrics.base_metric_src import *
-from src.results.base_rs_proc import BaseRSProc
-from src.results.csv_proc import CsvRSProc
+from src.results.base_rs_proc import BaseRsProc
+from src.results.csv_rs_proc import CsvRsProc
 import sys
+from src.utils import get_cls_in_pkg
 
 class MethodFactory:
     @staticmethod
     def create_method(config: Config, *args, **kwargs):
-        def method_name_to_cls_name(name: str, suffix: str = "Method") -> str:
-            """
-            Convert snake_case string to PascalCase and append suffix.
-            Example: "no_temp" -> "NoTempMethod"
-            """
-            parts = name.split("_")[:-1] # remove the 'mt' postfix
-            # Capitalize the first letter fo each part, but keep the rest as is
-            for i in range(len(parts)):
-                word = parts[i]
-                word = word[0].upper() + word[1:]
-                parts[i] = word
-            pascal = "".join(parts)
-            return pascal + suffix
+        def convert_fn(n: str) -> str:
+            return "".join(p.title() for p in n.split("_")[:-1]) + "Method"
 
-        pkg_name = "src.methods"
-        # ! method_name == module_name
-        method_postfix = "mt"
-        module_name = f"{config.methodCfg.name}_{method_postfix}"
-        cls_name = method_name_to_cls_name(module_name)
-        pprint(f'Creating method class: {pkg_name}.{module_name}.{cls_name}')
-        cls = get_cls(f"{pkg_name}.{module_name}.{cls_name}")
-        assert cls is not None, f"Class '{cls_name}' not found in module '{pkg_name}'."
+        cls = get_cls_in_pkg(
+            pkg_name="src.methods",
+            file_name=f"{config.methodCfg.name}_mt",
+            fileName_to_clsName_func=convert_fn,
+        )
 
-        rs_handler_list: list[BaseRSProc] = []
+        rs_handler_list: list[BaseRsProc] = []
+
         if config.inferCfg.save_csv_results:
-            rs_handler_list.append(CsvRSProc(config))
+            rs_handler_list.append(CsvRsProc(config))
+
         if config.inferCfg.save_video_results:
             pkg_name = "src.results"
             chosen_video_handler = config.methodCfg.extra_cfgs.get(  # ty:ignore[possibly-missing-attribute]
-                "video_rs_proc", "VideoRSProc"
+                "video_rs_proc", "video_base_proc"
             )
             rs_handler_list.append(
                 get_cls(f"{pkg_name}.{chosen_video_handler}")(cfg=config)
@@ -66,13 +55,13 @@ class BaseMethod(ABC):
 
     REQUIRED_INFER_RS = ["logits", "probs", "predLabelIdx", "predLabel"]
 
-    def __init__(self, cfg: Config, rs_handlers: Optional[list[BaseRSProc]] = None):
+    def __init__(self, cfg: Config, rs_handlers: Optional[list[BaseRsProc]] = None):
         """
         Initializes the detector.
 
         Args:
             cfg (Config): The configuration object.
-            rs_handlers (Optional[list[BaseRSProc]], optional): A list of handlers to process the inference results. Defaults to None.
+            rs_handlers (Optional[list[BaseRsProc]], optional): A list of handlers to process the inference results. Defaults to None.
         """
         self.cfg: Config = cfg
         self.model = None
@@ -219,11 +208,11 @@ class BaseMethod(ABC):
         # find CsvRSHandler in self.result_handlers
         csv_handler = None
         for handler in self.result_handlers:
-            if isinstance(handler, CsvRSProc):
+            if isinstance(handler, CsvRsProc):
                 csv_handler = handler
                 break
         assert csv_handler is not None, (
-            "CsvRSProc not found in result_handlers, it is required."
+            "CsvRsProc not found in result_handlers, it is required."
         )
         SKIP_INFER = csv_handler.outfile_exists
         frame_idx = 0

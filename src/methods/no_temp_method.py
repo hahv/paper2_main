@@ -5,7 +5,7 @@ from PIL import Image
 import torch.nn.functional as F
 
 from src.config import Config
-from src.methods.base_mt import BaseMethod
+from src.methods.base_method import BaseMethod
 from src.utils import get_transform
 
 

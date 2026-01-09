@@ -2,10 +2,10 @@ from halib import *
 import sys
 import torch
 from torch.nn import functional as F
-from src.methods.noTemp_mt import NoTempMethod
+from src.methods.no_temp_method import NoTempMethod
 
 
-class TempBaselineTPTMethod(NoTempMethod):
+class TempBaselineTptMethod(NoTempMethod):
 
     def before_infer_video(self, video_path: str):
         # ! do validation: method name in cfg matches class name

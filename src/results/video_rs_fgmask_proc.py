@@ -2,10 +2,10 @@ from halib import *
 import cv2
 
 from src.config import *
-from src.results.video_base_proc import *
+from src.results.video_base_rs_proc import VideoBaseRsProc
 
 
-class FGMaskRSProc(VideoRSProc):
+class VideoRsFgmaskProc(VideoBaseRsProc):
     @staticmethod
     def getColor(classIdx):
         # main palette
@@ -37,7 +37,7 @@ class FGMaskRSProc(VideoRSProc):
         frame_bgr = cv2.addWeighted(overlay, 0.5, frame_bgr, 0.5, 0)
         # Add text annotations
         for i, (label, value) in enumerate(label_value_dict.items()):
-            color = VideoRSProc.bgr_to_rgb(VideoRSProc.getColor(i))
+            color = VideoBaseRsProc.bgr_to_rgb(VideoBaseRsProc.getColor(i))
             text = (
                 f"{label}: {value:.2f}"
                 if isinstance(value, float)
@@ -160,21 +160,20 @@ class FGMaskRSProc(VideoRSProc):
         frame_vis = self.annotate_fg_mask(
             fg_mask_dict=fg_mask_dict, vis_frame=frame_vis
         )
-        self.video_writer.write(frame_vis)
+        self.video_writer.write(frame_vis)  # ty:ignore[possibly-missing-attribute]
         # 2. do the anotation and write fg mask video
         fg_mask = fg_mask_dict["fg_mask"]
         if self.fg_mask_video_writer is None:
             # initialize video writer
-            fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-            fps = self.fps
+            fourcc = cv2.VideoWriter_fourcc(*"mp4v")  # ty:ignore[unresolved-attribute]
             frame_size = (fg_mask.shape[1], fg_mask.shape[0])
             self.fg_mask_video_writer = cv2.VideoWriter(
-                self.fg_mask_video_output_path, fourcc, self.fps, frame_size
+                self.fg_mask_video_output_path, fourcc, self.fps, frame_size  # ty:ignore[invalid-argument-type]
             )
         # visualize fg mask (with block info: which block activated, which block classified as fire/smoke, ROI box, etc.)
         fg_mask_vis = self.annotate_fg_mask(fg_mask_dict=fg_mask_dict)
         # add annotations to fg mask video
-        fg_mask_vis = VideoRSProc.annotate_frame(fg_mask_vis, lb_val_dict)
+        fg_mask_vis = VideoBaseRsProc.annotate_frame(fg_mask_vis, lb_val_dict)
         self.fg_mask_video_writer.write(fg_mask_vis)
 
     def after_video(self, video_path: str, **kwargs):

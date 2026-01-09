@@ -1,5 +1,5 @@
 import importlib
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Callable
 from torchvision import transforms
 from timm.data import resolve_data_config, create_transform
 
@@ -12,9 +12,30 @@ def get_cls(class_path: str, *args, **kwargs):
     module_name, class_name = class_path.rsplit(".", 1)
     module = importlib.import_module(module_name)
     cls = getattr(module, class_name)
+    assert cls is not None, f"Class '{class_name}' not found in module '{module_name}'."
     return cls
 
+def default_fileName_to_clsName(file_name: str) -> str:
+        return "".join(p.title() for p in file_name.split("_"))
 
+def get_cls_in_pkg(
+    pkg_name: str,
+    fileName_or_fileNameAndClsName: str,
+    fileName_to_clsName_func: Optional[
+        Callable[[str], str]
+    ] = default_fileName_to_clsName,
+):
+    "This function imports a class from a specified package and file name. Using a provided function, it converts the file name to the corresponding class name and retrieves the class from the module. "
+    having_cls_name = "." in fileName_or_fileNameAndClsName
+    class_path = None
+    if having_cls_name:
+        file_name = fileName_or_fileNameAndClsName.split(".")[0]
+        cls_name = fileName_or_fileNameAndClsName.split(".")[1]
+        class_path = f"{pkg_name}.{file_name}.{cls_name}"
+    else:
+        assert fileName_to_clsName_func is not None, "fileName_to_clsName_func must be provided if class name is not included."
+        class_path = f"{pkg_name}.{fileName_or_fileNameAndClsName}.{fileName_to_clsName_func(fileName_or_fileNameAndClsName)}"
+    return get_cls(class_path)
 # ! Since fire/smoke images have important color info, we remove color jitter to preserve it.
 def get_transform(model_name: str, input_size: Optional[List[int]] = None):
     def _remove_color_jitter(tfm_pipeline: transforms.Compose) -> transforms.Compose:
@@ -74,3 +95,27 @@ def get_transform(model_name: str, input_size: Optional[List[int]] = None):
         val_tfm = _remove_color_jitter(val_tfm)
 
         return val_tfm
+
+def test():
+    pkg_cls = {
+        "src.methods": ["no_temp_method", "temp_Baseline_TPT_method", "temp_method"],
+        "src.metrics": ["csv_metric_src"],
+        "src.results": ["csv_rs_proc", "video_base_rs_proc", "video_rs_fgmask_proc"],
+    }
+    from rich.pretty import pprint
+    import sys
+    # get current folder of this file
+    import os
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    proj_dir = os.path.dirname(current_dir)
+    pprint(f'Proj dir: {proj_dir}')
+    sys.path.append(proj_dir)
+
+    for pkg_name, file_names in pkg_cls.items():
+        for file_name in file_names:
+            cls = get_cls_in_pkg(pkg_name, fileName_or_fileNameAndClsName=file_name)
+            pprint(cls)
+
+
+if __name__ == "__main__":
+    test()

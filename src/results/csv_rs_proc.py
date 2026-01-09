@@ -5,7 +5,7 @@ from collections import OrderedDict
 from src.results.base_rs_proc import *
 
 
-class CsvRSProc(BaseRSProc):
+class CsvRsProc(BaseRsProc):
     CSV_FIXED_COLUMNS = [
         "video",  # video name
         "num_frames",  # total number of frames in the video
@@ -25,7 +25,7 @@ class CsvRSProc(BaseRSProc):
         self.out_csv_file = None
         self.outdir = os.path.abspath(cfg.get_outdir())
         self.extra_cols = self.cfg.inferCfg.csv_columns
-        self.csv_columns = CsvRSProc.CSV_FIXED_COLUMNS + self.extra_cols
+        self.csv_columns = CsvRsProc.CSV_FIXED_COLUMNS + self.extra_cols
         self.outfile_exists = False
 
     def before_video(self, video_path: str, **kwargs):
@@ -49,7 +49,7 @@ class CsvRSProc(BaseRSProc):
     def prepare_csv_row(self, frame_rs_dict: dict):
         """Prepare a CSV row dictionary from frame results."""
         row_dict = OrderedDict()
-        for col in CsvRSProc.CSV_FIXED_COLUMNS:
+        for col in CsvRsProc.CSV_FIXED_COLUMNS:
             row_dict[col] = frame_rs_dict[col]
 
         row_dict["class_names"] = self.cfg.modelCfg.class_names
@@ -80,4 +80,4 @@ class CsvRSProc(BaseRSProc):
             self.out_csv_file, index=False, sep=";", encoding="utf-8"
         )
         with ConsoleLog("Results saved to:"):
-            pprint_local_path(self.out_csv_file, get_wins_path=True)
+            pprint_local_path(self.out_csv_file, get_wins_path=True)  # ty:ignore[invalid-argument-type]

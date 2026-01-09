@@ -29,7 +29,8 @@
         "~$zzpaper2.xlsx": true,
         "zreport/~$available_dataset.xlsx": true,
         "**/.ruff_cache": true,
-        "uv.lock": true
+        "uv.lock": true,
+        "**/.python-version": true
     },
     "explorerExclude.backup": {},
     "notebook.formatOnSave.enabled": true,
