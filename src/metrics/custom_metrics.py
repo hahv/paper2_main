@@ -51,7 +51,7 @@ class FPR(Metric):  # False Positive Rate
 
 class MetricFactory:
     @staticmethod
-    def create_metric(metric_name: str, num_classes: int = 2) -> Metric:
+    def create_single_metric(metric_name: str, num_classes: int = 2) -> Metric:
         """
         Factory method to create metric instances based on the metric name.
         :param metric_name: Name of the metric to create.
@@ -82,7 +82,7 @@ class MetricFactory:
     def create_metrics(metric_names: list, num_classes: int = 2) -> dict:
         metrics = {}
         for name in metric_names:
-            metrics[name] = MetricFactory.create_metric(name, num_classes)
+            metrics[name] = MetricFactory.create_single_metric(name, num_classes)
         return metrics
 
 

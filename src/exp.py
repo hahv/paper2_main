@@ -7,7 +7,7 @@ from halib.exp.perf.perfmetrics import MetricsBackend, TorchMetricsBackend
 
 from src.config import *
 from src.metrics.custom_metrics import MetricFactory
-from src.methods.base_mt import *
+from src.methods.base_method import *
 
 
 class Paper2Exp(BaseExp):
@@ -54,7 +54,7 @@ class Paper2Exp(BaseExp):
         console.rule(f"Exec Experiment")
         console.print(f"[red]{self.config.get_cfg_name()}[/red]")
 
-        method_instance = MethodFactory.create_method(self.config)
+        method_instance = MethodFactory.create_method(self.config)  # ty:ignore[invalid-argument-type]
         assert isinstance(method_instance, BaseMethod), (
             "Method instance is not of type BaseMethod"
         )
@@ -68,9 +68,9 @@ class Paper2Exp(BaseExp):
         return exp_rs
 
     def run_exp(self, should_calc_metrics=True, reload_env=False, *args, **kwargs):
-        self.init_general(self.config.get_general_cfg())
-        self.prepare_dataset(self.config.get_dataset_cfg())
-        self.prepare_metrics(self.config.get_metric_cfg())
+        self.init_general(self.config.get_general_cfg())  # ty:ignore[invalid-argument-type]
+        self.prepare_dataset(self.config.get_dataset_cfg())  # ty:ignore[invalid-argument-type]
+        self.prepare_metrics(self.config.get_metric_cfg())  # ty:ignore[invalid-argument-type]
 
         # Save config before running
         self.config.save_to_outdir()
@@ -90,12 +90,12 @@ class Paper2Exp(BaseExp):
                     extra_data=None,
                     outfile=outfile,
                     return_df=True,
-                    *args,
+                    *args,  # ty:ignore[parameter-already-assigned]
                     **kwargs,
                 )
-                df = pd.read_csv(outfile, sep=";", encoding="utf-8")
+                df = pd.read_csv(outfile, sep=";", encoding="utf-8")  # ty:ignore[no-matching-overload]
                 # get row 0
                 df.at[0, "experiment"] = f"{self.full_cfg.get_cfg_name()}_{mode}"
                 df.to_csv(outfile, sep=";", encoding="utf-8", index=False)
                 csvfile.fn_display_df(df)
-                pprint_local_path(outfile, get_wins_path=True)
+                pprint_local_path(outfile, get_wins_path=True)  # ty:ignore[invalid-argument-type]

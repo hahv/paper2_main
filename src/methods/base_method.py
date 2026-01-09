@@ -10,7 +10,6 @@ from halib.exp.perf.profiler import zProfiler
 
 from src.results import *
 from src.config import Config
-from src.utils import get_cls
 from src.metrics.base_metric_src import *
 from src.results.base_rs_proc import BaseRsProc
 from src.results.csv_rs_proc import CsvRsProc
@@ -20,13 +19,9 @@ from src.utils import get_cls_in_pkg
 class MethodFactory:
     @staticmethod
     def create_method(config: Config, *args, **kwargs):
-        def convert_fn(n: str) -> str:
-            return "".join(p.title() for p in n.split("_")[:-1]) + "Method"
-
         cls = get_cls_in_pkg(
             pkg_name="src.methods",
-            file_name=f"{config.methodCfg.name}_mt",
-            fileName_to_clsName_func=convert_fn,
+            fileName_ClsName=str(config.methodCfg.name),
         )
 
         rs_handler_list: list[BaseRsProc] = []
@@ -35,12 +30,13 @@ class MethodFactory:
             rs_handler_list.append(CsvRsProc(config))
 
         if config.inferCfg.save_video_results:
-            pkg_name = "src.results"
-            chosen_video_handler = config.methodCfg.extra_cfgs.get(  # ty:ignore[possibly-missing-attribute]
-                "video_rs_proc", "video_base_proc"
+            selected_video_proc = config.methodCfg.extra_cfgs.get(  # ty:ignore[possibly-missing-attribute]
+                "video_rs_proc", "video_base_rs_proc"
             )
+            rs_proc_cls = get_cls_in_pkg(
+                pkg_name="src.results", fileName_ClsName=selected_video_proc)
             rs_handler_list.append(
-                get_cls(f"{pkg_name}.{chosen_video_handler}")(cfg=config)
+                rs_proc_cls(cfg=config)
             )
 
         kwargs = {"cfg": config, "rs_handlers": rs_handler_list}
@@ -69,7 +65,7 @@ class BaseMethod(ABC):
         self.outdir = os.path.abspath(cfg.get_outdir())
         os.makedirs(self.outdir, exist_ok=True)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.profiler = zProfiler(self.cfg.inferCfg.use_profiler)
+        self.profiler: zProfiler = zProfiler(self.cfg.inferCfg.use_profiler)
 
         # Store the list of handlers that will process the results
         self.result_handlers = rs_handlers if rs_handlers is not None else []
@@ -138,7 +134,8 @@ class BaseMethod(ABC):
 
     def after_infer_video_dir(self, video_dir: str):
         """Hook method called after completing inference on a video directory."""
-        pass
+        if self.profiler:
+            self.profiler.report_and_plot(outdir=self.outdir)
 
     def before_infer_video(self, video_path: str):
         """Hook method called before starting inference on a video."""

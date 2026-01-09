@@ -20,21 +20,21 @@ def default_fileName_to_clsName(file_name: str) -> str:
 
 def get_cls_in_pkg(
     pkg_name: str,
-    fileName_or_fileNameAndClsName: str,
+    fileName_ClsName: str,
     fileName_to_clsName_func: Optional[
         Callable[[str], str]
     ] = default_fileName_to_clsName,
 ):
     "This function imports a class from a specified package and file name. Using a provided function, it converts the file name to the corresponding class name and retrieves the class from the module. "
-    having_cls_name = "." in fileName_or_fileNameAndClsName
+    having_cls_name = "." in fileName_ClsName
     class_path = None
     if having_cls_name:
-        file_name = fileName_or_fileNameAndClsName.split(".")[0]
-        cls_name = fileName_or_fileNameAndClsName.split(".")[1]
+        file_name = fileName_ClsName.split(".")[0]
+        cls_name = fileName_ClsName.split(".")[1]
         class_path = f"{pkg_name}.{file_name}.{cls_name}"
     else:
         assert fileName_to_clsName_func is not None, "fileName_to_clsName_func must be provided if class name is not included."
-        class_path = f"{pkg_name}.{fileName_or_fileNameAndClsName}.{fileName_to_clsName_func(fileName_or_fileNameAndClsName)}"
+        class_path = f"{pkg_name}.{fileName_ClsName}.{fileName_to_clsName_func(fileName_ClsName)}"
     return get_cls(class_path)
 # ! Since fire/smoke images have important color info, we remove color jitter to preserve it.
 def get_transform(model_name: str, input_size: Optional[List[int]] = None):
@@ -113,7 +113,7 @@ def test():
 
     for pkg_name, file_names in pkg_cls.items():
         for file_name in file_names:
-            cls = get_cls_in_pkg(pkg_name, fileName_or_fileNameAndClsName=file_name)
+            cls = get_cls_in_pkg(pkg_name, fileName_ClsName=file_name)
             pprint(cls)
 
 

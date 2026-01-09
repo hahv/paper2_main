@@ -21,7 +21,7 @@ metric_selector:
 
 method_selector:
   list_methods: [] # empty, will populate from config/methods
-  selected_method: tempBaselineTPT # noTemp
+  selected_method: no_temp_method # noTemp
 
 modelCfg:
   base_model: hgnetv2_b5.ssld_stage2_ft_in1k

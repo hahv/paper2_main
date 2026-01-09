@@ -35,7 +35,8 @@ def main():
         pprint (f" Find {pattern} in {indir}")
         # FIX: Capture 'pattern' as a default argument (p=pattern)
         # This freezes the value of 'pattern' at the moment the lambda is created.
-        exp_csv_filter_fn = lambda csv_file_name, p=pattern: p in csv_file_name
+        def exp_csv_filter_fn(csv_file_name, p=pattern):
+            return p in csv_file_name
         perfTb_by_metric: PerfTB = PerfCalc.get_perftb_for_multi_exps(
             indir, exp_csv_filter_fn=exp_csv_filter_fn
         )

@@ -6,12 +6,12 @@ import torch.nn.functional as F
 
 from src.config import Config
 from src.methods.base_method import BaseMethod
-from src.utils import get_transform
+from src.utils import get_transform, default_fileName_to_clsName
 
 
 class NoTempMethod(BaseMethod):
     def _validate_method_name(self):
-        method_name: str = self.cfg.methodCfg.name  # ty:ignore[invalid-assignment]
+        method_name: str = default_fileName_to_clsName(self.cfg.methodCfg.name)  # ty:ignore[invalid-assignment, invalid-argument-type]
         current_class_name = self.__class__.__name__
         assert (
             method_name.lower() in current_class_name.lower()

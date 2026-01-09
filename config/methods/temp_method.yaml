@@ -1,2 +1,4 @@
 extra_cfgs:
-  skip_proc: no_skip_proc
+  skip_proc:
+    name: rand_skip_proc # no_skip_proc, rand_skip_proc
+    params: {}

@@ -1,14 +1,19 @@
 from halib import *
-
 from typing import Optional
+
+from src.config import Config
+from src.results.base_rs_proc import BaseRsProc
 from src.methods.no_temp_method import NoTempMethod
-from src.methods.skip.base_skip_proc import BaseSkipProc
+from src.methods.skip.base_skip_proc import BaseSkipProc, SkipFactory
 
 class TempMethod(NoTempMethod):
-    def __init__(self, cfg, skip_proc: Optional[BaseSkipProc] = None):
-        super().__init__(cfg)
+    def __init__(self, cfg: Config, rs_handlers: Optional[list[BaseRsProc]] = None):
+        super().__init__(cfg, rs_handlers)
         # Composition: We "have" a handler, we aren't "is" a handler
-        self.skip_proc = skip_proc if skip_proc else BaseSkipProc()
+        assert self.cfg.methodCfg.name == "temp_method", (
+            "only `temp_method` supported in yaml cfg `method_selector.selected_method`"
+        )
+        self.skip_proc: BaseSkipProc = SkipFactory.create_skip_proc(cfg)
 
     def infer_frame(self, frame, frame_idx: int) -> dict:
         with self.profiler.measure("infer_wrapper") as ctx:
