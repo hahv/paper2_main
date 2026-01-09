@@ -33,7 +33,7 @@ def objective(trial: Trial):
     with ConsoleLog(f"Running trial {trial.number}/{num_trials}"):
         print("param set :")
         pprint(trial_param_set)
-        metrics = run_single_exp(current_exp_cfg_file, method_cfg_dict=trial_param_set)
+        metrics = run_single_exp(current_exp_cfg_file, method_cfg_dict=trial_param_set)  # noqa: F841
 
     # Return metric to maximize (e.g., F1 score)
     return np.random.rand()

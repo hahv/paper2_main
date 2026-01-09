@@ -4,8 +4,7 @@ from abc import abstractmethod
 from typing import Optional, Tuple, Dict
 from src.methods.noTemp_mt import NoTempMethod
 
-
-class TempBaseMethod(NoTempMethod):
+class TemporalMethod(NoTempMethod):
     @abstractmethod
     def skip_module(self, frame_idx, cv2_bgr_frame) -> Tuple[bool, Optional[Dict]]:
         """
