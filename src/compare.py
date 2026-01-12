@@ -12,7 +12,8 @@ from sklearn.metrics import (
     f1_score,
     confusion_matrix,
 )
-
+# from halib.filetype.videofile import VideoUtils
+# VideoUtils.hstack()
 # -----------------------------
 # Configuration
 # -----------------------------
@@ -25,28 +26,7 @@ NEG = "X_None"
 # -----------------------------
 # FFmpeg Horizontal Stack
 # -----------------------------
-def video_hstack(video_files, output_file):
-    """Horizontally stack multiple videos using FFmpeg."""
-    tmp_file = "video_list.txt"
-    try:
-        with open(tmp_file, "w") as f:
-            for video in video_files:
-                f.write(f"file '{video}'\n")
 
-        ffmpeg_cmd = (
-            f"ffmpeg -f concat -safe 0 -i {tmp_file} "
-            f'-filter_complex "[0:v][1:v][2:v]hstack=inputs={len(video_files)}[v]" '
-            f'-map "[v]" -c:v libx264 -preset fast -crf 22 {output_file}'
-        )
-
-        os.system(ffmpeg_cmd)
-        print(f"[INFO] Video stacked successfully: {output_file}")
-
-    except Exception as e:
-        print(f"[ERROR] Video stacking failed: {e}")
-    finally:
-        if os.path.exists(tmp_file):
-            os.remove(tmp_file)
 
 
 # -----------------------------

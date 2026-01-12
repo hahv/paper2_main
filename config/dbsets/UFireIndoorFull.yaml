@@ -1,0 +1,4 @@
+dir_path: /mnt/d/zdataset_paper2/build_video_dataset/my_firesmoke_indoor
+extra_cfgs:
+  ds_metric_src: csv_metric_src
+  ds_recursive: true

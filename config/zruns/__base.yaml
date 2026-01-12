@@ -13,7 +13,7 @@ general:
 
 dbset_selector:
   list_dbsets: [] # empty, will populate from config/dbsets
-  selected_dbset: UFireIndoor # will be set later
+  selected_dbset: UFireIndoorFull # will be set later
 
 metric_selector:
   list_metrics: [] # empty, will populate from config/metrics
