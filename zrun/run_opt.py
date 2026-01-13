@@ -14,7 +14,7 @@ from run_exp import run_single_exp
 
 class RunOptArgs(Tap):
     cfg: str = r"./config/zruns/__base.yaml"
-    optcfg: str = r"./config/zruns/__opt_cfg.yaml"
+    optcfg: str = r"./config/zruns/_run_opt_cfg.yaml"
 
 SEARCH_SPACE = None
 current_exp_cfg_file = None
@@ -50,9 +50,6 @@ def calc_num_trials(search_space):
 
 
 def main():
-    # move to folder where the script is located
-    script_folder = os.path.dirname(os.path.abspath(__file__))
-    os.chdir(script_folder)
     args = RunOptArgs().parse_args()
 
     # Load base config for experiments
@@ -65,7 +62,9 @@ def main():
     # Load optimization config
     opt_cfg_file = args.optcfg
     global SEARCH_SPACE
-    SEARCH_SPACE = ParamGen.from_file(opt_cfg_file).params
+    SEARCH_SPACE = ParamGen.from_files(sweep_yaml=opt_cfg_file).get_param_space()
+    pprint(SEARCH_SPACE)
+    assert False, "Debug stop"
 
     # Create a GridSampler with your space
     sampler = optuna.samplers.GridSampler(SEARCH_SPACE)

@@ -66,7 +66,7 @@ class BlockAnalyzer:
         Uses YCbCr Method 3 with Global Means.
         global_means: tuple (mean_Y, mean_Cr, mean_Cb) calculated from the whole frame.
         """
-        # Paper 9:  T. W. Hsu, S. Pare, M. S. Meena, D. K. Jain, D. L. Li, A. Saxena, M. Prasad, and C. T. Lin, “An early flame detection system based on image block threshold selection using knowledge of local and global feature analysis,” Sustainability, vol. 12, no. 21, p. 8899, 2020.
+        # Paper 9:  T. W. Hsu, S. Pare, M. S. Meena, D. K. Jain, D. L. Li, A. Saxena, M. Prasad, and C. T. Lin, "An early flame detection system based on image block threshold selection using knowledge of local and global feature analysis" Sustainability, vol. 12, no. 21, p. 8899, 2020.
         # Unpack global means
         mean_Y, mean_Cr, mean_Cb = global_means
 

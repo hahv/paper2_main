@@ -66,5 +66,9 @@ name = "pytorch-cu118"
 url = "https://download.pytorch.org/whl/cu118"
 explicit = true
 
+# [tool.ty]
+# # Add the rule name to the ignore list
+# ignore = ["invalid-return-type"]
+
 # TO install CPU torch: uv sync --extra cpu
 # TO install GPU torch: uv sync --extra gpu

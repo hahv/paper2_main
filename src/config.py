@@ -58,7 +58,7 @@ class GeneralCfg(NamedCfg, YAMLWizard):
             self.time_stamp = now_str()
         if self.computer_name is None or len(str(self.computer_name)) == 0:
             self.computer_name = get_PC_abbr_name()
-        self.project_dir = normalize_paths(self.project_dir)
+        self.project_dir = normalize_paths(self.project_dir)  # ty:ignore[missing-argument]
 
 
 @dataclass
@@ -88,7 +88,7 @@ class ModelConfig(YAMLWizard):
 # -----------------------------------------------------------------------------
 @dataclass
 class DatasetCfg(AutoNamedCfg):
-    dir_path: str = None
+    dir_path: Optional[str] = None
     extra_cfgs: Optional[Dict[str, Any]] = None
     vname2path: Optional[Dict[str, str]] = None
 
@@ -135,7 +135,7 @@ class DatasetSelector(BaseSelectorCfg[DatasetCfg]):
 
     def post_init(self):
         self.dbset_used = self._resolve_selection(
-            self.list_dbsets, self.selected_dbset, "dataset"
+            self.list_dbsets, self.selected_dbset, "dataset"  # ty:ignore[invalid-argument-type]
         )
 
 
@@ -147,7 +147,7 @@ class MetricSelector(BaseSelectorCfg[MetricSetCfg]):
 
     def post_init(self):
         self.metric_used = self._resolve_selection(
-            self.list_metrics, self.selected_metric, "metric set"
+            self.list_metrics, self.selected_metric, "metric set"  # ty:ignore[invalid-argument-type]
         )
 
 
@@ -159,7 +159,7 @@ class MethodSelector(BaseSelectorCfg[MethodCfg]):
 
     def post_init(self):
         self.method_used = self._resolve_selection(
-            self.list_methods, self.selected_method, "method"
+            self.list_methods, self.selected_method, "method"  # ty:ignore[invalid-argument-type]
         )
 
 
@@ -182,13 +182,13 @@ class Config(ExpBaseCfg):
         return self.general
 
     def get_dataset_cfg(self) -> DatasetCfg:
-        return self.dbset_selector.dbset_used
+        return self.dbset_selector.dbset_used  # ty:ignore[invalid-return-type]
 
     def get_metric_cfg(self) -> MetricSetCfg:
-        return self.metric_selector.metric_used
+        return self.metric_selector.metric_used  # ty:ignore[invalid-return-type]
 
     def get_method_cfg(self) -> MethodCfg:
-        return self.method_selector.method_used
+        return self.method_selector.method_used  # ty:ignore[invalid-return-type]
 
     def get_cfg_name(self, sep="__", *args, **kwargs):
         extra_info = self.general.time_stamp
@@ -202,22 +202,22 @@ class Config(ExpBaseCfg):
     # --- SHORTCUT PROPERTIES (THE REQUESTED FEATURE) ---
     @property
     def dbsetCfg(self) -> DatasetCfg:
-        return self.dbset_selector.dbset_used
+        return self.dbset_selector.dbset_used  # ty:ignore[invalid-return-type]
 
     @property
     def metricCfg(self) -> MetricSetCfg:
-        return self.metric_selector.metric_used
+        return self.metric_selector.metric_used  # ty:ignore[invalid-return-type]
 
     @property
     def methodCfg(self) -> MethodCfg:
-        return self.method_selector.method_used
+        return self.method_selector.method_used  # ty:ignore[invalid-return-type]
 
     @property
     def expDir(self) -> str:
         assert self.cfg_name is not None, "cfg_name is not set"
         return os.path.join(self.general.project_dir, self.general.outdir, self.cfg_name)
 
-    def print_meta_info(self) -> str:
+    def print_meta_info(self):
         with ConsoleLog("Meta Info"):
             pprint(self.dbsetCfg)
             pprint(self.methodCfg)
@@ -240,7 +240,7 @@ class Config(ExpBaseCfg):
         self.get_cfg_name()
 
     @classmethod
-    def from_custom_yaml_file(cls, yaml_file_or_dict: str) -> "Config":
+    def from_custom_yaml_file(cls, yaml_file_or_dict: str) -> "Config":  # ty:ignore[invalid-method-override]
         """
         Wrapper for from_custom_yaml_file_or_str
         """
@@ -277,7 +277,7 @@ class Config(ExpBaseCfg):
             # folder: e.g., config/datasets, config/trains
             folder_name = f"{file_suffix}s"
             attr_folder = os.path.join(
-                instance.general.project_dir, f"config/{folder_name}"
+                instance.general.project_dir, f"config/{folder_name}"  # ty:ignore[possibly-missing-attribute]
             )
 
             # list attribute: e.g., list_datasets
@@ -307,5 +307,5 @@ class Config(ExpBaseCfg):
                 print(f"Warning: Config folder not found: {attr_folder}")
 
         # 3. Finalize (Link strings to objects)
-        instance.finalize_config()
-        return instance
+        instance.finalize_config()  # ty:ignore[possibly-missing-attribute]
+        return instance  # ty:ignore[invalid-return-type]
