@@ -2,8 +2,10 @@ import cv2
 import numpy as np
 from .base_rule import *
 from typing import Any, Dict, Optional
+import pywt
 
-class FireBlockYCbCrRule(BaseRule):
+
+class FireBlockYCbCrRule(BlockBasedRule):
     """
     Advanced Fire Detection using YCbCr Method 3 with Global Means.
     Ported from BlockAnalyzer.check_fire_candidate.
@@ -11,11 +13,19 @@ class FireBlockYCbCrRule(BaseRule):
     Requires 'global_means' (tuple: mean_Y, mean_Cr, mean_Cb) in extra_dict.
     """
 
+    def __init__(self, name: str = "", params: Optional[Dict[str, Any]] = None):
+        super().__init__(name=name, params=params)
+        self.tau = self.params["rule_params"].get("tau", 40)
+        self.block_active_thresh = self.params["rule_params"].get(
+            "block_active_thres", 0.1
+        )
+
     def check(
         self,
         frame_or_roi: np.ndarray,
         extra_dict: Optional[Dict[str, Any]] = None,
     ) -> RuleResult:
+        details = self.prepare(extra_dict)
         # 1. Retrieve Global Means from context (Calculated from full frame)
         if extra_dict is None or "global_means" not in extra_dict:
             return RuleResult(
@@ -33,10 +43,6 @@ class FireBlockYCbCrRule(BaseRule):
         ycrcb = cv2.cvtColor(frame_or_roi, cv2.COLOR_BGR2YCrCb)
         Y, Cr, Cb = cv2.split(ycrcb)
 
-        # 3. Parameters
-        tau = self.params.get("tau", 40)
-        block_active_thres = self.params.get("block_active_thres", 0.1)
-
         # 4. Apply Rules (Vectorized)
 
         # r6: Y > Cb
@@ -47,7 +53,7 @@ class FireBlockYCbCrRule(BaseRule):
 
         # r9: |Cb - Cr| >= tau
         diff_cb_cr = cv2.absdiff(Cb, Cr)
-        r9 = diff_cb_cr >= tau
+        r9 = diff_cb_cr >= self.tau
 
         # Split Logic (Method 3)
         # r10: (Y < 220) & r6 & r7
@@ -68,39 +74,50 @@ class FireBlockYCbCrRule(BaseRule):
         percent_fire = fire_pixel_count / total_pixels
 
         status = (
-            RuleStatus.PASS if percent_fire > block_active_thres else RuleStatus.FAIL
+            RuleStatus.PASS
+            if percent_fire > self.block_active_thresh
+            else RuleStatus.FAIL
         )
 
-        return RuleResult(
-            rule_name=self.name,
-            status=status,
-            details={
+        details.update(
+            {
                 "percent_fire": percent_fire,
-                "threshold": block_active_thres,
+                "threshold": self.block_active_thresh,
                 "global_mean_Y": float(mean_Y),
-                "msg": f"Method3 Fire Ratio {percent_fire:.2f} > {block_active_thres}",
-            },
+                "msg": f"Method3 Fire Ratio {percent_fire:.2f} > {self.block_active_thresh}",
+            }
         )
 
-class FireBlockWaveletRule(BaseRule):
+        return RuleResult(rule_name=self.name, status=status, details=details)
+
+
+class FireBlockWaveletRule(BlockBasedRule):
     """
     Analyzes block texture/frequency using Haar Wavelets.
     Ported from BlockAnalyzer.get_spatial_wavelet_energy.
     """
+
+    def __init__(self, name: str = "", params: Optional[Dict[str, Any]] = None):
+        super().__init__(name=name, params=params)
+        self.channel_name = self.params.get("rule_params", {}).get(
+            "wavelet_channel", "r"
+        )
+        self.energy_thres = self.params.get("rule_params", {}).get(
+            "wavelet_energy_thres", 50.0
+        )
 
     def check(
         self,
         frame_or_roi: np.ndarray,
         extra_dict: Optional[Dict[str, Any]] = None,
     ) -> RuleResult:
+        details = self.prepare(extra_dict)
         # Parameters
-        channel_name = self.params.get("channel", "r")  # 'r', 'g', or 'b'
-        energy_thres = self.params.get("wavelet_energy_thres", 50.0)
 
         # Determine channel index (BGR format)
-        if channel_name == "r":
+        if self.channel_name == "r":
             c_idx = 2
-        elif channel_name == "g":
+        elif self.channel_name == "g":
             c_idx = 1
         else:
             c_idx = 0
@@ -126,16 +143,20 @@ class FireBlockWaveletRule(BaseRule):
             # Decide status based on threshold
             # Note: High energy usually implies complex texture (like fire edges).
             # Adjust logic if you want to detect 'smooth' core (Low energy).
-            status = RuleStatus.PASS if energy > energy_thres else RuleStatus.FAIL
+            status = RuleStatus.PASS if energy > self.energy_thres else RuleStatus.FAIL
+
+            details.update(
+                {
+                    "energy": float(energy),
+                    "threshold": self.energy_thres,
+                    "msg": f"Wavelet Energy {energy:.2f} > {self.energy_thres}",
+                }
+            )
 
             return RuleResult(
                 rule_name=self.name,
                 status=status,
-                details={
-                    "energy": float(energy),
-                    "threshold": energy_thres,
-                    "msg": f"Wavelet Energy {energy:.2f} > {energy_thres}",
-                },
+                details=details,
             )
 
         except Exception as e:
@@ -145,7 +166,7 @@ class FireBlockWaveletRule(BaseRule):
             )
 
 
-class SmokeBlockSpatioTemporalRule(BaseRule):
+class SmokeBlockSpatioTemporalRule(BlockBasedRule):
     """
     Smoke detection logic based on HSV Saturation and Value.
     Ported from BlockAnalyzer.check_smoke_candidate.
@@ -156,6 +177,7 @@ class SmokeBlockSpatioTemporalRule(BaseRule):
         frame_or_roi: np.ndarray,
         extra_dict: Optional[Dict[str, Any]] = None,
     ) -> RuleResult:
+        details = self.prepare(extra_dict)
         # Convert to HSV
         hsv = cv2.cvtColor(frame_or_roi, cv2.COLOR_BGR2HSV)
         s_channel = hsv[:, :, 1]
@@ -183,13 +205,16 @@ class SmokeBlockSpatioTemporalRule(BaseRule):
         status = (
             RuleStatus.PASS if percent_smoke > block_active_thres else RuleStatus.FAIL
         )
+        details.update(
+            {
+                "percent_smoke": percent_smoke,
+                "threshold": block_active_thres,
+                "msg": f"Smoke HSV Ratio {percent_smoke:.2f} > {block_active_thres}",
+            }
+        )
 
         return RuleResult(
             rule_name=self.name,
             status=status,
-            details={
-                "percent_smoke": percent_smoke,
-                "threshold": block_active_thres,
-                "msg": f"Smoke HSV Ratio {percent_smoke:.2f} > {block_active_thres}",
-            },
+            details=details,
         )

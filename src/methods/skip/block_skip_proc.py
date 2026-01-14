@@ -7,12 +7,25 @@ from src.methods.skip.rule.base_rule import *
 from src.methods.skip.rule.block_rule import *
 from src.methods.skip.base_skip_proc import BaseSkipProc
 
+
 class BlockSkipProc(BaseSkipProc):
     def __init__(self, cfg: Config):
         super().__init__(cfg)
         self.block_size: int = self.params.get("block_size", 32)
         self.block_active_thresh: float = self.params.get("block_active_thresh", 0.1)
         self.scale_factor: float = self.params.get("scale_factor", 1.0)
+        self.update_rules()
+
+    def update_rules(self):
+        fire_complex = AllRule(
+            [
+                FireBlockYCbCrRule(params=self.params),
+                FireBlockWaveletRule(params=self.params),
+            ],
+            name="FireCheck",
+        )
+        smoke_rule = SmokeBlockSpatioTemporalRule(params=self.params, name="SmokeCheck")
+        self.rules = AnyRule([fire_complex, smoke_rule], name="FireOrSmokeCheck")
 
     # input frames will be first resized based on scale_factor, then padded to be divisible by block_size
     def _resize_and_pad(self, frame: np.ndarray) -> np.ndarray:
@@ -115,14 +128,6 @@ class BlockSkipProc(BaseSkipProc):
         means = cv2.mean(full_ycrcb)
         global_means = (means[0], means[1], means[2])  # (Y, Cr, Cb)
 
-        # --- 1. DEFINE COMPLEX RULES ---
-
-        fire_complex = AllRule(
-            [FireBlockYCbCrRule(), FireBlockWaveletRule()], name="FireCheck"
-        )
-        smoke_rule = SmokeBlockSpatioTemporalRule(name="SmokeCheck") 
-        combine_rules = AnyRule([fire_complex, smoke_rule], name="FireOrSmokeCheck")
-
         # 2. Block Analysis (The logic you requested)
         has_fire_or_smoke = False
 
@@ -139,7 +144,7 @@ class BlockSkipProc(BaseSkipProc):
                 pprint(f"Analyzing Block {block_id}...")
 
                 # --- RUN CHECK ---
-                result = combine_rules.check(block_roi, {"global_means": global_means})
+                result = self.rules.check(block_roi, {"global_means": global_means})
 
                 # Store result for visualization/debugging if needed
                 if result.is_pass():

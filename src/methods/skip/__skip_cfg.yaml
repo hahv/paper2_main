@@ -11,3 +11,5 @@ extra_cfgs:
           diff_thresh: 30
       rule_params:
           active_ratio_threshold: 0.2
+          wavelet_channel: r
+          wavelet_energy_thres: 50.0

@@ -26,12 +26,29 @@ class BaseRule(ABC):
     def __init__(self, name: str = "", params: Optional[Dict[str, Any]] = None):
         self.name = name if len(name.strip()) > 0 else self.__class__.__name__
         self.params = params or {}
+        self.block_id = self.params.get("block_idx", (0, 0))  # (row, col) of the block
 
     @abstractmethod
     def check(
         self, frame_or_roi: np.ndarray, extra_dict: Optional[Dict[str, Any]] = None
     ) -> RuleResult:
         pass
+
+
+class BlockBasedRule(BaseRule):
+    """
+    Base class for rules that operate on image blocks.
+    Inherits from BaseRule.
+    """
+
+    def __init__(self, name: str = "", params: Optional[Dict[str, Any]] = None):
+        super().__init__(name=name, params=params)
+        self.block_id = self.params.get("block_idx", (0, 0))  # (row, col) of the block
+
+    def prepare(self, extra_dict):
+        if extra_dict and "block_id" in extra_dict:
+            return {"block_id": extra_dict["block_id"]}
+        return {}
 
 
 # --- LOGIC RULES ---
