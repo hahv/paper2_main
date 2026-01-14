@@ -1,12 +1,11 @@
-from fontTools.unicodedata import block
 import cv2
 from halib import *  # noqa: F403
 from typing import Tuple, Dict, Any
-from src.methods.skip.base_skip_proc import BaseSkipProc
+
 from src.config import Config
 from src.methods.skip.rule.base_rule import *
 from src.methods.skip.rule.block_rule import *
-
+from src.methods.skip.base_skip_proc import BaseSkipProc
 
 class BlockSkipProc(BaseSkipProc):
     def __init__(self, cfg: Config):
@@ -119,12 +118,10 @@ class BlockSkipProc(BaseSkipProc):
         # --- 1. DEFINE COMPLEX RULES ---
 
         fire_complex = AllRule(
-            [FireBlockYCbCrRule(), FireBlockLowEnergyRule()], name="FireCheck"
+            [FireBlockYCbCrRule(), FireBlockWaveletRule()], name="FireCheck"
         )
-        smoke_complex = AllRule(
-            [SmokeBlockHSVRule(), SmokeBlockHighVarRule()], name="SmokeCheck"
-        )
-        combine_rules = AnyRule([fire_complex, smoke_complex], name="FireOrSmokeCheck")
+        smoke_rule = SmokeBlockSpatioTemporalRule(name="SmokeCheck") 
+        combine_rules = AnyRule([fire_complex, smoke_rule], name="FireOrSmokeCheck")
 
         # 2. Block Analysis (The logic you requested)
         has_fire_or_smoke = False

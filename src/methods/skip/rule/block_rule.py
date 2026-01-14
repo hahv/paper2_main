@@ -3,26 +3,69 @@ import numpy as np
 from .base_rule import *
 from typing import Any, Dict, Optional
 
-
 class FireBlockYCbCrRule(BaseRule):
+    """
+    Advanced Fire Detection using YCbCr Method 3 with Global Means.
+    Ported from BlockAnalyzer.check_fire_candidate.
+
+    Requires 'global_means' (tuple: mean_Y, mean_Cr, mean_Cb) in extra_dict.
+    """
+
     def check(
         self,
         frame_or_roi: np.ndarray,
         extra_dict: Optional[Dict[str, Any]] = None,
     ) -> RuleResult:
-        # Simplified Method 3 Check
+        # 1. Retrieve Global Means from context (Calculated from full frame)
+        if extra_dict is None or "global_means" not in extra_dict:
+            return RuleResult(
+                self.name,
+                RuleStatus.FAIL,
+                {"msg": "Missing global_means in extra_dict"},
+            )
+
+        global_means = extra_dict[
+            "global_means"
+        ]  # Expecting (mean_Y, mean_Cr, mean_Cb)
+        mean_Y, mean_Cr, mean_Cb = global_means
+
+        # 2. Convert Block to YCbCr
         ycrcb = cv2.cvtColor(frame_or_roi, cv2.COLOR_BGR2YCrCb)
         Y, Cr, Cb = cv2.split(ycrcb)
 
-        # Fire Rule: Y > Cb AND Cr > Cb AND High Luminance
-        fire_mask = (Y > Cb) & (Cr > Cb) & (Y > 200)
+        # 3. Parameters
+        tau = self.params.get("tau", 40)
+        block_active_thres = self.params.get("block_active_thres", 0.1)
 
-        total_pixels = fire_mask.size
+        # 4. Apply Rules (Vectorized)
+
+        # r6: Y > Cb
+        r6 = Y > Cb
+
+        # r7: Cr > Cb
+        r7 = Cr > Cb
+
+        # r9: |Cb - Cr| >= tau
+        diff_cb_cr = cv2.absdiff(Cb, Cr)
+        r9 = diff_cb_cr >= tau
+
+        # Split Logic (Method 3)
+        # r10: (Y < 220) & r6 & r7
+        r10 = (Y < 220) & r6 & r7
+
+        # r11: (Y >= 220) & (Y > GLOBAL_MEAN_Y) & r7
+        r11 = (Y >= 220) & (Y > mean_Y) & r7
+
+        # Final Combination: F(3) = r6 & r7 & r9 & (r10 | r11)
+        fire_mask = r6 & r7 & r9 & (r10 | r11)
+
+        # 5. Verification
+        total_pixels = frame_or_roi.shape[0] * frame_or_roi.shape[1]
         if total_pixels == 0:
             return RuleResult(self.name, RuleStatus.FAIL, {"percent": 0.0})
 
-        percent_fire = cv2.countNonZero(fire_mask.astype(int)) / total_pixels
-        block_active_thres = self.params.get("block_active_thres", 0.05)
+        fire_pixel_count = cv2.countNonZero(fire_mask.astype(int))
+        percent_fire = fire_pixel_count / total_pixels
 
         status = (
             RuleStatus.PASS if percent_fire > block_active_thres else RuleStatus.FAIL
@@ -34,56 +77,108 @@ class FireBlockYCbCrRule(BaseRule):
             details={
                 "percent_fire": percent_fire,
                 "threshold": block_active_thres,
-                "msg": f"Fire pixel ratio {percent_fire:.2f} > {block_active_thres}",
+                "global_mean_Y": float(mean_Y),
+                "msg": f"Method3 Fire Ratio {percent_fire:.2f} > {block_active_thres}",
             },
         )
 
-
-class FireBlockLowEnergyRule(BaseRule):
-    """Checks if the block has Low Spatial Energy (Blurry)."""
+class FireBlockWaveletRule(BaseRule):
+    """
+    Analyzes block texture/frequency using Haar Wavelets.
+    Ported from BlockAnalyzer.get_spatial_wavelet_energy.
+    """
 
     def check(
         self,
         frame_or_roi: np.ndarray,
         extra_dict: Optional[Dict[str, Any]] = None,
     ) -> RuleResult:
-        gray = cv2.cvtColor(frame_or_roi, cv2.COLOR_BGR2GRAY)
+        # Parameters
+        channel_name = self.params.get("channel", "r")  # 'r', 'g', or 'b'
+        energy_thres = self.params.get("wavelet_energy_thres", 50.0)
 
-        # Calculate Laplacian Variance (Measure of texture/edges)
-        laplacian_var = cv2.Laplacian(gray, cv2.CV_64F).var()
-        var_thres = self.params.get("fire_var_thres", 100)
+        # Determine channel index (BGR format)
+        if channel_name == "r":
+            c_idx = 2
+        elif channel_name == "g":
+            c_idx = 1
+        else:
+            c_idx = 0
 
-        # Pass if variance is LOW (Blurry)
-        status = RuleStatus.PASS if laplacian_var < var_thres else RuleStatus.FAIL
+        try:
+            # Extract single channel for analysis
+            gray = frame_or_roi[:, :, c_idx]
 
-        return RuleResult(
-            rule_name=self.name,
-            status=status,
-            details={
-                "laplacian_var": laplacian_var,
-                "threshold": var_thres,
-                "msg": f"Texture Energy {laplacian_var:.1f} < {var_thres}",
-            },
-        )
+            # Safety check for very small blocks (DWT requires minimum size)
+            if gray.shape[0] < 2 or gray.shape[1] < 2:
+                return RuleResult(
+                    self.name, RuleStatus.FAIL, {"msg": "Block too small"}
+                )
+
+            # Perform 2D Discrete Wavelet Transform
+            coeffs = pywt.dwt2(gray, "haar")
+            cA, (cH, cV, cD) = coeffs
+
+            # Calculate High-Frequency Energy
+            # Energy = Mean of squares of Detail coefficients (Horizontal, Vertical, Diagonal)
+            energy = np.mean(np.square(cH) + np.square(cV) + np.square(cD))
+
+            # Decide status based on threshold
+            # Note: High energy usually implies complex texture (like fire edges).
+            # Adjust logic if you want to detect 'smooth' core (Low energy).
+            status = RuleStatus.PASS if energy > energy_thres else RuleStatus.FAIL
+
+            return RuleResult(
+                rule_name=self.name,
+                status=status,
+                details={
+                    "energy": float(energy),
+                    "threshold": energy_thres,
+                    "msg": f"Wavelet Energy {energy:.2f} > {energy_thres}",
+                },
+            )
+
+        except Exception as e:
+            # Fallback for mathematical/shape errors
+            return RuleResult(
+                self.name, RuleStatus.FAIL, {"msg": f"Wavelet Error: {str(e)}"}
+            )
 
 
-class SmokeBlockHSVRule(BaseRule):
+class SmokeBlockSpatioTemporalRule(BaseRule):
+    """
+    Smoke detection logic based on HSV Saturation and Value.
+    Ported from BlockAnalyzer.check_smoke_candidate.
+    """
+
     def check(
         self,
         frame_or_roi: np.ndarray,
         extra_dict: Optional[Dict[str, Any]] = None,
     ) -> RuleResult:
+        # Convert to HSV
         hsv = cv2.cvtColor(frame_or_roi, cv2.COLOR_BGR2HSV)
+        s_channel = hsv[:, :, 1]
+        v_channel = hsv[:, :, 2]
 
-        # Smoke Rule: Low Saturation (<72) AND High Value (>108)
-        mask = (hsv[:, :, 1] < 72) & (hsv[:, :, 2] > 108)
+        # Parameters
+        # Note: Original code used s < 0.28.
+        # In OpenCV uint8 (0-255), 0.28 maps to approx 71.4 (0.28 * 255).
+        # We default to 72 to match standard integer processing.
+        s_thres_max = self.params.get("smoke_sat_max", 72)
+        v_thres_min = self.params.get("smoke_val_min", 108)
+        block_active_thres = self.params.get("block_active_thres", 0.1)
 
-        total_pixels = mask.size
+        # Rule: Low Saturation (Grayish) AND High Value (Bright-ish)
+        color_mask = (s_channel < s_thres_max) & (v_channel > v_thres_min)
+
+        # Verification
+        total_pixels = frame_or_roi.shape[0] * frame_or_roi.shape[1]
         if total_pixels == 0:
             return RuleResult(self.name, RuleStatus.FAIL, {"percent": 0.0})
 
-        percent_smoke = cv2.countNonZero(mask.astype(int)) / total_pixels
-        block_active_thres = self.params.get("block_active_thres", 0.1)
+        smoke_pixels = cv2.countNonZero(color_mask.astype(int))
+        percent_smoke = smoke_pixels / total_pixels
 
         status = (
             RuleStatus.PASS if percent_smoke > block_active_thres else RuleStatus.FAIL
@@ -95,34 +190,6 @@ class SmokeBlockHSVRule(BaseRule):
             details={
                 "percent_smoke": percent_smoke,
                 "threshold": block_active_thres,
-                "msg": f"Smoke pixel ratio {percent_smoke:.2f} > {block_active_thres}",
-            },
-        )
-
-
-class SmokeBlockHighVarRule(BaseRule):
-    """Checks if the block has High Variance (Turbulence/Contrast)."""
-
-    def check(
-        self,
-        frame_or_roi: np.ndarray,
-        extra_dict: Optional[Dict[str, Any]] = None,
-    ) -> RuleResult:
-        # Calculate Standard Deviation (Contrast/Variance)
-        mean, stddev = cv2.meanStdDev(frame_or_roi)
-        std_val = stddev[0][0]  # Take first channel or simplify
-
-        var_thres = self.params.get("smoke_var_thres", 40)
-
-        # Pass if Variance is HIGH
-        status = RuleStatus.PASS if std_val > var_thres else RuleStatus.FAIL
-
-        return RuleResult(
-            rule_name=self.name,
-            status=status,
-            details={
-                "std_dev": std_val,
-                "threshold": var_thres,
-                "msg": f"StdDev {std_val:.1f} > {var_thres}",
+                "msg": f"Smoke HSV Ratio {percent_smoke:.2f} > {block_active_thres}",
             },
         )
