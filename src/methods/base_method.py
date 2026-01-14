@@ -16,6 +16,7 @@ from src.results.csv_rs_proc import CsvRsProc
 import sys
 from src.utils import get_cls_in_pkg
 
+
 class MethodFactory:
     @staticmethod
     def create_method(config: Config, *args, **kwargs):
@@ -34,10 +35,9 @@ class MethodFactory:
                 "video_rs_proc", "video_base_rs_proc"
             )
             rs_proc_cls = get_cls_in_pkg(
-                pkg_name="src.results", fileName_ClsName=selected_video_proc)
-            rs_handler_list.append(
-                rs_proc_cls(cfg=config)
+                pkg_name="src.results", fileName_ClsName=selected_video_proc
             )
+            rs_handler_list.append(rs_proc_cls(cfg=config))
 
         kwargs = {"cfg": config, "rs_handlers": rs_handler_list}
         return cls(**kwargs)
@@ -162,9 +162,7 @@ class BaseMethod(ABC):
 
         self.after_infer_video_dir(video_dir)
 
-    def infer_video(
-        self, video_path: str, video_idx: int, total_videos: int
-    ):
+    def infer_video(self, video_path: str, video_idx: int, total_videos: int):
         """
         Processes each frame of a single video, performing inference and delegating
         the results to the registered handlers.

@@ -3,17 +3,22 @@ from typing import Tuple, Dict, Any
 import numpy as np
 from src.config import Config
 from src.utils import *
+from src.methods.skip.motion.base_motion_det import *
 
-class SkipFactory:
+
+class SkipProcFactory:
     @staticmethod
     def create_skip_proc(config: Config, *args, **kwargs):
-        assert config.methodCfg.name == "temp_method", "SkipFactory only works with temp_method"
-        temp_method_cfg: dict = config.methodCfg.extra_cfgs["skip_proc"]  # ty:ignore[not-subscriptable]
-        skip_proc_name: str = temp_method_cfg["name"]
-        skip_proc_params = temp_method_cfg.get("params", {})
-        cls = get_cls_in_pkg(pkg_name="src.methods.skip", fileName_ClsName=skip_proc_name)
+        assert config.methodCfg.name == "temp_method", (
+            "SkipProcFactory only works with temp_method"
+        )
+        temp_method_cfg: dict = config.methodCfg.extra_cfgs.get("skip_proc", {})  # ty:ignore[possibly-missing-attribute]
+        skip_proc_name: str = temp_method_cfg.get("name", "no_skip_proc")
+        cls = get_cls_in_pkg(
+            pkg_name="src.methods.skip", fileName_ClsName=skip_proc_name
+        )
 
-        kwargs = {"cfg": config, "params": skip_proc_params}
+        kwargs = {"cfg": config}
         return cls(**kwargs)
 
 
@@ -21,9 +26,22 @@ class BaseSkipProc(ABC):
     """
     Strategy Interface for frame skipping logic.
     """
-    def __init__(self, cfg: Config, params: dict):
+
+    def __init__(self, cfg: Config):
         self.cfg = cfg
-        self.params = params
+
+        skip_proc_dict: dict = self.cfg.methodCfg.extra_cfgs.get("skip_proc", {})  # ty:ignore[possibly-missing-attribute]
+        self.name = skip_proc_dict.get("name", "no_skip_proc")
+        self.params = skip_proc_dict.get("params", {})
+        self.motion_det: BaseMotionDet = None
+
+        if "motion" in self.params:
+            motion_cfg = self.params.get("motion", {})
+            assert "name" in motion_cfg, "motion detector config must have a name"
+            assert "params" in motion_cfg, "motion detector config must have params"
+            self.motion_det: BaseMotionDet = MotionDetFactory.create_method(
+                name=motion_cfg["name"], params=motion_cfg["params"]
+            )
 
     @abstractmethod
     def should_skip(
@@ -37,7 +55,9 @@ class BaseSkipProc(ABC):
         """
         pass
 
-    def prepare_input(self, frame: np.ndarray, meta_data: Dict[str, Any]) -> np.ndarray:
+    def prepare_infer_input(
+        self, frame: np.ndarray, meta_data: Dict[str, Any]
+    ) -> np.ndarray:
         """
         Optional: Transform the frame before inference (e.g., crop to ROI).
         Defaults to passing the original frame.

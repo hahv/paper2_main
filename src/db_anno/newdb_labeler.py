@@ -13,7 +13,7 @@ class NewDBLabeler(VideoLabelerBase):
     VALID_IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png"]
     LABEL_POSITIVE = "Fire_Smoke"
     LABEL_NEGATIVE = "None"
-    LABEL_MIXED = "Mixed" # Frames have mixed labels (some fire/smoke, some none)
+    LABEL_MIXED = "Mixed"  # Frames have mixed labels (some fire/smoke, some none)
 
     def __init__(
         self,
@@ -43,7 +43,7 @@ class NewDBLabeler(VideoLabelerBase):
     @staticmethod
     def map_video_to_label(dataset_name: str, video_path: str) -> str:
         fname = fs.get_file_name(video_path, split_file_ext=True)[0]
-        target_fname_parts = ['__lb_fire', '__lb_smoke']
+        target_fname_parts = ["__lb_fire", "__lb_smoke"]
         if dataset_name == "NewDB":
             """Map video file name to its label based on naming conventions."""
             if "__lb_none" in fname:
@@ -157,7 +157,7 @@ class NewDBLabeler(VideoLabelerBase):
         # Save dataset metadata after labeling process."""
         VideoUtils.get_video_dir_meta_df(
             video_dir=self.dataset_path,
-            csv_outfile= os.path.join(
+            csv_outfile=os.path.join(
                 self.dataset_path, f"___{self.dataset_name}_meta_info.csv"
             ),  # ty:ignore[no-matching-overload]
             search_recursive=self.search_recursive,

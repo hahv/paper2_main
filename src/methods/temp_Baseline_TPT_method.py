@@ -6,7 +6,6 @@ from src.methods.no_temp_method import NoTempMethod
 
 
 class TempBaselineTptMethod(NoTempMethod):
-
     def before_infer_video(self, video_path: str):
         # ! do validation: method name in cfg matches class name
         super()._validate_method_name()
@@ -46,7 +45,7 @@ class TempBaselineTptMethod(NoTempMethod):
             if num_det_frames <= self.persist_thres * self.window_size:
                 console.print(
                     f"Suppressing `fire/smoke` detection at frame [bold cyan]{frame_idx}[/] by TPT.",
-                    end="\r"
+                    end="\r",
                 )
                 sys.stdout.flush()  # Force the flush manually
                 pred_label = "none"

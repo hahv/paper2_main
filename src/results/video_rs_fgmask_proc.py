@@ -168,7 +168,10 @@ class VideoRsFgmaskProc(VideoBaseRsProc):
             fourcc = cv2.VideoWriter_fourcc(*"mp4v")  # ty:ignore[unresolved-attribute]
             frame_size = (fg_mask.shape[1], fg_mask.shape[0])
             self.fg_mask_video_writer = cv2.VideoWriter(
-                self.fg_mask_video_output_path, fourcc, self.fps, frame_size  # ty:ignore[invalid-argument-type]
+                self.fg_mask_video_output_path,
+                fourcc,
+                self.fps,
+                frame_size,  # ty:ignore[invalid-argument-type]
             )
         # visualize fg mask (with block info: which block activated, which block classified as fire/smoke, ROI box, etc.)
         fg_mask_vis = self.annotate_fg_mask(fg_mask_dict=fg_mask_dict)

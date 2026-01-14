@@ -88,7 +88,9 @@ class MetricFactory:
 
 def testFPS():
     fps = FPS()
-    fps.update([0.033, 0.040, 0.042, 0.037])  # Simulate frame timings  # ty:ignore[invalid-argument-type]
+    fps.update(
+        [0.033, 0.040, 0.042, 0.037]
+    )  # Simulate frame timings  # ty:ignore[invalid-argument-type]
     print(f"Computed FPS: {fps.compute():.2f}")  # ty:ignore[missing-argument]
 
 

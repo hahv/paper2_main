@@ -68,7 +68,7 @@ explicit = true
 
 # [tool.ty]
 # # Add the rule name to the ignore list
-# ignore = ["invalid-return-type"]
+# ignore = ["invalid-return-type", "typossibly-missing-attribute"]
 
 # TO install CPU torch: uv sync --extra cpu
 # TO install GPU torch: uv sync --extra gpu

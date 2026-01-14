@@ -15,8 +15,10 @@ def get_cls(class_path: str, *args, **kwargs):
     assert cls is not None, f"Class '{class_name}' not found in module '{module_name}'."
     return cls
 
+
 def default_fileName_to_clsName(file_name: str) -> str:
-        return "".join(p.title() for p in file_name.split("_"))
+    return "".join(p.title() for p in file_name.split("_"))
+
 
 def get_cls_in_pkg(
     pkg_name: str,
@@ -25,7 +27,7 @@ def get_cls_in_pkg(
         Callable[[str], str]
     ] = default_fileName_to_clsName,
 ):
-    "This function imports a class from a specified package and file name. Using a provided function, it converts the file name to the corresponding class name and retrieves the class from the module. "
+    "This function imports a class from a specified package and file name. Using a provided function, it converts the file name to the corresponding class name and retrieves the class from the module."
     having_cls_name = "." in fileName_ClsName
     class_path = None
     if having_cls_name:
@@ -33,9 +35,13 @@ def get_cls_in_pkg(
         cls_name = fileName_ClsName.split(".")[1]
         class_path = f"{pkg_name}.{file_name}.{cls_name}"
     else:
-        assert fileName_to_clsName_func is not None, "fileName_to_clsName_func must be provided if class name is not included."
+        assert fileName_to_clsName_func is not None, (
+            "fileName_to_clsName_func must be provided if class name is not included."
+        )
         class_path = f"{pkg_name}.{fileName_ClsName}.{fileName_to_clsName_func(fileName_ClsName)}"
     return get_cls(class_path)
+
+
 # ! Since fire/smoke images have important color info, we remove color jitter to preserve it.
 def get_transform(model_name: str, input_size: Optional[List[int]] = None):
     def _remove_color_jitter(tfm_pipeline: transforms.Compose) -> transforms.Compose:
@@ -96,6 +102,7 @@ def get_transform(model_name: str, input_size: Optional[List[int]] = None):
 
         return val_tfm
 
+
 def test():
     pkg_cls = {
         "src.methods": ["no_temp_method", "temp_Baseline_TPT_method", "temp_method"],
@@ -104,11 +111,13 @@ def test():
     }
     from rich.pretty import pprint
     import sys
+
     # get current folder of this file
     import os
+
     current_dir = os.path.dirname(os.path.abspath(__file__))
     proj_dir = os.path.dirname(current_dir)
-    pprint(f'Proj dir: {proj_dir}')
+    pprint(f"Proj dir: {proj_dir}")
     sys.path.append(proj_dir)
 
     for pkg_name, file_names in pkg_cls.items():

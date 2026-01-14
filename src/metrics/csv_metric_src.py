@@ -89,10 +89,7 @@ class CsvMetricSrc(BaseMetricSrc):
         video_name = fs.get_file_name(csv_file, split_file_ext=True)[0]
         video_name = video_name.replace("_results", "")
         recursive = self.cfg.dbsetCfg.extra_cfgs.get("ds_recursive", False)
-        vname2path_dict = self.cfg.dbsetCfg.get_vname2path(
-            recursive=recursive
-        )
-
+        vname2path_dict = self.cfg.dbsetCfg.get_vname2path(recursive=recursive)
 
         if has_csv_label:
             label_gt_file_name = f"{video_name}__labels.csv"

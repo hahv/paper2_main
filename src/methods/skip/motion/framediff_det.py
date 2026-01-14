@@ -1,17 +1,26 @@
 import cv2
 import numpy as np
+from typing import Optional, Dict, Any
 from src.methods.skip.motion.base_motion_det import BaseMotionDet
-class SimpleFrameDifference(BaseMotionDet):
+
+
+class FrameDiffDet(BaseMotionDet):
     """
     Standard Frame Difference implementation.
     """
 
-    def __init__(self, params):
-        super().__init__(params)
-        self.diff_threshold = params.get("diff_threshold", 30)
+    def __init__(self, name: str, params: Dict[str, Any]):
+        super().__init__(name, params)
+        self.diff_threshold = params.get("diff_thresh", 30)
         self.prev_frame = None
 
-    def apply(self, frame_bgr: np.ndarray) -> np.ndarray:
+    def apply(
+        self,
+        frame_bgr: np.ndarray,
+        extra_dict: Optional[Dict[str, Any]] = None,
+        *args,
+        **kwargs,
+    ) -> np.ndarray:
         gray = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2GRAY)
         if self.prev_frame is None:
             self.prev_frame = gray

@@ -135,7 +135,9 @@ class DatasetSelector(BaseSelectorCfg[DatasetCfg]):
 
     def post_init(self):
         self.dbset_used = self._resolve_selection(
-            self.list_dbsets, self.selected_dbset, "dataset"  # ty:ignore[invalid-argument-type]
+            self.list_dbsets,
+            self.selected_dbset,
+            "dataset",  # ty:ignore[invalid-argument-type]
         )
 
 
@@ -147,7 +149,9 @@ class MetricSelector(BaseSelectorCfg[MetricSetCfg]):
 
     def post_init(self):
         self.metric_used = self._resolve_selection(
-            self.list_metrics, self.selected_metric, "metric set"  # ty:ignore[invalid-argument-type]
+            self.list_metrics,
+            self.selected_metric,
+            "metric set",  # ty:ignore[invalid-argument-type]
         )
 
 
@@ -159,7 +163,9 @@ class MethodSelector(BaseSelectorCfg[MethodCfg]):
 
     def post_init(self):
         self.method_used = self._resolve_selection(
-            self.list_methods, self.selected_method, "method"  # ty:ignore[invalid-argument-type]
+            self.list_methods,
+            self.selected_method,
+            "method",  # ty:ignore[invalid-argument-type]
         )
 
 
@@ -215,7 +221,9 @@ class Config(ExpBaseCfg):
     @property
     def expDir(self) -> str:
         assert self.cfg_name is not None, "cfg_name is not set"
-        return os.path.join(self.general.project_dir, self.general.outdir, self.cfg_name)
+        return os.path.join(
+            self.general.project_dir, self.general.outdir, self.cfg_name
+        )
 
     def print_meta_info(self):
         with ConsoleLog("Meta Info"):
@@ -277,7 +285,8 @@ class Config(ExpBaseCfg):
             # folder: e.g., config/datasets, config/trains
             folder_name = f"{file_suffix}s"
             attr_folder = os.path.join(
-                instance.general.project_dir, f"config/{folder_name}"  # ty:ignore[possibly-missing-attribute]
+                instance.general.project_dir,
+                f"config/{folder_name}",  # ty:ignore[possibly-missing-attribute]
             )
 
             # list attribute: e.g., list_datasets
