@@ -16,6 +16,12 @@ class TempMethod(NoTempMethod):
         )
         self.skip_proc: BaseSkipProc = SkipProcFactory.create_skip_proc(cfg)
 
+    # ! This video done, reset the skip proc motion det if any
+    def after_infer_video(self, video_path: str):
+        if self.skip_proc.motion_det is not None:
+            self.skip_proc.motion_det.reset()
+        super().after_infer_video(video_path)
+
     def infer_frame(self, frame, frame_idx: int) -> dict:
         with self.profiler.measure("infer_wrapper") as ctx:
             # 1. Ask the handler: Should we skip?

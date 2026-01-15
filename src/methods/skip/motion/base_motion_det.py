@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional
 import numpy as np
-from utils import get_cls_in_pkg
+from src.utils import get_cls_in_pkg
 
 
 class MotionDetFactory:
@@ -33,4 +33,9 @@ class BaseMotionDet(ABC):
         **kwargs,
     ) -> np.ndarray:
         """Returns a binary foreground mask (255=motion, 0=static)."""
+        pass
+
+    @abstractmethod
+    def reset(self):
+        """Reset any internal state."""
         pass

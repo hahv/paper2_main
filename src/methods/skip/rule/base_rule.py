@@ -52,8 +52,6 @@ class BlockBasedRule(BaseRule):
 
 
 # --- LOGIC RULES ---
-
-
 class AnyRule(BaseRule):
     """(OR Logic) Returns PASS if ANY sub-rule passes."""
 

@@ -25,8 +25,11 @@ class FrameDiffDet(BaseMotionDet):
         if self.prev_frame is None:
             self.prev_frame = gray
             return np.zeros_like(gray)
-
+        # print(f"Prev: {self.prev_frame.shape}, Curr: {gray.shape}")
         diff = cv2.absdiff(self.prev_frame, gray)
         _, fgmask = cv2.threshold(diff, self.diff_threshold, 255, cv2.THRESH_BINARY)
         self.prev_frame = gray
         return fgmask
+
+    def reset(self):
+        self.prev_frame = None

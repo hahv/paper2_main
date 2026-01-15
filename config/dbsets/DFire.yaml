@@ -1,3 +1,4 @@
-dir_path: datasets/DFire/test
+dir_path: datasets/DFire/DFire_Full_ValTest/test
 extra_cfgs:
   ds_metric_src: csv_metric_src
+  csv_loader_cls: dfire_csv_loader.DFireCsvLoader

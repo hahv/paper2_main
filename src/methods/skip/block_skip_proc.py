@@ -140,8 +140,8 @@ class BlockSkipProc(BaseSkipProc):
                 x1 = c * self.block_size
                 x2 = x1 + self.block_size
                 block_roi = scaled_frame[y1:y2, x1:x2]
-                block_id = (r, c)
-                pprint(f"Analyzing Block {block_id}...")
+                block_id = (int(r), int(c))
+                console.print(f"[red]Analyzing Block {block_id}... [/red]", end='\r')
 
                 # --- RUN CHECK ---
                 result = self.rules.check(block_roi, {"global_means": global_means})
