@@ -1,2 +1,2 @@
 extra_cfgs:
-  video_rs_proc: video_base_proc
+  video_rs_proc: video_infer_rs_proc

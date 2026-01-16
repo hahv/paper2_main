@@ -102,6 +102,7 @@ class VideoBaseRsProc(BaseRsProc):
         frame_vis = VideoBaseRsProc.annotate_frame(frame_bgr, lb_val_dict)
         return frame_vis, lb_val_dict
 
+    # ! abstract method implementation
     def handle_frame_results(self, frame_bgr, frame_rs_dict: dict):
         frame_vis, lb_val_dict = self.prepare_frame_vwriter(frame_bgr, frame_rs_dict)
         self.video_writer.write(frame_vis)  # ty:ignore[possibly-missing-attribute]

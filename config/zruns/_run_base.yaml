@@ -34,7 +34,7 @@ inferCfg:
   do_infer: true
   skip_if_exists: true
   limit: -1 # -1 for no limit
-  save_video_results: false
+  save_video_results: true
   save_csv_results: true
   csv_columns:
     - class_names

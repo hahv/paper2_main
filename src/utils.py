@@ -4,6 +4,11 @@ from torchvision import transforms
 from timm.data import resolve_data_config, create_transform
 
 
+def filter_dict_by_keys(input_dict: dict, keys: List[str]) -> dict:
+    # Iterate over 'keys' to preserve their order
+    return {k: input_dict[k] for k in keys if k in input_dict}
+
+
 def get_cls(class_path: str, *args, **kwargs):
     """
     Dynamically import class and create instance.

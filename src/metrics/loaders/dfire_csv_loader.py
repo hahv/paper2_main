@@ -46,4 +46,3 @@ class DFireCsvLoader(BaseCsvLoader):
             gt_label = self.NEG_LABEL
 
         return [gt_label] * num_frames
-
