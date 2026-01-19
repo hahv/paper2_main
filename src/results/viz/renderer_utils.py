@@ -76,6 +76,77 @@ class RenderUtils:
         return alias, fmt, color, scale, thickness
 
     @classmethod
+    def calculate_osd_box(
+        cls,
+        data: Dict[str, Any],
+        config: Optional[Dict[str, Any]] = None,
+        padding: int = 10,
+        line_spacing: int = 5,
+    ) -> Tuple[int, int]:
+        """
+        Calculates the width and height of the OSD box without drawing.
+        Returns: (box_width, box_height)
+        """
+        font = cv2.FONT_HERSHEY_SIMPLEX
+
+        # ---------------- PHASE 1: PREPARE TEXT ----------------
+        lines = []
+
+        # Helper to process text (same logic as draw_osd)
+        def process_entry(key, val, idx, cfg=None):
+            if cfg is not None:
+                alias, fmt, _, scale, thick = cls._parse_setting(key, cfg, idx)
+                fmt = fmt or cls._auto_fmt(val)
+            else:
+                alias = key
+                fmt = cls._auto_fmt(val)
+                scale = 0.7
+                thick = 2
+
+            try:
+                val_str = fmt.format(val)
+            except Exception:
+                val_str = str(val)
+
+            return {
+                "text": f"{alias}: {val_str}",
+                "scale": scale,
+                "thickness": thick,
+            }
+
+        if config:
+            for idx, (k, cfg) in enumerate(config.items()):
+                if k in data:
+                    lines.append(process_entry(k, data[k], idx, cfg))
+        else:
+            for idx, (k, v) in enumerate(data.items()):
+                lines.append(process_entry(k, v, idx))
+
+        if not lines:
+            return (0, 0)
+
+        # ---------------- PHASE 2: MEASURE ----------------
+        max_w = 0
+        total_h = 0
+
+        for line in lines:
+            (w, h), baseline = cv2.getTextSize(
+                line["text"], font, line["scale"], line["thickness"]
+            )
+            # Row height = text height + baseline + spacing
+            row_h = h + baseline + line_spacing
+
+            max_w = max(max_w, w)
+            total_h += row_h
+
+        # Calculate final box dimensions
+        box_w = max_w + 2 * padding
+        # Subtract one line_spacing because the last line doesn't need bottom spacing inside the box
+        box_h = total_h + 2 * padding - line_spacing
+
+        return box_h, box_w
+
+    @classmethod
     def draw_osd(
         cls,
         frame: np.ndarray,

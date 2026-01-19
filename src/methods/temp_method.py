@@ -24,24 +24,34 @@ class TempMethod(NoTempMethod):
 
     def infer_frame(self, frame, frame_idx: int) -> dict:
         with self.profiler.measure("infer_wrapper") as ctx:
+            mt_cfg_dict = {
+                "mt_cfg": self.cfg.methodCfg.extra_cfgs.get("skip_proc", {}).copy()  # ty:ignore[possibly-missing-attribute]
+            }
+            meta_data = None
+            infer_result = {}
+
             # 1. Ask the handler: Should we skip?
             with ctx.step("skip_check"):
                 should_skip, meta_data = self.skip_proc.should_skip(frame_idx, frame)
+                meta_data.update(mt_cfg_dict)
 
             if should_skip:
                 class_names = self.cfg.modelCfg.class_names
-                return self.skip_proc.get_dummy_result(class_names)
+                infer_result = self.skip_proc.get_dummy_result(class_names)
+            else:
+                # 2. Ask the handler: Prepare the image (Crop/Resize/Etc)
+                with ctx.step("prep_input"):
+                    model_input = self.skip_proc.prepare_infer_input(frame, meta_data)
 
-            # 2. Ask the handler: Prepare the image (Crop/Resize/Etc)
-            with ctx.step("prep_input"):
-                model_input = self.skip_proc.prepare_infer_input(frame, meta_data)
-
-            # 3. Run the heavy model (Super class logic)
-            # Note: We pass the *processed* input (e.g. the crop)
-            with ctx.step("heavy_infer"):
-                raw_result = super().infer_frame(model_input, frame_idx)
+                # 3. Run the heavy model (Super class logic)
+                # Note: We pass the *processed* input (e.g. the crop)
+                with ctx.step("heavy_infer"):
+                    infer_result = super().infer_frame(model_input, frame_idx)
 
             # 4. Ask the handler: Fix the results (Coordinate mapping)
-            final_result = self.skip_proc.post_process_result(raw_result, meta_data)
+            # ! Merge meta data (of skip proc) into raw result
+            # ! This is useful for logging or visualization later
+            assert len(meta_data) > 0, "Meta data from skip proc is empty!"
+            infer_result.update(meta_data)
 
-            return final_result
+            return infer_result

@@ -1,3 +1,4 @@
+from IPython.testing.decorators import skip
 import cv2
 from halib import *  # noqa: F403
 from typing import Tuple, Dict, Any
@@ -168,13 +169,13 @@ class BlockSkipProc(BaseSkipProc):
 
         should_skip = not has_fire_or_smoke
 
-        # You can now see exactly why it skipped or didn't skip
         meta_data = {
-            "scaled_frame": scaled_frame,
-            "motion_mask": fgmask,
-            "active_blocks_indices": active_indices,
-            "active_blocks": len(active_indices),
-            "triggered_blocks": block_logs,
+            "mt_proc": {
+                "scaled_frame": scaled_frame,
+                "motion_mask": fgmask,
+                "active_blocks_indices": active_indices,
+                "active_blocks": len(active_indices),
+                "triggered_blocks": block_logs,
+            }
         }
-
         return should_skip, meta_data

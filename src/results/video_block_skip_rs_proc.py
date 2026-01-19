@@ -7,9 +7,10 @@ from src.results.base_rs_proc import BaseRsProc
 # Import your new classes
 from src.results.viz.video_pipeline import VideoPipeline
 from src.results.viz.infer_rs_renderer import InferRsRenderer
+from src.results.viz.grid_renderer import GridRenderer
 
 
-class VideoInferRsProc(BaseRsProc):
+class VideoBlockSkipRsProc(BaseRsProc):
     def __init__(self, cfg: Config):
         self.cfg = cfg
         self.outdir = os.path.abspath(cfg.get_outdir())
@@ -21,6 +22,7 @@ class VideoInferRsProc(BaseRsProc):
         pipeline_ls = []
         infer_rs_pipe = VideoPipeline(self.video_output_path, fps, frame_size)
         infer_rs_pipe.add_renderer(InferRsRenderer())  # ty:ignore[invalid-argument-type]
+        infer_rs_pipe.add_renderer(GridRenderer())  # ty:ignore[invalid-argument-type]
         pipeline_ls.append(infer_rs_pipe)
         return pipeline_ls
 
@@ -47,7 +49,6 @@ class VideoInferRsProc(BaseRsProc):
     # ! abstract method implementation
     def handle_frame_results(self, frame_bgr, frame_rs_dict: dict):
         # pprint("Writing frame to video pipelines")
-        pprint(frame_rs_dict)
         for pipe in self.pipelines:
             pipe.process_and_write(frame_bgr, frame_rs_dict)
 

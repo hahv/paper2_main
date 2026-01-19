@@ -64,13 +64,6 @@ class BaseSkipProc(ABC):
         """
         return frame
 
-    def post_process_result(self, result: dict, meta_data: Dict[str, Any]) -> dict:
-        """
-        Optional: Modify the inference result (e.g., offset bbox coordinates back to original).
-        Defaults to returning the result as-is.
-        """
-        return result
-
     def get_dummy_result(self, class_names) -> dict:
         """Returns a standardized dummy result for skipped frames."""
         num_classes = len(class_names)

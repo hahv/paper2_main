@@ -1,4 +1,5 @@
 extra_cfgs:
+  video_rs_proc: video_block_skip_rs_proc
   skip_proc:
     name: block_skip_proc # no_skip_proc, rand_skip_proc
     params:
