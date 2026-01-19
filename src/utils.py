@@ -1,13 +1,20 @@
+import re
 import importlib
 from typing import List, Optional, Tuple, Callable
 from torchvision import transforms
 from timm.data import resolve_data_config, create_transform
 
-
 def filter_dict_by_keys(input_dict: dict, keys: List[str]) -> dict:
     # Iterate over 'keys' to preserve their order
     return {k: input_dict[k] for k in keys if k in input_dict}
 
+
+def to_abbr(text: str) -> str:
+    """
+    Extracts all uppercase letters to form an abbreviation.
+    Example: 'SmokeCheck' -> 'SC'
+    """
+    return "".join(re.findall(r"[A-Z]", text))
 
 def get_cls(class_path: str, *args, **kwargs):
     """

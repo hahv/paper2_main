@@ -1,8 +1,9 @@
 import cv2
 import numpy as np
 import seaborn as sns
-from typing import Dict, Any, Tuple, Optional
+from typing import Dict, Any, Tuple, Optional, Union
 from enum import Enum
+import os
 
 
 class OsdFmt(str, Enum):
@@ -30,7 +31,18 @@ class OsdFmt(str, Enum):
 class RenderUtils:
     """
     Flexible OSD renderer with automatic layout and optional background.
+    Uses dictionary-based configuration for styling.
     """
+
+    # Default style values if not provided in the config dict
+    DEFAULT_STYLE = {
+        "font": cv2.FONT_HERSHEY_SIMPLEX,
+        "label": None,  # Defaults to the data key
+        "fmt": None,  # Defaults to auto-detection
+        "color": None,  # Defaults to rainbow generation
+        "scale": 0.7,
+        "thickness": 2,
+    }
 
     @staticmethod
     def get_rainbow_color(idx: int) -> Tuple[int, int, int]:
@@ -45,35 +57,36 @@ class RenderUtils:
     def _auto_fmt(value: Any) -> str:
         return OsdFmt.FLOAT.value if isinstance(value, float) else OsdFmt.INT.value
 
-    @staticmethod
+    @classmethod
     def _parse_setting(
-        key: str, setting: Any, idx: int
-    ) -> Tuple[str, Optional[str], Optional[Tuple[int, int, int]], float, int]:
-        """Returns: (alias, fmt, color, scale, thickness)"""
+        cls, key: str, setting: Union[Dict[str, Any], str], idx: int
+    ) -> Dict[str, Any]:
+        """
+        Parses a single configuration item.
+        """
+        # Start with defaults
+        parsed = cls.DEFAULT_STYLE.copy()
 
-        alias = key
-        fmt_input = None
-        color = None
-        scale = 0.7
-        thickness = 2
-
+        # 1. Handle Shorthand (String only)
         if isinstance(setting, str):
-            alias = setting
+            parsed["label"] = setting
 
-        elif isinstance(setting, (tuple, list)):
-            if len(setting) > 0:
-                alias = setting[0]
+        # 2. Handle Dictionary Config
+        elif isinstance(setting, dict):
+            # Update defaults with provided values
+            parsed.update(setting)
 
-            for item in setting[1:]:
-                if isinstance(item, (OsdFmt, str)):
-                    fmt_input = item
-                elif isinstance(item, (int, float)) and item < 5:
-                    scale = float(item)
-                elif isinstance(item, (tuple, list)) and len(item) == 3:
-                    color = tuple(item)
+        # 3. Resolve final values
+        if parsed["label"] is None:
+            parsed["label"] = key
 
-        fmt = OsdFmt.resolve(fmt_input) if fmt_input else None
-        return alias, fmt, color, scale, thickness
+        if parsed["color"] is None:
+            parsed["color"] = cls.get_rainbow_color(idx)
+
+        if parsed["fmt"]:
+            parsed["fmt"] = OsdFmt.resolve(parsed["fmt"])
+
+        return parsed
 
     @classmethod
     def calculate_osd_box(
@@ -84,24 +97,44 @@ class RenderUtils:
         line_spacing: int = 5,
     ) -> Tuple[int, int]:
         """
-        Calculates the width and height of the OSD box without drawing.
-        Returns: (box_width, box_height)
+        Calculates the (height, width) of the OSD box without drawing.
         """
-        font = cv2.FONT_HERSHEY_SIMPLEX
+        lines = cls._prepare_lines(data, config)
 
-        # ---------------- PHASE 1: PREPARE TEXT ----------------
+        if not lines:
+            return (0, 0)
+
+        # Measure
+        max_w = 0
+        total_h = 0
+
+        for line in lines:
+            # FIX: Use the line's specific font, not a global one
+            (w, h), baseline = cv2.getTextSize(
+                line["text"], line["font"], line["scale"], line["thickness"]
+            )
+            row_h = h + baseline + line_spacing
+            max_w = max(max_w, w)
+            total_h += row_h
+
+        box_w = max_w + 2 * padding
+        box_h = total_h + 2 * padding - line_spacing
+
+        return box_h, box_w
+
+    @classmethod
+    def _prepare_lines(
+        cls, data: Dict[str, Any], config: Optional[Dict[str, Any]] = None
+    ) -> list:
+        """Helper to generate the list of text lines with their styles."""
         lines = []
 
-        # Helper to process text (same logic as draw_osd)
-        def process_entry(key, val, idx, cfg=None):
-            if cfg is not None:
-                alias, fmt, _, scale, thick = cls._parse_setting(key, cfg, idx)
-                fmt = fmt or cls._auto_fmt(val)
-            else:
-                alias = key
-                fmt = cls._auto_fmt(val)
-                scale = 0.7
-                thick = 2
+        def create_line_data(key, val, idx, cfg=None):
+            # Parse the style (merging defaults + config)
+            style = cls._parse_setting(key, cfg or {}, idx)
+
+            # Determine format
+            fmt = style["fmt"] or cls._auto_fmt(val)
 
             try:
                 val_str = fmt.format(val)
@@ -109,42 +142,23 @@ class RenderUtils:
                 val_str = str(val)
 
             return {
-                "text": f"{alias}: {val_str}",
-                "scale": scale,
-                "thickness": thick,
+                "text": f"{style['label']}: {val_str}",
+                # FIX: Use the parsed font style, NOT hardcoded cv2.FONT_HERSHEY_SIMPLEX
+                "font": style["font"],
+                "color": style["color"],
+                "scale": style["scale"],
+                "thickness": style["thickness"],
             }
 
         if config:
-            for idx, (k, cfg) in enumerate(config.items()):
+            for idx, (k, cfg_item) in enumerate(config.items()):
                 if k in data:
-                    lines.append(process_entry(k, data[k], idx, cfg))
+                    lines.append(create_line_data(k, data[k], idx, cfg_item))
         else:
             for idx, (k, v) in enumerate(data.items()):
-                lines.append(process_entry(k, v, idx))
+                lines.append(create_line_data(k, v, idx))
 
-        if not lines:
-            return (0, 0)
-
-        # ---------------- PHASE 2: MEASURE ----------------
-        max_w = 0
-        total_h = 0
-
-        for line in lines:
-            (w, h), baseline = cv2.getTextSize(
-                line["text"], font, line["scale"], line["thickness"]
-            )
-            # Row height = text height + baseline + spacing
-            row_h = h + baseline + line_spacing
-
-            max_w = max(max_w, w)
-            total_h += row_h
-
-        # Calculate final box dimensions
-        box_w = max_w + 2 * padding
-        # Subtract one line_spacing because the last line doesn't need bottom spacing inside the box
-        box_h = total_h + 2 * padding - line_spacing
-
-        return box_h, box_w
+        return lines
 
     @classmethod
     def draw_osd(
@@ -158,72 +172,48 @@ class RenderUtils:
         line_spacing: int = 5,
     ) -> np.ndarray:
         """
-        Draws multi-line OSD with auto-sized background box.
-        If bg_opacity <= 0, background is not drawn.
+        Draws multi-line OSD.
+        config: Dict[key_name, Dict] -> {"label": "Alias", "color": (255,0,0), ...}
         """
-
         vis = frame.copy()
         x_start, y_start = pos
-        font = cv2.FONT_HERSHEY_SIMPLEX
 
-        # ---------------- PHASE 1: PREPARE TEXT ----------------
-        lines = []
-
-        def process_entry(key, val, idx, cfg=None):
-            if cfg is not None:
-                alias, fmt, color, scale, thick = cls._parse_setting(key, cfg, idx)
-                fmt = fmt or cls._auto_fmt(val)
-                color = color or cls.get_rainbow_color(idx)
-            else:
-                alias = key
-                fmt = cls._auto_fmt(val)
-                color = cls.get_rainbow_color(idx)
-                scale = 0.7
-                thick = 2
-
-            try:
-                val_str = fmt.format(val)
-            except Exception:
-                val_str = str(val)
-
-            return {
-                "text": f"{alias}: {val_str}",
-                "color": color,
-                "scale": scale,
-                "thickness": thick,
-            }
-
-        if config:
-            for idx, (k, cfg) in enumerate(config.items()):
-                if k in data:
-                    lines.append(process_entry(k, data[k], idx, cfg))
-        else:
-            for idx, (k, v) in enumerate(data.items()):
-                lines.append(process_entry(k, v, idx))
+        # 1. Prepare Text Lines
+        lines = cls._prepare_lines(data, config)
 
         if not lines:
             return vis
 
-        # ---------------- PHASE 2: MEASURE ----------------
+        # 2. Measure for Background
         max_w = 0
         total_h = 0
 
+        # We need to store measurements to avoid calling getTextSize twice
+        measured_lines = []
+
         for line in lines:
+            # FIX: Use line["font"] here so measurement matches drawing
             (w, h), baseline = cv2.getTextSize(
-                line["text"], font, line["scale"], line["thickness"]
+                line["text"], line["font"], line["scale"], line["thickness"]
             )
-            line["w"] = w
-            line["h"] = h
-            line["baseline"] = baseline
-            line["row_h"] = h + baseline + line_spacing
+            line_h = h + baseline + line_spacing
+
+            measured_lines.append(
+                {
+                    **line,
+                    "w": w,
+                    "h": h,  # text height only
+                    "row_h": line_h,
+                }
+            )
 
             max_w = max(max_w, w)
-            total_h += line["row_h"]
+            total_h += line_h
 
         box_w = max_w + 2 * padding
         box_h = total_h + 2 * padding - line_spacing
 
-        # ---------------- PHASE 3: DRAW ----------------
+        # 3. Draw Background
         if bg_opacity > 0:
             overlay = vis.copy()
             cv2.rectangle(
@@ -235,16 +225,18 @@ class RenderUtils:
             )
             vis = cv2.addWeighted(overlay, bg_opacity, vis, 1 - bg_opacity, 0)
 
+        # 4. Draw Text
         curr_y = y_start + padding
 
-        for line in lines:
+        for line in measured_lines:
+            # Text origin in OpenCV is bottom-left of the string
             draw_y = curr_y + line["h"]
 
             cv2.putText(
                 vis,
                 line["text"],
                 (x_start + padding, draw_y),
-                font,
+                line["font"],  # Correctly using line-specific font
                 line["scale"],
                 line["color"],
                 line["thickness"],
@@ -259,7 +251,7 @@ class RenderUtils:
 def test():
     img = np.zeros((400, 500, 3), dtype=np.uint8) + 50
 
-    results = {
+    data = {
         "frame_idx": 105,
         "fps": 24.532,
         "fire_prob": 0.98,
@@ -267,29 +259,42 @@ def test():
         "status": "DANGER",
     }
 
-    img_auto = RenderUtils.draw_osd(img.copy(), results)
+    print("1. Testing Auto Mode (No Config)...")
+    img_auto = RenderUtils.draw_osd(img.copy(), data)
 
-    cfg = {
-        "fps": ("FPS", "{:.1f}"),
-        "status": ("System", (0, 0, 255)),
-        "fire_prob": ("Fire", OsdFmt.PERCENT, (0, 0, 255)),
-        "smoke_prob": ("Smoke", OsdFmt.PERCENT),
+    # New Dictionary-based Configuration
+    data_render_cfg = {
+        "fps": {
+            "label": "FPS",
+            "fmt": "{:.1f}",
+            "scale": 0.4,
+            "thickness": 1,
+            "font": cv2.FONT_HERSHEY_COMPLEX_SMALL,  # <--- Custom font test
+        },
+        "status": {"label": "System", "color": (0, 0, 255), "thickness": 2},
+        "fire_prob": {"label": "Fire", "fmt": OsdFmt.PERCENT, "color": (0, 0, 255)},
+        "smoke_prob": {
+            "label": "Smoke",
+            "fmt": OsdFmt.PERCENT,
+        },
     }
 
-    img_cfg = RenderUtils.draw_osd(img.copy(), results, cfg, bg_opacity=0.5)
-    img_no_bg = RenderUtils.draw_osd(img.copy(), results, cfg, bg_opacity=0)
+    print("2. Testing Custom Config Mode...")
+    img_cfg = RenderUtils.draw_osd(img.copy(), data, data_render_cfg, bg_opacity=0.5)
 
-    import os
+    print("3. Testing No Background Mode...")
+    img_no_bg = RenderUtils.draw_osd(img.copy(), data, data_render_cfg, bg_opacity=0)
 
     current_dir = os.path.dirname(os.path.abspath(__file__))
     os.chdir(current_dir)
     os.makedirs("_test_out", exist_ok=True)
     os.chdir("_test_out")
+
     cv2.imwrite("test_auto.jpg", img_auto)
     cv2.imwrite("test_cfg.jpg", img_cfg)
     cv2.imwrite("test_no_bg.jpg", img_no_bg)
 
-    print("Saved test images.")
+    print(f"Saved test images to {os.getcwd()}")
 
 
 if __name__ == "__main__":

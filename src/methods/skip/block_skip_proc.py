@@ -1,4 +1,3 @@
-from IPython.testing.decorators import skip
 import cv2
 from halib import *  # noqa: F403
 from typing import Tuple, Dict, Any
@@ -133,7 +132,7 @@ class BlockSkipProc(BaseSkipProc):
         has_fire_or_smoke = False
 
         # We will collect detailed logs for debugging
-        block_logs = []
+        block_info = []
         if len(active_indices) > 0:
             for r, c in active_indices:
                 y1 = r * self.block_size
@@ -145,37 +144,23 @@ class BlockSkipProc(BaseSkipProc):
                 console.print(f"[red]Analyzing Block {block_id}... [/red]", end="\r")
 
                 # --- RUN CHECK ---
-                result = self.rules.check(block_roi, {"global_means": global_means})
+                result = self.rules.check(
+                    block_roi, extra_dict={"global_means": global_means}
+                )
 
                 # Store result for visualization/debugging if needed
                 if result.is_pass():
                     has_fire_or_smoke = True
-                    # Log which sub-rule triggered it
-                    triggered_rule = "Unknown"
-                    for sub in result.sub_results:
-                        if sub.is_pass():
-                            triggered_rule = sub.rule_name
-
-                    block_logs.append(
-                        {
-                            "block": (int(r), int(c)),
-                            "trigger": triggered_rule,
-                            "details": result,
-                        }
-                    )
-
-                    # Optimization: Break if we found one confirmed candidate
-                    break
+                    rule_dict = BaseRule.collect_leaf_results(result)
+                    block_info.append({"block_id": block_id, "rule_dict": rule_dict})
 
         should_skip = not has_fire_or_smoke
 
         meta_data = {
             "mt_proc": {
-                "scaled_frame": scaled_frame,
-                "motion_mask": fgmask,
-                "active_blocks_indices": active_indices,
-                "active_blocks": len(active_indices),
-                "triggered_blocks": block_logs,
+                "vis_frame": scaled_frame,
+                "motion_mask_frame": fgmask,
+                "block_info": block_info,
             }
         }
         return should_skip, meta_data

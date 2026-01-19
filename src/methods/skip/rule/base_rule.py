@@ -3,6 +3,7 @@ from enum import Enum
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Dict, Optional, List
+from src.utils import to_abbr
 
 
 class RuleStatus(Enum):
@@ -21,6 +22,8 @@ class RuleResult:
     def is_pass(self) -> bool:
         return self.status == RuleStatus.PASS
 
+    def abbr_name(self) -> str:
+        return to_abbr(self.rule_name)
 
 class BaseRule(ABC):
     def __init__(self, name: str = "", params: Optional[Dict[str, Any]] = None):
@@ -33,6 +36,38 @@ class BaseRule(ABC):
         self, frame_or_roi: np.ndarray, extra_dict: Optional[Dict[str, Any]] = None
     ) -> RuleResult:
         pass
+
+    @staticmethod
+    def collect_leaf_results(
+        result: RuleResult, current_path: str = ""
+    ) -> Dict[str, RuleResult]:
+        """
+        Recursively collects passing leaf RuleResults.
+        Returns: { "RuleA->RuleB->LeafC": RuleResultObject, ... }
+        """
+        if not result.is_pass():
+            return {}
+
+        # Build the current path string (e.g., "AnyRule -> ColorRule")
+        node_name = result.rule_name
+        new_path = f"{current_path} -> {node_name}" if current_path else node_name
+
+        # Base Case: This is a Leaf Node (no sub-results)
+        if not result.sub_results:
+            return {new_path: result}
+
+        # Recursive Step: Collect results from all passing children
+        leaves = {}
+        for sub in result.sub_results:
+            if sub.is_pass():
+                child_leaves = BaseRule.collect_leaf_results(sub, new_path)
+                leaves.update(child_leaves)
+
+        # Edge case: If an Any/All rule passes but has no children (empty container), return itself
+        if not leaves:
+            return {new_path: result}
+
+        return leaves
 
 
 class BlockBasedRule(BaseRule):

@@ -8,6 +8,7 @@ from src.results.base_rs_proc import BaseRsProc
 from src.results.viz.video_pipeline import VideoPipeline
 from src.results.viz.infer_rs_renderer import InferRsRenderer
 from src.results.viz.grid_renderer import GridRenderer
+from src.results.viz.block_rule_renderer import BlockRuleRenderer
 
 
 class VideoBlockSkipRsProc(BaseRsProc):
@@ -23,6 +24,7 @@ class VideoBlockSkipRsProc(BaseRsProc):
         infer_rs_pipe = VideoPipeline(self.video_output_path, fps, frame_size)
         infer_rs_pipe.add_renderer(InferRsRenderer())  # ty:ignore[invalid-argument-type]
         infer_rs_pipe.add_renderer(GridRenderer())  # ty:ignore[invalid-argument-type]
+        infer_rs_pipe.add_renderer(BlockRuleRenderer())  # ty:ignore[invalid-argument-type]
         pipeline_ls.append(infer_rs_pipe)
         return pipeline_ls
 

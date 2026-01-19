@@ -17,9 +17,6 @@ class GridRenderer(BaseRenderer):
         Converts global context to renderer-specific context.
         global_context: contains all inference results (fps, fg_mask_dict, etc.)
         """
-        # with ConsoleLog("global ctx"):
-        #     pprint(global_context)
-        # assert False, "Debug stop"
         mt_cfg =  global_context["infer_rs"]["mt_cfg"]["params"]
         render_ctx = filter_dict_by_keys(mt_cfg, ["scale_factor", "block_size"])
         return render_ctx
