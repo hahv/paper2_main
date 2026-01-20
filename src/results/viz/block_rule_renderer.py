@@ -107,10 +107,11 @@ class BlockRuleRenderer(BaseRenderer):
                 full_osd_dict.update(osd_dict)
 
                 # (alias, fmt, color, scale, thickness)
+                # cv2.FONT_HERSHEY_COMPLEX_SMALL, cv2.FONT_HERSHEY_PLAIN, FONT_HERSHEY_SIMPLEX
                 osd_cfg_dict = {
-                    "font": cv2.FONT_HERSHEY_PLAIN,  # cv2.FONT_HERSHEY_COMPLEX_SMALL,
+                    "font": cv2.FONT_HERSHEY_PLAIN,
                     "color": color,
-                    "scale": 0.6,
+                    "scale": 0.5,
                     "thickness": 1,
                 }
                 osd_cfg_dict = {key: osd_cfg_dict.copy() for key in osd_dict.keys()}
@@ -125,7 +126,7 @@ class BlockRuleRenderer(BaseRenderer):
 
             if full_osd_dict:
                 pprint(f"{x1=}, {y1=}, drawing OSD...")
-                frame_bgr = RenderUtils.draw_osd(
+                frame_bgr = RenderUtils.draw_osd_pil(
                     frame_bgr,
                     full_osd_dict,
                     config=full_osd_cfg_dict,
@@ -133,6 +134,7 @@ class BlockRuleRenderer(BaseRenderer):
                     bg_opacity=-1,  # no bg
                     padding=3,
                     line_spacing=2,
+                    base_font_size=20,
                 )
 
         return frame_bgr

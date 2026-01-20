@@ -4,6 +4,7 @@ import seaborn as sns
 from typing import Dict, Any, Tuple, Optional, Union
 from enum import Enum
 import os
+from PIL import Image, ImageDraw, ImageFont
 
 
 class OsdFmt(str, Enum):
@@ -43,6 +44,9 @@ class RenderUtils:
         "scale": 0.7,
         "thickness": 2,
     }
+
+    # Cache for PIL fonts to avoid reloading .ttf files constantly
+    _pil_font_cache: Dict[Tuple[str, int], ImageFont.FreeTypeFont] = {}
 
     @staticmethod
     def get_rainbow_color(idx: int) -> Tuple[int, int, int]:
@@ -89,40 +93,6 @@ class RenderUtils:
         return parsed
 
     @classmethod
-    def calculate_osd_box(
-        cls,
-        data: Dict[str, Any],
-        config: Optional[Dict[str, Any]] = None,
-        padding: int = 10,
-        line_spacing: int = 5,
-    ) -> Tuple[int, int]:
-        """
-        Calculates the (height, width) of the OSD box without drawing.
-        """
-        lines = cls._prepare_lines(data, config)
-
-        if not lines:
-            return (0, 0)
-
-        # Measure
-        max_w = 0
-        total_h = 0
-
-        for line in lines:
-            # FIX: Use the line's specific font, not a global one
-            (w, h), baseline = cv2.getTextSize(
-                line["text"], line["font"], line["scale"], line["thickness"]
-            )
-            row_h = h + baseline + line_spacing
-            max_w = max(max_w, w)
-            total_h += row_h
-
-        box_w = max_w + 2 * padding
-        box_h = total_h + 2 * padding - line_spacing
-
-        return box_h, box_w
-
-    @classmethod
     def _prepare_lines(
         cls, data: Dict[str, Any], config: Optional[Dict[str, Any]] = None
     ) -> list:
@@ -161,6 +131,40 @@ class RenderUtils:
         return lines
 
     @classmethod
+    def calculate_osd_box(
+        cls,
+        data: Dict[str, Any],
+        config: Optional[Dict[str, Any]] = None,
+        padding: int = 10,
+        line_spacing: int = 5,
+    ) -> Tuple[int, int]:
+        """
+        Calculates the (height, width) of the OSD box without drawing.
+        """
+        lines = cls._prepare_lines(data, config)
+
+        if not lines:
+            return (0, 0)
+
+        # Measure
+        max_w = 0
+        total_h = 0
+
+        for line in lines:
+            # FIX: Use the line's specific font, not a global one
+            (w, h), baseline = cv2.getTextSize(
+                line["text"], line["font"], line["scale"], line["thickness"]
+            )
+            row_h = h + baseline + line_spacing
+            max_w = max(max_w, w)
+            total_h += row_h
+
+        box_w = max_w + 2 * padding
+        box_h = total_h + 2 * padding - line_spacing
+
+        return box_h, box_w
+
+    @classmethod
     def draw_osd(
         cls,
         frame: np.ndarray,
@@ -172,8 +176,7 @@ class RenderUtils:
         line_spacing: int = 5,
     ) -> np.ndarray:
         """
-        Draws multi-line OSD.
-        config: Dict[key_name, Dict] -> {"label": "Alias", "color": (255,0,0), ...}
+        Draws multi-line OSD using standard OpenCV functions.
         """
         vis = frame.copy()
         x_start, y_start = pos
@@ -246,6 +249,114 @@ class RenderUtils:
 
         return vis
 
+    # ---------------- NEW PIL METHOD ----------------
+
+    @classmethod
+    def _get_pil_font(cls, font_path: str, size: int):
+        """Loads and caches the PIL font."""
+        key = (font_path, size)
+        if key not in cls._pil_font_cache:
+            try:
+                cls._pil_font_cache[key] = ImageFont.truetype(font_path, size)
+            except IOError:
+                # Fallback to default if path is wrong
+                print(f"Warning: Font not found at {font_path}, using default.")
+                cls._pil_font_cache[key] = ImageFont.load_default()  # ty:ignore[invalid-assignment]
+        return cls._pil_font_cache[key]
+
+    @classmethod
+    def draw_osd_pil(
+        cls,
+        frame: np.ndarray,
+        data: Dict[str, Any],
+        config: Optional[Dict[str, Any]] = None,
+        pos: Tuple[int, int] = (10, 30),
+        bg_opacity: float = 0.5,
+        padding: int = 10,
+        line_spacing: int = 5,
+        font_path: str = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+        base_font_size: int = 20,
+    ) -> np.ndarray:
+        """
+        Draws multi-line OSD using PIL (High Quality).
+        Reuses the same config structure.
+        Font Size = base_font_size * config['scale']
+        """
+        # 1. Prepare Lines (reusing the logic from draw_osd)
+        lines = cls._prepare_lines(data, config)
+
+        if not lines:
+            return frame
+
+        # Convert to PIL Image (BGR -> RGB)
+        img_pil = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+        draw = ImageDraw.Draw(img_pil, "RGBA")
+
+        x_start, y_start = pos
+
+        # 2. Measure Lines (PIL Specific)
+        measured_lines = []
+        max_w = 0
+        total_h = 0
+
+        for line in lines:
+            # Calculate actual font size: base * scale
+            pil_size = int(base_font_size * line["scale"])
+
+            # Get PIL Font object
+            font = cls._get_pil_font(font_path, pil_size)
+
+            # Measure
+            bbox = draw.textbbox((0, 0), line["text"], font=font)
+            w = bbox[2] - bbox[0]
+            h = bbox[3] - bbox[1]
+            row_h = h + line_spacing
+
+            measured_lines.append(
+                {
+                    **line,
+                    "pil_font": font,  # Store the PIL font object
+                    "w": w,
+                    "h": h,
+                    "row_h": row_h,
+                }
+            )
+
+            max_w = max(max_w, w)
+            total_h += row_h
+
+        # Adjust total height (remove last spacing)
+        if total_h > 0:
+            total_h -= line_spacing
+
+        box_w = max_w + 2 * padding
+        box_h = total_h + 2 * padding
+
+        # 3. Draw Background
+        if bg_opacity > 0:
+            rect_coords = (x_start, y_start, x_start + box_w, y_start + box_h)
+            alpha_val = int(255 * bg_opacity)
+            draw.rectangle(rect_coords, fill=(0, 0, 0, alpha_val))
+
+        # 4. Draw Text
+        curr_y = y_start + padding
+
+        for line in measured_lines:
+            # Handle Color: BGR (from config) -> RGB (for PIL)
+            c = line["color"]
+            rgb_color = (c[2], c[1], c[0])
+
+            draw.text(
+                (x_start + padding, curr_y),
+                line["text"],
+                font=line["pil_font"],
+                fill=rgb_color,
+            )
+            curr_y += line["row_h"]
+
+        # 5. Convert back to OpenCV (RGB -> BGR)
+        return cv2.cvtColor(np.array(img_pil), cv2.COLOR_RGB2BGR)
+
 
 # ---------------- DEMO ----------------
 def test():
@@ -279,11 +390,23 @@ def test():
         },
     }
 
-    print("2. Testing Custom Config Mode...")
+    print("2. Testing Custom Config Mode (OpenCV)...")
     img_cfg = RenderUtils.draw_osd(img.copy(), data, data_render_cfg, bg_opacity=0.5)
 
-    print("3. Testing No Background Mode...")
+    print("3. Testing No Background Mode (OpenCV)...")
     img_no_bg = RenderUtils.draw_osd(img.copy(), data, data_render_cfg, bg_opacity=0)
+
+    # --- NEW: Test PIL High Quality Mode ---
+    print("4. Testing High Quality PIL Mode...")
+    # NOTE: Set base_font_size so that scale=1.0 maps to roughly 24px (adjust as needed)
+    # Ensure 'arial.ttf' exists or it will fallback to default font
+    img_pil = RenderUtils.draw_osd_pil(
+        img.copy(),
+        data,
+        data_render_cfg,
+        bg_opacity=0.5,
+        base_font_size=16,
+    )
 
     current_dir = os.path.dirname(os.path.abspath(__file__))
     os.chdir(current_dir)
@@ -293,6 +416,7 @@ def test():
     cv2.imwrite("test_auto.jpg", img_auto)
     cv2.imwrite("test_cfg.jpg", img_cfg)
     cv2.imwrite("test_no_bg.jpg", img_no_bg)
+    cv2.imwrite("test_pil.jpg", img_pil)  # <--- Saving new PIL output
 
     print(f"Saved test images to {os.getcwd()}")
 
