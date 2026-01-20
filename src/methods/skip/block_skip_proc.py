@@ -27,6 +27,35 @@ class BlockSkipProc(BaseSkipProc):
         smoke_rule = SmokeBlockSpatioTemporalRule(params=self.params, name="SmokeCheck")
         self.rules = AnyRule([fire_complex, smoke_rule], name="FireOrSmokeCheck")
 
+    @staticmethod
+    def get_skip_proc_frame_size(
+        frame_w_h: tuple, scale_factor: float, block_size: int
+    ) -> tuple:
+        """
+        Calculates the final shape (H, W) after resizing and padding to block_size.
+        mimics logic of _resize_and_pad without processing the image.
+        """
+        assert len(frame_w_h) == 2, "frame_w_h must be a tuple of (width, height)"
+
+        w, h = frame_w_h[:2]
+
+        # 1. Calculate Scaled Dimensions (OpenCV uses round() for fx/fy)
+        if scale_factor != 1.0:
+            new_h = int(round(h * scale_factor))
+            new_w = int(round(w * scale_factor))
+        else:
+            new_h, new_w = h, w
+
+        # 2. Calculate Padding (matches your formula)
+        # (block - (dim % block)) % block ensures 0 padding if already divisible
+        pad_h = (block_size - (new_h % block_size)) % block_size
+        pad_w = (block_size - (new_w % block_size)) % block_size
+
+        # 3. Add Padding
+        final_h = new_h + pad_h
+        final_w = new_w + pad_w
+        return (final_w, final_h)
+
     # input frames will be first resized based on scale_factor, then padded to be divisible by block_size
     def _resize_and_pad(self, frame: np.ndarray) -> np.ndarray:
         if self.scale_factor != 1.0:
@@ -141,7 +170,7 @@ class BlockSkipProc(BaseSkipProc):
                 x2 = x1 + self.block_size
                 block_roi = scaled_frame[y1:y2, x1:x2]
                 block_id = (int(r), int(c))
-                console.print(f"[red]Analyzing Block {block_id}... [/red]", end="\r")
+                console.print(f"[red] Analyzing Block {block_id}... [/red]", end="\r")
 
                 # --- RUN CHECK ---
                 result = self.rules.check(

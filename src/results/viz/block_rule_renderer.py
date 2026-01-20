@@ -27,11 +27,6 @@ class BlockRuleRenderer(BaseRenderer):
         """
         mt_cfg = global_context["infer_rs"]["mt_cfg"]["params"]
         mt_proc = global_context["infer_rs"]["mt_proc"]
-
-        # with ConsoleLog("BlockRuleRenderer"):
-        #     pprint(mt_cfg)
-        #     pprint(mt_proc)
-
         return {"mt_cfg": mt_cfg, "mt_proc": mt_proc}
 
     def render(self, frame_bgr: np.ndarray, renderer_ctx: Dict[str, Any]) -> np.ndarray:
@@ -120,12 +115,7 @@ class BlockRuleRenderer(BaseRenderer):
                 )
                 full_osd_cfg_dict.update(osd_cfg_dict)
 
-            with ConsoleLog("BlockRuleRenderer"):
-                pprint(full_osd_dict)
-                # pprint(full_osd_cfg_dict)
-
             if full_osd_dict:
-                pprint(f"{x1=}, {y1=}, drawing OSD...")
                 frame_bgr = RenderUtils.draw_osd_pil(
                     frame_bgr,
                     full_osd_dict,

@@ -16,31 +16,51 @@ from src.results.csv_rs_proc import CsvRsProc
 import sys
 from src.utils import get_cls_in_pkg
 
+# Constants for package paths (avoids magic strings scattered in code)
+PKG_METHODS = "src.methods"
+PKG_RESULTS = "src.results"
+DEFAULT_VIDEO_PROC = "video_infer_rs_proc"
 
 class MethodFactory:
     @staticmethod
     def create_method(config: Config, *args, **kwargs):
-        cls = get_cls_in_pkg(
-            pkg_name="src.methods",
+        # Constants
+        METHOD_PKG = "src.methods"
+        RESULTS_PKG = "src.results"
+        DEFAULT_VIDEO_PROC = "video_infer_rs_proc"
+
+        # 1. Load the Method Class
+        method_cls = get_cls_in_pkg(
+            pkg_name=METHOD_PKG,
             fileName_ClsName=str(config.methodCfg.name),
         )
 
-        rs_handler_list: list[BaseRsProc] = []
+        # 2. Assemble Result Handlers
+        rs_handlers: list[BaseRsProc] = []
 
+        # --- CSV Handler ---
         if config.inferCfg.save_csv_results:
-            rs_handler_list.append(CsvRsProc(config))
+            rs_handlers.append(CsvRsProc(config))
 
+        # --- Video Handlers ---
         if config.inferCfg.save_video_results:
-            selected_video_proc = config.methodCfg.extra_cfgs.get(  # ty:ignore[possibly-missing-attribute]
-                "video_rs_proc", "video_base_rs_proc"
+            # Extract video config safely (defaults to [DEFAULT_VIDEO_PROC] if missing)
+            extra_cfgs = getattr(config.methodCfg, "extra_cfgs", {})
+            proc_names = extra_cfgs.get("result_proc", {}).get(
+                "video", [DEFAULT_VIDEO_PROC]
             )
-            rs_proc_cls = get_cls_in_pkg(
-                pkg_name="src.results", fileName_ClsName=selected_video_proc
-            )
-            rs_handler_list.append(rs_proc_cls(cfg=config))
 
-        kwargs = {"cfg": config, "rs_handlers": rs_handler_list}
-        return cls(**kwargs)
+            # Ensure it is a list
+            if isinstance(proc_names, str):
+                proc_names = [proc_names]
+
+            # Load and instantiate processors
+            for name in proc_names:
+                proc_cls = get_cls_in_pkg(pkg_name=RESULTS_PKG, fileName_ClsName=name)
+                rs_handlers.append(proc_cls(cfg=config))
+
+        # 3. Instantiate Method
+        return method_cls(cfg=config, rs_handlers=rs_handlers, *args, **kwargs)
 
 
 class BaseMethod(ABC):

@@ -1,3 +1,9 @@
+# import os
+
+# os.environ["OPENCV_FFMPEG_DEBUG"] = "1"
+# os.environ["OPENCV_LOG_LEVEL"] = "VERBOSE"
+
+
 from halib import *
 import sys
 

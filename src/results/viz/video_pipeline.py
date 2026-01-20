@@ -7,6 +7,8 @@ from src.results.viz.base_renderer import BaseRenderer
 class VideoPipeline:
     def __init__(self, filepath: str, fps: float, frame_size: tuple):
         self.filepath = filepath
+        self.frame_size = frame_size  # ! must be (width, height)
+        self.fps = fps
         fourcc = cv2.VideoWriter_fourcc(*"mp4v")  # ty:ignore[unresolved-attribute]
         self.writer = cv2.VideoWriter(filepath, fourcc, fps, frame_size)
         self.renderers: List[BaseRenderer] = []
@@ -17,6 +19,9 @@ class VideoPipeline:
     def process_and_write(self, raw_frame, global_context: dict):
         """Passes frame through all renderers, then writes to disk."""
         if not self.writer.isOpened():
+            console.print(
+                f"[red]Video writer not opened for file: {self.filepath}[/red]"
+            )
             return
 
         frame = raw_frame.copy()
