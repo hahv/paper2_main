@@ -21,6 +21,7 @@ def get_cls(class_path: str, *args, **kwargs):
     Dynamically import class and create instance.
     class_path format: 'mypkg.shapes.circle.Circle'
     """
+    # print(f">>Importing class from path: {class_path}")
     module_name, class_name = class_path.rsplit(".", 1)
     module = importlib.import_module(module_name)
     cls = getattr(module, class_name)

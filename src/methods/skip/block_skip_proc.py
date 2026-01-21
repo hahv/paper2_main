@@ -11,9 +11,9 @@ from src.methods.skip.base_skip_proc import BaseSkipProc
 class BlockSkipProc(BaseSkipProc):
     def __init__(self, cfg: Config):
         super().__init__(cfg)
+        self.scale_factor: float = self.params.get("scale_factor", 1.0)
         self.block_size: int = self.params.get("block_size", 32)
         self.block_active_thresh: float = self.params.get("block_active_thresh", 0.1)
-        self.scale_factor: float = self.params.get("scale_factor", 1.0)
         self.update_rules()
 
     def update_rules(self):
@@ -193,3 +193,4 @@ class BlockSkipProc(BaseSkipProc):
             }
         }
         return should_skip, meta_data
+

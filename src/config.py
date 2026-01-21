@@ -125,6 +125,13 @@ class MetricSetCfg(AutoNamedCfg):
 @dataclass
 class MethodCfg(AutoNamedCfg):
     extra_cfgs: Optional[Dict[str, Any]] = None
+    def get_skip_method_name(self) -> str:
+        skip_name = "Unknown"
+        try:
+            skip_name = self.extra_cfgs.get("skip_proc").get("name", "Unknown")  # ty:ignore[possibly-missing-attribute]
+        except Exception:
+            pass
+        return skip_name
 
 
 @dataclass
@@ -136,7 +143,7 @@ class DatasetSelector(BaseSelectorCfg[DatasetCfg]):
     def post_init(self):
         self.dbset_used = self._resolve_selection(
             self.list_dbsets,
-            self.selected_dbset,
+            self.selected_dbset,  # ty:ignore[invalid-argument-type]
             "dataset",  # ty:ignore[invalid-argument-type]
         )
 
@@ -150,7 +157,7 @@ class MetricSelector(BaseSelectorCfg[MetricSetCfg]):
     def post_init(self):
         self.metric_used = self._resolve_selection(
             self.list_metrics,
-            self.selected_metric,
+            self.selected_metric,  # ty:ignore[invalid-argument-type]
             "metric set",  # ty:ignore[invalid-argument-type]
         )
 
@@ -164,7 +171,7 @@ class MethodSelector(BaseSelectorCfg[MethodCfg]):
     def post_init(self):
         self.method_used = self._resolve_selection(
             self.list_methods,
-            self.selected_method,
+            self.selected_method,  # ty:ignore[invalid-argument-type]
             "method",  # ty:ignore[invalid-argument-type]
         )
 
@@ -285,7 +292,7 @@ class Config(ExpBaseCfg):
             # folder: e.g., config/datasets, config/trains
             folder_name = f"{file_suffix}s"
             attr_folder = os.path.join(
-                instance.general.project_dir,
+                instance.general.project_dir,  # ty:ignore[possibly-missing-attribute]
                 f"config/{folder_name}",  # ty:ignore[possibly-missing-attribute]
             )
 

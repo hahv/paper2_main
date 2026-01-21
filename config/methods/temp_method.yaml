@@ -1,20 +1,41 @@
+# ! prof. rule
 extra_cfgs:
   result_proc:
-    # video: [video_block_skip_rs_proc, fgmask_block_skip_rs_proc]
     video: [video_block_skip_rs_proc, fgmask_block_skip_rs_proc]
 
-
   skip_proc:
-    name: block_skip_proc # no_skip_proc, rand_skip_proc
+    name: prof_skip_proc # no_skip_proc, rand_skip_proc
     params:
-      scale_factor: 0.5 # 1.0 means no scaling
+      scale_factor: 1.0 # 1.0 means no scaling
       block_size: 64
-      block_active_thresh: 0.1
+      block_roi_th: 200
       motion:
-        name: framediff_det.FrameDiffDet
+        name: acc_motion_det.AccMotionDet
         params:
-          diff_thresh: 30
-      rule_params:
-        active_ratio_threshold: 0.2
-        wavelet_channel: r
-        wavelet_energy_thres: 50.0
+          diff_frame_th: 3
+          impact_plus_one: 5
+          mask_th: 10
+          max_val: 25
+          decay: 1
+
+# ! hahv rule
+# extra_cfgs:
+#   result_proc:
+#     # video: [video_block_skip_rs_proc, fgmask_block_skip_rs_proc]
+#     video: [video_block_skip_rs_proc, fgmask_block_skip_rs_proc]
+
+
+#   skip_proc:
+#     name: block_skip_proc # no_skip_proc, rand_skip_proc
+#     params:
+#       scale_factor: 0.5 # 1.0 means no scaling
+#       block_size: 64
+#       block_active_thresh: 0.1
+#       motion:
+#         name: framediff_det.FrameDiffDet
+#         params:
+#           diff_thresh: 30
+#       rule_params:
+#         active_ratio_threshold: 0.2
+#         wavelet_channel: r
+#         wavelet_energy_thres: 50.0
