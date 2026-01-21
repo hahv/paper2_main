@@ -1,0 +1,431 @@
+direction: right
+
+# ============================================================================
+# 1. Configuration Group (Orange)
+# ============================================================================
+Config: {
+  shape: class
+  style.fill: "#FFA726" 
+
+  "dbset_selector: DatasetSelector"
+  "metric_selector: MetricSelector"
+  "method_selector: MethodSelector"
+  "general: GeneralCfg"
+  "inferCfg: InferConfig"
+  "modelCfg: ModelConfig"
+
+  "get_general_cfg(): GeneralCfg"
+  "get_dataset_cfg(): DatasetCfg"
+  "get_metric_cfg(): MetricSetCfg"
+  "get_method_cfg(): MethodCfg"
+  "get_outdir(): str"
+  "finalize_config(): void"
+  "from_custom_yaml_file(): Config"
+}
+
+GeneralCfg: {
+  shape: class
+  style.fill: "#FFB74D"
+
+  "seed: int"
+  "project_dir: str"
+  "outdir: str"
+  "log_cfg: LogCfg"
+  "computer_name: str | None"
+  "time_stamp: str | None"
+
+  "get_name(): str"
+  "__post_init__(): void"
+}
+
+InferConfig: {
+  shape: class
+  style.fill: "#FFB74D"
+
+  "do_infer: bool"
+  "skip_if_exists: bool"
+  "limit: int"
+  "save_video_results: bool"
+  "save_csv_results: bool"
+  "csv_columns: List[str]"
+  "calc_metrics: bool"
+  "log_transforms: bool"
+  "use_profiler: bool"
+  "verbose: bool"
+}
+
+ModelConfig: {
+  shape: class
+  style.fill: "#FFB74D"
+
+  "base_model: str"
+  "model_path: str"
+  "class_names: List[str]"
+  "input_size: List[int] | None"
+}
+
+LogCfg: { shape: class; style.fill: "#FFB74D"; "wandb_cfg: WanDBCfg | None" }
+WanDBCfg: { shape: class; style.fill: "#FFB74D"; "project: str"; "mode: str"; "wandb_key: str" }
+
+DatasetCfg: {
+  shape: class
+  style.fill: "#FFB74D"
+
+  "dir_path: str | None"
+  "extra_cfgs: Dict"
+  "vname2path: Dict[str,str] | None"
+
+  "get_vname2path(): Dict"
+  "get_num_videos(): int"
+  "get_csv_labels(): List[str]"
+}
+
+MetricSetCfg: { shape: class; style.fill: "#FFB74D"; "metric_names: List[str]"; "extra_cfgs: Dict | None" }
+
+MethodCfg: {
+  shape: class
+  style.fill: "#FFB74D"
+
+  "extra_cfgs: Dict | None"
+  "get_skip_method_name(): str"
+}
+
+DatasetSelector: { shape: class; style.fill: "#FFB74D"; "..." }
+MetricSelector: { shape: class; style.fill: "#FFB74D"; "..." }
+MethodSelector: { shape: class; style.fill: "#FFB74D"; "..." }
+
+
+# ============================================================================
+# 2. Methods & Skip Logic Group (Blue)
+# ============================================================================
+
+BaseMethod: {
+  shape: class
+  style.fill: "#42A5F5"
+
+  "cfg: Config"
+  "model: Any"
+  "outdir: str"
+  "device: torch.device"
+  "profiler: zProfiler"
+  "result_handlers: List[BaseRsProc]"
+
+  "infer_frame(): dict (abstract)"
+  "prepare_metric_src(): dict"
+  "load_model(): Any"
+  "prepare_model(): Any"
+  "infer_video_dir(): void"
+  "infer_video(): void"
+}
+
+NoTempMethod: {
+  shape: class
+  style.fill: "#64B5F6"
+
+  "_validate_method_name(): void"
+  "_pre_process_frame(): torch.Tensor"
+  "infer_frame(): dict"
+}
+
+TempMethod: {
+  shape: class
+  style.fill: "#64B5F6"
+
+  "skip_proc: BaseSkipProc"
+
+  "after_infer_video(): void"
+  "infer_frame(): dict"
+}
+
+TempBaselineTptMethod: {
+  shape: class
+  style.fill: "#64B5F6"
+
+  "window_size: int"
+  "persist_thres: float"
+  "temporal_buffer: np.ndarray"
+
+  "before_infer_video(): void"
+  "infer_frame(): dict"
+}
+
+BaseSkipProc: {
+  shape: class
+  style.fill: "#42A5F5"
+
+  "cfg: Config"
+  "name: str"
+  "params: Dict"
+  "motion_det: BaseMotionDet | None"
+
+  "should_skip(): Tuple[bool, Dict] (abstract)"
+  "prepare_infer_input(): np.ndarray"
+  "get_dummy_result(): dict"
+}
+
+BlockSkipProc: {
+  shape: class
+  style.fill: "#64B5F6"
+
+  "scale_factor: float"
+  "block_size: int"
+  "block_active_thresh: float"
+  "rules: BaseRule"
+
+  "update_rules(): void"
+  "get_skip_proc_frame_size(): tuple"
+  "should_skip(): Tuple[bool, Dict]"
+}
+
+ProfSkipProc: {
+  shape: class
+  style.fill: "#64B5F6"
+
+  "scale_factor: float"
+  "block_size: int"
+  "block_roi_th: int"
+
+  "should_skip(): Tuple[bool, Dict]"
+  "prepare_infer_input(): np.ndarray"
+}
+
+# ============================================================================
+# 3. Motion Detection & Rules Group (Red)
+# ============================================================================
+
+BaseMotionDet: {
+  shape: class
+  style.fill: "#12ecc8"
+
+  "name: str"
+  "params: Dict"
+
+  "apply(): np.ndarray (abstract)"
+  "reset(): void (abstract)"
+}
+
+FrameDiffDet: { shape: class; style.fill: "#4beed3"; "apply(): np.ndarray"; "reset(): void" }
+AccMotionDet: { shape: class; style.fill: "#4beed3"; "apply(): np.ndarray"; "reset(): void" }
+
+BaseRule: {
+  shape: class
+  style.fill: "#EF5350"
+
+  "name: str"
+  "params: Dict"
+  "block_id: tuple"
+
+  "check(): RuleResult (abstract)"
+  "collect_leaf_results(): Dict"
+}
+
+BlockBasedRule: { shape: class; style.fill: "#E57373"; "block_id: tuple"; "prepare(): Dict" }
+AnyRule: { shape: class; style.fill: "#E57373"; "rules: List[BaseRule]"; "check(): RuleResult" }
+AllRule: { shape: class; style.fill: "#E57373"; "rules: List[BaseRule]"; "check(): RuleResult" }
+FireBlockYCbCrRule: { shape: class; style.fill: "#E57373"; "check(): RuleResult" }
+FireBlockWaveletRule: { shape: class; style.fill: "#E57373"; "check(): RuleResult" }
+SmokeBlockSpatioTemporalRule: { shape: class; style.fill: "#E57373"; "check(): RuleResult" }
+
+
+# ============================================================================
+# 4. Metrics Group (Purple)
+# ============================================================================
+
+BaseMetricSrc: {
+  shape: class
+  style.fill: "#AB47BC"
+
+  "dataset_name: str"
+  "metric_data_getters_dict: Dict"
+  "mode_processors_dict: Dict"
+
+  "_register_handlers(): void (abstract)"
+  "get_data_metrics(): Dict"
+  "default_mode_processor(): Dict"
+}
+
+CsvMetricSrc: {
+  shape: class
+  style.fill: "#BA68C8"
+
+  "cfg: Config"
+  "csv_loader: BaseCsvLoader"
+  "POS_LABEL: str"
+  "NEG_LABEL: str"
+
+  "_register_handlers(): void"
+  "load_raw_pred_and_gt(): list"
+  "get_metric_data_by_mode(): Dict"
+  "proc_data_by_mode(): Any"
+}
+
+BaseCsvLoader: {
+  shape: class
+  style.fill: "#AB47BC"
+
+  "POS_LABEL: str"
+  "NEG_LABEL: str"
+
+  "load_pred_df(): pd.DataFrame (abstract)"
+  "get_gt(): List[str] (abstract)"
+}
+
+DFireCsvLoader: { shape: class; style.fill: "#BA68C8"; "load_pred_df(): DataFrame"; "get_gt(): list" }
+UFireIndoorCsvLoader: { shape: class; style.fill: "#BA68C8"; "load_pred_df(): DataFrame"; "get_gt(): list" }
+
+# ============================================================================
+# 5. Result Processing & Visualization Group (Green)
+# ============================================================================
+
+BaseRsProc: {
+  shape: class
+  style.fill: "#66BB6A"
+
+  "before_video(): void"
+  "handle_frame_results(): void (abstract)"
+  "after_video(): void"
+}
+
+CsvRsProc: {
+  shape: class
+  style.fill: "#81C784"
+
+  "cfg: Config"
+  "csv_columns: List[str]"
+  "out_csv_file: str"
+  "outfile_exists: bool"
+
+  "before_video(): void"
+  "prepare_csv_row(): dict"
+  "handle_frame_results(): void"
+  "after_video(): void"
+}
+
+VideoInferRsProc: {
+  shape: class
+  style.fill: "#81C784"
+
+  "cfg: Config"
+  "pipelines: List[VideoPipeline]"
+  "video_output_path: str"
+  "out_video_postfix: str"
+  "outfile_exists: bool"
+
+  "prepare_pipelines_list(): List"
+  "calc_frame_size(): tuple"
+  "before_video(): void"
+  "get_vis_frame(): np.ndarray"
+  "handle_frame_results(): void"
+  "after_video(): void"
+}
+
+VideoBlockSkipRsProc: {
+  shape: class
+  style.fill: "#81C784"
+
+  "calc_frame_size(): tuple"
+  "get_vis_frame(): np.ndarray"
+  "get_custom_renderer(): List[BaseRenderer]"
+  "prepare_pipelines_list(): List"
+}
+
+FgmaskBlockSkipRsProc: {
+  shape: class
+  style.fill: "#81C784"
+
+  "get_vis_frame(): np.ndarray"
+}
+
+BaseRenderer: {
+  shape: class
+  style.fill: "#66BB6A"
+
+  "global_ctx_to_render_ctx(): Dict (abstract)"
+  "render(): np.ndarray (abstract)"
+}
+
+VideoPipeline: {
+  shape: class
+  style.fill: "#66BB6A"
+
+  "filepath: str"
+  "fps: float"
+  "frame_size: tuple"
+  "renderers: List[BaseRenderer]"
+
+  "add_renderer(): void"
+  "process_and_write(): void"
+  "release(): void"
+}
+
+InferRsRenderer: { shape: class; style.fill: "#81C784"; "global_ctx_to_render_ctx(): Dict"; "render(): np.ndarray" }
+GridRenderer: { shape: class; style.fill: "#81C784"; "global_ctx_to_render_ctx(): Dict"; "render(): np.ndarray" }
+BlockProfRenderer: { shape: class; style.fill: "#81C784"; "global_ctx_to_render_ctx(): Dict"; "render(): np.ndarray" }
+BlockRuleRenderer: { shape: class; style.fill: "#81C784"; "global_ctx_to_render_ctx(): Dict"; "render(): np.ndarray" }
+
+
+# ============================================================================
+# Relationships
+# ============================================================================
+
+# Composition / Aggregation
+Config -> GeneralCfg
+Config -> InferConfig
+Config -> ModelConfig
+Config -> DatasetCfg
+Config -> MetricSetCfg
+Config -> MethodCfg
+Config -> DatasetSelector
+Config -> MetricSelector
+Config -> MethodSelector
+
+GeneralCfg -> LogCfg
+LogCfg -> WanDBCfg
+
+BaseMethod -> BaseRsProc
+BaseMethod -> BaseMetricSrc
+BaseMethod -> Config
+
+CsvMetricSrc -> BaseCsvLoader
+
+VideoInferRsProc -> VideoPipeline
+VideoPipeline -> BaseRenderer
+
+BlockSkipProc -> BaseRule
+BlockSkipProc -> BaseMotionDet
+ProfSkipProc -> BaseMotionDet
+TempMethod -> BaseSkipProc
+
+# Inheritance (Using Labels for compatibility)
+
+TempMethod -> NoTempMethod: extends {style: {stroke-dash: 3}}
+TempBaselineTptMethod -> NoTempMethod: extends {style: {stroke-dash: 3}}
+NoTempMethod -> BaseMethod: extends {style: {stroke-dash: 3}}
+
+BaseRsProc -> CsvRsProc: extends {style: {stroke-dash: 3}}
+BaseRsProc -> VideoInferRsProc: extends {style: {stroke-dash: 3}}
+VideoInferRsProc -> VideoBlockSkipRsProc: extends {style: {stroke-dash: 3}}
+VideoBlockSkipRsProc -> FgmaskBlockSkipRsProc: extends {style: {stroke-dash: 3}}
+
+BaseSkipProc -> BlockSkipProc: extends {style: {stroke-dash: 3}}
+BaseSkipProc -> ProfSkipProc: extends {style: {stroke-dash: 3}}
+
+BaseMotionDet -> FrameDiffDet: extends {style: {stroke-dash: 3}}
+BaseMotionDet -> AccMotionDet: extends {style: {stroke-dash: 3}}
+
+BaseRule -> BlockBasedRule: extends {style: {stroke-dash: 3}}
+BaseRule -> AnyRule: extends {style: {stroke-dash: 3}}
+BaseRule -> AllRule: extends {style: {stroke-dash: 3}}
+BlockBasedRule -> FireBlockYCbCrRule: extends {style: {stroke-dash: 3}}
+BlockBasedRule -> FireBlockWaveletRule: extends {style: {stroke-dash: 3}}
+BlockBasedRule -> SmokeBlockSpatioTemporalRule: extends {style: {stroke-dash: 3}}
+
+BaseMetricSrc -> CsvMetricSrc: extends {style: {stroke-dash: 3}}
+BaseCsvLoader -> DFireCsvLoader: extends {style: {stroke-dash: 3}}
+BaseCsvLoader -> UFireIndoorCsvLoader: extends {style: {stroke-dash: 3}}
+
+BaseRenderer -> VideoPipeline: {label: uses; style: {stroke-dash: 3}}
+BaseRenderer -> InferRsRenderer: extends {style: {stroke-dash: 3}}
+BaseRenderer -> GridRenderer: extends {style: {stroke-dash: 3}}
+BaseRenderer -> BlockRuleRenderer: extends {style: {stroke-dash: 3}}
+BaseRenderer -> BlockProfRenderer: extends {style: {stroke-dash: 3}}

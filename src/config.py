@@ -32,14 +32,6 @@ class LogCfg(YAMLWizard):
     wandb_cfg: Optional[WanDBCfg] = None
 
 
-@dataclass
-class GeneralConfig(YAMLWizard):
-    seed: int
-    outdir: str
-    log_cfg: LogCfg
-    computer_name: Optional[str] = None
-    time_stamp: Optional[str] = None
-
 
 @dataclass
 class GeneralCfg(NamedCfg, YAMLWizard):
