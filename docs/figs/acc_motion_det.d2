@@ -1,0 +1,83 @@
+direction: down
+
+classes: {
+  process: {
+    shape: rectangle
+    style: {
+      border-radius: 5
+      fill: "#e1f5fe" # Light Blue
+      stroke: "#01579b"
+    }
+  }
+  state: {
+    shape: cylinder
+    style: {
+      fill: "#fff3e0" # Light Orange
+      stroke: "#e65100"
+      shadow: true
+    }
+  }
+  data: {
+    shape: parallelogram
+    style: {
+      fill: "#e8f5e9" # Light Green
+      stroke: "#1b5e20"
+    }
+  }
+}
+
+# --- 1. Inputs & State ---
+Input: Input Frame (BGR) {class: data}
+PrevFrame: Previous Frame\n(State) {class: state}
+AccBuffer: Accumulation Buffer\n(State) {class: state}
+
+# --- 2. Processing Pipeline ---
+Preprocessing: {
+  label: "1. Preprocessing"
+  Convert: To Grayscale {class: process}
+  Input -> Convert
+}
+
+Difference_Check: {
+  label: "2. Detect Change"
+  AbsDiff: AbsDiff\n|Curr - Prev| {class: process}
+  CalcImpact: Calculate Impact\n(If Diff > 1, add 5)\n(Else 0) {class: process}
+  
+  AbsDiff -> CalcImpact
+}
+
+Accumulation_Loop: {
+  label: "3. Accumulation & Decay"
+  style: {stroke-dash: 3}
+  
+  Add: Add to Buffer\n(Buffer + Impact) {class: process}
+  Cap: Cap Values\n(Min(Buffer, 25)) {class: process}
+  Decay: Decay Heat\n(Buffer - 1) {class: process}
+  
+  Add -> Cap -> Decay
+}
+
+Thresholding: {
+  label: "4. Output Generation"
+  FinalThresh: Final Threshold\n(If Buffer > 10)\nResult = 255 {class: process}
+}
+
+Output: Motion Mask\n(Binary) {class: data}
+
+# --- 3. Connections ---
+
+# Flow
+Preprocessing.Convert -> Difference_Check.AbsDiff
+PrevFrame -> Difference_Check.AbsDiff
+Difference_Check.CalcImpact -> Accumulation_Loop.Add
+
+# State Cycle: Buffer
+AccBuffer -> Accumulation_Loop.Add: read
+Accumulation_Loop.Decay -> AccBuffer: update
+
+# Output Flow
+Accumulation_Loop.Decay -> Thresholding.FinalThresh
+Thresholding.FinalThresh -> Output
+
+# State Update: PrevFrame
+Preprocessing.Convert -> PrevFrame: update
