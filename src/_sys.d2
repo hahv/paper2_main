@@ -1,0 +1,275 @@
+title:  {
+  label: PROJECT SYSTEM ARCHITECTURE OVERVIEW
+  near: top-center
+  shape: text
+  style: {
+    font-size: 24
+    bold:  true
+  }
+}
+
+# Central Configuration
+config: Config. py {
+  shape: cylinder
+  style. fill: "#e1f5ff"
+
+  dataset_cfg: DatasetCfg\n(video paths, labels)
+  method_cfg: MethodCfg\n(which method to use)
+  metric_set_cfg: MetricSetCfg\n(which metrics to compute)
+  model_config: ModelConfig\n(CNN model info)
+  infer_config: InferConfig\n(save_csv, save_video, etc.)
+}
+
+# Experiment Orchestrator
+paper2exp: Paper2Exp {
+  shape: hexagon
+  style.fill: "#fff3e0"
+  label: "Paper2Exp\nExperiment Orchestrator"
+}
+
+# Methods Layer
+methods: src/methods/ {
+  style.fill: "#f3e5f5"
+
+  factory: MethodFactory {
+    shape: diamond
+    style.fill: "#ce93d8"
+  }
+
+  base:  BaseMethod\n(ABC) {
+    shape: class
+    style.fill: "#ba68c8"
+  }
+
+  no_temp: NoTempMethod\n(frame-by-frame) {
+    shape: rectangle
+    style.fill: "#ab47bc"
+  }
+
+  temp: TempMethod\n(with skip) {
+    shape: rectangle
+    style.fill: "#9c27b0"
+  }
+
+  temp_baseline: TempBaselineTptMethod\n(temporal filtering) {
+    shape: rectangle
+    style.fill: "#8e24aa"
+  }
+
+  # Skip Pipeline
+  skip_pipeline: Skip Pipeline {
+    style. fill: "#e8eaf6"
+
+    skip_factory: SkipProcFactory {
+      shape: diamond
+      style.fill: "#9fa8da"
+    }
+
+    base_skip: BaseSkipProc {
+      shape: class
+      style.fill: "#7986cb"
+    }
+
+    block_skip: BlockSkipProc\n(rule-based detection) {
+      style.fill: "#5c6bc0"
+    }
+
+    prof_skip: ProfSkipProc\n(motion ROI cropping) {
+      style.fill: "#5c6bc0"
+    }
+
+    no_skip: NoSkipProc\n(no optimization) {
+      style.fill: "#5c6bc0"
+    }
+
+    rand_skip: RandSkipProc\n(random skip) {
+      style.fill: "#5c6bc0"
+    }
+
+    components: Motion Components {
+      style.fill: "#c5cae9"
+      motion_det:  "• FrameDiffDet\n• AccMotionDet"
+      rules_list: "• FireBlockYCbCrRule\n• WaveletRule\n• etc."
+    }
+  }
+}
+
+# Results Layer
+results: src/results/ {
+  style.fill: "#e8f5e9"
+
+  base_rs: BaseRsProc\n(ABC) {
+    shape: class
+    style.fill: "#66bb6a"
+  }
+
+  csv_rs:  CsvRsProc {
+    style.fill: "#4caf50"
+    output: "Saves:\nvideo_name_results.csv\n\nColumns:\n• frame_idx\n• pred_label\n• probs\n• logits\n• elapsed_time"
+  }
+
+  video_rs:  VideoInferRsProc {
+    style.fill: "#43a047"
+
+    pipeline: VideoPipeline {
+      style.fill: "#a5d6a7"
+
+      renderers: Multiple Renderers {
+        infer: "InferRsRenderer\n(OSD: pred, fps)"
+        grid: "GridRenderer\n(block grid)"
+        block_rule:  "BlockRuleRenderer\n(fire/smoke)"
+        block_prof: "BlockProfRenderer\n(motion blocks)"
+      }
+    }
+
+    subclasses: Subclasses {
+      style.fill: "#c8e6c9"
+      block: "• VideoBlockSkipRsProc"
+      fgmask: "• FgmaskBlockSkipRsProc\n  (visualize motion masks)"
+    }
+  }
+}
+
+# Metrics Layer
+metrics: src/metrics/ {
+  style.fill: "#fff9c4"
+
+  metric_factory: MetricSrcFactory {
+    shape: diamond
+    style.fill: "#fdd835"
+  }
+
+  base_metric: BaseMetricSrc\n(ABC) {
+    shape: class
+    style. fill: "#fbc02d"
+  }
+
+  csv_metric: CsvMetricSrc {
+    style.fill: "#f9a825"
+
+    loaders: CSV Loaders {
+      style.fill: "#fff59d"
+      base_loader: "BaseCsvLoader (ABC)"
+      dfire: "• DFireCsvLoader"
+      ufire: "• UFireIndoorCsvLoader"
+    }
+
+    process_steps: Process {
+      style.fill: "#fff59d"
+      step_list: "1. Load *_results.csv\n2. Load ground truth\n3. Match pred vs GT"
+    }
+  }
+
+  torch_metrics:  TorchMetrics {
+    style.fill: "#f57f17"
+    metrics_list: "• FPS (frames per second)\n• FPR (false positive rate)\n• Accuracy\n• F1Score\n• Precision\n• Recall (TPR)"
+  }
+
+  output: performance_metrics.csv {
+    shape: document
+    style.fill: "#ffeb3b"
+  }
+}
+
+# Output Files
+outputs: Output Files {
+  style. fill: "#ffccbc"
+  csvs: "• video1_results.csv\n• video2_results.csv"
+  videos: "• video1_out.mp4\n• video2_out.mp4"
+}
+
+# Data Flow Example
+dataflow: Data Flow Example {
+  style.fill: "#b2dfdb"
+
+  input: video.mp4 {
+    shape: document
+  }
+
+  frame_processing: Frame Processing {
+    frame1: "Frame 1\n→ No motion\n→ Skip\n→ dummy result"
+    frame2: "Frame 2\n→ Motion detected\n→ Check rules\n  • FireBlockYCbCrRule → PASS\n  • Crop ROI\n  • Run CNN\n  • pred='fire_smoke'"
+  }
+
+  result_output: Result Output {
+    csv_out: "CSV:  video_results.csv\n(frame_idx, pred, probs, time)"
+    video_out: "Video: video_out. mp4\n• Draw pred label + FPS\n• Draw block grid\n• Highlight fire blocks"
+  }
+
+  metric_calc: Metric Calculation {
+    results_text: "Results:\n• Accuracy: 0.95\n• F1-Score: 0.92\n• FPS: 30.5\n• FPR: 0.03"
+  }
+}
+
+# Design Patterns
+patterns: Design Patterns Used {
+  style.fill: "#f8bbd0"
+
+  factory_pattern: "Factory Pattern:\nMethodFactory, SkipProcFactory,\nMetricSrcFactory"
+  strategy_pattern: "Strategy Pattern:\nBaseSkipProc (different skip strategies)"
+  observer_pattern: "Observer/Handler Pattern:\nBaseRsProc (multiple result handlers)"
+  template_pattern: "Template Method:\nBaseMethod (defines inference workflow)"
+  adapter_pattern: "Adapter Pattern:\nBaseCsvLoader (dataset-specific parsing)"
+  composite_pattern: "Composite Pattern:\nBaseRule (AnyRule, AllRule)"
+  pipeline_pattern: "Pipeline Pattern:\nVideoPipeline + Renderers"
+}
+
+# Connections - Config Flow
+config -> paper2exp:  configures
+
+# Connections - Paper2Exp to Methods
+paper2exp -> methods. factory: 1. Creates Method
+
+# Connections - Methods Internal
+methods.factory -> methods.base: creates
+methods.base -> methods. no_temp
+methods.base -> methods.temp
+methods.base -> methods.temp_baseline
+
+methods. temp -> methods.skip_pipeline: uses {style.animated: true}
+
+# Connections - Skip Pipeline Internal
+methods.skip_pipeline. skip_factory -> methods.skip_pipeline.base_skip: creates
+methods.skip_pipeline.base_skip -> methods.skip_pipeline. block_skip
+methods.skip_pipeline.base_skip -> methods. skip_pipeline.prof_skip
+methods.skip_pipeline.base_skip -> methods.skip_pipeline. no_skip
+methods.skip_pipeline.base_skip -> methods. skip_pipeline.rand_skip
+
+methods.skip_pipeline.block_skip -> methods.skip_pipeline. components: uses
+methods.skip_pipeline.prof_skip -> methods. skip_pipeline.components: uses
+
+# Connections - Methods to Results
+methods -> results: 2. Inference on Videos {style.stroke-dash: 3}
+
+# Connections - Results Internal
+results. base_rs -> results.csv_rs
+results.base_rs -> results.video_rs
+
+# Connections - Results to Outputs
+results.csv_rs -> outputs: saves
+results.video_rs -> outputs: saves
+
+# Connections - Outputs to Metrics
+outputs -> metrics.metric_factory: 3. Metric Calculation {style.stroke-dash: 3}
+
+# Connections - Metrics Internal
+metrics.metric_factory -> metrics.base_metric: creates
+metrics.base_metric -> metrics.csv_metric
+metrics.csv_metric -> metrics.torch_metrics: passes data
+metrics.torch_metrics -> metrics. output: produces
+
+# Connections - Data Flow Example
+dataflow. input -> dataflow.frame_processing
+dataflow.frame_processing -> dataflow.result_output
+dataflow.result_output -> dataflow.metric_calc
+
+# Key Interactions Legend
+legend: Key Interactions {
+  near: bottom-left
+  style.fill: "#eceff1"
+
+  note1: "1. CONFIG → METHODS:\n   Config selects method & provides model info"
+  note2: "2. METHODS → RESULTS:\n   Handlers save CSV and/or video"
+  note3: "3. RESULTS → METRICS:\n   Load CSV + ground truth → compute metrics"
+  note4: "4. SKIP PIPELINE:\n   Motion detection → Rule checking → Inference"
+}
