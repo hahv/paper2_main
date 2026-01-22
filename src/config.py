@@ -56,6 +56,7 @@ class GeneralCfg(NamedCfg, YAMLWizard):
 @dataclass
 class InferConfig(YAMLWizard):
     do_infer: bool
+    num_infer_workers: int
     skip_if_exists: bool
     limit: int
     save_video_results: bool

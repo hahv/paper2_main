@@ -16,10 +16,14 @@ from src.results.csv_rs_proc import CsvRsProc
 import sys
 from src.utils import get_cls_in_pkg
 
+import torch.multiprocessing as mp
+from concurrent.futures import ProcessPoolExecutor, as_completed
+
 # Constants for package paths (avoids magic strings scattered in code)
 PKG_METHODS = "src.methods"
 PKG_RESULTS = "src.results"
 DEFAULT_VIDEO_PROC = "video_infer_rs_proc"
+
 
 class MethodFactory:
     @staticmethod
@@ -167,7 +171,7 @@ class BaseMethod(ABC):
 
     # !------End HOOKS------------------------------------------------------
 
-    def infer_video_dir(self, video_dir: str, recursive: bool = True):
+    def infer_video_dir_no_parallel(self, video_dir: str, recursive: bool = True):
         """Processes all videos in a specified directory."""
         assert os.path.exists(video_dir), f"Video directory {video_dir} does not exist."
         video_files = fs.filter_files_by_extension(
@@ -181,6 +185,71 @@ class BaseMethod(ABC):
             self.infer_video(video_path, video_idx=i, total_videos=len(video_files))
 
         self.after_infer_video_dir(video_dir)
+
+    def infer_video_dir(
+        self, video_dir: str, recursive: bool = True, max_workers: int = 0
+    ):
+        """
+        Processes all videos in a specified directory in parallel.
+        max_workers: Number of parallel processes (videos) to run at once.
+                     CAUTION: Each worker loads a copy of the model.
+                     If you have 1 GPU and a big model, set this to 1 or 2.
+        """
+        if max_workers <= 0:
+            self.infer_video_dir_no_parallel(video_dir, recursive=recursive)
+            return
+        else:
+            assert os.path.exists(video_dir), (
+                f"Video directory {video_dir} does not exist."
+            )
+
+            # 1. Filter files
+            video_files = fs.filter_files_by_extension(
+                video_dir, [".mp4", ".avi", ".mov", ".mkv"], recursive=recursive
+            )
+            assert len(video_files) > 0, f"No video files found in {video_dir}."
+
+            self.before_infer_video_dir(video_dir)
+            total_videos = len(video_files)
+
+            # 2. Parallel Execution
+            # We use 'spawn' to avoid CUDA initialization errors in forked processes
+            try:
+                mp.set_start_method("spawn", force=True)
+            except RuntimeError:
+                pass
+
+            print(f"Starting parallel inference with {max_workers} workers...")
+
+            with ProcessPoolExecutor(max_workers=max_workers) as executor:
+                futures = []
+                for i, video_path in enumerate(video_files):
+                    # We submit the task to the pool
+                    future = executor.submit(
+                        self._infer_video_worker, video_path, i, total_videos
+                    )
+                    futures.append(future)
+
+                # Wait for all videos to finish and handle errors
+                for future in as_completed(futures):
+                    try:
+                        future.result()  # This will raise any exception caught in the worker
+                    except Exception as e:
+                        print(f"Worker failed with error: {e}")
+
+            self.after_infer_video_dir(video_dir)
+
+    def _infer_video_worker(self, video_path: str, video_idx: int, total_videos: int):
+        """
+        Wrapper specifically for the worker process.
+        Since 'self' is pickled and sent to the worker, self.model might be None
+        initially in the new process.
+        """
+        # Ensure the model is loaded in THIS process
+        self.prepare_model()
+
+        # Call the original logic
+        self.infer_video(video_path, video_idx, total_videos)
 
     def infer_video(self, video_path: str, video_idx: int, total_videos: int):
         """

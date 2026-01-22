@@ -1,5 +1,3 @@
-import sys
-
 from halib import *
 from halib.common.common import seed_everything
 from halib.exp.core.base_exp import BaseExp
@@ -22,7 +20,7 @@ class Paper2Exp(BaseExp):
         self.metric_backend = None
         self.video_dir_path = None
 
-    def init_general(self, general_cfg: GeneralConfig):
+    def init_general(self, general_cfg: GeneralCfg):
         console.rule("General initialization")
         seed_everything(general_cfg.seed)
         # setup log here
@@ -59,7 +57,9 @@ class Paper2Exp(BaseExp):
             "Method instance is not of type BaseMethod"
         )
         method: BaseMethod = method_instance
-        method.infer_video_dir(self.video_dir_path)
+        method.infer_video_dir(
+            self.video_dir_path, max_workers=self.full_cfg.inferCfg.num_infer_workers
+        )
         eval_data_dict = (
             method.prepare_metric_src()
         )  # {metric: <value for compute metrics>}
@@ -74,8 +74,12 @@ class Paper2Exp(BaseExp):
 
         # Save config before running
         self.config.save_to_outdir()
+        exp_start = time.time()
         # Execute experiment
         results = self.exec_exp(*args, **kwargs)
+        exp_end = time.time()
+        with ConsoleLog('Experiment Summary'):
+            console.print(f"Exp time: {exp_end - exp_start:.2f} seconds")
         if should_calc_metrics:
             mode_metrics_data_dict, _ = results
             for mode in mode_metrics_data_dict:
