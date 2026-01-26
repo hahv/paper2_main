@@ -1,0 +1,20 @@
+# ! prof. rule
+extra_cfgs:
+  result_proc:
+    video: [video_block_skip_rs_proc, fgmask_block_skip_rs_proc]
+
+  skip_proc:
+    name: prof_skip_proc # no_skip_proc, rand_skip_proc
+    params:
+      scale_factor: 1.0 # 1.0 means no scaling
+      block_size_orig: 64 # ! in original frame size (vs block_size: in processed frame size)
+      block_ratio_th: 0.1 # ratio for generality; prof -> fixed num 200 motion pixels
+      min_roi_ratio: 0.7  # min ROI size (relative to orignal frame)
+      motion:
+        name: acc_motion_det.AccMotionDet
+        params:
+          diff_frame_th: 3
+          impact_plus_one: 5
+          mask_th: 10
+          max_val: 25
+          decay: 1

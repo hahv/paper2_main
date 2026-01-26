@@ -1,61 +1,49 @@
 from halib import *  # noqa: F403
 from typing import Tuple, Dict, Any
 
-import cv2
 from src.config import Config
-from src.methods.skip.base_skip_proc import BaseSkipProc
+from src.methods.skip.base_block_skip import BaseBlockSkipProc
 
-
-class ProfSkipProc(BaseSkipProc):
+# ! @Also see: src/methods/skip/__prof_skip_meta.md for further details.
+class MotionOnlyBlockSkipProc(BaseBlockSkipProc):
     def __init__(self, cfg: Config):
-        super().__init__(cfg)  # call BaseSkipProc init
-        self.scale_factor: float = self.params.get("scale_factor", 1.0)
-        self.block_size: int = self.params.get("block_size", 32)
-        self.block_roi_th = self.params.get("block_roi_th", 200)  # ROI_TH
+        super().__init__(cfg)
+        self.block_ratio_th = self.params.get("block_ratio_th")
+        self.min_roi_ratio = self.params.get("min_roi_ratio")
 
     def should_skip(
         self, frame_idx: int, frame: np.ndarray
     ) -> Tuple[bool, Dict[str, Any]]:
-        # 1. Motion Detection
-        fgmask = self.motion_det.apply(frame)
+        original_h, original_w = frame.shape[:2]
 
-        # 2. Handle Non-Divisible Dimensions (Padding Strategy)
-        H, W = fgmask.shape
+        # Resize and pad (returns frame in SCALED space)
+        scaled_padded_frame = self.resize_and_pad(frame)
+
+        # 1. Motion Detection (Performed in SCALED space)
+        scaled_padded_fgmask = self.motion_det.apply(scaled_padded_frame)
+
+        # 2. Handle Non-Divisible Dimensions
+        H_scaled, W_scaled = scaled_padded_fgmask.shape
         B = self.block_size
 
-        # Calculate padding needed
-        pad_h = (B - (H % B)) % B
-        pad_w = (B - (W % B)) % B
-
-        if pad_h > 0 or pad_w > 0:
-            # Pad Right and Bottom with 0 (Black/No Motion)
-            padded_mask = cv2.copyMakeBorder(
-                fgmask, 0, pad_h, 0, pad_w, cv2.BORDER_CONSTANT, value=0
-            )  # ty:ignore[no-matching-overload]
-        else:
-            padded_mask = fgmask
-
-        # 3. Vectorized Block Analysis
-        # Now dimensions are perfectly divisible by B
-        H_pad, W_pad = padded_mask.shape
-        blk_h = H_pad // B
-        blk_w = W_pad // B
+        blk_h = H_scaled // B
+        blk_w = W_scaled // B
 
         try:
             # Reshape to (GridRows, BlockHeight, GridCols, BlockWidth) -> Swap -> Sum
-            blocks = padded_mask.reshape(blk_h, B, blk_w, B).swapaxes(1, 2)
+            blocks = scaled_padded_fgmask.reshape(blk_h, B, blk_w, B).swapaxes(1, 2)
             counts = (blocks > 0).sum(axis=(2, 3))
         except ValueError:
             counts = np.zeros((blk_h, blk_w))
 
         # 4. Filter Active Blocks
-        active_mask = counts > self.block_roi_th
+        total_pixels_per_block = self.block_size * self.block_size
+        active_mask = counts / total_pixels_per_block >= self.block_ratio_th
         active_indices = np.argwhere(active_mask)
 
         # --- COLLECT BLOCK INFO ---
         block_info = []
         for r, c in active_indices:
-            # Get the exact number of active pixels for this block
             pixel_count = int(counts[r, c])
             block_info.append(
                 {"block_id": (int(r), int(c)), "active_pixels": pixel_count}
@@ -66,22 +54,31 @@ class ProfSkipProc(BaseSkipProc):
         crop_roi = None
 
         if has_motion:
-            # 5. Find Bounding Box (Grid Coords)
+            # 5. Find Bounding Box (in Grid/Scaled Space)
             y_min_grid, x_min_grid = active_indices.min(axis=0)
             y_max_grid, x_max_grid = active_indices.max(axis=0)
 
-            # Convert Grid -> Pixel Coordinates (Padded Frame Space)
-            x1 = x_min_grid * B
-            y1 = y_min_grid * B
-            x2 = (x_max_grid + 1) * B
-            y2 = (y_max_grid + 1) * B
+            # 5a. Convert Grid -> Pixel Coordinates (SCALED Space)
+            x1_p = x_min_grid * B
+            y1_p = y_min_grid * B
+            x2_p = (x_max_grid + 1) * B
+            y2_p = (y_max_grid + 1) * B
 
+            # 5b. Transform to ORIGINAL Frame Space
+            # Formula: Original = Scaled / scale_factor
+            x1 = int(x1_p / self.scale_factor)
+            y1 = int(y1_p / self.scale_factor)
+            x2 = int(x2_p / self.scale_factor)
+            y2 = int(y2_p / self.scale_factor)
+
+            # Recalculate raw width/height in original space
             curr_w = x2 - x1
             curr_h = y2 - y1
 
-            # 6. Enforce Minimum ROI Size (C++ Logic)
-            req_w = int(W * 0.75)
-            req_h = int(H * 0.75)
+            # 6. Enforce Minimum ROI Size (Based on ORIGINAL Frame)
+            # Use self.min_roi_ratio instead of hardcoded 0.75
+            req_w = int(original_w * self.min_roi_ratio)
+            req_h = int(original_h * self.min_roi_ratio)
 
             # Center Expansion Logic
             if curr_w < req_w:
@@ -94,31 +91,31 @@ class ProfSkipProc(BaseSkipProc):
                 y1 = max(0, y1 - diff // 2)
                 y2 = y1 + req_h
 
-            # 7. Clamp to Original Frame Size (Ignore Padding)
+            # 7. Clamp to Original Frame Size
             # Ensure we don't return coordinates outside the real image
-            x1 = max(0, min(x1, W))
-            y1 = max(0, min(y1, H))
-            x2 = max(0, min(x2, W))
-            y2 = max(0, min(y2, H))
+            x1 = max(0, min(x1, original_w))
+            y1 = max(0, min(y1, original_h))
+            x2 = max(0, min(x2, original_w))
+            y2 = max(0, min(y2, original_h))
 
-            # Recalculate Width/Height after clamping
+            # Recalculate Final Width/Height
             final_w = x2 - x1
             final_h = y2 - y1
 
-            # Only valid if we have a positive area
             if final_w > 0 and final_h > 0:
                 crop_roi = (int(x1), int(y1), int(final_w), int(final_h))  # xywh
             else:
-                has_motion = False  # Should be rare, but safe
+                has_motion = False
 
         should_skip = not has_motion
-        # pprint(f'{frame.shape=}, fgmask={fgmask.shape}, pad_h={pad_h}, pad_w={pad_w}, active_blocks={len(active_indices)}, should_skip={should_skip}')
+
         meta_data = {
             "mt_proc": {
-                "vis_frame": frame,
-                "motion_mask_frame": fgmask,
+                "vis_frame": frame,  # Original frame for viz
+                "block_size_in_original_space": int(B / self.scale_factor),
+                "motion_mask_frame": scaled_padded_fgmask,  # Scaled mask
                 "block_info": block_info,
-                "crop_roi": crop_roi,
+                "crop_roi": crop_roi,  # Now in original coords
             }
         }
         return should_skip, meta_data

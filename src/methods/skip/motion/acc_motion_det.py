@@ -5,6 +5,35 @@ from src.methods.skip.motion.base_motion_det import BaseMotionDet
 
 
 # ! see @doc AccMotionDet in src/methods/skip/motion/acc_motion_det.md
+# [tFrame (Prev)]       [frame (Curr)]
+#           |                    |
+#           +---------+----------+
+#                     | absdiff()
+#                     v
+#              [Raw Difference]
+#                     |
+#                     | cvtColor(GRAY) + threshold(diff > 1, val=5)
+#                     v
+#              [Instant Delta] (Pixels = 0 or 5)
+#                     |
+#       +-------------+-------------+
+#       |                           |
+#       v                           v
+#  [deltaMask (Old)]   +      [Instant Delta]
+#       |                           |
+#       +-------------+-------------+
+#                     | add() -> Accumulate motion heat
+#                     v
+#             [Accumulated Mask]
+#                     |
+#                     | min(val, 25) -> Cap heat at 25
+#                     | subtract(1)  -> Decay/Fade out old motion
+#                     v
+#             [deltaMask (New)] <------- Stores history of motion
+#                     |
+#                     | compare(val >= 10) -> Threshold for final mask
+#                     v
+#          [curMask (Binary 0/255)]
 class AccMotionDet(BaseMotionDet):
     """
     Accumulation Motion Detector (formerly TemporalMotionDetector).

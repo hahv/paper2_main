@@ -1,7 +1,7 @@
 from halib import *
 from src.config import Config
 from src.methods.skip.block_skip_proc import BlockSkipProc
-from typing import List
+from typing import List, Dict, Any
 
 # Import your new classes
 from src.results.viz.video_pipeline import VideoPipeline
@@ -41,14 +41,17 @@ class VideoBlockSkipRsProc(VideoInferRsProc):
         vis_frame = mt_proc.get("vis_frame")
         return vis_frame
 
+    def get_block_extra_dict(self) -> Dict[str, Any]:
+        return {"viz_in_fgmask": False}
+
     def get_custom_renderer(self) -> List[BaseRenderer]:
         method_cfg = self.cfg.methodCfg.extra_cfgs.get("skip_proc").get("params")  # ty:ignore[possibly-missing-attribute]
         # ! decide which renderer to use based on method config (which method is used)
-        is_prof_method = "block_roi_th" in method_cfg
+        is_prof_method = method_cfg["name"] == "prof_skip_proc"
         if is_prof_method:
-            return [BlockProfRenderer()]
+            return [BlockProfRenderer(extra_cfg=self.get_block_extra_dict())]
         else:
-            return [BlockRuleRenderer()]
+            return [BlockRuleRenderer(extra_cfg=self.get_block_extra_dict())]
 
     def prepare_pipelines_list(self, video_path: str, fps: float, frame_size: tuple):
         pipeline_ls = []

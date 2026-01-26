@@ -5,14 +5,17 @@ from typing import Tuple, Dict, Any
 from src.config import Config
 from src.methods.skip.rule.base_rule import *
 from src.methods.skip.rule.block_rule import *
-from src.methods.skip.base_skip_proc import BaseSkipProc
+from src.methods.skip.base_block_skip import BaseBlockSkipProc
 
 
-class BlockSkipProc(BaseSkipProc):
+class RuleBasedBlockSkipProc(BaseBlockSkipProc):
     def __init__(self, cfg: Config):
         super().__init__(cfg)
         self.scale_factor: float = self.params.get("scale_factor", 1.0)
-        self.block_size: int = self.params.get("block_size", 32)
+        # Original/effective block size before any scaling
+        self.block_size_orig: int = self.params.get("block_size_orig")
+        # Block size using in the scaled frame (after padding_and_resizing)
+        self.block_size = int(self.block_size_orig * self.scale_factor)
         self.block_active_thresh: float = self.params.get("block_active_thresh", 0.1)
         self.update_rules()
 
@@ -55,29 +58,6 @@ class BlockSkipProc(BaseSkipProc):
         final_h = new_h + pad_h
         final_w = new_w + pad_w
         return (final_w, final_h)
-
-    # input frames will be first resized based on scale_factor, then padded to be divisible by block_size
-    def _resize_and_pad(self, frame: np.ndarray) -> np.ndarray:
-        if self.scale_factor != 1.0:
-            scaled_frame = cv2.resize(
-                frame,
-                None,
-                fx=self.scale_factor,
-                fy=self.scale_factor,
-                interpolation=cv2.INTER_AREA,
-            )
-        else:
-            scaled_frame = frame
-
-        H, W = scaled_frame.shape[:2]
-        pad_h = (self.block_size - (H % self.block_size)) % self.block_size
-        pad_w = (self.block_size - (W % self.block_size)) % self.block_size
-
-        if pad_h > 0 or pad_w > 0:
-            scaled_frame = cv2.copyMakeBorder(
-                scaled_frame, 0, pad_h, 0, pad_w, cv2.BORDER_CONSTANT, value=(0, 0, 0)
-            )
-        return scaled_frame
 
     def _get_active_blocks(self, fg_mask: np.ndarray) -> Tuple[np.ndarray, float]:
         """
@@ -143,7 +123,7 @@ class BlockSkipProc(BaseSkipProc):
         self, frame_idx: int, frame: np.ndarray
     ) -> Tuple[bool, Dict[str, Any]]:
         # 1. Preprocessing & Motion
-        scaled_frame = self._resize_and_pad(frame)
+        scaled_frame = self.resize_and_pad(frame)
         fgmask = self.motion_det.apply(scaled_frame)
         active_indices, adapt_thres = self._get_active_blocks(fgmask)
 

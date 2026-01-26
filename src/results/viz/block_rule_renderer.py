@@ -4,12 +4,12 @@ import cv2
 import numpy as np
 from typing import Any, Dict
 from src.methods.skip.rule.base_rule import RuleResult
-from src.results.viz.base_renderer import BaseRenderer
 from src.results.viz.renderer_utils import RenderUtils
+from src.results.viz.grid_renderer import GridRenderer
 
 
 # ! Note that this only draws the grid, motion blocks will be draw in different renderer
-class BlockRuleRenderer(BaseRenderer):
+class BlockRuleRenderer(GridRenderer):
     """Draws the Grid, Yellow Motion Blocks, and Fire/Smoke Classification."""
 
     # COLOR for fire block: red, smoke block
@@ -36,8 +36,11 @@ class BlockRuleRenderer(BaseRenderer):
         mt_cfg = renderer_ctx["mt_cfg"]
         mt_proc = renderer_ctx["mt_proc"]
         block_size = mt_cfg.get("block_size")
-        scale_factor = mt_cfg.get("scale_factor", 1.0)
+        scale_factor = mt_cfg.get("scale_factor")
         block_info = mt_proc.get("block_info", [])
+
+        # ! Adjust block size based on context (original vs resized)
+        block_size = self.calc_block_size_by_frame_ctx(block_size, scale_factor)  # ty:ignore[invalid-argument-type]
 
         for block_item in block_info:
             block_id = block_item["block_id"]
@@ -47,16 +50,10 @@ class BlockRuleRenderer(BaseRenderer):
 
             # FIX 1: Define x1, y1... even if scale_factor is 1.0
             # (Original code would crash here if scale_factor == 1.0)
-            if scale_factor != 1.0:
-                x1 = int(x_idx * block_size / scale_factor)
-                x2 = int((x_idx + 1) * block_size / scale_factor)
-                y1 = int(y_idx * block_size / scale_factor)
-                y2 = int((y_idx + 1) * block_size / scale_factor)
-            else:
-                x1 = int(x_idx * block_size)
-                x2 = int((x_idx + 1) * block_size)
-                y1 = int(y_idx * block_size)
-                y2 = int((y_idx + 1) * block_size)
+            x1 = int(x_idx * block_size)
+            x2 = int((x_idx + 1) * block_size)
+            y1 = int(y_idx * block_size)
+            y2 = int((y_idx + 1) * block_size)
 
             full_osd_dict = {}
             full_osd_cfg_dict = {}

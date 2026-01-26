@@ -1,12 +1,13 @@
+from fontTools.unicodedata import block
 from halib import *
 
 import cv2
 import numpy as np
 from typing import Any, Dict
-from src.results.viz.base_renderer import BaseRenderer
+from src.results.viz.grid_renderer import GridRenderer
 
 
-class BlockProfRenderer(BaseRenderer):
+class BlockProfRenderer(GridRenderer):
     """Draws the Grid, Yellow Motion Blocks, and Fire/Smoke Classification."""
 
     MOTION_BLOCK_COLOR = (0, 255, 255)  # yellow
@@ -24,7 +25,10 @@ class BlockProfRenderer(BaseRenderer):
         """
         mt_cfg = global_context["infer_rs"]["mt_cfg"]["params"]
         mt_proc = global_context["infer_rs"]["mt_proc"]
-        return {"mt_cfg": mt_cfg, "mt_proc": mt_proc}
+        render_ctx = {"mt_cfg": mt_cfg, "mt_proc": mt_proc}
+        if self.extra_cfg:
+            render_ctx.update(self.extra_cfg)
+        return render_ctx
 
     def render(self, frame_bgr: np.ndarray, renderer_ctx: Dict[str, Any]) -> np.ndarray:
         # Basic validation
@@ -34,7 +38,11 @@ class BlockProfRenderer(BaseRenderer):
         mt_cfg = renderer_ctx.get("mt_cfg", {})
         mt_proc = renderer_ctx.get("mt_proc", {})
 
-        block_size = mt_cfg.get("block_size", 32)
+        block_size = mt_cfg.get("block_size")
+        scale_factor = mt_cfg.get("scale_factor")
+
+        block_size = self.calc_block_size_by_frame_ctx(block_size, scale_factor)  # ty:ignore[invalid-argument-type]
+
         block_info = mt_proc.get("block_info", [])
         crop_roi = mt_proc.get("crop_roi", None)
 

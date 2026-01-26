@@ -41,25 +41,25 @@ Preprocessing: {
 Difference_Check: {
   label: "2. Detect Change"
   AbsDiff: AbsDiff\n|Curr - Prev| {class: process}
-  CalcImpact: Calculate Impact\n(If Diff > 1, add 5)\n(Else 0) {class: process}
-  
+  CalcImpact: Calculate Impact\n(If Diff > diff_frame_th(1), add impact_plus_one(5))\n(Else 0) {class: process}
+
   AbsDiff -> CalcImpact
 }
 
 Accumulation_Loop: {
   label: "3. Accumulation & Decay"
   style: {stroke-dash: 3}
-  
+
   Add: Add to Buffer\n(Buffer + Impact) {class: process}
-  Cap: Cap Values\n(Min(Buffer, 25)) {class: process}
-  Decay: Decay Heat\n(Buffer - 1) {class: process}
-  
+  Cap: Cap Values\n(Min(Buffer, max_val(25))) {class: process}
+  Decay: Decay Heat\n(Buffer - decay(1)) {class: process}
+
   Add -> Cap -> Decay
 }
 
 Thresholding: {
   label: "4. Output Generation"
-  FinalThresh: Final Threshold\n(If Buffer > 10)\nResult = 255 {class: process}
+  FinalThresh: Final Threshold\n(If Buffer > mask_th(10))\nResult = 255 {class: process}
 }
 
 Output: Motion Mask\n(Binary) {class: data}

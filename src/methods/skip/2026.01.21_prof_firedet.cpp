@@ -102,8 +102,8 @@ bool FireDetector::runModelSingle(FDRecord& fdRcd, Mat& oriFrame, int vchID, Rec
 #else
     vector<int> outputShape;
     classScores = run(preFrame.ptr(), outputShape);
-#endif   
-    
+#endif
+
 	//printf("%.4f %.4f %.4f\n", classScores[0], classScores[1], classScores[2]);
 
     int classID = 0;
@@ -182,7 +182,7 @@ bool FireDetector::runModel(FDRecord& fdRcd, Mat& frame, int vchID, int& detecte
     fdCnts[vchID] = 0;
 
     Mat oriFrame;
-    Rect roi = Rect(0, 0, frame.cols, frame.rows); // Initialize roi to the full frame    
+    Rect roi = Rect(0, 0, frame.cols, frame.rows); // Initialize roi to the full frame
 
 #ifndef _CPU_INFER
     if (drawBlockDebug)
@@ -206,13 +206,13 @@ bool FireDetector::runModel(FDRecord& fdRcd, Mat& frame, int vchID, int& detecte
 #else
     oriFrame = frame;
 #endif
-    
+
     runModelSingle(fdRcd, oriFrame, vchID, roi, detectedClassID);
     return true;
 }
 
 
-#ifndef _CPU_INFER        
+#ifndef _CPU_INFER
 bool FireDetector::temporalStabilization(Mat& frame, int vchID, Rect& roi) {
     const int DIFF_FRAME_TH = 1; // difference threshold for frame comparison
     const int IMPACK_PLUS_ONE = 5; // difference threshold for frame comparison
@@ -287,7 +287,7 @@ bool FireDetector::temporalStabilization(Mat& frame, int vchID, Rect& roi) {
                 //Mat overlay = frame(block).clone();
                 //overlay.setTo(Scalar(255, 0, 0), regionMask);
                 //double alpha = 0.7;
-                //addWeighted(overlay, alpha, frame(block), 1.0 - alpha, 0, frame(block));            
+                //addWeighted(overlay, alpha, frame(block), 1.0 - alpha, 0, frame(block));
                 putText(frame, std::to_string(nonZeroCount),
                     Point(col + 10, row + 20),
                     FONT_HERSHEY_PLAIN, 1, Scalar(0, 255, 0), 1);
@@ -308,11 +308,11 @@ bool FireDetector::temporalStabilization(Mat& frame, int vchID, Rect& roi) {
 
         if (initROI.width < minW) {
             initROI.x = std::min(cols - minW, std::max(0, initROI.x - (minW - initROI.width) / 2)); // Center the ROI
-            initROI.width = minW; // Ensure minimum width			
+            initROI.width = minW; // Ensure minimum width
         }
         if (initROI.height < minH) {
             initROI.y = std::min(rows - minH, std::max(0, initROI.y - (minH - initROI.height) / 2)); // Center the ROI
-            initROI.height = minH; // Ensure minimum height		    
+            initROI.height = minH; // Ensure minimum height
         }
 
         roi = initROI;

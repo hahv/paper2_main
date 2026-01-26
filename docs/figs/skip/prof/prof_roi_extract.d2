@@ -1,0 +1,88 @@
+direction: down
+
+# Inputs
+Input: "Input: curMask (Binary Motion Mask)" {
+  shape: parallelogram
+}
+
+# Phase 1: Grid Scanning Loop
+GridScanning: "Phase 1: Grid Scanning & Accumulation" {
+  style: {
+    fill: "#f0f8ff"
+    stroke: "#4682b4"
+  }
+
+  Init: "Initialize Global Bounds\n(min_x=cols, max_x=0...)"
+
+  Loop: "Loop through Grid Blocks\n(step = NET_SIZE / 4)" {
+
+    GetBlock: "Get Current Block\nMask(row, col)"
+    Count: "cv::countNonZero(Block)"
+
+    CheckThreshold: "Count >= ROI_TH (200)?" {
+      shape: diamond
+    }
+
+    UpdateBounds: "Expand Global Bounding Box\n(Update min_x, max_y, etc.)" {
+      style: {
+        fill: "#90ee90"
+      }
+    }
+
+    Skip: "Ignore Block" {
+      style: {
+        fill: "#ffcccb"
+      }
+    }
+
+    GetBlock -> Count
+    Count -> CheckThreshold
+    CheckThreshold -> UpdateBounds: Yes
+    CheckThreshold -> Skip: No
+  }
+
+  Init -> Loop
+}
+
+# Phase 2: ROI Refinement
+ROIRefinement: "Phase 2: ROI Calculation & Sizing" {
+  style: {
+    fill: "#fffacd"
+    stroke: "#ffd700"
+  }
+
+  ValidCheck: "Valid Region Found?\n(min_x < max_x)" {
+    shape: diamond
+  }
+
+  CreateRaw: "Create Raw ROI\nRect(min_x, min_y, w, h)"
+
+  SizeCheck: "Check Minimum Size\n(width < minW || height < minH)" {
+    shape: diamond
+  }
+
+  Expand: "Expand & Center ROI\n(Preserve center, force minW/minH)" {
+    style: {
+      fill: "#ffebcd"
+    }
+  }
+
+  Finalize: "Set Final ROI"
+
+  Abort: "Return False\n(No Inference)" {
+    style: {
+      fill: "#d3d3d3"
+    }
+  }
+
+  ValidCheck -> CreateRaw: Yes
+  ValidCheck -> Abort: No
+  CreateRaw -> SizeCheck
+  SizeCheck -> Expand: Yes (Too Small)
+  SizeCheck -> Finalize: No (Size OK)
+  Expand -> Finalize
+}
+
+# Connections between phases
+Input -> GridScanning
+GridScanning -> ROIRefinement
