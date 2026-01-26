@@ -5,17 +5,12 @@ from typing import Tuple, Dict, Any
 from src.config import Config
 from src.methods.skip.rule.base_rule import *
 from src.methods.skip.rule.block_rule import *
-from src.methods.skip.base_block_skip import BaseBlockSkipProc
+from src.methods.skip.base_block_skip_proc import BaseBlockSkipProc
 
 
 class RuleBasedBlockSkipProc(BaseBlockSkipProc):
     def __init__(self, cfg: Config):
         super().__init__(cfg)
-        self.scale_factor: float = self.params.get("scale_factor", 1.0)
-        # Original/effective block size before any scaling
-        self.block_size_orig: int = self.params.get("block_size_orig")
-        # Block size using in the scaled frame (after padding_and_resizing)
-        self.block_size = int(self.block_size_orig * self.scale_factor)
         self.block_active_thresh: float = self.params.get("block_active_thresh", 0.1)
         self.update_rules()
 
@@ -29,35 +24,6 @@ class RuleBasedBlockSkipProc(BaseBlockSkipProc):
         )
         smoke_rule = SmokeBlockSpatioTemporalRule(params=self.params, name="SmokeCheck")
         self.rules = AnyRule([fire_complex, smoke_rule], name="FireOrSmokeCheck")
-
-    @staticmethod
-    def get_skip_proc_frame_size(
-        frame_w_h: tuple, scale_factor: float, block_size: int
-    ) -> tuple:
-        """
-        Calculates the final shape (H, W) after resizing and padding to block_size.
-        mimics logic of _resize_and_pad without processing the image.
-        """
-        assert len(frame_w_h) == 2, "frame_w_h must be a tuple of (width, height)"
-
-        w, h = frame_w_h[:2]
-
-        # 1. Calculate Scaled Dimensions (OpenCV uses round() for fx/fy)
-        if scale_factor != 1.0:
-            new_h = int(round(h * scale_factor))
-            new_w = int(round(w * scale_factor))
-        else:
-            new_h, new_w = h, w
-
-        # 2. Calculate Padding (matches your formula)
-        # (block - (dim % block)) % block ensures 0 padding if already divisible
-        pad_h = (block_size - (new_h % block_size)) % block_size
-        pad_w = (block_size - (new_w % block_size)) % block_size
-
-        # 3. Add Padding
-        final_h = new_h + pad_h
-        final_w = new_w + pad_w
-        return (final_w, final_h)
 
     def _get_active_blocks(self, fg_mask: np.ndarray) -> Tuple[np.ndarray, float]:
         """
@@ -156,7 +122,6 @@ class RuleBasedBlockSkipProc(BaseBlockSkipProc):
                 result = self.rules.check(
                     block_roi, extra_dict={"global_means": global_means}
                 )
-
                 # Store result for visualization/debugging if needed
                 if result.is_pass():
                     has_fire_or_smoke = True
@@ -167,10 +132,9 @@ class RuleBasedBlockSkipProc(BaseBlockSkipProc):
 
         meta_data = {
             "mt_proc": {
-                "vis_frame": scaled_frame,
-                "motion_mask_frame": fgmask,
+                "resized_frame": scaled_frame,
+                "fgmask_frame": fgmask,
                 "block_info": block_info,
             }
         }
         return should_skip, meta_data
-

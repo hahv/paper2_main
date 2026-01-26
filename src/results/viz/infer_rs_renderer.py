@@ -23,6 +23,5 @@ class InferRsRenderer(BaseRenderer):
         return renderer_dict
 
     """Draws the semi-transparent black box with Text Info (FPS, Frame #)."""
-
     def render(self, frame_bgr: np.ndarray, renderer_ctx: Dict[str, Any]) -> np.ndarray:
         return RenderUtils.draw_osd(frame=frame_bgr, data=renderer_ctx)

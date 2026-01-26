@@ -20,12 +20,16 @@ class GridRenderer(BaseRenderer):
         global_context: contains all inference results (fps, fg_mask_dict, etc.)
         """
         mt_cfg = global_context["infer_rs"]["mt_cfg"]["params"]
-        render_ctx = filter_dict_by_keys(mt_cfg, ["scale_factor", "block_size"])
+        render_ctx = filter_dict_by_keys(mt_cfg, ["scale_factor", "block_size_orig"])
+
         return render_ctx
 
-    def calc_block_size_by_frame_ctx(self, block_size, scale_factor: float = 1.0) -> int:
-        if self.context == "original_frame" and scale_factor != 1.0:
-            return int(block_size / scale_factor)
+    def get_render_block_size(self, renderer_ctx: Dict[str, Any]) -> int:
+        block_size = (
+            renderer_ctx["block_size_orig"]
+            if self.context == "original_frame"
+            else int(renderer_ctx["block_size_orig"] * renderer_ctx["scale_factor"])
+        )
         return block_size
 
     def render(self, frame_bgr: np.ndarray, renderer_ctx: Dict[str, Any]) -> np.ndarray:
@@ -33,9 +37,7 @@ class GridRenderer(BaseRenderer):
             "Renderer context is empty!"
         )
         H, W = frame_bgr.shape[:2]
-        block_size = renderer_ctx.get("block_size")
-        scale_factor = renderer_ctx.get("scale_factor")
-        block_size = self.calc_block_size_by_frame_ctx(block_size, scale_factor)  # ty:ignore[invalid-argument-type]
+        block_size = self.get_render_block_size(renderer_ctx)
         box_h, box_w = RenderUtils.calculate_osd_box(
             renderer_ctx,
         )

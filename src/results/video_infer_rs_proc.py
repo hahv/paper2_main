@@ -18,13 +18,6 @@ class VideoInferRsProc(BaseRsProc):
         self.video_output_path: str = None
         self.out_video_postfix = "out"
 
-    def prepare_pipelines_list(self, video_path: str, fps: float, frame_size: tuple):
-        pipeline_ls = []
-        infer_rs_pipe = VideoPipeline(self.video_output_path, fps, frame_size)
-        infer_rs_pipe.add_renderer(InferRsRenderer())  # ty:ignore[invalid-argument-type]
-        pipeline_ls.append(infer_rs_pipe)
-        return pipeline_ls
-
     def update_video_output_path(self, video_path: str):
         fname = fs.get_file_name(video_path, split_file_ext=True)[0]
         self.video_output_path = os.path.join(
@@ -34,6 +27,18 @@ class VideoInferRsProc(BaseRsProc):
     # ! Normal cases: Frame size of out video = input frame size
     def calc_frame_size(self, video_path: str, **kwargs) -> tuple:
         return kwargs["frame_size"]
+
+    # ! which frame to visualize
+    def get_vis_frame(self, frame_bgr, frame_rs_dict: dict):
+        return frame_bgr
+
+    # ! i.e: which info to be rendered on the output video
+    def prepare_pipelines_list(self, video_path: str, fps: float, frame_size: tuple):
+        pipeline_ls = []
+        infer_rs_pipe = VideoPipeline(self.video_output_path, fps, frame_size)
+        infer_rs_pipe.add_renderer(InferRsRenderer())  # ty:ignore[invalid-argument-type]
+        pipeline_ls.append(infer_rs_pipe)
+        return pipeline_ls
 
     def before_video(self, video_path: str, **kwargs):
         # if video_path is not a video (e.g., image folder), skip video writer creation
@@ -55,9 +60,6 @@ class VideoInferRsProc(BaseRsProc):
         pipeline_ls = self.prepare_pipelines_list(video_path, fps, frame_size)
         self.pipelines.extend(pipeline_ls)
         assert len(self.pipelines) > 0, "No video pipelines were created."
-
-    def get_vis_frame(self, frame_bgr, frame_rs_dict: dict):
-        return frame_bgr
 
     # ! abstract method implementation
     def handle_frame_results(self, frame_bgr, frame_rs_dict: dict):

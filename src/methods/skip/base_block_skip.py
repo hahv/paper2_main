@@ -36,34 +36,3 @@ class BaseBlockSkipProc(BaseSkipProc):
                 scaled_frame, 0, pad_h, 0, pad_w, cv2.BORDER_CONSTANT, value=(0, 0, 0)
             )
         return scaled_frame
-
-    @staticmethod
-    def get_skip_proc_frame_size(
-        frame_w_h: tuple, scale_factor: float, block_size_orig: int
-    ) -> tuple:
-        """
-        Calculates the final shape (H, W) after resizing and padding to block_size.
-        mimics logic of _resize_and_pad without processing the image.
-        """
-        assert len(frame_w_h) == 2, "frame_w_h must be a tuple of (width, height)"
-
-        w, h = frame_w_h[:2]
-
-        # 1. Calculate Scaled Dimensions (OpenCV uses round() for fx/fy)
-        if scale_factor != 1.0:
-            new_h = int(round(h * scale_factor))
-            new_w = int(round(w * scale_factor))
-        else:
-            new_h, new_w = h, w
-
-        block_size = int(block_size_orig * scale_factor)
-
-        # 2. Calculate Padding (matches your formula)
-        # (block - (dim % block)) % block ensures 0 padding if already divisible
-        pad_h = (block_size - (new_h % block_size)) % block_size
-        pad_w = (block_size - (new_w % block_size)) % block_size
-
-        # 3. Add Padding
-        final_h = new_h + pad_h
-        final_w = new_w + pad_w
-        return (final_w, final_h)

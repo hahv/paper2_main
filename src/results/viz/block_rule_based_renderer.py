@@ -9,7 +9,7 @@ from src.results.viz.grid_renderer import GridRenderer
 
 
 # ! Note that this only draws the grid, motion blocks will be draw in different renderer
-class BlockRuleRenderer(GridRenderer):
+class BlockRuleBasedRenderer(GridRenderer):
     """Draws the Grid, Yellow Motion Blocks, and Fire/Smoke Classification."""
 
     # COLOR for fire block: red, smoke block
@@ -33,14 +33,14 @@ class BlockRuleRenderer(GridRenderer):
         assert renderer_ctx is not None and len(renderer_ctx) > 0, (
             "Renderer context is empty!"
         )
-        mt_cfg = renderer_ctx["mt_cfg"]
+        # mt_cfg = renderer_ctx["mt_cfg"]
         mt_proc = renderer_ctx["mt_proc"]
-        block_size = mt_cfg.get("block_size")
-        scale_factor = mt_cfg.get("scale_factor")
+        # block_size = mt_cfg.get("block_size")
+        # scale_factor = mt_cfg.get("scale_factor")
         block_info = mt_proc.get("block_info", [])
 
         # ! Adjust block size based on context (original vs resized)
-        block_size = self.calc_block_size_by_frame_ctx(block_size, scale_factor)  # ty:ignore[invalid-argument-type]
+        block_size = self.get_render_block_size(renderer_ctx)
 
         for block_item in block_info:
             block_id = block_item["block_id"]

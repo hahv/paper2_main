@@ -2,7 +2,7 @@ from halib import *  # noqa: F403
 from typing import Tuple, Dict, Any
 
 from src.config import Config
-from src.methods.skip.base_block_skip import BaseBlockSkipProc
+from src.methods.skip.base_block_skip_proc import BaseBlockSkipProc
 
 # ! @Also see: src/methods/skip/__prof_skip_meta.md for further details.
 class MotionOnlyBlockSkipProc(BaseBlockSkipProc):
@@ -20,10 +20,10 @@ class MotionOnlyBlockSkipProc(BaseBlockSkipProc):
         scaled_padded_frame = self.resize_and_pad(frame)
 
         # 1. Motion Detection (Performed in SCALED space)
-        scaled_padded_fgmask = self.motion_det.apply(scaled_padded_frame)
+        fgmask = self.motion_det.apply(scaled_padded_frame)
 
         # 2. Handle Non-Divisible Dimensions
-        H_scaled, W_scaled = scaled_padded_fgmask.shape
+        H_scaled, W_scaled = fgmask.shape
         B = self.block_size
 
         blk_h = H_scaled // B
@@ -31,7 +31,7 @@ class MotionOnlyBlockSkipProc(BaseBlockSkipProc):
 
         try:
             # Reshape to (GridRows, BlockHeight, GridCols, BlockWidth) -> Swap -> Sum
-            blocks = scaled_padded_fgmask.reshape(blk_h, B, blk_w, B).swapaxes(1, 2)
+            blocks = fgmask.reshape(blk_h, B, blk_w, B).swapaxes(1, 2)
             counts = (blocks > 0).sum(axis=(2, 3))
         except ValueError:
             counts = np.zeros((blk_h, blk_w))
@@ -44,9 +44,10 @@ class MotionOnlyBlockSkipProc(BaseBlockSkipProc):
         # --- COLLECT BLOCK INFO ---
         block_info = []
         for r, c in active_indices:
-            pixel_count = int(counts[r, c])
+            # pixel_count = int(counts[r, c])
+            percent_pixels = counts[r, c] / total_pixels_per_block
             block_info.append(
-                {"block_id": (int(r), int(c)), "active_pixels": pixel_count}
+                {"block_id": (int(r), int(c)), "percent_active_pixels": percent_pixels}
             )
         # --------------------------
 
@@ -111,9 +112,8 @@ class MotionOnlyBlockSkipProc(BaseBlockSkipProc):
 
         meta_data = {
             "mt_proc": {
-                "vis_frame": frame,  # Original frame for viz
-                "block_size_in_original_space": int(B / self.scale_factor),
-                "motion_mask_frame": scaled_padded_fgmask,  # Scaled mask
+                "resized_frame": scaled_padded_frame,  # Scaled frame
+                "fgmask_frame": fgmask,  # Scaled mask
                 "block_info": block_info,
                 "crop_roi": crop_roi,  # Now in original coords
             }
