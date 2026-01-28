@@ -11,7 +11,7 @@ class TempMethod(NoTempMethod):
     def __init__(self, cfg: Config, rs_handlers: Optional[list[BaseRsProc]] = None):
         super().__init__(cfg, rs_handlers)
         # Composition: We "have" a handler, we aren't "is" a handler
-        assert self.cfg.methodCfg.name == "temp_method", (
+        assert "temp_method" in self.cfg.methodCfg.name, (  # ty:ignore[unsupported-operator]
             "only `temp_method` supported in yaml cfg `method_selector.selected_method`"
         )
         self.skip_proc: BaseSkipProc = SkipProcFactory.create_skip_proc(cfg)

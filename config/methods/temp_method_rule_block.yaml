@@ -4,12 +4,11 @@ extra_cfgs:
     # video: [video_block_skip_rs_proc, fgmask_block_skip_rs_proc]
     video: [video_block_skip_rs_proc, fgmask_block_skip_rs_proc]
 
-
   skip_proc:
     name: rule_based_block_skip_proc # no_skip_proc, rand_skip_proc
     params:
       scale_factor: 0.5 # 1.0 means no scaling
-      block_size: 64
+      block_size_orig: 64
       block_active_thresh: 0.1
       motion:
         name: framediff_det.FrameDiffDet

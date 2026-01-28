@@ -42,9 +42,9 @@ class VideoBlockSkipRsProc(VideoInferRsProc):
         return {"viz_in_fgmask": False}
 
     def get_custom_renderer(self) -> List[BaseRenderer]:
-        method_cfg = self.cfg.methodCfg.extra_cfgs.get("skip_proc").get("params")  # ty:ignore[possibly-missing-attribute]
+        method_cfg = self.cfg.methodCfg.extra_cfgs.get("skip_proc")  # ty:ignore[possibly-missing-attribute]
         # ! decide which renderer to use based on method config (which method is used)
-        is_motion_only = "motion_only" in method_cfg["name"]
+        is_motion_only = "motion_only" in method_cfg["name"]  # ty:ignore[not-subscriptable]
         # ! we alway render in original frame size
         if is_motion_only:
             return [BlockMontionOnlyRenderer(context=self.renderer_context)]
@@ -54,10 +54,10 @@ class VideoBlockSkipRsProc(VideoInferRsProc):
     def prepare_pipelines_list(self, video_path: str, fps: float, frame_size: tuple):
         pipeline_ls = []
         infer_rs_pipe = VideoPipeline(self.video_output_path, fps, frame_size)
-        infer_rs_pipe.add_renderer(InferRsRenderer())  # ty:ignore[invalid-argument-type]
-        infer_rs_pipe.add_renderer(GridRenderer(context=self.renderer_context))  # ty:ignore[invalid-argument-type]
+        infer_rs_pipe.add_renderer(InferRsRenderer())
+        infer_rs_pipe.add_renderer(GridRenderer(context=self.renderer_context))
         custom_renderer_ls = self.get_custom_renderer()
         for renderer in custom_renderer_ls:
-            infer_rs_pipe.add_renderer(renderer)  # ty:ignore[invalid-argument-type]
+            infer_rs_pipe.add_renderer(renderer)
         pipeline_ls.append(infer_rs_pipe)
         return pipeline_ls

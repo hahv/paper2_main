@@ -25,6 +25,7 @@ class RuleResult:
     def abbr_name(self) -> str:
         return to_abbr(self.rule_name)
 
+
 class BaseRule(ABC):
     def __init__(self, name: str = "", params: Optional[Dict[str, Any]] = None):
         self.name = name if len(name.strip()) > 0 else self.__class__.__name__

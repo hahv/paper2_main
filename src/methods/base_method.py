@@ -26,6 +26,8 @@ DEFAULT_VIDEO_PROC = "video_infer_rs_proc"
 
 
 class MethodFactory:
+    TEMP_METHOD_NAME_PREFIX = "temp_method"
+
     @staticmethod
     def create_method(config: Config, *args, **kwargs):
         # Constants
@@ -34,9 +36,12 @@ class MethodFactory:
         DEFAULT_VIDEO_PROC = "video_infer_rs_proc"
 
         # 1. Load the Method Class
+        method_name = config.methodCfg.name
+        if MethodFactory.TEMP_METHOD_NAME_PREFIX in method_name:  # ty:ignore[unsupported-operator]
+            method_name = MethodFactory.TEMP_METHOD_NAME_PREFIX
         method_cls = get_cls_in_pkg(
             pkg_name=METHOD_PKG,
-            fileName_ClsName=str(config.methodCfg.name),
+            fileName_ClsName=str(method_name),
         )
 
         # 2. Assemble Result Handlers

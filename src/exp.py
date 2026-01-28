@@ -78,7 +78,7 @@ class Paper2Exp(BaseExp):
         # Execute experiment
         results = self.exec_exp(*args, **kwargs)
         exp_end = time.time()
-        with ConsoleLog('Experiment Summary'):
+        with ConsoleLog("Experiment Summary"):
             console.print(f"Exp time: {exp_end - exp_start:.2f} seconds")
         if should_calc_metrics:
             mode_metrics_data_dict, _ = results

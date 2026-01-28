@@ -5,11 +5,11 @@ import numpy as np
 from typing import Any, Dict
 from src.methods.skip.rule.base_rule import RuleResult
 from src.results.viz.renderer_utils import RenderUtils
-from src.results.viz.grid_renderer import GridRenderer
+from src.results.viz.block_motion_only_renderer import BlockMontionOnlyRenderer
 
 
 # ! Note that this only draws the grid, motion blocks will be draw in different renderer
-class BlockRuleBasedRenderer(GridRenderer):
+class BlockRuleBasedRenderer(BlockMontionOnlyRenderer):
     """Draws the Grid, Yellow Motion Blocks, and Fire/Smoke Classification."""
 
     # COLOR for fire block: red, smoke block
@@ -25,18 +25,13 @@ class BlockRuleBasedRenderer(GridRenderer):
         Converts global context to renderer-specific context.
         global_context: contains all inference results (fps, fg_mask_dict, etc.)
         """
-        mt_cfg = global_context["infer_rs"]["mt_cfg"]["params"]
-        mt_proc = global_context["infer_rs"]["mt_proc"]
-        return {"mt_cfg": mt_cfg, "mt_proc": mt_proc}
+        return super().global_ctx_to_render_ctx(global_context)
 
     def render(self, frame_bgr: np.ndarray, renderer_ctx: Dict[str, Any]) -> np.ndarray:
         assert renderer_ctx is not None and len(renderer_ctx) > 0, (
             "Renderer context is empty!"
         )
-        # mt_cfg = renderer_ctx["mt_cfg"]
         mt_proc = renderer_ctx["mt_proc"]
-        # block_size = mt_cfg.get("block_size")
-        # scale_factor = mt_cfg.get("scale_factor")
         block_info = mt_proc.get("block_info", [])
 
         # ! Adjust block size based on context (original vs resized)

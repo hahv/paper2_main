@@ -81,8 +81,8 @@ class FireBlockYCbCrRule(BlockBasedRule):
 
         details.update(
             {
-                "pct": percent_fire, # (pct) percentage of fire pixels in block
-                "th": self.block_active_thresh, # (th) threshold for active block
+                "pct": percent_fire,  # (pct) percentage of fire pixels in block
+                "th": self.block_active_thresh,  # (th) threshold for active block
                 # "global_mean_Y": float(mean_Y),
                 # "msg": f"Method3 Fire Ratio {percent_fire:.2f} > {self.block_active_thresh}",
             }
@@ -147,8 +147,8 @@ class FireBlockWaveletRule(BlockBasedRule):
 
             details.update(
                 {
-                    "en": float(energy), # (en) calculated wavelet energy
-                    "th": self.energy_thres, # (th) threshold for wavelet energy
+                    "en": float(energy),  # (en) calculated wavelet energy
+                    "th": self.energy_thres,  # (th) threshold for wavelet energy
                     # "msg": f"Wavelet Energy {energy:.2f} > {self.energy_thres}",
                 }
             )
@@ -207,8 +207,8 @@ class SmokeBlockSpatioTemporalRule(BlockBasedRule):
         )
         details.update(
             {
-                "pct": percent_smoke, # (pct) percentage of smoke pixels in block
-                "th": block_active_thres, # (th) threshold for active block
+                "pct": percent_smoke,  # (pct) percentage of smoke pixels in block
+                "th": block_active_thres,  # (th) threshold for active block
                 # "msg": f"Smoke HSV Ratio {percent_smoke:.2f} > {block_active_thres}",
             }
         )

@@ -4,6 +4,7 @@ from typing import Tuple, Dict, Any
 from src.config import Config
 from src.methods.skip.base_block_skip_proc import BaseBlockSkipProc
 
+
 # ! @Also see: src/methods/skip/__prof_skip_meta.md for further details.
 class MotionOnlyBlockSkipProc(BaseBlockSkipProc):
     def __init__(self, cfg: Config):

@@ -21,10 +21,15 @@ class GridRenderer(BaseRenderer):
         """
         mt_cfg = global_context["infer_rs"]["mt_cfg"]["params"]
         render_ctx = filter_dict_by_keys(mt_cfg, ["scale_factor", "block_size_orig"])
-
         return render_ctx
 
     def get_render_block_size(self, renderer_ctx: Dict[str, Any]) -> int:
+        assert "block_size_orig" in renderer_ctx, (
+            "renderer_ctx must contain 'block_size_orig'"
+        )
+        assert "scale_factor" in renderer_ctx, (
+            "renderer_ctx must contain 'scale_factor'"
+        )
         block_size = (
             renderer_ctx["block_size_orig"]
             if self.context == "original_frame"

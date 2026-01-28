@@ -32,7 +32,6 @@ class LogCfg(YAMLWizard):
     wandb_cfg: Optional[WanDBCfg] = None
 
 
-
 @dataclass
 class GeneralCfg(NamedCfg, YAMLWizard):
     seed: int
@@ -118,6 +117,7 @@ class MetricSetCfg(AutoNamedCfg):
 @dataclass
 class MethodCfg(AutoNamedCfg):
     extra_cfgs: Optional[Dict[str, Any]] = None
+
     def get_skip_method_name(self) -> str:
         skip_name = "Unknown"
         try:

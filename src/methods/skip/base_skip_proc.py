@@ -9,7 +9,7 @@ from src.methods.skip.motion.base_motion_det import *
 class SkipProcFactory:
     @staticmethod
     def create_skip_proc(config: Config, *args, **kwargs):
-        assert config.methodCfg.name == "temp_method", (
+        assert "temp_method" in config.methodCfg.name, (  # ty:ignore[unsupported-operator]
             "SkipProcFactory only works with temp_method"
         )
         temp_method_cfg: dict = config.methodCfg.extra_cfgs.get("skip_proc", {})  # ty:ignore[possibly-missing-attribute]
