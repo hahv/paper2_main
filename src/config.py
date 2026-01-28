@@ -4,6 +4,7 @@ import yaml
 from dataclasses import dataclass, field
 from dataclass_wizard import YAMLWizard
 from typing import List, Optional, Dict, Any
+from halib.utils.dict import DictUtils
 
 from halib.filetype import yamlfile
 from halib.research.mics import *
@@ -35,6 +36,7 @@ class LogCfg(YAMLWizard):
 @dataclass
 class GeneralCfg(NamedCfg, YAMLWizard):
     seed: int
+    skip_exp_if_exists: bool
     project_dir: str
     outdir: str
     log_cfg: LogCfg
@@ -137,7 +139,7 @@ class DatasetSelector(BaseSelectorCfg[DatasetCfg]):
         self.dbset_used = self._resolve_selection(
             self.list_dbsets,
             self.selected_dbset,  # ty:ignore[invalid-argument-type]
-            "dataset",  # ty:ignore[invalid-argument-type]
+            "dataset",
         )
 
 
@@ -151,7 +153,7 @@ class MetricSelector(BaseSelectorCfg[MetricSetCfg]):
         self.metric_used = self._resolve_selection(
             self.list_metrics,
             self.selected_metric,  # ty:ignore[invalid-argument-type]
-            "metric set",  # ty:ignore[invalid-argument-type]
+            "metric set",
         )
 
 
@@ -165,7 +167,7 @@ class MethodSelector(BaseSelectorCfg[MethodCfg]):
         self.method_used = self._resolve_selection(
             self.list_methods,
             self.selected_method,  # ty:ignore[invalid-argument-type]
-            "method",  # ty:ignore[invalid-argument-type]
+            "method",
         )
 
 
@@ -176,6 +178,7 @@ class MethodSelector(BaseSelectorCfg[MethodCfg]):
 
 @dataclass
 class Config(ExpBaseCfg):
+    CFG_SEP = "__"
     dbset_selector: DatasetSelector
     metric_selector: MetricSelector
     method_selector: MethodSelector
@@ -196,8 +199,12 @@ class Config(ExpBaseCfg):
     def get_method_cfg(self) -> MethodCfg:
         return self.method_selector.method_used  # ty:ignore[invalid-return-type]
 
-    def get_cfg_name(self, sep="__", *args, **kwargs):
-        extra_info = self.general.time_stamp
+    def get_cfg_name(self, sep=CFG_SEP, *args, **kwargs):
+        time_stamp_info = self.general.time_stamp
+        mt_cfg_hash = DictUtils.get_unique_hash(
+            self.method_selector.method_used.extra_cfgs  # ty:ignore[possibly-missing-attribute]
+        )
+        extra_info = f"{mt_cfg_hash}{sep}{time_stamp_info}"
         return super().get_cfg_name(sep, extra=extra_info, *args, **kwargs)
 
     def get_outdir(self):
@@ -224,6 +231,38 @@ class Config(ExpBaseCfg):
         return os.path.join(
             self.general.project_dir, self.general.outdir, self.cfg_name
         )
+
+    @property
+    def expSameCfgExists(self) -> tuple[bool, str]:
+        # Check if experiment with the same cfg existed.
+        exp_with_same_cfg_existed = False
+        time_stamp_info = self.general.time_stamp
+        cfg_name_posfix_len = len(f"{self.CFG_SEP}{time_stamp_info}")
+        exp_dir_with_hash = self.expDir[:-cfg_name_posfix_len]
+
+        # Check if any directory in general.project_dir/general.outdir matches exp_dir_with_hash
+        exp_outdir = os.path.join(self.general.project_dir, self.general.outdir)
+        existing_dir = ""
+        # find directories that start with exp_dir_with_hash
+        if os.path.exists(exp_outdir):
+            for name in os.listdir(exp_outdir):
+                dir_path = os.path.join(exp_outdir, name)
+                if os.path.isdir(dir_path) and name.startswith(
+                    os.path.basename(exp_dir_with_hash)
+                ):
+                    exp_with_same_cfg_existed = True
+                    existing_dir = dir_path
+                    break
+        return (exp_with_same_cfg_existed, existing_dir)
+
+    @property
+    def shouldSkipExp(self) -> bool:
+        exp_with_same_cfg_existed, existing_dir = self.expSameCfgExists
+        should_skip = exp_with_same_cfg_existed and self.general.skip_exp_if_exists
+        if should_skip:
+            with ConsoleLog("[red] <<Skip>> Exp existed [/red]"):
+                pprint_local_path(existing_dir, get_wins_path=True)
+        return should_skip
 
     def print_meta_info(self):
         with ConsoleLog("Meta Info"):
@@ -286,7 +325,7 @@ class Config(ExpBaseCfg):
             folder_name = f"{file_suffix}s"
             attr_folder = os.path.join(
                 instance.general.project_dir,  # ty:ignore[possibly-missing-attribute]
-                f"config/{folder_name}",  # ty:ignore[possibly-missing-attribute]
+                f"config/{folder_name}",
             )
 
             # list attribute: e.g., list_datasets

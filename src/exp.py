@@ -68,11 +68,14 @@ class Paper2Exp(BaseExp):
         return exp_rs
 
     def run_exp(self, should_calc_metrics=True, reload_env=False, *args, **kwargs):
+        if self.full_cfg.shouldSkipExp:
+            return
+
         self.init_general(self.config.get_general_cfg())  # ty:ignore[invalid-argument-type]
         self.prepare_dataset(self.config.get_dataset_cfg())  # ty:ignore[invalid-argument-type]
         self.prepare_metrics(self.config.get_metric_cfg())  # ty:ignore[invalid-argument-type]
 
-        # Save config before running
+        # ! creates output directory and save config before running exp
         self.config.save_to_outdir()
         exp_start = time.time()
         # Execute experiment

@@ -97,7 +97,7 @@ class AccMotionDet(BaseMotionDet):
 
         # 6. Decay (subtract(deltaMask, 1, deltaMask))
         # Using cv2.subtract handles underflow (0 - 1 = 0) automatically for uint8
-        self.delta_mask = cv2.subtract(self.delta_mask, self.decay)  # ty:ignore[no-matching-overload]
+        self.delta_mask = cv2.subtract(self.delta_mask, self.decay)
 
         # 7. Generate Current Mask (compare(deltaMask, MASK_TH, curMask, cv::CMP_GE))
         _, cur_mask = cv2.threshold(

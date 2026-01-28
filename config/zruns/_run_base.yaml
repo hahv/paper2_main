@@ -1,5 +1,6 @@
 general:
   seed: 1
+  skip_exp_if_exists: true # ! skip if same experiment with same config existed
   project_dir: /mnt/e/SyncData/paper2_main
   outdir: zout/zruns
   computer_name: null # PC name that run the experiment
