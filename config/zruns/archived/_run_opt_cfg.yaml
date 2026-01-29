@@ -1,19 +1,14 @@
 # pixel diff threshold for temporal stabilization
 diff_thres: "8:13:2"
-
 # scale factor for frame diff
 scale_factor: [1.0]
-
 # block size for activity check
 blk_size: [64]
-
 # % pixels active in block to mark block active
 blk_act_thres: "0.05:0.21:0.05"
 # % percentage of active blocks (per total blocks) to mark frame active and trigger whole frame processing
 frm_act_thres: [0.7]
-
 # fire/smoke classification threshold
 firesmoke_cls_thres: [0.2, 0.51, 0.1]
-
 # min ROI size (relative to frame) for BIG typel
 min_roi: [0.6]

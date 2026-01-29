@@ -1,3 +1,5 @@
 extra_cfgs:
+  result_proc:
+    video: [video_infer_rs_proc]
   window_size: 20
   persist_thres: 0.5 # threshold for persisting a temp_tpt

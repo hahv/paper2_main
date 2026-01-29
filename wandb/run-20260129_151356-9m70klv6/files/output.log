@@ -1,0 +1,46 @@
+[92m───────────────────────────────────────────── [0mTotal [1;36m36[0m configs to run[92m ──────────────────────────────────────────────[0m
+[92m────────────────────────────────────────────────── [0m[1m<[0m[1;95mConfig_Stats[0m[1m>[0m[92m ──────────────────────────────────────────────────[0m
++--------------------------+---------------+
+|                          |   Num Configs |
++==========================+===============+
+| temp_method_motion_block |            36 |
++--------------------------+---------------+
+[92m───────────────────────────────────────────────── [0m[1m<[0m[35m/[0m[95mConfig_Stats[0m[1m>[0m[92m ──────────────────────────────────────────────────[0m
+0it [00:00, ?it/s][34m[1mwandb[0m: [33mWARNING[0m Calling wandb.login() after wandb.init() has no effect.
+[34m[1mwandb[0m: wandb.init() called while a run is active and reinit is set to 'default', so returning the previous run.
+[92m─────────────────────────────────────────────── [0mRunning config [1;36m0[0m/[1;36m36[0m[92m ────────────────────────────────────────────────[0m
+[92m────────────────────────────────────────────── [0mGeneral initialization[92m ──────────────────────────────────────────────[0m
+[92m───────────────────────────────────────── [0mPreparing dataset - UFireIndoor2[92m ─────────────────────────────────────────[0m
+[1;31m FORCED Number of classes: [0m[1;31m2[0m[1;31m [0m
+[92m───────────────────────────────────────────────── [0mExec Experiment[92m ──────────────────────────────────────────────────[0m
+[31mMainPC__ds_UFireIndoor2__mt_temp_method_motion_block__553bcca14012__20260129.[0m[1;31m151353[0m
+[32m'Loading method class: temp_method'[0m
+0it [00:00, ?it/s]
+Traceback (most recent call last):
+  File "/mnt/e/SyncData/paper2_main/zrun/run_optim.py", line 130, in <module>
+    main()
+  File "/mnt/e/SyncData/paper2_main/zrun/run_optim.py", line 123, in main
+    single_exp.run_exp()
+  File "/mnt/e/SyncData/paper2_main/src/exp.py", line 85, in run_exp
+    results = self.exec_exp(*args, **kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/e/SyncData/paper2_main/src/exp.py", line 58, in exec_exp
+    method_instance = MethodFactory.create_method(self.config)  # ty:ignore[invalid-argument-type]
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/e/SyncData/paper2_main/src/methods/base_method.py", line 76, in create_method
+    return method_cls(cfg=config, rs_handlers=rs_handlers, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/e/SyncData/paper2_main/src/methods/temp_method.py", line 17, in __init__
+    self.skip_proc: BaseSkipProc = SkipProcFactory.create_skip_proc(cfg)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/e/SyncData/paper2_main/src/methods/skip/base_skip_proc.py", line 25, in create_skip_proc
+    return cls(**kwargs)
+           ^^^^^^^^^^^^^
+  File "/mnt/e/SyncData/paper2_main/src/methods/skip/motion_only_block_skip_proc.py", line 11, in __init__
+    super().__init__(cfg)
+  File "/mnt/e/SyncData/paper2_main/src/methods/skip/base_block_skip_proc.py", line 9, in __init__
+    super().__init__(cfg)
+  File "/mnt/e/SyncData/paper2_main/src/methods/skip/base_skip_proc.py", line 43, in __init__
+    assert "name" in motion_cfg, "motion detector config must have a name"
+           ^^^^^^^^^^^^^^^^^^^^
+AssertionError: motion detector config must have a name

@@ -37,8 +37,12 @@ class MethodFactory:
 
         # 1. Load the Method Class
         method_name = config.methodCfg.name
-        if MethodFactory.TEMP_METHOD_NAME_PREFIX in method_name:  # ty:ignore[unsupported-operator]
+        assert method_name is not None, (
+            "Method name must be specified in config.methodCfg.name"
+        )
+        if method_name.startswith(MethodFactory.TEMP_METHOD_NAME_PREFIX):
             method_name = MethodFactory.TEMP_METHOD_NAME_PREFIX
+        # pprint(f"Loading method class: {method_name}")
         method_cls = get_cls_in_pkg(
             pkg_name=METHOD_PKG,
             fileName_ClsName=str(method_name),
@@ -332,6 +336,7 @@ class BaseMethod(ABC):
                     fps = f"{fps:.2f}"
 
                     frame_rs_dict = {
+                        "method": self.cfg.methodCfg.name,
                         "video": os.path.basename(video_path),
                         "num_frames": total_frames,
                         "frame_idx": frame_idx,

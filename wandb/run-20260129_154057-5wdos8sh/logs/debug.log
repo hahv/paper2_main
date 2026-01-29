@@ -1,0 +1,6 @@
+2026-01-29 15:40:57,900 INFO    MainThread:79838 [wandb_init.py:setup_run_log_directory():703] Logging user logs to /mnt/e/SyncData/paper2_main/wandb/run-20260129_154057-5wdos8sh/logs/debug.log
+2026-01-29 15:40:57,901 INFO    MainThread:79838 [wandb_init.py:setup_run_log_directory():704] Logging internal logs to /mnt/e/SyncData/paper2_main/wandb/run-20260129_154057-5wdos8sh/logs/debug-internal.log
+2026-01-29 15:40:57,901 INFO    MainThread:79838 [wandb_init.py:init():830] calling init triggers
+2026-01-29 15:40:57,901 INFO    MainThread:79838 [wandb_init.py:init():835] wandb.init called with sweep_config: {}
+config: {'_wandb': {}}
+2026-01-29 15:44:26,146 INFO    MsgRouterThr:79838 [mailbox.py:close():129] [no run ID] Closing mailbox, abandoning 1 handles.

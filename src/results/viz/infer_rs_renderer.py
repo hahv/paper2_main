@@ -10,7 +10,7 @@ class InferRsRenderer(BaseRenderer):
     def global_ctx_to_render_ctx(
         self, global_context: Dict[str, Any]
     ) -> Dict[str, Any]:
-        renderer_dict = filter_dict_by_keys(global_context, keys=["fps"])
+        renderer_dict = filter_dict_by_keys(global_context, keys=["method", "fps"])
         renderer_dict["frame_idx"] = (
             f"{global_context['frame_idx']}/{global_context['num_frames']}"
         )

@@ -9,11 +9,14 @@ from src.methods.skip.motion.base_motion_det import *
 class SkipProcFactory:
     @staticmethod
     def create_skip_proc(config: Config, *args, **kwargs):
-        assert "temp_method" in config.methodCfg.name, (  # ty:ignore[unsupported-operator]
+        assert config.methodCfg.name.startswith("temp_method"), (  # ty:ignore[possibly-missing-attribute]
             "SkipProcFactory only works with temp_method"
         )
         temp_method_cfg: dict = config.methodCfg.extra_cfgs.get("skip_proc", {})  # ty:ignore[possibly-missing-attribute]
-        skip_proc_name: str = temp_method_cfg.get("name", "no_skip_proc")
+        skip_proc_name: str = temp_method_cfg.get("name")
+        assert skip_proc_name is not None and len(skip_proc_name) > 0, (
+            "Skip proc name must be specified"
+        )
         cls = get_cls_in_pkg(
             pkg_name="src.methods.skip", fileName_ClsName=skip_proc_name
         )
@@ -32,7 +35,7 @@ class BaseSkipProc(ABC):
 
         skip_proc_dict: dict = self.cfg.methodCfg.extra_cfgs.get("skip_proc", {})  # ty:ignore[possibly-missing-attribute]
         self.name = skip_proc_dict.get("name", "no_skip_proc")
-        self.params = skip_proc_dict.get("params", {})
+        self.params = skip_proc_dict.get("params")
         self.motion_det: BaseMotionDet = None
 
         if "motion" in self.params:

@@ -1,0 +1,14 @@
+{"time":"2026-01-29T15:48:30.276854687+09:00","level":"INFO","msg":"stream: starting","core version":"0.21.0"}
+{"time":"2026-01-29T15:48:30.700991191+09:00","level":"INFO","msg":"stream: created new stream","id":"t3unt89v"}
+{"time":"2026-01-29T15:48:30.701235774+09:00","level":"INFO","msg":"stream: started","id":"t3unt89v"}
+{"time":"2026-01-29T15:48:30.701366422+09:00","level":"INFO","msg":"handler: started","stream_id":"t3unt89v"}
+{"time":"2026-01-29T15:48:30.70191155+09:00","level":"INFO","msg":"sender: started","stream_id":"t3unt89v"}
+{"time":"2026-01-29T15:48:30.701806502+09:00","level":"INFO","msg":"writer: Do: started","stream_id":"t3unt89v"}
+{"time":"2026-01-29T15:48:32.413037006+09:00","level":"INFO","msg":"stream: closing","id":"t3unt89v"}
+{"time":"2026-01-29T15:48:32.799737532+09:00","level":"INFO","msg":"sender: sendAlert: notified scriptable run alert","data":{"notifyScriptableRunAlert":{"success":true}}}
+{"time":"2026-01-29T15:48:33.05936439+09:00","level":"INFO","msg":"sender: sendAlert: notified scriptable run alert","data":{"notifyScriptableRunAlert":{"success":true}}}
+{"time":"2026-01-29T15:48:33.8509949+09:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2026-01-29T15:48:34.11523646+09:00","level":"INFO","msg":"handler: closed","stream_id":"t3unt89v"}
+{"time":"2026-01-29T15:48:34.115292951+09:00","level":"INFO","msg":"writer: Close: closed","stream_id":"t3unt89v"}
+{"time":"2026-01-29T15:48:34.115313051+09:00","level":"INFO","msg":"sender: closed","stream_id":"t3unt89v"}
+{"time":"2026-01-29T15:48:34.115939953+09:00","level":"INFO","msg":"stream: closed","id":"t3unt89v"}

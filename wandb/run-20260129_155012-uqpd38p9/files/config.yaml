@@ -1,0 +1,57 @@
+_wandb:
+    value:
+        cli_version: 0.21.0
+        e:
+            ohdyf8nse440on2oek0l7357jxagv1or:
+                codePath: zrun/run_optim.py
+                codePathLocal: zrun/run_optim.py
+                cpu_count: 10
+                cpu_count_logical: 20
+                cudaVersion: "12.6"
+                disk:
+                    /:
+                        total: "1081101176832"
+                        used: "40388067328"
+                email: hoangvanhauit@gmail.com
+                executable: /mnt/e/SyncData/paper2_main/.venv/bin/python
+                git:
+                    commit: 9c2718533d48d1a47f4694b4fe576ec20b32eebb
+                    remote: https://github.com/hahv/paper2_main.git
+                gpu: NVIDIA GeForce RTX 3090
+                gpu_count: 1
+                gpu_nvidia:
+                    - architecture: Ampere
+                      memoryTotal: "25769803776"
+                      name: NVIDIA GeForce RTX 3090
+                      uuid: GPU-9df9c428-0596-ad55-b4c5-d0b4a57f4bbc
+                host: DESKTOP-JQD9K01
+                memory:
+                    total: "33589194752"
+                os: Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39
+                program: /mnt/e/SyncData/paper2_main/zrun/run_optim.py
+                python: CPython 3.11.6
+                root: /mnt/e/SyncData/paper2_main
+                startedAt: "2026-01-29T06:50:12.404244Z"
+                writerId: ohdyf8nse440on2oek0l7357jxagv1or
+        m: []
+        python_version: 3.11.6
+        t:
+            "1":
+                - 1
+                - 41
+                - 49
+                - 63
+                - 105
+            "2":
+                - 1
+                - 41
+                - 49
+                - 63
+                - 105
+            "3":
+                - 13
+                - 24
+            "4": 3.11.6
+            "5": 0.21.0
+            "12": 0.21.0
+            "13": linux-x86_64

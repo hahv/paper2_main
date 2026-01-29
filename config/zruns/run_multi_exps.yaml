@@ -1,8 +1,10 @@
 dbset_selector:
   selected_dbset: ["UFireIndoor2"] # "UFireIndoorFull", "UFireIndoor2", "UFire", "DFAN"
-
 metric_selector:
   selected_metric: ["per_frame_metric"]
-
 method_selector:
-  selected_method: ["temp_method_rule_block"]
+  selected_method:
+    - temp_method_motion_block
+    # - temp_method_rule_block
+    # - temp_baseline_Tpt_method
+    # - no_temp_method

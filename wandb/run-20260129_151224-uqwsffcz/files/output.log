@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "/mnt/e/SyncData/paper2_main/zrun/run_optim.py", line 130, in <module>
+    main()
+  File "/mnt/e/SyncData/paper2_main/zrun/run_optim.py", line 94, in main
+    logger_meta = all_optim_run_cfgs[0].get_wandb_logger_meta(name=WANDB_NAME)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/e/SyncData/paper2_main/src/config.py", line 293, in get_wandb_logger_meta
+    logger_hash = self.general.log_cfg.wandb_cfg.get_hash()
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/e/SyncData/paper2_main/src/config.py", line 45, in get_hash
+    cfg_dict = yaml.safe_load(yaml_str=self.to_yaml())  # ty:ignore[missing-argument, unknown-argument]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: safe_load() got an unexpected keyword argument 'yaml_str'

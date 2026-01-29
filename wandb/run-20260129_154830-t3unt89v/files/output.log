@@ -1,0 +1,30 @@
+[92m───────────────────────────────────────────── [0mTotal [1;36m36[0m configs to run[92m ──────────────────────────────────────────────[0m
+[92m────────────────────────────────────────────────── [0m[1m<[0m[1;95mConfig_Stats[0m[1m>[0m[92m ──────────────────────────────────────────────────[0m
++--------------------------+---------------+
+|                          |   Num Configs |
++==========================+===============+
+| temp_method_motion_block |            36 |
++--------------------------+---------------+
+[92m───────────────────────────────────────────────── [0m[1m<[0m[35m/[0m[95mConfig_Stats[0m[1m>[0m[92m ──────────────────────────────────────────────────[0m
+An exception of type [1m<[0m[1;95mclass[0m[39m [0m[32m'TypeError'[0m[1m>[0m occurred.
+Exception message: bad argument type for built-in operation
+Traceback (most recent call last):
+  File "/mnt/e/SyncData/paper2_main/zrun/run_optim.py", line 131, in <module>
+    main()
+  File "/mnt/e/SyncData/paper2_main/zrun/run_optim.py", line 109, in main
+    wandb_logger.alert(WANDB_NAME,cfg_stats)
+  File "/mnt/e/SyncData/paper2_main/.venv/lib/python3.11/site-packages/wandb/sdk/wandb_run.py", line 398, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/e/SyncData/paper2_main/.venv/lib/python3.11/site-packages/wandb/sdk/wandb_run.py", line 456, in wrapper_fn
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/e/SyncData/paper2_main/.venv/lib/python3.11/site-packages/wandb/sdk/wandb_run.py", line 443, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/e/SyncData/paper2_main/.venv/lib/python3.11/site-packages/wandb/sdk/wandb_run.py", line 3623, in alert
+    self._backend.interface.publish_alert(title, text, level_str, wait_duration)
+  File "/mnt/e/SyncData/paper2_main/.venv/lib/python3.11/site-packages/wandb/sdk/interface/interface.py", line 798, in publish_alert
+    proto_alert.text = text
+    ^^^^^^^^^^^^^^^^
+TypeError: bad argument type for built-in operation

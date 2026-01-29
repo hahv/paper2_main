@@ -16,6 +16,7 @@ from halib.exp.core.base_config import (
     NamedCfg,
 )
 
+import wandb
 # -----------------------------------------------------------------------------
 # 4. GENERAL CONFIGS
 # -----------------------------------------------------------------------------
@@ -27,6 +28,23 @@ class WanDBCfg(YAMLWizard):
     mode: str
     wandb_key: str
 
+    def get_logger(self, name: Optional[str] = None):
+        # 1. Authenticate using the key from config
+        # relogin=True ensures it overwrites any previously cached local keys
+        if self.wandb_key:
+            wandb.login(key=self.wandb_key, relogin=True)
+        # 2. Initialize the run instance
+        run = wandb.init(
+            project=self.project,
+            mode=self.mode,  # ty:ignore[invalid-argument-type]
+            name=name,
+        )
+        return run
+
+    def get_hash(self):
+        cfg_dict = yaml.safe_load(self.to_yaml())
+        return DictUtils.get_unique_hash(cfg_dict)
+
 
 @dataclass
 class LogCfg(YAMLWizard):
@@ -37,6 +55,7 @@ class LogCfg(YAMLWizard):
 class GeneralCfg(NamedCfg, YAMLWizard):
     seed: int
     skip_exp_if_exists: bool
+    is_optim_mode: bool
     project_dir: str
     outdir: str
     log_cfg: LogCfg
@@ -128,6 +147,12 @@ class MethodCfg(AutoNamedCfg):
             pass
         return skip_name
 
+    def get_dict(self) -> Dict[str, Any]:
+        return {
+            "name": self.name,
+            "extra_cfgs": self.extra_cfgs,
+        }
+
 
 @dataclass
 class DatasetSelector(BaseSelectorCfg[DatasetCfg]):
@@ -185,6 +210,17 @@ class Config(ExpBaseCfg):
     general: GeneralCfg
     inferCfg: InferConfig
     modelCfg: ModelConfig
+    orignal_yaml_str: Optional[str] = None
+
+    def save_to_outdir(
+        self, filename: str = "__config.yaml", outdir=None, override: bool = False
+    ) -> None:
+        super().save_to_outdir(filename, outdir, override)
+        # !we also save the method_cfg.yaml for easier reference
+        method_dict = self.methodCfg.get_dict()
+        outfile = os.path.join(self.get_outdir(), "__method_cfg.yaml")
+        with open(outfile, "w") as f:
+            yaml.dump(method_dict, f, default_flow_style=False)
 
     # --- Base Class Implementations ---
     def get_general_cfg(self) -> GeneralCfg:
@@ -257,12 +293,21 @@ class Config(ExpBaseCfg):
 
     @property
     def shouldSkipExp(self) -> bool:
-        exp_with_same_cfg_existed, existing_dir = self.expSameCfgExists
-        should_skip = exp_with_same_cfg_existed and self.general.skip_exp_if_exists
+        exists, existing_dir = self.expSameCfgExists
+        should_skip = exists and self.general.skip_exp_if_exists
         if should_skip:
             with ConsoleLog("[red] <<Skip>> Exp existed [/red]"):
                 pprint_local_path(existing_dir, get_wins_path=True)
         return should_skip
+
+    def get_wandb_logger_meta(
+        self, name: Optional[str] = None
+    ) -> tuple[Optional[wandb.sdk.wandb_run.Run], str]:
+        logger, logger_hash = None, ""
+        if self.general.log_cfg.wandb_cfg is not None:
+            logger = self.general.log_cfg.wandb_cfg.get_logger(name=name)
+            logger_hash = self.general.log_cfg.wandb_cfg.get_hash()
+        return logger, logger_hash
 
     def print_meta_info(self):
         with ConsoleLog("Meta Info"):
@@ -278,12 +323,22 @@ class Config(ExpBaseCfg):
         """
         Links names (strs) to actual objects and generates the canonical Config Name.
         """
-        pprint("Finalizing configuration...")
+        # pprint("Finalizing configuration...")
         # 1. Resolve sub-configs
         self.dbset_selector.post_init()
         self.metric_selector.post_init()
         self.method_selector.post_init()
         # ! must called for generating cfg_name
+        self.get_cfg_name()
+
+    def update_optim_params(self, optim_params: Dict[str, Any]) -> None:
+        """
+        Update the method extra_cfgs with the given optimization parameters.
+        """
+        if self.methodCfg.extra_cfgs is None:
+            self.methodCfg.extra_cfgs = {}
+        self.methodCfg.extra_cfgs = optim_params  # force replace
+        # ! must update cfg_name after changing method cfgs
         self.get_cfg_name()
 
     @classmethod
@@ -294,21 +349,9 @@ class Config(ExpBaseCfg):
         return cls.from_custom_yaml_file_or_str(yaml_file_or_dict)
 
     @classmethod
-    def from_custom_yaml_file_or_str(cls, yaml_file_or_dict: str) -> "Config":
-        """
-        Loads the main config, then scans specific folders to populate lists
-        (e.g., list_datasets) from external YAML files.
-        """
-        yaml_str = ""
-        if isinstance(yaml_file_or_dict, str) and os.path.exists(yaml_file_or_dict):
-            # 1. Load Base Config
-            cfg_dict = yamlfile.load_yaml(yaml_file_or_dict, to_dict=True)
-            if "__base__" in cfg_dict:
-                del cfg_dict["__base__"]
-            yaml_str = yaml.dump(cfg_dict, default_flow_style=False)
-        elif isinstance(yaml_file_or_dict, dict):
-            yaml_str = yaml.dump(yaml_file_or_dict, default_flow_style=False)
+    def from_yaml_str(cls, yaml_str: str) -> "Config":
         instance = Config.from_yaml(yaml_str)
+        instance.orignal_yaml_str = yaml_str  # ty:ignore[invalid-assignment]
         # 2. Configuration for dynamic loading
         # Map: Attribute Name -> (Class Type, Folder Name Suffix)
         # Note: Logic assumes list attribute is "list_" + suffix + "s"
@@ -357,3 +400,25 @@ class Config(ExpBaseCfg):
         # 3. Finalize (Link strings to objects)
         instance.finalize_config()  # ty:ignore[possibly-missing-attribute]
         return instance  # ty:ignore[invalid-return-type]
+
+    @classmethod
+    def from_custom_yaml_file_or_str(cls, yaml_file_or_dict: str) -> "Config":
+        """
+        Loads the main config, then scans specific folders to populate lists
+        (e.g., list_datasets) from external YAML files.
+        """
+        yaml_str = ""
+        if isinstance(yaml_file_or_dict, str):
+            if os.path.exists(yaml_file_or_dict):  # is a file path
+                # 1. Load Base Config
+                cfg_dict = yamlfile.load_yaml(yaml_file_or_dict, to_dict=True)
+                if "__base__" in cfg_dict:
+                    del cfg_dict["__base__"]
+                yaml_str = yaml.dump(cfg_dict, default_flow_style=False)
+            else:  # is a yaml string
+                yaml_str = yaml_file_or_dict
+        elif isinstance(yaml_file_or_dict, dict):
+            yaml_str = yaml.dump(yaml_file_or_dict, default_flow_style=False)
+        else:
+            raise ValueError("Input must be a file path, YAML string, or dict.")
+        return cls.from_yaml_str(yaml_str)

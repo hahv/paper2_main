@@ -13,12 +13,15 @@ class Paper2Exp(BaseExp):
     Custom experiment class that extends BaseExperiment.
     """
 
-    def __init__(self, config: Config):
+    def __init__(self, config: Config, *args, **kwargs):
         super().__init__(config)
         self.full_cfg: Config = config
         self.metric_results = {}
         self.metric_backend = None
         self.video_dir_path = None
+        self.wandb_logger = None
+        if "wandb_logger" in kwargs:
+            self.wandb_logger = kwargs["wandb_logger"]
 
     def init_general(self, general_cfg: GeneralCfg):
         console.rule("General initialization")

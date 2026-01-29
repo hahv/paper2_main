@@ -8,7 +8,7 @@ from src.exp import Paper2Exp
 
 
 class RunExp(Tap):
-    cfg: str = r"config/zruns/__base.yaml"  # config file path
+    cfg: str = r"config/zruns/run_base.yaml"  # config file path
 
 def run_single_exp(exp_cfg_file, method_cfg_dict=None):
     cfg = Config.from_custom_yaml_file(exp_cfg_file)

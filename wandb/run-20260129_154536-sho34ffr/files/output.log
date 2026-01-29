@@ -1,0 +1,16 @@
+[92m───────────────────────────────────────────── [0mTotal [1;36m36[0m configs to run[92m ──────────────────────────────────────────────[0m
+Traceback (most recent call last):
+  File "/mnt/e/SyncData/paper2_main/zrun/run_optim.py", line 132, in <module>
+    main()
+  File "/mnt/e/SyncData/paper2_main/zrun/run_optim.py", line 101, in main
+    wandb_logger.alert(msg)
+  File "/mnt/e/SyncData/paper2_main/.venv/lib/python3.11/site-packages/wandb/sdk/wandb_run.py", line 398, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/e/SyncData/paper2_main/.venv/lib/python3.11/site-packages/wandb/sdk/wandb_run.py", line 456, in wrapper_fn
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/e/SyncData/paper2_main/.venv/lib/python3.11/site-packages/wandb/sdk/wandb_run.py", line 443, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: Run.alert() missing 1 required positional argument: 'text'

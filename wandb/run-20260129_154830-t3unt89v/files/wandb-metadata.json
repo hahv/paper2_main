@@ -1,0 +1,39 @@
+{
+  "os":  "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "python":  "CPython 3.11.6",
+  "startedAt":  "2026-01-29T06:48:30.870944Z",
+  "program":  "/mnt/e/SyncData/paper2_main/zrun/run_optim.py",
+  "codePath":  "zrun/run_optim.py",
+  "codePathLocal":  "zrun/run_optim.py",
+  "git":  {
+    "remote":  "https://github.com/hahv/paper2_main.git",
+    "commit":  "9c2718533d48d1a47f4694b4fe576ec20b32eebb"
+  },
+  "email":  "hoangvanhauit@gmail.com",
+  "root":  "/mnt/e/SyncData/paper2_main",
+  "host":  "DESKTOP-JQD9K01",
+  "executable":  "/mnt/e/SyncData/paper2_main/.venv/bin/python",
+  "cpu_count":  10,
+  "cpu_count_logical":  20,
+  "gpu":  "NVIDIA GeForce RTX 3090",
+  "gpu_count":  1,
+  "disk":  {
+    "/":  {
+      "total":  "1081101176832",
+      "used":  "40388038656"
+    }
+  },
+  "memory":  {
+    "total":  "33589194752"
+  },
+  "gpu_nvidia":  [
+    {
+      "name":  "NVIDIA GeForce RTX 3090",
+      "memoryTotal":  "25769803776",
+      "architecture":  "Ampere",
+      "uuid":  "GPU-9df9c428-0596-ad55-b4c5-d0b4a57f4bbc"
+    }
+  ],
+  "cudaVersion":  "12.6",
+  "writerId":  "z3wx9pg1c9i1vcvnu40679dfi9ce12cr"
+}

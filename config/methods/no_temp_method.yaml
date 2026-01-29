@@ -1,3 +1,3 @@
 extra_cfgs:
   result_proc:
-    video: [video_block_skip_rs_proc, fgmask_block_skip_rs_proc]
+    video: [video_infer_rs_proc]

@@ -17,8 +17,8 @@ from src.exp import Paper2Exp
 
 
 class MultipleExpArgs(Tap):
-    base_yaml: str = r"./config/zruns/_run_base.yaml"
-    sweep_yaml: str = r"./config/zruns/_run_multi_exps.yaml"
+    base_yaml: str = r"./config/zruns/run_base.yaml"
+    sweep_yaml: str = r"config/zruns/run_multi_exps.yaml"
 
 
 def main():
