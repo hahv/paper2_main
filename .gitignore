@@ -6,6 +6,7 @@ datasets
 models
 test
 zout
+wandb
 *.pyc
 # keep models folder structure
 !models/
@@ -23,3 +24,4 @@ zout/*
 !zout/.gitkeep
 
 __archived/datasets
+src/.slack_env.yaml

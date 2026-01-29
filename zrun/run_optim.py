@@ -12,17 +12,17 @@ import wandb
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from tap import *
-from typing import List
+from typing import List, Optional
 from halib.exp.core.param_gen import ParamGen
 from src.config import Config
 from src.exp import Paper2Exp
+from src.utils import clear_slack_channel
 
-from typing import Optional
 
-
-class MultipleExpArgs(Tap):
+class RunOptimArgs(Tap):
     base_yaml: str = r"./config/zruns/run_base.yaml"
     sweep_yaml: str = r"./config/zruns/run_optim.yaml"
+    clean_slack: bool = True
 
 
 def method_name_to_opt_cfg(method_name: str):
@@ -41,10 +41,16 @@ def get_sweep_cfgs(base_cfg: dict, method_name: str) -> List[Config]:
     return ls_cfg
 
 
+def send_slack_noti(logger: wandb.sdk.wandb_run.Run, message: str):
+    logger.alert("Run Optim", message, level="INFO", wait_duration=0.001)
+    time.sleep(0.5)
+
+
 def main():
-    args = MultipleExpArgs().parse_args()
+    args = RunOptimArgs().parse_args()
     base_yaml = args.base_yaml
     sweep_yaml = args.sweep_yaml
+    clean_slack = args.clean_slack
 
     ls_run_dicts = ParamGen.from_files(
         sweep_yaml=sweep_yaml, base_yaml=base_yaml
@@ -97,7 +103,11 @@ def main():
     assert wandb_logger is not None, "Wandb logger should not be None here"
     msg = f"Total {len(all_optim_run_cfgs)} configs to run"
     console.rule(msg)
-    wandb_logger.alert(WANDB_NAME, msg)
+
+    # ! Clear slack channel for new run (to make it less noisy)
+    if clean_slack:
+        clear_slack_channel()
+    send_slack_noti(wandb_logger, msg)
     with ConsoleLog("Config Stats"):
         df_stats = pd.DataFrame.from_dict(
             cfg_stats,
@@ -105,8 +115,7 @@ def main():
             columns=["Num Configs"],  # ty:ignore[invalid-argument-type]
         )
         csvfile.fn_display_df(df_stats)
-        wandb_logger.alert(WANDB_NAME, "Config Stats")
-        wandb_logger.alert(WANDB_NAME,str(cfg_stats))
+        send_slack_noti(wandb_logger, f"Config Stats:\n{str(cfg_stats)}")
 
     for idx, config in tqdm(enumerate(all_optim_run_cfgs)):
         cfg_wandb_logger, cfg_logger_hash = config.get_wandb_logger_meta()
@@ -118,7 +127,10 @@ def main():
             wandb_logger_hash = cfg_logger_hash
         msg = f"Running config {idx}/{len(all_optim_run_cfgs)}"
         console.rule(msg)
-        wandb_logger.alert(WANDB_NAME, msg)
+        exp_dict = config.methodCfg.get_dict()
+        pprint(exp_dict)
+
+        send_slack_noti(wandb_logger, msg)
         wandb_logger.log({"msg": msg})
         single_exp = Paper2Exp(config, wandb_logger=wandb_logger)
         single_exp.run_exp()

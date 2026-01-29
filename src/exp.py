@@ -6,6 +6,7 @@ from halib.exp.perf.perfmetrics import MetricsBackend, TorchMetricsBackend
 from src.config import *
 from src.metrics.custom_metrics import MetricFactory
 from src.methods.base_method import *
+from halib.utils.dict import DictUtils
 
 
 class Paper2Exp(BaseExp):
@@ -95,9 +96,17 @@ class Paper2Exp(BaseExp):
                     self.full_cfg.get_outdir()
                     + f"/{self.full_cfg.get_cfg_name()}__{mode}.csv"
                 )
+                extra_data = None
+                if self.full_cfg.methodCfg.extra_cfgs is not None:
+                    extra_data_orig = self.full_cfg.methodCfg.extra_cfgs.copy()
+                    del extra_data_orig["result_proc"]
+                    extra_data = DictUtils.flatten(extra_data_orig)
+                    # with ConsoleLog("Extra data"):
+                    #     pprint(extra_data)
+
                 perf_results, outfile = self.calc_perfs(
                     raw_metrics_data=metrics_data,
-                    extra_data=None,
+                    extra_data=extra_data,
                     outfile=outfile,
                     return_df=True,
                     *args,  # ty:ignore[parameter-already-assigned]
