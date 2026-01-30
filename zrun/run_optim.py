@@ -2,23 +2,21 @@
 
 # os.environ["OPENCV_FFMPEG_DEBUG"] = "1"
 # os.environ["OPENCV_LOG_LEVEL"] = "VERBOSE"
-from PIL.TiffImagePlugin import name
-from click.core import F
-from matplotlib.backends.backend_pdf import Op
-
+from lightning.pytorch.loggers import WandbLogger
 
 from halib import *
 import sys
-import wandb
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from tap import *
-from typing import List, Optional
+from typing import List
 from halib.exp.core.param_gen import ParamGen
 from src.config import Config
 from src.exp import Paper2Exp
 from src.utils import clear_slack_channel
+
+from halib.filetype import yamlfile
 
 
 class RunOptimArgs(Tap):
@@ -27,11 +25,22 @@ class RunOptimArgs(Tap):
     clean_slack: bool = True
 
 
-def method_name_to_opt_cfg(method_name: str):
+def get_opt_cfg(method_name: str):
     BASE_CFG_OPTIM = "config/zruns/optim"
     # temp_method_motion_block, temp_method_rule_block
     opt_cfg = os.path.join(
         BASE_CFG_OPTIM, f"opt_{method_name.replace('temp_method_', '')}.yaml"
+    )
+    if not os.path.exists(opt_cfg):
+        return None
+    return opt_cfg
+
+
+def get_wandb_params_cfg(method_name: str):
+    BASE_CFG_OPTIM = "config/zruns/optim"
+    # temp_method_motion_block, temp_method_rule_block
+    opt_cfg = os.path.join(
+        BASE_CFG_OPTIM, f"keep_opt_{method_name.replace('temp_method_', '')}.yaml"
     )
     if not os.path.exists(opt_cfg):
         return None
@@ -43,8 +52,8 @@ def get_sweep_cfgs(base_cfg: dict, method_name: str) -> List[Config]:
     return ls_cfg
 
 
-def send_slack_noti(logger: wandb.sdk.wandb_run.Run, message: str):
-    logger.alert("Run Optim", message, level="INFO", wait_duration=0.001)
+def send_slack_noti(logger: WandbLogger, message: str):
+    logger.experiment.alert("Run Optim", message, level="INFO", wait_duration=0.001)
     time.sleep(0.5)
 
 
@@ -70,7 +79,7 @@ def main():
             "Expect is_optim_mode to be True for hyper-parameter optim runs"
         )
         method_name = cfg_item.methodCfg.name
-        opt_cfg_path = method_name_to_opt_cfg(method_name)  # ty:ignore[invalid-argument-type]
+        opt_cfg_path = get_opt_cfg(method_name)  # ty:ignore[invalid-argument-type]
         if method_name not in cfg_stats:
             cfg_stats[method_name] = 0
         if opt_cfg_path is None:
@@ -119,24 +128,42 @@ def main():
     for idx, config in tqdm(enumerate(all_optim_run_cfgs)):
         current_cfg: Config = config
         cfg_name = current_cfg.get_cfg_name()
-        cfg_wandb_logger = current_cfg.get_wandb_logger(name=cfg_name)
+        cfg_wandb_logger: WandbLogger = current_cfg.get_wandb_logger(name=cfg_name)
 
         if not did_send_meta:
             for cfg_run_status in ls_meta_info_to_send:
                 send_slack_noti(cfg_wandb_logger, cfg_run_status)
             did_send_meta = True
 
-        cfg_run_status = f"Running config {idx}/{len(all_optim_run_cfgs)}"
+        cfg_run_status = f"Running config {idx + 1}/{len(all_optim_run_cfgs)}"
         console.rule(cfg_run_status)
 
         # exp_dict = current_cfg.methodCfg.get_dict()
         # pprint(exp_dict)
 
         send_slack_noti(cfg_wandb_logger, cfg_run_status)
-        cfg_wandb_logger.log({"msg": cfg_run_status})
+        cfg_wandb_logger.experiment.log({"msg": cfg_run_status})
+
+        method_name = cfg_item.methodCfg.name
+        wandb_params_cfg_path = get_wandb_params_cfg(method_name)  # ty:ignore[invalid-argument-type]
+        wandb_params_dict = {}
+        if wandb_params_cfg_path:
+            wandb_params_cfg_dict = yamlfile.load_yaml(
+                wandb_params_cfg_path, to_dict=True
+            )
+            wandb_params_dict = current_cfg.methodCfg.get_wandb_dict(
+                config_mask=wandb_params_cfg_dict["extra_cfgs"]
+            )
         single_exp = Paper2Exp(current_cfg, wandb_logger=cfg_wandb_logger)
         single_exp.run_exp()
-        cfg_wandb_logger.finish()
+
+        # ! log the selected hyper-parameters to wandb
+        if len(wandb_params_dict) > 0:
+            cfg_wandb_logger.log_hyperparams(wandb_params_dict)
+
+        # ! TODO: need to save perf metrics too
+
+        cfg_wandb_logger.experiment.finish()
 
 
 if __name__ == "__main__":
