@@ -300,14 +300,13 @@ class Config(ExpBaseCfg):
                 pprint_local_path(existing_dir, get_wins_path=True)
         return should_skip
 
-    def get_wandb_logger_meta(
+    def get_wandb_logger(
         self, name: Optional[str] = None
-    ) -> tuple[Optional[wandb.sdk.wandb_run.Run], str]:
-        logger, logger_hash = None, ""
+    ) -> Optional[wandb.sdk.wandb_run.Run]:
+        logger = None
         if self.general.log_cfg.wandb_cfg is not None:
             logger = self.general.log_cfg.wandb_cfg.get_logger(name=name)
-            logger_hash = self.general.log_cfg.wandb_cfg.get_hash()
-        return logger, logger_hash
+        return logger
 
     def print_meta_info(self):
         with ConsoleLog("Meta Info"):

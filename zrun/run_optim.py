@@ -2,6 +2,8 @@
 
 # os.environ["OPENCV_FFMPEG_DEBUG"] = "1"
 # os.environ["OPENCV_LOG_LEVEL"] = "VERBOSE"
+from PIL.TiffImagePlugin import name
+from click.core import F
 from matplotlib.backends.backend_pdf import Op
 
 
@@ -95,19 +97,12 @@ def main():
                 all_optim_run_cfgs.append(base_cfg)
             cfg_stats[method_name] += len(optim_cfgs)
 
-    WANDB_NAME = f"run_optim_{now_str()}"
-    logger_meta = all_optim_run_cfgs[0].get_wandb_logger_meta(name=WANDB_NAME)
-    # 2. Unpack into typed variables
-    wandb_logger: Optional[wandb.sdk.wandb_run.Run] = logger_meta[0]
-    wandb_logger_hash: str = logger_meta[1]
-    assert wandb_logger is not None, "Wandb logger should not be None here"
-    msg = f"Total {len(all_optim_run_cfgs)} configs to run"
-    console.rule(msg)
+    num_cfg_str = f"Total {len(all_optim_run_cfgs)} configs to run"
+    console.rule(num_cfg_str)
 
     # ! Clear slack channel for new run (to make it less noisy)
     if clean_slack:
         clear_slack_channel()
-    send_slack_noti(wandb_logger, msg)
     with ConsoleLog("Config Stats"):
         df_stats = pd.DataFrame.from_dict(
             cfg_stats,
@@ -115,28 +110,33 @@ def main():
             columns=["Num Configs"],  # ty:ignore[invalid-argument-type]
         )
         csvfile.fn_display_df(df_stats)
-        send_slack_noti(wandb_logger, f"Config Stats:\n{str(cfg_stats)}")
+
+    cfg_stats_str = "Config Stats:\n" + str(cfg_stats)
+    ls_meta_info_to_send = [num_cfg_str, cfg_stats_str]
+
+    did_send_meta = False
 
     for idx, config in tqdm(enumerate(all_optim_run_cfgs)):
-        cfg_wandb_logger, cfg_logger_hash = config.get_wandb_logger_meta()
-        if wandb_logger is None or wandb_logger_hash != cfg_logger_hash:
-            # Close previous logger
-            if wandb_logger is not None:
-                wandb_logger.finish()
-            wandb_logger = cfg_wandb_logger
-            wandb_logger_hash = cfg_logger_hash
-        msg = f"Running config {idx}/{len(all_optim_run_cfgs)}"
-        console.rule(msg)
-        exp_dict = config.methodCfg.get_dict()
-        pprint(exp_dict)
+        current_cfg: Config = config
+        cfg_name = current_cfg.get_cfg_name()
+        cfg_wandb_logger = current_cfg.get_wandb_logger(name=cfg_name)
 
-        send_slack_noti(wandb_logger, msg)
-        wandb_logger.log({"msg": msg})
-        single_exp = Paper2Exp(config, wandb_logger=wandb_logger)
+        if not did_send_meta:
+            for cfg_run_status in ls_meta_info_to_send:
+                send_slack_noti(cfg_wandb_logger, cfg_run_status)
+            did_send_meta = True
+
+        cfg_run_status = f"Running config {idx}/{len(all_optim_run_cfgs)}"
+        console.rule(cfg_run_status)
+
+        # exp_dict = current_cfg.methodCfg.get_dict()
+        # pprint(exp_dict)
+
+        send_slack_noti(cfg_wandb_logger, cfg_run_status)
+        cfg_wandb_logger.log({"msg": cfg_run_status})
+        single_exp = Paper2Exp(current_cfg, wandb_logger=cfg_wandb_logger)
         single_exp.run_exp()
-
-    # Finalize
-    wandb_logger.finish()
+        cfg_wandb_logger.finish()
 
 
 if __name__ == "__main__":
