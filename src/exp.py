@@ -7,6 +7,7 @@ from src.config import *
 from src.metrics.custom_metrics import MetricFactory
 from src.methods.base_method import *
 from halib.utils.dict import DictUtils
+from collections import OrderedDict
 
 
 class Paper2Exp(BaseExp):
@@ -108,12 +109,45 @@ class Paper2Exp(BaseExp):
                     raw_metrics_data=metrics_data,
                     extra_data=extra_data,
                     outfile=outfile,
-                    return_df=True,
+                    return_df=False,
                     *args,  # ty:ignore[parameter-already-assigned]
                     **kwargs,
                 )
+                # with ConsoleLog(f"Performance Results-{mode}"):
+                #     pprint(perf_results)
+                #     assert False, "Stop here for debugging"
+                # ! perf_results example: a list with an OrderDict inside
+                # {
+                #     "experiment": "MainPC__ds_UFireIndoor2__mt_temp_method_motion_block__a7b567955502__20260202.131451",
+                #     "dataset": "UFireIndoor2",
+                #     "skip_proc.name": "motion_only_block_skip_proc.MotionOnlyBlockSkipProc",
+                #     "skip_proc.params.motion.name": "acc_motion_det.AccMotionDet",
+                #     "skip_proc.params.motion.params.diff_frame_th": 2,
+                #     "skip_proc.params.motion.params.impact_plus_one": 5,
+                #     "skip_proc.params.motion.params.mask_th": 10,
+                #     "skip_proc.params.motion.params.max_val": 25,
+                #     "skip_proc.params.motion.params.decay": 1,
+                #     "skip_proc.params.scale_factor": 1.0,
+                #     "skip_proc.params.block_size_orig": 32,
+                #     "skip_proc.params.block_ratio_th": 0.05,
+                #     "skip_proc.params.min_roi_ratio": 0.75,
+                #     "metric_accuracy": 1.0,
+                #     "metric_f1_score": 1.0,
+                #     "metric_precision": 1.0,
+                #     "metric_recall (TPR)": 1.0,
+                #     "metric_FPR (False Alarm Rate)": 0.0,
+                #     "metric_FPS": 25.530609130859375,
+                # }
+                if self.wandb_logger is not None:
+                    metric_rs_dict = {}
+                    perf_dict: OrderedDict = perf_results[0]
+                    for key in perf_dict:
+                        if key.startswith("metric_"):
+                            metric_name = key.replace("metric_", f"{mode}_metric_")
+                            metric_rs_dict[metric_name] = perf_dict[key]
+                    self.wandb_logger.log_metrics(metric_rs_dict)
+
                 df = pd.read_csv(outfile, sep=";", encoding="utf-8")  # ty:ignore[no-matching-overload]
-                # get row 0
                 df.at[0, "experiment"] = f"{self.full_cfg.get_cfg_name()}_{mode}"
                 df.to_csv(outfile, sep=";", encoding="utf-8", index=False)
                 csvfile.fn_display_df(df)

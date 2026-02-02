@@ -153,7 +153,7 @@ class MethodCfg(AutoNamedCfg):
             "extra_cfgs": self.extra_cfgs,
         }
 
-    @log_func(log_args=True, skip_idxs=[0])
+    # @log_func(log_args=True, skip_idxs=[0])
     def get_wandb_dict(
         self, config_mask: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:

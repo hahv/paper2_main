@@ -1,11 +1,10 @@
-from alembic.command import current
 import re
 import importlib
 from typing import List, Optional, Tuple, Callable
 from torchvision import transforms
 from timm.data import resolve_data_config, create_transform
 
-from halib.utils.slack import SlackUtils
+from halib.utils.slack_op import SlackUtils
 import os
 from halib.filetype import yamlfile
 
@@ -13,7 +12,7 @@ SLACK_TOKEN = None
 SLACK_CHANNEL_ID = None
 
 
-def clear_slack_channel():
+def clear_slack_channel(sleep_interval: float = 0.5):
     global SLACK_TOKEN, SLACK_CHANNEL_ID
     if SLACK_TOKEN is None or SLACK_CHANNEL_ID is None:
         # get current dir of this file
@@ -24,7 +23,7 @@ def clear_slack_channel():
         SLACK_CHANNEL_ID = slack_cfg_dict["SLACK_CHANNEL_ID"]
 
     slack_util = SlackUtils(token=SLACK_TOKEN)
-    slack_util.clear_channel(channel_id=SLACK_CHANNEL_ID, sleep_interval=1.0)
+    slack_util.clear_channel(channel_id=SLACK_CHANNEL_ID, sleep_interval=sleep_interval)
 
 
 def filter_dict_by_keys(input_dict: dict, keys: List[str]) -> dict:
