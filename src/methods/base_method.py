@@ -168,10 +168,7 @@ class BaseMethod(ABC):
 
     def after_infer_video_dir(self, video_dir: str):
         """Hook method called after completing inference on a video directory."""
-        pprint("All videos in directory processed.")
-        pprint(self.outdir)
         if self.profiler:
-            pprint(f"Profiler Report:")
             self.profiler.report_and_plot(outdir=self.outdir)
 
     def before_infer_video(self, video_path: str):
