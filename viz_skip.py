@@ -189,6 +189,18 @@ def generate_final_report(stats_list, output_file="final_report.html"):
     <head>
         <title>Skip Logic Efficiency Report</title>
         <style>
+            /* --- FORCE PRINTING OF BACKGROUND COLORS --- */
+            @media print {{
+                body {{
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                }}
+                .dot, .legend-box, div {{
+                    print-color-adjust: exact;
+                    -webkit-print-color-adjust: exact;
+                }}
+            }}
+            /* ------------------------------------------ */
             body {{ font-family: "Segoe UI", sans-serif; padding: 20px; }}
             table {{ border-collapse: collapse; width: 100%; box-shadow: 0 0 10px rgba(0,0,0,0.1); }}
             h2 {{ color: #2c3e50; }}
