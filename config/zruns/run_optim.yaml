@@ -1,7 +1,7 @@
 general:
   is_optim_mode: true
 dbset_selector:
-  selected_dbset: ["UFireIndoor2"] # "UFireIndoorFull", "UFireIndoor2", "UFire", "DFAN"
+  selected_dbset: ["UFireIndoor2"] # "UFireIndoorFull", "UFireIndoor2", "UFire", "DFAN", "UFireIndoorVal"
 metric_selector:
   selected_metric: ["per_frame_metric"]
 method_selector:

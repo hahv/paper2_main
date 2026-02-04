@@ -98,10 +98,11 @@ class BaseMethod(ABC):
         self.outdir = os.path.abspath(cfg.get_outdir())
         os.makedirs(self.outdir, exist_ok=True)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.profiler: zProfiler = zProfiler(self.cfg.inferCfg.use_profiler)
+        self.profiler: zProfiler = zProfiler(enabled=self.cfg.inferCfg.use_profiler)
 
         # Store the list of handlers that will process the results
         self.result_handlers = rs_handlers if rs_handlers is not None else []
+        self.num_infer_workers = self.cfg.inferCfg.num_infer_workers
 
     @abstractmethod
     def infer_frame(self, frame, frame_idx: int) -> dict:
@@ -167,7 +168,10 @@ class BaseMethod(ABC):
 
     def after_infer_video_dir(self, video_dir: str):
         """Hook method called after completing inference on a video directory."""
+        pprint("All videos in directory processed.")
+        pprint(self.outdir)
         if self.profiler:
+            pprint(f"Profiler Report:")
             self.profiler.report_and_plot(outdir=self.outdir)
 
     def before_infer_video(self, video_path: str):
@@ -204,7 +208,7 @@ class BaseMethod(ABC):
                      CAUTION: Each worker loads a copy of the model.
                      If you have 1 GPU and a big model, set this to 1 or 2.
         """
-        if max_workers <= 0:
+        if max_workers <= 1:
             self.infer_video_dir_no_parallel(video_dir, recursive=recursive)
             return
         else:
@@ -242,7 +246,9 @@ class BaseMethod(ABC):
                 # Wait for all videos to finish and handle errors
                 for future in as_completed(futures):
                     try:
-                        future.result()  # This will raise any exception caught in the worker
+                        worker_profiler_data = future.result()
+                        if self.profiler and worker_profiler_data:
+                            self.profiler.merge_data(worker_profiler_data)
                     except Exception as e:
                         print(f"Worker failed with error: {e}")
 
@@ -258,7 +264,8 @@ class BaseMethod(ABC):
         self.prepare_model()
 
         # Call the original logic
-        self.infer_video(video_path, video_idx, total_videos)
+        # ! remember to return profiler data if any
+        return self.infer_video(video_path, video_idx, total_videos)
 
     def infer_video(self, video_path: str, video_idx: int, total_videos: int):
         """
@@ -360,3 +367,10 @@ class BaseMethod(ABC):
 
         # ! Hook: Call the hook method after video inference
         self.after_infer_video(video_path=video_path)
+
+        print(f"\nFinished inference for: {video_path}\n")
+        if self.num_infer_workers > 1:
+            # Return profiler data for aggregation
+            if self.profiler and self.profiler.enabled:
+                return self.profiler.time_dict
+        return {}

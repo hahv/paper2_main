@@ -8,6 +8,7 @@ from tap import *
 class CustomArgs(Tap):
     # --- Basic Types ---
     infile: Path = Path("./wandb_export.csv")  # Path to the CSV file
+    csv_sep: str = ";"  # CSV separator
 
 
 def exp_id_formatter_func(exp_id: str) -> str:
@@ -74,7 +75,10 @@ EXCLUDE_COLS = [
 
 def main():
     args = CustomArgs().parse_args()
-    df = pd.read_csv(args.infile, sep=",", encoding="utf-8")
+    df = pd.read_csv(args.infile, sep=args.csv_sep, encoding="utf-8")
+    # Drop rows if df["Name"] is NaN
+    # df = df.dropna(subset=["Name"])
+    # csvfile.fn_display_df(df.head(5))
 
     # 1. Column Filtering and Param Shortening
     df = df.drop(columns=[c for c in EXCLUDE_COLS if c in df.columns])
@@ -111,6 +115,8 @@ def main():
         metric_cols = [v for v in METRIC_MAP.values() if v in df_mode.columns]
         non_metric_cols = [c for c in df_mode.columns if c not in metric_cols]
         df_mode = df_mode[non_metric_cols + metric_cols]
+        # with ConsoleLog(f"Final columns for mode={mode}:"):
+        #     pprint(df_mode.index.tolist())
 
         # 4. Visualization
         console.rule(f"[Mode={mode}] Parallel Plot")

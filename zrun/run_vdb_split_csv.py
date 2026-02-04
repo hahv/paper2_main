@@ -7,14 +7,13 @@ from typing import Literal
 
 
 class DBSplitCSVArgs(Tap):
-    video_dir: str = "/mnt/d/zdataset_paper2/build_video_dataset/my_firesmoke_indoor/firesmoke"  # Path to your video folder
-    task: Literal["mk_csv", "split_by_csv", "copy_files"] = (
-        "split_by_csv"  # Set a default value if desired  # Set a default value if desired
+    video_dir: str = "/mnt/d/zdataset_paper2/build_video_dataset/my_firesmoke_indoor/none"  # Path to your video folder
+    task: Literal["mk_meta_csv", "split_by_csv", "copy_files"] = (
+        "mk_meta_csv"  # Set a default value if desired  # Set a default value if desired
     )
     out_dir: str = "/mnt/e/zDatasets/paper2_datasets"  # Output directory
     val_size: float = 0.3  # Size of validation set (0.0 to 1.0)
-    seed: int = 42  # Random seed for reproducibility
-    add_time: bool = True  # Whether to add timestamp to output dir names
+    seed: int = 1  # Random seed for reproducibility
 
 
 META_DATA_CSV = "video_metadata"
@@ -33,7 +32,7 @@ def get_split_csv_file_path(video_dir, out_dir, split_name):
     return os.path.join(out_dir, f"{video_dir_name}_{split_name}_split.csv")
 
 
-def get_video_dir_meta_csv(video_dir, out_dir):
+def get_video_dir_meta_csv(video_dir, out_dir, seed=42):
     """
     Main logic to extract features, cluster, and split videos.
     """
@@ -80,7 +79,7 @@ def get_video_dir_meta_csv(video_dir, out_dir):
     return df
 
 
-def split_by_csv(csv_path, video_dir, out_dir, val_size=0.3, seed=42, add_time=True):
+def split_by_csv(csv_path, video_dir, out_dir, val_size=0.3, seed=42):
     seed_everything(seed)
     df = pd.read_csv(csv_path, sep=";", encoding="utf-8")
     df["stratify_key"] = df["data_source"] + "_" + df["category"]
@@ -107,7 +106,7 @@ def split_by_csv(csv_path, video_dir, out_dir, val_size=0.3, seed=42, add_time=T
             multi_items,
             test_size=0.3,
             stratify=multi_items["stratify_key"],
-            random_state=42,
+            random_state=seed,
         )
 
         # Randomly distribute the single items
@@ -185,8 +184,8 @@ def main():
     # ! to ensure reproducibility
     seed_everything(args.seed)
     console.rule(f"[bold red] Task: {args.task} [/bold red]")
-    if args.task == "mk_csv":
-        get_video_dir_meta_csv(args.video_dir, args.out_dir)
+    if args.task == "mk_meta_csv":
+        get_video_dir_meta_csv(args.video_dir, args.out_dir, seed=args.seed)
     elif args.task == "split_by_csv":
         meta_csv_file = get_meta_csv_file_path(args.video_dir, args.out_dir)
         split_by_csv(
@@ -195,7 +194,6 @@ def main():
             out_dir=args.out_dir,
             val_size=args.val_size,
             seed=args.seed,
-            add_time=args.add_time,
         )
     elif args.task == "copy_files":
         copy_files(args.video_dir, args.out_dir)

@@ -1,0 +1,120 @@
+direction: down
+
+# Global Styles
+classes: {
+  process: {
+    shape: rectangle
+    style.border-radius: 5
+  }
+  decision: {
+    shape: diamond
+    style.fill: "#FFE4B5"
+  }
+  data: {
+    shape: cylinder
+    style.fill: "#E1F5FE"
+  }
+  scaled_space: {
+    shape: rectangle
+    style.fill: "#FFF9C4" # Yellowish for scaled space
+    style.border-radius: 5
+  }
+  original_space: {
+    shape: rectangle
+    style.fill: "#E3F2FD" # Blueish for original space
+    style.border-radius: 5
+  }
+}
+
+InputFrame: "Input Frame\n(Original Size H x W)" {class: data}
+
+# =========================================================
+# Phase 1: Motion Detection & Block Analysis (should_skip)
+# =========================================================
+ShouldSkip: {
+  label: "Phase 1: should_skip()"
+  style.stroke-dash: 3
+
+  ResizePad: "Resize & Pad Frame" {class: scaled_space}
+  MotionDet: "Apply Motion Detection\n(fgmask)" {class: scaled_space}
+
+  BlockGrid: "Reshape into Grid\n& Count Active Pixels" {class: scaled_space}
+  FilterBlocks: "Filter Active Blocks\n(>= block_ratio_th)" {class: scaled_space}
+
+  HasMotion: "Any blocks active?" {class: decision}
+
+  FindScaledBBox: "Find Bounding Box\n(Grid/Scaled Space)" {class: scaled_space}
+
+  TransformCoords: "Transform to Original Space\n(/ scale_factor)" {class: original_space}
+
+  EnforceMinROI: "Enforce Minimum ROI\n(min_roi_ratio)" {class: original_space}
+
+  ClampBounds: "Clamp to Original\nFrame Bounds" {class: original_space}
+
+  OutputMeta: "Return MetaData\n(crop_roi, fgmask, etc.)" {class: data}
+
+  SkipTrue: "Return should_skip = True" {
+    shape: oval
+    style.fill: "#FFCDD2"
+  }
+  SkipFalse: "Return should_skip = False" {
+    shape: oval
+    style.fill: "#C8E6C9"
+  }
+}
+
+# =========================================================
+# Phase 2: ROI Cropping (prepare_infer_input)
+# =========================================================
+PrepareInput: {
+  label: "Phase 2: prepare_infer_input()"
+  style.stroke-dash: 3
+
+  GetROI: "Get 'crop_roi' from MetaData" {class: original_space}
+  CheckROI: "ROI Exists?" {class: decision}
+
+  SafetyClamp: "Safety Clamp\n(Ensure w/h within frame)" {class: original_space}
+  CropFrame: "Crop Frame\nframe[y:y+h, x:x+w]" {class: original_space}
+
+  FullFrame: "Use Full Frame" {class: original_space}
+}
+
+OutputInfer: "Inference Input\n(Cropped or Full Frame)" {class: data}
+
+# =========================================================
+# Connections
+# =========================================================
+
+InputFrame -> ShouldSkip.ResizePad
+
+ShouldSkip.ResizePad -> ShouldSkip.MotionDet
+ShouldSkip.MotionDet -> ShouldSkip.BlockGrid
+ShouldSkip.BlockGrid -> ShouldSkip.FilterBlocks
+ShouldSkip.FilterBlocks -> ShouldSkip.HasMotion
+
+# Motion Found path
+ShouldSkip.HasMotion -> ShouldSkip.FindScaledBBox: "Yes"
+ShouldSkip.FindScaledBBox -> ShouldSkip.TransformCoords
+ShouldSkip.TransformCoords -> ShouldSkip.EnforceMinROI
+ShouldSkip.EnforceMinROI -> ShouldSkip.ClampBounds
+ShouldSkip.ClampBounds -> ShouldSkip.OutputMeta
+ShouldSkip.OutputMeta -> ShouldSkip.SkipFalse
+
+# No Motion path
+ShouldSkip.HasMotion -> ShouldSkip.SkipTrue: "No"
+
+# Transition to Phase 2
+ShouldSkip.SkipFalse -> PrepareInput.GetROI: "Triggers Inference"
+
+InputFrame -> PrepareInput.CropFrame: "Source Pixels"
+InputFrame -> PrepareInput.FullFrame: "Source Pixels"
+
+PrepareInput.GetROI -> PrepareInput.CheckROI
+PrepareInput.CheckROI -> PrepareInput.SafetyClamp: "Yes"
+PrepareInput.SafetyClamp -> PrepareInput.CropFrame
+PrepareInput.CropFrame -> OutputInfer
+
+PrepareInput.CheckROI -> PrepareInput.FullFrame: "No (Full Frame)"
+PrepareInput.FullFrame -> OutputInfer
+
+ShouldSkip.SkipTrue -> "End (Next Frame)": "Frame Skipped"

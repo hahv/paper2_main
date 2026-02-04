@@ -23,6 +23,8 @@ class TempMethod(NoTempMethod):
         super().after_infer_video(video_path)
 
     def infer_frame(self, frame, frame_idx: int) -> dict:
+        assert self.profiler is not None, "Profiler not initialized."
+        assert self.profiler.enabled, "Profiler is not enabled."
         with self.profiler.measure("infer_wrapper") as ctx:
             mt_cfg_dict = {
                 "mt_cfg": self.cfg.methodCfg.extra_cfgs.get("skip_proc", {}).copy()  # ty:ignore[possibly-missing-attribute]

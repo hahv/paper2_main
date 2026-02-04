@@ -7,15 +7,6 @@ extra_cfgs:
       motion: # ! params for motion detector inside skip proc
         name: acc_motion_det.AccMotionDet
         params:
-          # --- 4. Pixel Sensitivity (The "Physics" Knob) ---
-          # Search Space: [2, 3, 5]
-          # --- 3. Noise Gate (Density Filter) ---
-
-          # Search Space: [0.02, 0.05, 0.10]
-          # --- 2. Spatial Granularity (Object Size) ---
-          # Search Space: [32, 48, 64] (Pixels in Original Frame)
-          # --- 1. Speed vs. Resolution Trade-off ---
-          # Search Space: [1.0, 0.5, 0.25]
           # Logic:
           # - 2: High Sensitivity. Detects subtle color shifts in gray smoke. Risk: Sensor noise triggers it.
           # - 3: Standard. Good balance for general surveillance motion.
@@ -33,7 +24,7 @@ extra_cfgs:
       # - 1.0 (Full Res): The baseline ground truth for accuracy.
       # - 0.5 (Half Res): The target for optimization. 4x speedup, usually retains enough detail.
       # - 0.25 (Quarter Res): Aggressive 16x speedup. Risk: Thin smoke plumes might disappear.
-      scale_factor: [1.0]
+      scale_factor: [1.0, 0.5]
       # Logic:
       # - 32px: High sensitivity. Necessary for detecting early ignition or small distant fires.
       # - 48px: Mid-range balance.

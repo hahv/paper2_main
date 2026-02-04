@@ -30,7 +30,7 @@ modelCfg:
   # class_names: [FireSmoke, None]
 inferCfg:
   do_infer: true
-  num_infer_workers: 0 # set to 0 for no parallel; 1 worker for 1 video
+  num_infer_workers: 3 # set to 0 for no parallel; 1 worker for 1 video
   skip_if_exists: true
   limit: -1 # -1 for no limit
   save_video_results: false
