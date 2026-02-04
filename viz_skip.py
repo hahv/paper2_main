@@ -201,7 +201,10 @@ def generate_final_report(stats_list, output_file="final_report.html"):
                 }}
             }}
             /* ------------------------------------------ */
-            body {{ font-family: "Segoe UI", sans-serif; padding: 20px; }}
+            body {{
+                font-family: 'CMUSerifRoman', 'Times New Roman', serif;
+                padding: 40px;
+            }}
             table {{ border-collapse: collapse; width: 100%; box-shadow: 0 0 10px rgba(0,0,0,0.1); }}
             h2 {{ color: #2c3e50; }}
             .legend-box {{ background: #f9f9f9; padding: 15px; border: 1px solid #ccc; display: inline-block; margin-top: 20px; border-radius: 5px; }}
