@@ -270,20 +270,14 @@ if __name__ == "__main__":
     def get_rand_num_frames():
         return np.random.randint(400, 601)
 
-    videos = [
-        (
-            "Scenario_A_Ideal.mp4",
-            generate_dummy_data_scenario("perfect", get_rand_num_frames()),
-        ),
-        (
-            "Scenario_B_Miss.mp4",
-            generate_dummy_data_scenario("dangerous_miss", get_rand_num_frames()),
-        ),
-        (
-            "Scenario_C_Slow.mp4",
-            generate_dummy_data_scenario("inefficient", get_rand_num_frames()),
-        ),
-    ]
+    scenarios = ["perfect", "dangerous_miss", "inefficient"]
+    num_videos = 10
+    videos = []
+    for i in range(num_videos):
+        scenario = np.random.choice(scenarios)
+        video_name = f"Video_{i + 1:02d}_{scenario}.mp4"
+        df = generate_dummy_data_scenario(scenario, get_rand_num_frames())
+        videos.append((video_name, df))
 
     stats_list = []
     for name, df in videos:
