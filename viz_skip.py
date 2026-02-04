@@ -231,11 +231,13 @@ if __name__ == "__main__":
 
     OUT_FILE = "./zout/reports/final_report_v4.html"
     os.makedirs(os.path.dirname(OUT_FILE), exist_ok=True)
+    def get_rand_num_frames():
+        return np.random.randint(400, 601)
 
     videos = [
-        ("Scenario_A_Ideal.mp4", generate_dummy_data_scenario("perfect")),
-        ("Scenario_B_Miss.mp4", generate_dummy_data_scenario("dangerous_miss")),
-        ("Scenario_C_Slow.mp4", generate_dummy_data_scenario("inefficient")),
+        ("Scenario_A_Ideal.mp4", generate_dummy_data_scenario("perfect", get_rand_num_frames())),
+        ("Scenario_B_Miss.mp4", generate_dummy_data_scenario("dangerous_miss", get_rand_num_frames())),
+        ("Scenario_C_Slow.mp4", generate_dummy_data_scenario("inefficient", get_rand_num_frames())),
     ]
 
     stats_list = []
