@@ -1,10 +1,22 @@
+from dataclass_wizard import GT
 import pandas as pd
 import numpy as np
 import os
+from halib import *
 
 # ============================================================================
 # 1. METRICS & VISUALIZATION ENGINE
 # ============================================================================
+SKIP_COLOR_MAP = {
+    "Miss (FN)": "#e91e63",
+    "Waste (FP)": "#f1c40f",
+    "True Skip (TN)": "#2fecc4",
+    "True Proc. (TP)": "#16a085",
+}
+GT_COLOR_MAP = {
+    "FireSmoke": "#e74c3c",
+    "None": "#2ecc71",
+}
 
 
 def calculate_video_stats(video_name, df):
@@ -51,7 +63,11 @@ def generate_timeline_html(df, width_px=300):
     # --- 1. Define Colors ---
 
     # Strip 1: Ground Truth
-    gt_colors = np.where(df["gt_label"].isin(["Fire", "Smoke"]), "#e74c3c", "#2ecc71")
+    gt_colors = np.where(
+        df["gt_label"].isin(["Fire", "Smoke"]),
+        GT_COLOR_MAP["FireSmoke"],
+        GT_COLOR_MAP["None"],
+    )
 
     # Strip 2: Result Status (Integrated)
     is_fire = df["gt_label"].isin(["Fire", "Smoke"])
@@ -62,13 +78,19 @@ def generate_timeline_html(df, width_px=300):
     cond_tp = is_fire & (~is_skipped)  # Hit
     cond_tn = (~is_fire) & is_skipped  # True Skip
 
+    # ! Legend for Your Report
+    # Miss (FN): Fire was present, but you Skipped it. (Safety Failure)
+    # Waste (FP): No fire was present, but you Processed it. (Efficiency Failure)
+    # True Skip (TN): No fire was present, and you Skipped it. (Efficiency Success)
+    # Hit (TP): Fire was present, and you Processed it. (Safety Success)
+
     status_colors = np.select(
         [cond_fn, cond_fp, cond_tp, cond_tn],
         [
-            "#e91e63",  # Miss: Pink
-            "#f1c40f",  # Waste: Gold
-            "#16a085",  # True Proc: Navy
-            "#aed6f1",  # True Skip: Teal
+            SKIP_COLOR_MAP["Miss (FN)"],
+            SKIP_COLOR_MAP["Waste (FP)"],
+            SKIP_COLOR_MAP["True Proc. (TP)"],
+            SKIP_COLOR_MAP["True Skip (TN)"],
         ],
         default="#95a5a6",
     )
@@ -183,15 +205,15 @@ def generate_final_report(stats_list, output_file="final_report.html"):
             <b>Timeline Legend</b><hr>
 
             <div class="legend-item"><b>1. GT (Ground Truth - Top Bar)</b></div>
-            <div class="legend-item"><span class="dot" style="background:#e74c3c"></span>Fire/Smoke</div>
-            <div class="legend-item"><span class="dot" style="background:#2ecc71"></span>Safe</div>
+            <div class="legend-item"><span class="dot" style="background:{GT_COLOR_MAP["FireSmoke"]}"></span>Fire/Smoke</div>
+            <div class="legend-item"><span class="dot" style="background:{GT_COLOR_MAP["None"]}"></span>Safe</div>
             <br>
 
             <div class="legend-item"><b>2. PROC (Processing Status - Bottom Bar)</b></div>
-            <div class="legend-item"><span class="dot" style="background:#e91e63"></span><b>Miss (FN)</b>: Unsafe Skip</div>
-            <div class="legend-item"><span class="dot" style="background:#f1c40f"></span><b>Waste (FP)</b>: Unneeded Proc</div>
-            <div class="legend-item"><span class="dot" style="background:#aed6f1"></span><b>True Skip (TN)</b>: Correct Skip</div>
-            <div class="legend-item"><span class="dot" style="background:#16a085"></span><b>True Proc. (TP)</b>: Valid Processed</div>
+            <div class="legend-item"><span class="dot" style="background:{SKIP_COLOR_MAP["Miss (FN)"]}"></span><b>Miss (FN)</b>: Unsafe Skip</div>
+            <div class="legend-item"><span class="dot" style="background:{SKIP_COLOR_MAP["Waste (FP)"]}"></span><b>Waste (FP)</b>: Unneeded Proc</div>
+            <div class="legend-item"><span class="dot" style="background:{SKIP_COLOR_MAP["True Skip (TN)"]}"></span><b>True Skip (TN)</b>: Correct Skip</div>
+            <div class="legend-item"><span class="dot" style="background:{SKIP_COLOR_MAP["True Proc. (TP)"]}"></span><b>True Proc. (TP)</b>: Valid Processed</div>
         </div>
     </body>
     </html>
@@ -200,7 +222,8 @@ def generate_final_report(stats_list, output_file="final_report.html"):
     with open(output_file, "w") as f:
         f.write(full_html)
 
-    print(f"✅ Report successfully generated: {os.path.abspath(output_file)}")
+    print(f"✅ Report successfully generated: ⏬")
+    pprint_local_path(output_file, get_wins_path=True)
 
 
 # ============================================================================
@@ -229,15 +252,25 @@ if __name__ == "__main__":
             data.append({"frame_idx": i, "action": action, "gt_label": gt})
         return pd.DataFrame(data)
 
-    OUT_FILE = "./zout/reports/final_report_v4.html"
+    OUT_FILE = "./zout/reports/viz_skip.html"
     os.makedirs(os.path.dirname(OUT_FILE), exist_ok=True)
+
     def get_rand_num_frames():
         return np.random.randint(400, 601)
 
     videos = [
-        ("Scenario_A_Ideal.mp4", generate_dummy_data_scenario("perfect", get_rand_num_frames())),
-        ("Scenario_B_Miss.mp4", generate_dummy_data_scenario("dangerous_miss", get_rand_num_frames())),
-        ("Scenario_C_Slow.mp4", generate_dummy_data_scenario("inefficient", get_rand_num_frames())),
+        (
+            "Scenario_A_Ideal.mp4",
+            generate_dummy_data_scenario("perfect", get_rand_num_frames()),
+        ),
+        (
+            "Scenario_B_Miss.mp4",
+            generate_dummy_data_scenario("dangerous_miss", get_rand_num_frames()),
+        ),
+        (
+            "Scenario_C_Slow.mp4",
+            generate_dummy_data_scenario("inefficient", get_rand_num_frames()),
+        ),
     ]
 
     stats_list = []
