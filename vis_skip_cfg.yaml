@@ -1,15 +1,18 @@
-legion_sections:
-    - title: "1. GT (Ground Truth)"
+bar_types:
+    gt:
+      legend_title: "1. GT (Ground Truth)"
       map_name: "gt_color_map"
-    - title: "2. NO SKIP (Baseline)"
+    no_skip:
+      legend_title: "2. NO SKIP (Baseline)"
       map_name: "no_skip_color_map"
-    - title: "3. SKIP (Proposed Method)"
+    skip:
+      legend_title: "3. SKIP (Proposed Method)"
       map_name: "skip_color_map"
 
 gt_color_map:
   FireSmoke:
     desc: Fire/Smoke
-    color: "#e67e22" # Orange
+    color: "#fc6065"
   None:
     desc: None
     color: "#2ecc71" # Green
