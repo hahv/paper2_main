@@ -1,0 +1,66 @@
+direction: right
+
+# 1. INPUT
+VideoFrame: Video\nFrame111 {
+  shape: parallelogram
+}
+
+# 2. THE SKIP MODULE CONTAINER
+SkipModule: Skip-module {
+  style.fill: "#f9f9f9"
+  style.stroke: "#333"
+  style.stroke-dash: 3
+
+  # Internal Components
+  BypassCalc: ByPass\nCalculation {
+    shape: square
+    style.fill: "#fff176"
+  }
+
+  Decision: {
+    shape: diamond
+    label: "should ByPass?"
+    style.fill: "#ffccbc"
+  }
+
+  StandardLogic: Skip check\nlogic\nprocess {
+    shape: rectangle
+    style.fill: "#e1f5fe"
+  }
+
+  # Internal Connections
+  BypassCalc -> Decision: Controls
+  Decision -> StandardLogic: NO
+}
+
+# 3. EXTERNAL HEAVY MODEL
+BigInfer: Big\nInfer{
+  shape: hexagon
+  style.fill: "#2c3e50"
+  style.font-color: "#fff"
+}
+
+# 4. MAIN FLOW CONNECTIONS
+# Frame enters the decision point
+VideoFrame -> SkipModule.Decision
+
+# Path 1: Bypass Active (Yes) -> Go straight to Big Infer
+SkipModule.Decision -> BigInfer: Yes\n(Skip=NO) {
+  style.stroke-width: 3
+  style.stroke: "#e74c3c"
+}
+
+# Path 2: Normal Check -> If suspicious, go to Big Infer
+SkipModule.StandardLogic -> BigInfer: {
+  style.stroke: "#3498db"
+}
+
+# 5. THE FEEDBACK LOOP
+# Results from Big Infer update the Bypass Calc
+BigInfer -> SkipModule.BypassCalc: Infer Results\n(Feedback) {
+  style.stroke: "#2ecc71"
+  style.stroke-width: 2
+  style.animated: true
+}
+
+
