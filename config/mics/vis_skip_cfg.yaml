@@ -1,13 +1,17 @@
+report_title: "Performance Report: Skip Logic Efficiency with Timeline Visualization"
 bar_types:
     gt:
       legend_title: "1. GT (Ground Truth)"
       map_name: "gt_color_map"
+      include_col_in_table: false
     no_skip:
       legend_title: "2. NO SKIP (Baseline)"
       map_name: "no_skip_color_map"
+      include_col_in_table: True
     skip:
       legend_title: "3. SKIP (Proposed Method)"
       map_name: "skip_color_map"
+      include_col_in_table: True
 
 gt_color_map:
   FireSmoke:

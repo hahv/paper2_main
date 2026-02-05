@@ -1,19 +1,21 @@
 from halib import *
 from pathlib import Path
 from tap import *
-from typing import List, Optional, Literal, Dict, Any
+from typing import List, Optional, Dict
 from halib.filetype import yamlfile
 import pandas as pd
 import numpy as np
 import os
 
+DEFAULT_TIMELINE_CFG = "/mnt/e/SyncData/paper2_main/config/mics/vis_skip_cfg.yaml"
+
 
 class CustomArgs(Tap):
     # --- Basic Types ---
-    vis_cfg: Path = Path("./vis_skip_cfg.yaml")
+    vis_cfg: Path = Path(DEFAULT_TIMELINE_CFG)
 
 
-class SkipLogicReport:
+class TimelineReportHelper:
     """
     A unified class to generate Skip Logic Performance Reports.
     """
@@ -251,7 +253,7 @@ class SkipLogicReport:
     def generate_report(
         cls,
         stats_list: List[Dict],
-        vis_cfg_yaml: Path,
+        vis_cfg_yaml: Path = Path(DEFAULT_TIMELINE_CFG),
         output_file: str = "final_report.html",
     ):
         """
@@ -277,23 +279,24 @@ class SkipLogicReport:
             bar_types_cfg[bar_type_key]["map"] = vis_cfg_dict.get(map_name, {})
 
         legend_html = cls._make_legend_html(bar_types_cfg)
+        title_text = vis_cfg_dict.get("report_title", "Skip Logic Efficiency Report")
 
         full_html = f"""
         <html>
         <head>
-            <title>Skip Logic Efficiency Report</title>
+            <title>{title_text}</title>
             <style>
                 @media print {{ body {{ -webkit-print-color-adjust: exact; print-color-adjust: exact; }} }}
-                
-                body {{ 
-                    font-family: 'CMU Serif', 'Times New Roman', serif; 
-                    color: #333; 
+
+                body {{
+                    font-family: 'CMU Serif', 'Times New Roman', serif;
+                    color: #333;
                     margin: 0;
                     padding: 0;
                     height: 100vh;
                     display: flex;
                     flex-direction: column;
-                    overflow: hidden; 
+                    overflow: hidden;
                 }}
 
                 /* --- SMALLER LEGEND PANE --- */
@@ -318,12 +321,12 @@ class SkipLogicReport:
                     grid-template-columns: repeat(3, 1fr);
                     gap: 15px; /* Tighter gap */
                 }}
-                
+
                 /* --- COMPACT FONT SIZES --- */
-                h2 {{ 
-                    color: #2c3e50; 
-                    text-align: center; 
-                    margin-top: 0; 
+                h2 {{
+                    color: #2c3e50;
+                    text-align: center;
+                    margin-top: 0;
                     margin-bottom: 10px; /* Reduced margin */
                     font-size: 20px;     /* Smaller Header */
                 }}
@@ -332,42 +335,42 @@ class SkipLogicReport:
                     margin-bottom: 5px;
                     color: #555;
                 }}
-                
+
                 .legend-box {{ width: 100%; }}
-                
+
                 /* Smaller dots and text */
-                .dot {{ 
+                .dot {{
                     height: 10px; width: 10px; /* Smaller dots */
-                    display: inline-block; 
-                    border-radius: 2px; 
-                    margin-right: 6px; 
-                    vertical-align: middle; 
+                    display: inline-block;
+                    border-radius: 2px;
+                    margin-right: 6px;
+                    vertical-align: middle;
                 }}
-                .legend-item {{ 
-                    margin-bottom: 3px; 
+                .legend-item {{
+                    margin-bottom: 3px;
                     font-size: 11px; /* Smaller font */
-                    line-height: 1.4; 
-                    white-space: nowrap; 
+                    line-height: 1.4;
+                    white-space: nowrap;
                 }}
-                .legend-title {{ 
-                    font-weight: bold; 
-                    margin-bottom: 5px; 
-                    display: block; 
-                    color: #555; 
-                    border-bottom: 1px solid #eee; 
+                .legend-title {{
+                    font-weight: bold;
+                    margin-bottom: 5px;
+                    display: block;
+                    color: #555;
+                    border-bottom: 1px solid #eee;
                     padding-bottom: 2px;
                     font-size: 12px; /* Smaller title */
                 }}
 
                 /* --- TABLE STYLING --- */
-                table {{ 
-                    border-collapse: separate; 
+                table {{
+                    border-collapse: separate;
                     border-spacing: 0;
-                    width: 100%; 
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
+                    width: 100%;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
                     font-size: 13px; /* Slightly smaller table text */
                 }}
-                
+
                 th {{
                     position: sticky;
                     top: 0;
@@ -381,7 +384,7 @@ class SkipLogicReport:
         </head>
         <body>
             <div id="top-pane">
-                <h2>Skip Logic Performance Report</h2>
+                <h2>{title_text}</h2>
                 {legend_html}
             </div>
             <div id="bottom-pane">
@@ -454,11 +457,11 @@ def main():
 
     stats_list = []
     for name, df in videos:
-        stats = SkipLogicReport.calculate_video_stats(name, df)
+        stats = TimelineReportHelper.calculate_video_stats(name, df)
         if stats:
             stats_list.append(stats)
 
-    SkipLogicReport.generate_report(
+    TimelineReportHelper.generate_report(
         stats_list, vis_cfg_yaml=args.vis_cfg, output_file=OUT_FILE
     )
 
