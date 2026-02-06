@@ -163,7 +163,7 @@ class TimelineProcessor:
 
     @classmethod
     def proc_dataframe(
-        cls, df: pd.DataFrame, cols_to_timeline_types: Dict[str, str]
+        cls, df: pd.DataFrame, cols_to_timeline_types: Dict[str, str], table_mode: Literal["p", "fc", "pfc"] = "pfc"
     ) -> Tuple[pd.DataFrame, pd.DataFrame, Dict]:
         """
         Generates the frame-level timeline data.
@@ -218,7 +218,7 @@ class TimelineProcessor:
         final_df.set_index(cls.FIXED_COLS, inplace=True)
 
         # 4. Compute Stats
-        stats_df = cls.compute_stats_df(final_df.copy(), styles_map, mode="pfc")
+        stats_df = cls.compute_stats_df(final_df.copy(), styles_map, mode=table_mode)
         return final_df, stats_df, styles_map
 
     @classmethod
