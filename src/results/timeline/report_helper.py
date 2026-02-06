@@ -11,69 +11,87 @@ class TimelineReportGenerator:
     def __init__(self, cols_to_types: Dict[str, str]):
         self.cols_to_types = cols_to_types
 
-    def run(self, df: pd.DataFrame, output_path: str, title: str = "Timeline Report"):
+    def run(self, df: pd.DataFrame, output_path: str, title: str = "Timeline Report", table_mode: str = "pfc"):
         """
         Main entry point: Process dataframe and generate HTML report.
         """
         # 1. Process Data using the Logic Core
         final_df, stats_df, styles_map = TimelineProcessor.proc_dataframe(
-            df, self.cols_to_types
+            df, self.cols_to_types, table_mode=table_mode
         )
 
-        # 2. Prepare Report Rows
-        # Group frame-level data by video for visualization
+        # 2. Add "FRAMES" and "VISUALIZATION"
+        # We need to construct metadata for each video in stats_df
+        # Use final_df to get per-video frame data
         final_df_reset = final_df.reset_index()
         video_groups = {
             vid: grp.sort_values("frame_id")
             for vid, grp in final_df_reset.groupby("video")
         }
 
-        report_rows = []
+        # Prepare list for new columns (using dict for alignment)
+        frames_list = []
+        viz_list = []
 
-        # stats_df has 'video' as index (and includes a TOTAL row)
-        # We will parse stats matrix into a flat dictionary for the report table
-        for video_name, row in stats_df.iterrows():
-            row_dict = {"VIDEO NAME": video_name}
-
-            # Flatten MultiIndex Columns from stats_df: (Method, Outcome) -> "METHOD<br>Outcome"
-            for (method_col, outcome), val in row.items():  # ty:ignore[not-iterable]
-                # Clean up value (it comes as string "pct% (count)" from data_parser if mode='pfc')
-                header = f"{method_col.upper()}<br><span style='font-size:10px; font-weight:normal'>{outcome}</span>"
-                row_dict[header] = val
-
-            # Create Timeline Visualization
+        # Iterate stats_df.index to exact order (includes 'TOTAL')
+        for video_name in stats_df.index:
             if video_name in video_groups:
                 vid_df = video_groups[video_name]
-                row_dict["FRAMES"] = len(vid_df)
-                viz_html = self.generate_timeline_html(vid_df, styles_map)
-                row_dict["VISUALIZATION"] = viz_html
+                frames = len(vid_df)
+                viz = self.generate_timeline_html(vid_df, styles_map)
             elif video_name == "TOTAL":
-                row_dict["FRAMES"] = sum(len(v) for v in video_groups.values())
-                row_dict["VISUALIZATION"] = "-"
+                frames = sum(len(v) for v in video_groups.values())
+                viz = "-"
             else:
-                row_dict["FRAMES"] = 0
-                row_dict["VISUALIZATION"] = "-" # For Total row or missing data
+                frames = 0
+                viz = "-"
 
-            report_rows.append(row_dict)
+            frames_list.append(frames)
+            viz_list.append(viz)
 
-        # Create DataFrame for Report
-        df_report = pd.DataFrame(report_rows)
+        # 3. Construct Final Report DataFrame with MultiIndex Columns
+        # Filter existing stats_df columns based on config `include`
+        cols_to_keep = []
+        for col in stats_df.columns:
+            # col is tuple (Method, Outcome)
+            method_key = col[0]
+            if styles_map.get(method_key, {}).get("table", {}).get("include", True):
+                cols_to_keep.append(col)
 
-        # Reorder columns: VIDEO NAME, FRAMES, ...stats..., VISUALIZATION
-        cols = list(df_report.columns)
-        priorities = ["VIDEO NAME", "FRAMES"]
-        end_cols = ["VISUALIZATION"]
+        report_df = stats_df[cols_to_keep].copy()
 
-        mid_cols = [c for c in cols if c not in priorities and c not in end_cols]
-        final_cols = priorities + mid_cols + end_cols
+        # Add Metadata columns with (" ", "Column Name") structure to match MultiIndex
+        # Using a single space " " as the top level grouping for general info
+        report_df[(" ", "FRAMES")] = frames_list
+        report_df[(" ", "VISUALIZATION")] = viz_list
+        report_df[(" ", "VIDEO NAME")] = report_df.index
 
-        # Ensure columns exist before selecting
-        final_cols = [c for c in final_cols if c in df_report.columns]
+        # Reset index (drop=True since we already copied it to a column)
+        report_df.reset_index(drop=True, inplace=True)
 
-        df_report = df_report[final_cols]
+        # Ensure we maintain MultiIndex columns
+        if not isinstance(report_df.columns, pd.MultiIndex):
+            # Fallback if something flattened it (unlikely with this approach)
+            report_df.columns = pd.MultiIndex.from_tuples(report_df.columns)
+
+        # 4. Reorder Columns
+        # Desired: VIDEO NAME, FRAMES, [Method1...], [Method2...], VISUALIZATION
+
+        # Get Method Columns in order (preserve relative order from stats_df)
+        method_cols = [c for c in cols_to_keep if c in report_df.columns]
+
+        final_cols = [
+            (" ", "VIDEO NAME"),
+            (" ", "FRAMES"),
+        ] + method_cols + [
+            (" ", "VISUALIZATION")
+        ]
+
+        # Select and reorder
+        report_df = report_df[final_cols]
 
         # 3. Render HTML
-        self.render_html(df_report, styles_map, output_path, title)
+        self.render_html(report_df, styles_map, output_path, title)
         print(f"[INFO] Report generated at: {output_path}")
 
     def generate_timeline_html(self, vid_df: pd.DataFrame, styles_map: Dict) -> str:
@@ -89,7 +107,8 @@ class TimelineReportGenerator:
             labels = vid_df[col_name].values
 
             # Resolve labels to colors
-            labels_colors = style_cfg.get("labels_colors", {})
+            # Handle new nested config structure
+            labels_colors = style_cfg.get("timeline", {}).get("labels_colors") or style_cfg.get("labels_colors", {})
 
             def get_color(lbl):
                 entry = labels_colors.get(lbl, "#ccc")
@@ -126,8 +145,10 @@ class TimelineReportGenerator:
                         "props": [
                             ("background-color", "#2c3e50"),
                             ("color", "white"),
-                            ("padding", "10px"),
+                            ("padding", "8px"),
+                            ("border", "1px solid #fff"), # White border for header grid
                             ("white-space", "nowrap"),
+                            ("text-align", "center"),
                         ],
                     },
                     {
@@ -143,26 +164,69 @@ class TimelineReportGenerator:
             .hide(axis="index")
         )
 
-        # Highlight "Miss" columns in Red if they have "Miss" in header and value is not 0
-        def highlight_miss(s):
-            is_miss_col = "Miss" in s.name or "FN" in s.name
-            if not is_miss_col:
+        # Highlight Rules logic updated for MultiIndex columns
+        def highlight_cells(s):
+            # s.name is tuple: (Method, Outcome)
+            if not isinstance(s.name, tuple):
                 return ["" for _ in s]
 
-            results = []
-            for v in s:
-                # Check if value starts with "0.0%" or "0 " -> No red
-                # Value format is typically "10.5% (20)"
-                if str(v).startswith("0.0%") or str(v).startswith("0 "):
-                    results.append("")
-                else:
-                    results.append("color: #e74c3c; font-weight: bold;")
-            return results
+            method_key, outcome = s.name
 
-        styler.apply(highlight_miss)
+            # Skip metadata columns
+            if method_key.strip() == "":
+                return ["" for _ in s]
+
+            # Find matching config
+            # methods in styles_map keys match the Method part of column
+            method_cfg = styles_map.get(method_key)
+            if not method_cfg:
+                return ["" for _ in s]
+
+            rules = method_cfg.get("table", {}).get("highlight_rules", {})
+            rule = rules.get(outcome)
+
+            if not rule:
+                return ["" for _ in s]
+
+            condition = rule.get("condition", "")
+            color = rule.get("color", "red")
+
+            # Parse condition e.g. "< 20"
+            import operator
+            op_map = {
+                "<": operator.lt, "<=": operator.le,
+                ">": operator.gt, ">=": operator.ge,
+                "==": operator.eq, "!=": operator.ne
+            }
+
+            parts = condition.strip().split()
+            if len(parts) != 2 or parts[0] not in op_map:
+                return ["" for _ in s]
+
+            op = op_map[parts[0]]
+            try:
+                threshold = float(parts[1])
+            except ValueError:
+                return ["" for _ in s]
+
+            styles = []
+            for val in s:
+                # Parse value: "10.5% (20)" -> 10.5
+                try:
+                    pct = float(str(val).split("%")[0])
+                    if op(pct, threshold):
+                        styles.append(f"color: {color}; font-weight: bold;")
+                    else:
+                        styles.append("")
+                except (ValueError, IndexError):
+                    styles.append("")
+            return styles
+
+        styler.apply(highlight_cells)
 
         html_table = styler.to_html(escape=False)
         legend_html = self._make_legend_html(styles_map)
+
 
         # 2. Final HTML Assembly
         full_html = f"""
@@ -208,8 +272,9 @@ class TimelineReportGenerator:
         # Iterate over configured columns
         for col_name, type_key in self.cols_to_types.items():
             style_cfg = styles_map.get(col_name, {})
-            title = style_cfg.get("legend_title", col_name)
-            labels_colors = style_cfg.get("labels_colors", {})
+            # Handle new nested config structure
+            title = style_cfg.get("meta", {}).get("legend_title") or style_cfg.get("legend_title", col_name)
+            labels_colors = style_cfg.get("timeline", {}).get("labels_colors") or style_cfg.get("labels_colors", {})
 
             html += f'<div class="legend-section"><div class="legend-title">{title}</div>'
 

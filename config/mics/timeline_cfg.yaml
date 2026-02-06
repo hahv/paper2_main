@@ -1,22 +1,72 @@
-# Timeline Visualization Configuration
+# Timeline Visualization & Reporting Configuration
+
+# 1. Ground Truth (GT)
 gt:
-  legend_title: "1. GT (Ground Truth)"
-  include_col_in_table: false
-  labels_colors:
-    FireSmoke: #fc6065
-    None: "#2ecc71" # Green
+  meta:
+    legend_title: "1. GT (Ground Truth)"
+
+  # Visualization: Timeline colors
+  timeline:
+    labels_colors:
+      FireSmoke: "#fc6065"
+      None: "#2ecc71"
+
+  # Reporting: Statistics Table settings
+  table:
+    include: true  # Single source of truth for visibility
+    highlight_rules:
+      # If FireSmoke % is < 20%, highlight red (Example logic)
+      FireSmoke:
+        condition: "< 20"
+        color: "#fc6065"
+      None:
+        condition: ">= 20"
+        color: "#2ecc71"
+
+# 2. NO SKIP (Baseline)
 no_skip:
-  legend_title: "2. NO SKIP (Baseline)"
-  include_col_in_table: true
-  labels_colors:
-    Correct (Pred=GT): "#2ecc71" # Green
-    False Alarm (FP) = Error (Pred=Fire/Smoke, GT=None): "#f1c40f" # Gold
-    Miss (FN) = Error (Pred=None, GT=Fire/Smoke): "#e74c3c" # Red
+  meta:
+    legend_title: "2. NO SKIP (Baseline)"
+
+  timeline:
+    labels_colors:
+      Correct: "#2ecc71"           # Green
+      False Alarm (FP): "#f1c40f"  # Gold
+      Miss (FN): "#e74c3c"         # Red
+
+  table:
+    include: true
+    highlight_rules:
+      # Highlight Miss (FN) if > 10%
+      Miss (FN):
+        condition: "> 10"
+        color: "#e74c3c"
+      # Highlight False Alarm (FP) if > 15%
+      False Alarm (FP):
+        condition: "> 15"
+        color: "#f1c40f"
+    # Implicitly no highlighting if 'highlight_rules' is missing
+
+# 3. SKIP (Proposed Method)
 skip:
-  legend_title: "3. SKIP (Proposed Method)"
-  include_col_in_table: true
-  labels_colors:
-    Miss (FN - Unsafe Skip): "#8e44ad" # Purple (Critical Failure)
-    Waste (FP - Unneeded Proc.): "#f1c40f" # Gold (Inefficiency)
-    Correct Skip: "#00b894" # Teal (Efficiency Success)
-    Correct Proc.: "#2c3e50" # Navy (Valid Hit)
+  meta:
+    legend_title: "3. SKIP (Proposed Method)"
+
+  timeline:
+    labels_colors:
+      Miss (FN): "#8e44ad"         # Purple (Critical Failure)
+      Waste (FP): "#f1c40f"        # Gold (Inefficiency)
+      Correct Skip: "#00b894"      # Teal (Efficiency Success)
+      Correct Proc.: "#2c3e50"     # Navy (Valid Hit)
+
+  table:
+    include: true
+    highlight_rules:
+      # Highlight Miss (FN) if > 5%
+      Miss (FN):
+        condition: "> 5"
+        color: "#8e44ad"
+      # Highlight Waste (FP) if > 10%
+      Waste (FP):
+        condition: "> 10"
+        color: "#f1c40f"
