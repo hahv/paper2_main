@@ -7,7 +7,7 @@ from tap import *
 
 class CustomArgs(Tap):
     # --- Basic Types ---
-    infile: Path = Path("./wandb_export.csv")  # Path to the CSV file
+    infile: Path = Path("./zout/wandb_export.csv")  # Path to the CSV file
     csv_sep: str = ";"  # CSV separator
 
 

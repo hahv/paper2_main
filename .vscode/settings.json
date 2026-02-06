@@ -30,7 +30,8 @@
         "zreport/~$available_dataset.xlsx": true,
         "**/.ruff_cache": true,
         "uv.lock": true,
-        "**/.python-version": true
+        "**/.python-version": true,
+        "**/wandb": true
     },
     "explorerExclude.backup": {},
     "notebook.formatOnSave.enabled": true,
