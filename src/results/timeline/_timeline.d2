@@ -1,0 +1,122 @@
+direction: down
+
+# ======================================================
+# 1. INPUT DATA (The Raw DataFrame)
+# ======================================================
+InputData: Raw Input (pd.DataFrame) {
+  shape: sql_table
+  style.stroke-width: 2
+
+  # Title / Header
+  **Dangerous Scenario (Row 0)**: ""
+
+  # Table Rows (defined as fields)
+  frame | gt_label | method_col
+  0     | "Fire"   | "Skipped"
+  1     | "Safe"   | "Skipped"
+}
+
+# ======================================================
+# 2. CONFIGURATION (The Rules)
+# ======================================================
+Config: timeline_cfg.yaml {
+  shape: rectangle
+  style.fill: "#fdfefe"
+  style.stroke: "#333"
+
+  # YAML content block
+  label: |md
+    skip:
+      labels_colors:
+        Miss (FN): "#8e44ad"
+        Waste (FP): "#f1c40f"
+  |
+}
+
+# ======================================================
+# 3. THE PARSING ENGINE (Logic Transformation)
+# ======================================================
+ParserLogic: DataParser (TLParser Subclass) {
+  style.fill: "#e8f8f5"
+  style.stroke: "#1abc9c"
+
+  Factory: TLParserFactory {
+    shape: package
+    tooltip: "Selects logic based on config type"
+  }
+
+  Logic: parse(df, method_col) {
+    shape: callout
+    label: |md
+      **Logic:**
+      `np.select(conditions, outputs)`
+
+      *Condition:* `(GT='Fire') & (Method='Skipped')`
+      *Result:* `"Miss (FN)"`
+    |
+  }
+}
+
+# ======================================================
+# 4. REPORT GENERATION (Visualization & Stats)
+# ======================================================
+ReportEngine: TimelineReportHelper {
+  style.fill: "#fff8e1"
+  style.stroke: "#f39c12"
+
+  StatsCalc: calculate_video_stats() {
+    tooltip: "Aggregates counts for the Table"
+  }
+
+  VizGen: generate_timeline_html() {
+    tooltip: "Maps Labels -> Hex Colors"
+  }
+}
+
+# ======================================================
+# 5. FINAL OUTPUT (The Report)
+# ======================================================
+Output: Final HTML Report {
+  shape: rectangle
+
+  Table: Summary Stats {
+    shape: sql_table
+
+    Metric    | Value
+    Miss (FN) | 50%
+  }
+
+  Timeline: Visual Strip {
+    # Visualizing the result color
+    Frame 0 (Miss): {
+      style.fill: "#8e44ad"
+      label: ""
+      width: 40
+      height: 20
+    }
+    Frame 1 (TN): {
+      style.fill: "#00b894"
+      label: ""
+      width: 40
+      height: 20
+    }
+  }
+}
+
+# ======================================================
+# DATA FLOW CONNECTIONS
+# ======================================================
+
+# 1. Input feeds into the Parser
+InputData -> ParserLogic.Logic: 1. Raw Data
+
+# 2. Config defines the logic types and colors
+Config -> ParserLogic.Factory: Defines Logic Type
+Config -> ReportEngine.VizGen: Defines Colors
+
+# 3. Logic transforms Data -> Labels
+ParserLogic.Logic -> ReportEngine: 2. Transformed Label
+
+# 4. Report Engine aggregates and styles
+ReportEngine.StatsCalc -> Output.Table: 3a. Aggregated %
+ReportEngine.VizGen -> Output.Timeline: 3b. Mapped Color\n(" # 8e44ad")

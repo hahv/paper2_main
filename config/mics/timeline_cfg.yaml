@@ -1,0 +1,22 @@
+# Timeline Visualization Configuration
+gt:
+  legend_title: "1. GT (Ground Truth)"
+  include_col_in_table: false
+  labels_colors:
+    FireSmoke: #fc6065
+    None: "#2ecc71" # Green
+no_skip:
+  legend_title: "2. NO SKIP (Baseline)"
+  include_col_in_table: true
+  labels_colors:
+    Correct (Pred=GT): "#2ecc71" # Green
+    False Alarm (FP) = Error (Pred=Fire/Smoke, GT=None): "#f1c40f" # Gold
+    Miss (FN) = Error (Pred=None, GT=Fire/Smoke): "#e74c3c" # Red
+skip:
+  legend_title: "3. SKIP (Proposed Method)"
+  include_col_in_table: true
+  labels_colors:
+    Miss (FN - Unsafe Skip): "#8e44ad" # Purple (Critical Failure)
+    Waste (FP - Unneeded Proc.): "#f1c40f" # Gold (Inefficiency)
+    Correct Skip: "#00b894" # Teal (Efficiency Success)
+    Correct Proc.: "#2c3e50" # Navy (Valid Hit)
