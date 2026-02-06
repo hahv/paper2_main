@@ -54,7 +54,10 @@ class TLParser(ABC):
     def supported_labels(self) -> List[str]:
         timeline_cfg_dict = TimelineConfig.get_timeline_dict(self.timeline_type)
         # Search for labels_colors in "timeline" subsection (new format) or root (old format)
-        if "timeline" in timeline_cfg_dict and "labels_colors" in timeline_cfg_dict["timeline"]:
+        if (
+            "timeline" in timeline_cfg_dict
+            and "labels_colors" in timeline_cfg_dict["timeline"]
+        ):
             return list(timeline_cfg_dict["timeline"]["labels_colors"].keys())
 
         assert "labels_colors" in timeline_cfg_dict, (
@@ -163,7 +166,10 @@ class TimelineProcessor:
 
     @classmethod
     def proc_dataframe(
-        cls, df: pd.DataFrame, cols_to_timeline_types: Dict[str, str], table_mode: Literal["p", "fc", "pfc"] = "pfc"
+        cls,
+        df: pd.DataFrame,
+        cols_to_timeline_types: Dict[str, str],
+        table_mode: Literal["p", "fc", "pfc"] = "pfc",
     ) -> Tuple[pd.DataFrame, pd.DataFrame, Dict]:
         """
         Generates the frame-level timeline data.
@@ -240,7 +246,9 @@ class TimelineProcessor:
         for method_col, style_cfg in styles_map.items():
             # 1. Get ordered list of expected labels from config
             # Handle new nested config structure
-            labels_source = style_cfg.get("timeline", {}).get("labels_colors") or style_cfg.get("labels_colors", {})
+            labels_source = style_cfg.get("timeline", {}).get(
+                "labels_colors"
+            ) or style_cfg.get("labels_colors", {})
             expected_labels = list(labels_source.keys())
 
             # 2. Calculate Counts per Video

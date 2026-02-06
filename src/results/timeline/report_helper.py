@@ -1,17 +1,25 @@
 import pandas as pd
 import numpy as np
-from typing import Dict, List, Optional
+from typing import Dict, Literal
 from halib import *  # Assuming this is available as in original file
 from src.results.timeline.data_parser import TimelineProcessor
+
 
 class TimelineReportGenerator:
     """
     Generates an HTML report for timeline visualization using TimelineProcessor.
     """
+
     def __init__(self, cols_to_types: Dict[str, str]):
         self.cols_to_types = cols_to_types
 
-    def run(self, df: pd.DataFrame, output_path: str, title: str = "Timeline Report", table_mode: str = "pfc"):
+    def run(
+        self,
+        df: pd.DataFrame,
+        output_path: str,
+        title: str = "Timeline Report",
+        table_mode: Literal["p", "fc", "pfc"] = "pfc",
+    ):
         """
         Main entry point: Process dataframe and generate HTML report.
         """
@@ -80,12 +88,14 @@ class TimelineReportGenerator:
         # Get Method Columns in order (preserve relative order from stats_df)
         method_cols = [c for c in cols_to_keep if c in report_df.columns]
 
-        final_cols = [
-            (" ", "VIDEO NAME"),
-            (" ", "FRAMES"),
-        ] + method_cols + [
-            (" ", "VISUALIZATION")
-        ]
+        final_cols = (
+            [
+                (" ", "VIDEO NAME"),
+                (" ", "FRAMES"),
+            ]
+            + method_cols
+            + [(" ", "VISUALIZATION")]
+        )
 
         # Select and reorder
         report_df = report_df[final_cols]
@@ -108,7 +118,9 @@ class TimelineReportGenerator:
 
             # Resolve labels to colors
             # Handle new nested config structure
-            labels_colors = style_cfg.get("timeline", {}).get("labels_colors") or style_cfg.get("labels_colors", {})
+            labels_colors = style_cfg.get("timeline", {}).get(
+                "labels_colors"
+            ) or style_cfg.get("labels_colors", {})
 
             def get_color(lbl):
                 entry = labels_colors.get(lbl, "#ccc")
@@ -132,11 +144,17 @@ class TimelineReportGenerator:
 
         return f'<table style="background:transparent; border:none; margin:0;">{rows_html}</table>'
 
-    def render_html(self, df_report: pd.DataFrame, styles_map: Dict, output_file: str, title: str):
+    def render_html(
+        self, df_report: pd.DataFrame, styles_map: Dict, output_file: str, title: str
+    ):
         # 1. Styler Configuration
         styler = (
             df_report.style.set_properties(
-                **{"text-align": "center", "vertical-align": "middle", "font-size": "13px"}
+                **{
+                    "text-align": "center",
+                    "vertical-align": "middle",
+                    "font-size": "13px",
+                }
             )
             .set_table_styles(
                 [
@@ -146,7 +164,10 @@ class TimelineReportGenerator:
                             ("background-color", "#2c3e50"),
                             ("color", "white"),
                             ("padding", "8px"),
-                            ("border", "1px solid #fff"), # White border for header grid
+                            (
+                                "border",
+                                "1px solid #fff",
+                            ),  # White border for header grid
                             ("white-space", "nowrap"),
                             ("text-align", "center"),
                         ],
@@ -193,10 +214,14 @@ class TimelineReportGenerator:
 
             # Parse condition e.g. "< 20"
             import operator
+
             op_map = {
-                "<": operator.lt, "<=": operator.le,
-                ">": operator.gt, ">=": operator.ge,
-                "==": operator.eq, "!=": operator.ne
+                "<": operator.lt,
+                "<=": operator.le,
+                ">": operator.gt,
+                ">=": operator.ge,
+                "==": operator.eq,
+                "!=": operator.ne,
             }
 
             parts = condition.strip().split()
@@ -226,7 +251,6 @@ class TimelineReportGenerator:
 
         html_table = styler.to_html(escape=False)
         legend_html = self._make_legend_html(styles_map)
-
 
         # 2. Final HTML Assembly
         full_html = f"""
@@ -273,10 +297,16 @@ class TimelineReportGenerator:
         for col_name, type_key in self.cols_to_types.items():
             style_cfg = styles_map.get(col_name, {})
             # Handle new nested config structure
-            title = style_cfg.get("meta", {}).get("legend_title") or style_cfg.get("legend_title", col_name)
-            labels_colors = style_cfg.get("timeline", {}).get("labels_colors") or style_cfg.get("labels_colors", {})
+            title = style_cfg.get("meta", {}).get("legend_title") or style_cfg.get(
+                "legend_title", col_name
+            )
+            labels_colors = style_cfg.get("timeline", {}).get(
+                "labels_colors"
+            ) or style_cfg.get("labels_colors", {})
 
-            html += f'<div class="legend-section"><div class="legend-title">{title}</div>'
+            html += (
+                f'<div class="legend-section"><div class="legend-title">{title}</div>'
+            )
 
             for label, val in labels_colors.items():
                 if isinstance(val, dict):
