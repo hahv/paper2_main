@@ -53,8 +53,12 @@ class TLParser(ABC):
     @property
     def supported_labels(self) -> List[str]:
         timeline_cfg_dict = TimelineConfig.get_timeline_dict(self.timeline_type)
+        # Search for labels_colors in "timeline" subsection (new format) or root (old format)
+        if "timeline" in timeline_cfg_dict and "labels_colors" in timeline_cfg_dict["timeline"]:
+            return list(timeline_cfg_dict["timeline"]["labels_colors"].keys())
+
         assert "labels_colors" in timeline_cfg_dict, (
-            f"Config for '{self.timeline_type}' missing 'labels_colors' key."
+            f"Config for '{self.timeline_type}' missing 'labels_colors' key (checked root and 'timeline')."
         )
         return list(timeline_cfg_dict["labels_colors"].keys())
 
@@ -125,7 +129,7 @@ class SkipParser(TLParser):
                 is_gt_fire & (~is_skipped),
                 (~is_gt_fire) & is_skipped,
             ],
-            ["Miss (FN)", "Waste (FP)", "True Proc. (TP)", "True Skip (TN)"],
+            ["Miss (FN)", "Waste (FP)", "Correct Proc.", "Correct Skip"],
             default="Unknown",
         )
 
@@ -235,7 +239,9 @@ class TimelineProcessor:
         # Iterate through each processed method column
         for method_col, style_cfg in styles_map.items():
             # 1. Get ordered list of expected labels from config
-            expected_labels = list(style_cfg.get("labels_colors", {}).keys())
+            # Handle new nested config structure
+            labels_source = style_cfg.get("timeline", {}).get("labels_colors") or style_cfg.get("labels_colors", {})
+            expected_labels = list(labels_source.keys())
 
             # 2. Calculate Counts per Video
             counts_df = pd.crosstab(index=df_flat["video"], columns=df_flat[method_col])

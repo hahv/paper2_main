@@ -37,6 +37,10 @@ class TimelineReportGenerator:
 
             # Flatten MultiIndex Columns from stats_df: (Method, Outcome) -> "METHOD<br>Outcome"
             for (method_col, outcome), val in row.items():  # ty:ignore[not-iterable]
+                # Check config include
+                if not styles_map.get(method_col, {}).get("table", {}).get("include", True):
+                    continue
+
                 # Clean up value (it comes as string "pct% (count)" from data_parser if mode='pfc')
                 header = f"{method_col.upper()}<br><span style='font-size:10px; font-weight:normal'>{outcome}</span>"
                 row_dict[header] = val
@@ -89,7 +93,8 @@ class TimelineReportGenerator:
             labels = vid_df[col_name].values
 
             # Resolve labels to colors
-            labels_colors = style_cfg.get("labels_colors", {})
+            # Handle new nested config structure
+            labels_colors = style_cfg.get("timeline", {}).get("labels_colors") or style_cfg.get("labels_colors", {})
 
             def get_color(lbl):
                 entry = labels_colors.get(lbl, "#ccc")
@@ -144,22 +149,67 @@ class TimelineReportGenerator:
         )
 
         # Highlight "Miss" columns in Red if they have "Miss" in header and value is not 0
-        def highlight_miss(s):
-            is_miss_col = "Miss" in s.name or "FN" in s.name
-            if not is_miss_col:
+        def highlight_cells(s):
+            col_name = str(s.name)
+            # 1. Parse Column Name to identify Method & Outcome
+            # Header format: "{METHOD}<br><span ...>{outcome}</span>"
+            if "normal'>" not in col_name or "</span>" not in col_name:
                 return ["" for _ in s]
 
-            results = []
-            for v in s:
-                # Check if value starts with "0.0%" or "0 " -> No red
-                # Value format is typically "10.5% (20)"
-                if str(v).startswith("0.0%") or str(v).startswith("0 "):
-                    results.append("")
-                else:
-                    results.append("color: #e74c3c; font-weight: bold;")
-            return results
+            try:
+                # Extract outcome (content inside span)
+                outcome = col_name.split("normal'>")[1].split("</span>")[0]
+                # Extract method (prefix before <br>)
+                method_upper = col_name.split("<br>")[0]
+            except IndexError:
+                return ["" for _ in s]
 
-        styler.apply(highlight_miss)
+            # Find matching config
+            method_key = next((k for k in styles_map if k.upper() == method_upper), None)
+            if not method_key:
+                return ["" for _ in s]
+
+            rules = styles_map[method_key].get("table", {}).get("highlight_rules", {})
+            rule = rules.get(outcome)
+
+            if not rule:
+                return ["" for _ in s]
+
+            condition = rule.get("condition", "")
+            color = rule.get("color", "red")
+
+            # Parse condition e.g. "< 20"
+            import operator
+            op_map = {
+                "<": operator.lt, "<=": operator.le,
+                ">": operator.gt, ">=": operator.ge,
+                "==": operator.eq, "!=": operator.ne
+            }
+
+            parts = condition.strip().split()
+            if len(parts) != 2 or parts[0] not in op_map:
+                return ["" for _ in s]
+
+            op = op_map[parts[0]]
+            try:
+                threshold = float(parts[1])
+            except ValueError:
+                return ["" for _ in s]
+
+            styles = []
+            for val in s:
+                # Parse value: "10.5% (20)" -> 10.5
+                try:
+                    pct = float(str(val).split("%")[0])
+                    if op(pct, threshold):
+                        styles.append(f"color: {color}; font-weight: bold;")
+                    else:
+                        styles.append("")
+                except (ValueError, IndexError):
+                    styles.append("")
+            return styles
+
+        styler.apply(highlight_cells)
 
         html_table = styler.to_html(escape=False)
         legend_html = self._make_legend_html(styles_map)
@@ -208,8 +258,9 @@ class TimelineReportGenerator:
         # Iterate over configured columns
         for col_name, type_key in self.cols_to_types.items():
             style_cfg = styles_map.get(col_name, {})
-            title = style_cfg.get("legend_title", col_name)
-            labels_colors = style_cfg.get("labels_colors", {})
+            # Handle new nested config structure
+            title = style_cfg.get("meta", {}).get("legend_title") or style_cfg.get("legend_title", col_name)
+            labels_colors = style_cfg.get("timeline", {}).get("labels_colors") or style_cfg.get("labels_colors", {})
 
             html += f'<div class="legend-section"><div class="legend-title">{title}</div>'
 
