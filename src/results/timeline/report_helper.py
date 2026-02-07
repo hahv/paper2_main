@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from typing import Dict, Literal, Callable
 from halib import *
-from src.results.timeline.data_parser import TimelineProcessor
+from src.results.timeline.data_parser import TimelineProcessor, TimelineConfig
 from src.config import Config
 from pathlib import Path
 from halib.filetype import yamlfile
@@ -243,6 +243,55 @@ class TimelineReportGen:
                 continue
             df[col] = df[col].apply(lambda x: _standardize_label(col, x))
         return df
+
+    @staticmethod
+    def timeline_from_tlreport_df(
+        csv_path: str,
+        output_html_path: str,
+        title: str = "Timeline Report (Reconstructed)",
+    ):
+        """
+        Reconstructs the HTML report from a saved CSV file (report_df).
+        """
+        if not os.path.exists(csv_path):
+            raise FileNotFoundError(f"CSV file not found: {csv_path}")
+
+        # Load Dataframe with MultiIndex columns (2 header rows)
+        df = pd.read_csv(csv_path, header=[0, 1], sep=";", encoding="utf-8")
+
+        # Deduce cols_to_types
+        cols_to_types = {}
+        # Level 0 contains Method names. Level 1 contains Outcomes.
+        # We look at unique values in Level 0
+        level0_cols = df.columns.get_level_values(0).unique()
+
+        for col in level0_cols:
+            col = str(col).strip()
+            # Skip empty or strict metadata parent or "Unnamed" artifacts
+            if not col or col.lower() == "nan" or "unnamed" in col.lower():
+                continue
+
+            if col == "gt_label":
+                cols_to_types[col] = "gt"
+                continue
+
+            try:
+                t_type = TimelineReportGen.col_name_to_timeline_type(col)
+                cols_to_types[col] = t_type
+            except ValueError:
+                pass  # Not a recognized method column
+
+        # Reconstruct Styles Map
+        styles_map = {}
+        for col, t_type in cols_to_types.items():
+            styles_map[col] = TimelineConfig.get_timeline_dict(t_type)
+
+        gen = TimelineReportGen(cols_to_types)
+        gen.render_html(df, styles_map, output_html_path, title)
+
+        with ConsoleLog("Reconstructed Report"):
+            print(f"[INFO] Report generated at: ⏬")
+            pprint_local_path(output_html_path, get_wins_path=True)
 
     @staticmethod
     def gen_TlReport_muti_exps(
