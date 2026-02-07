@@ -126,7 +126,7 @@ def main():
         print(f"[INFO] Generated DataFrame with {len(df)} rows across {df['video'].nunique()} videos.")
 
         generator = TimelineReportGen(cols_to_timeline_types)
-        generator.run(df, output_html, title="Dynamic Timeline Report v2", table_mode="p")
+        generator.generate(df, output_html, title="Dynamic Timeline Report v2", table_mode="p")
 
     print("[SUCCESS] Report generated.")
 

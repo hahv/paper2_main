@@ -103,17 +103,29 @@ class TLParser(ABC):
 
 
 # --- IMPLEMENATIONS ---
+# CSV label Input (gt or pred):
+#         {
+#         │   'gt_label': ['fire_smoke', 'none'],
+#         │   'no_temp_method': ['fire', 'smokeonly', 'none'],
+#         │   'temp_method_motion_block': ['skipped', 'fire', 'smokeonly', 'none']
+#         }
+# !label Output (normalized):
+#         {
+#         │   'gt_label': ['fire', 'none'],
+#         │   'no_temp_method': ['fire', 'none'],
+#         │   'temp_method_motion_block': ['skipped', 'fire', 'none']
+#         }
 
 
 class TLGtParser(TLParser):
     def parse_logic(self, df: pd.DataFrame, method_col: str) -> np.ndarray:
-        return np.where(df["gt_label"].isin(["Fire", "Smoke"]), "FireSmoke", "None")
+        return np.where(df["gt_label"] == "fire", "FireSmoke", "None")
 
 
 class NoSkipParser(TLParser):
     def parse_logic(self, df: pd.DataFrame, method_col: str) -> np.ndarray:
-        is_gt_fire = df["gt_label"].isin(["Fire", "Smoke"])
-        is_pred_fire = df[method_col].isin(["Fire", "Smoke"])
+        is_gt_fire = df["gt_label"] == "fire"
+        is_pred_fire = df[method_col] == "fire"
         return np.select(
             [(~is_gt_fire) & (is_pred_fire), (is_gt_fire) & (~is_pred_fire)],
             ["False Alarm (FP)", "Miss (FN)"],
@@ -123,14 +135,22 @@ class NoSkipParser(TLParser):
 
 class SkipParser(TLParser):
     def parse_logic(self, df: pd.DataFrame, method_col: str) -> np.ndarray:
-        is_gt_fire = df["gt_label"].isin(["Fire", "Smoke"])
-        is_skipped = df[method_col] == "Skipped"
+        is_gt_fire = df["gt_label"] == "fire"
+        is_skipped = df[method_col] == "skipped"
+
+        # Logic for Temporal Skipping Efficiency:
+        # We evaluate whether the decision to SKIP or PROCESS was correct relative to the GT.
+        # - Miss (FN): Dangerous. Fire existed but we skipped the frame.
+        # - Waste (FP): Inefficient. No fire existed but we wasted resources processing it.
+        # - Correct Proc.: Good. Fire existed and we correctly decided to process it.
+        # - Correct Skip: Good. No fire existed and we correctly skipped it.
+
         return np.select(
             [
-                is_gt_fire & is_skipped,
-                (~is_gt_fire) & (~is_skipped),
-                is_gt_fire & (~is_skipped),
-                (~is_gt_fire) & is_skipped,
+                is_gt_fire & is_skipped,  # GT=Fire, Action=Skip
+                (~is_gt_fire) & (~is_skipped),  # GT=None, Action=Process
+                is_gt_fire & (~is_skipped),  # GT=Fire, Action=Process
+                (~is_gt_fire) & is_skipped,  # GT=None, Action=Skip
             ],
             ["Miss (FN)", "Waste (FP)", "Correct Proc.", "Correct Skip"],
             default="Unknown",

@@ -13,6 +13,7 @@ class TimelineReportGen:
     Generates an HTML report for timeline visualization using TimelineProcessor.
     """
 
+    FIX_COLUMNS = ["video", "frame_id", "gt_label"]
     CSV_PATH_DF_COLUMNS = ["video", "gt_csv_path"]
     NOTEMP_METHOD_PATTERN = "mt_no_temp_method"
 
@@ -49,7 +50,8 @@ class TimelineReportGen:
         exp_dir: str,
         shorten_exp_name_func: Callable[[str], str] = simplify_exp_name,
         exp_name_to_timeline_type: Callable[[str], str] = col_name_to_timeline_type,
-    ) -> tuple[pd.DataFrame, Dict[str, str], Dict[str, list]]:
+        do_normalize: bool = True,
+    ) -> tuple[pd.DataFrame, Dict[str, str]]:
         """
         Loads GT, Experiment, and Baseline data into a single frame-level DataFrame and a mapping of columns to timeline types.
         1. Identifies the baseline 'no_temp' experiment directory.
@@ -178,12 +180,12 @@ class TimelineReportGen:
 
         # 4. Finalize
         if not dfs:
-            return pd.DataFrame(), {}, {}
+            return pd.DataFrame(), {}
 
         combined_df = pd.concat(dfs, ignore_index=True)
 
         # Reorder columns: Metadata -> GT -> Exp -> Base
-        start_cols = ["video", "frame_id", "gt_label"]
+        start_cols = TimelineReportGen.FIX_COLUMNS
         other_cols = [col for col in combined_df.columns if col not in start_cols]
         combined_df = combined_df[start_cols + other_cols]
 
@@ -191,51 +193,111 @@ class TimelineReportGen:
         for col in other_cols:
             timeline_types_by_col[col] = exp_name_to_timeline_type(col)
 
-        check_cols = ["gt_label"] + other_cols
-        unique_by_cols = {col: list(combined_df[col].unique()) for col in check_cols}
-
-        return combined_df, timeline_types_by_col, unique_by_cols
+        if do_normalize:
+            combined_df = TimelineReportGen.norm_timeline_df(combined_df)
+        return combined_df, timeline_types_by_col
 
     @staticmethod
-    def exp_dir_to_timeline_data(exp_dir: Path) -> tuple[pd.DataFrame, Dict[str, str]]:
-        """Loads timeline data and configuration from an experiment directory."""
-        data_path = exp_dir / "timeline_data.csv"
-        config_path = exp_dir / "timeline_config.yaml"
+    def get_unique_values(df: pd.DataFrame) -> Dict[str, list]:
+        """
+        Get unique values for each column in the dataframe.
+        """
+        assert all(col in df.columns for col in TimelineReportGen.FIX_COLUMNS), (
+            f"This function only supports dataframes with fixed columns: {TimelineReportGen.FIX_COLUMNS} - for timeline dataframe"
+        )
+        unique_by_cols = {}
+        for col in df.columns:
+            if col in TimelineReportGen.FIX_COLUMNS[:-1]:  # skip 'video' and 'frame_id'
+                continue
+            unique_by_cols[col] = list(df[col].unique())
+        return unique_by_cols
 
-        df = pd.read_csv(data_path)
-        cols_to_types = {
-            "algo_v3": "skip",
-            "baseline": "no_skip",
-            "gt_label": "gt",
-        }  # Example mapping
+    @staticmethod
+    def norm_timeline_df(df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Convert gt_label and other columns to standard labels with respect to 'fire' and 'none' and 'skipped' (if using temp method).
 
-        return df, cols_to_types
+        Example:
+        Input:  {
+                │   'gt_label': ['fire_smoke', 'none'],
+                │   'no_temp_method': ['fire', 'smokeonly', 'none'],
+                │   'temp_method_motion_block': ['skipped', 'fire', 'smokeonly', 'none']
+                }
+        Output: {
+                │   'gt_label': ['fire', 'none'],
+                │   'no_temp_method': ['fire', 'none'],
+                │   'temp_method_motion_block': ['skipped', 'fire', 'none']
+                }
+        """
 
-    # {'gt_label': 'gt', 'no_temp_method': 'no_skip', 'temp_method_motion_block': 'skip'}
-    # {
-    # │   'gt_label': ['fire_smoke', 'none'],
-    # │   'no_temp_method': ['fire', 'smokeonly', 'none'],
-    # │   'temp_method_motion_block': ['skipped', 'fire', 'smokeonly', 'none']
-    # }
-    @classmethod
-    def run_exp_report(
-        cls, exp_dir: Path, title: str, table_mode: Literal["p", "fc", "pfc"]
+        def _standardize_label(col: str, label: str) -> str:
+            if "fire" in label or "smoke" in label:
+                return "fire"
+            if col.startswith("temp_method"):
+                return label  # keep 'skipped' as is
+            return "none"
+
+        df = df.copy()
+        for col in df.columns:
+            if col in TimelineReportGen.FIX_COLUMNS[:-1]:  # skip 'video' and 'frame_id'
+                continue
+            df[col] = df[col].apply(lambda x: _standardize_label(col, x))
+        return df
+
+    @staticmethod
+    def gen_TlReport_muti_exps(
+        parent_dir: str = "./zout/zruns", table_mode: Literal["p", "fc", "pfc"] = "p"
+    ):
+        """
+        Generate timeline reports for all experiment directories under the given parent directory.
+        """
+        parent_path = Path(parent_dir)
+        exp_dirs = [p for p in parent_path.iterdir() if p.is_dir()]
+        for exp_dir in exp_dirs:
+            pprint(f"[INFO] Gen timeline report for exp: {exp_dir.name}")
+            try:
+                outfile = TimelineReportGen.gen_TlReport_exp(
+                    exp_dir=exp_dir,
+                    title=f"Timeline Report - {exp_dir.name}",
+                    table_mode=table_mode,
+                )
+                pprint(f"[INFO] Report generated at: ⏬")
+                pprint_local_path(outfile, get_wins_path=True)
+            except Exception as e:
+                pprint(f"[ERROR] Failed to generate report for {exp_dir.name}: {e}")
+
+    @staticmethod
+    def gen_TlReport_exp(
+        exp_dir: Path, title: str, table_mode: Literal["p", "fc", "pfc"] = "p"
     ):
         # from exp_dir, do something to get the dataframe and cols_to_types
-        df, cols_to_types = cls.exp_dir_to_timeline_data(exp_dir)
-        report_generator = cls(cols_to_types)
+        df, cols_to_types = TimelineReportGen.get_timeline_csv_path_df(
+            str(exp_dir), do_normalize=True
+        )
+        report_generator = TimelineReportGen(cols_to_types)
         output_path = exp_dir / "timeline_report.html"
-        report_generator.run(df, str(output_path), title=title, table_mode=table_mode)
+        report_generator.generate(
+            df, str(output_path), title=title, table_mode=table_mode
+        )
+        return os.path.abspath(output_path)
 
-    def run(
+    def generate(
         self,
         df: pd.DataFrame,
         output_path: str,
         title: str = "Timeline Report",
-        table_mode: Literal["p", "fc", "pfc"] = "pfc",
+        table_mode: Literal["p", "fc", "pfc"] = "p",
     ):
         """
         Main entry point: Process dataframe and generate HTML report.
+        Args:
+            df (pd.DataFrame): Input timeline dataframe.
+            output_path (str): Path to save the HTML report.
+            title (str): Title of the report.
+            table_mode (Literal["p", "fc", "pfc"]): Table mode for statistics.
+            p - percentages only
+            fc - frame counts only
+            pfc - percentages and frame counts
         """
         # 1. Process Data using the Logic Core
         final_df, stats_df, styles_map = TimelineProcessor.proc_dataframe(
@@ -316,7 +378,15 @@ class TimelineReportGen:
 
         # 3. Render HTML
         self.render_html(report_df, styles_map, output_path, title)
-        print(f"[INFO] Report generated at: {output_path}")
+
+        # also save report_df to csv for easier debugging
+        csv_output_path = output_path.replace(".html", ".csv")
+        report_df.to_csv(csv_output_path, index=False, sep=";", encoding="utf-8")
+        with ConsoleLog("Saving report results:"):
+            print(f"[INFO] Report generated at: ⏬")
+            pprint_local_path(output_path, get_wins_path=True)
+            print(f"[INFO] CSV version saved at: ⏬")
+            pprint_local_path(csv_output_path, get_wins_path=True)
 
     def generate_timeline_html(self, vid_df: pd.DataFrame, styles_map: Dict) -> str:
         """Generates the stacked bar HTML for a single video."""
