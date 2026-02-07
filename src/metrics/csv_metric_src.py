@@ -18,14 +18,14 @@ class CsvMetricSrc(BaseMetricSrc):
 
     def __init__(self, cfg: Config):
         self.cfg = cfg
-        super().__init__(cfg.dbsetCfg.name)
+        super().__init__(cfg.dbsetCfg.name)  # ty:ignore[invalid-argument-type]
 
         # -----------------------------------------------------------
         # ! LOAD ADAPTER
         # We read 'adapter_cls' from config (e.g., 'DFireAdapter')
         # Defaulting to DFireAdapter to maintain backward compatibility
         # -----------------------------------------------------------
-        csv_loader_name = cfg.dbsetCfg.extra_cfgs.get(
+        csv_loader_name = cfg.dbsetCfg.extra_cfgs.get(  # ty:ignore[possibly-missing-attribute]
             "csv_loader_cls", "dfire_csv_loader.DFireCsvLoader"
         )
 
@@ -47,7 +47,7 @@ class CsvMetricSrc(BaseMetricSrc):
     def _register_handlers(self):
         metric_set_meta = self.cfg.metricCfg
         metric_names = metric_set_meta.metric_names
-        modes = metric_set_meta.extra_cfgs.get("mode", ["per-video"])
+        modes = metric_set_meta.extra_cfgs.get("mode", ["per-video"])  # ty:ignore[possibly-missing-attribute]
 
         self.did_save_raw_pred_and_gt = {mode: False for mode in modes}
 
@@ -72,7 +72,7 @@ class CsvMetricSrc(BaseMetricSrc):
         assert indir is not None, "indir must be provided"
 
         # 1. Filter CSV Files
-        recursive = self.cfg.dbsetCfg.extra_cfgs.get("ds_recursive", False)
+        recursive = self.cfg.dbsetCfg.extra_cfgs.get("ds_recursive", False)  # ty:ignore[possibly-missing-attribute]
         csv_files = fs.filter_files_by_extension(indir, [".csv"], recursive=recursive)
 
         # Filter for "_results"
@@ -112,7 +112,7 @@ class CsvMetricSrc(BaseMetricSrc):
                 pred_df = per_video_data[0]
                 # skip first frame
                 pervideo_preds_all.append(pred_df["elapsed_time"].tolist()[1:])
-            return pervideo_preds_all
+            return pervideo_preds_all  # ty:ignore[invalid-return-type]
         else:
             pervideo_preds_all = []
             pervideo_gts_all = []
@@ -130,7 +130,7 @@ class CsvMetricSrc(BaseMetricSrc):
                 pervideo_preds_all.append(preds)
                 pervideo_gts_all.append(gts)
 
-            return pervideo_preds_all, pervideo_gts_all
+            return pervideo_preds_all, pervideo_gts_all  # ty:ignore[invalid-return-type]
 
     def proc_data_by_mode(
         self, metric: str, mode: str, metric_data: Dict[str, Any], **kwargs
@@ -165,7 +165,7 @@ class CsvMetricSrc(BaseMetricSrc):
                 video_level_preds = []
                 video_level_gts = []
                 flatten = False
-                zip_metric_data = list(zip(metric_data[0], metric_data[1]))
+                zip_metric_data = list(zip(metric_data[0], metric_data[1]))  # ty:ignore[invalid-argument-type]
 
                 for pervideo_pred, pervideo_gt in zip_metric_data:
                     # Logic: if any frame is positive, video is positive

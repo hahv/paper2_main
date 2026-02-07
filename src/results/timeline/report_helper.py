@@ -1,17 +1,231 @@
 import pandas as pd
 import numpy as np
-from typing import Dict, Literal
-from halib import *  # Assuming this is available as in original file
+from typing import Dict, Literal, Callable
+from halib import *
 from src.results.timeline.data_parser import TimelineProcessor
+from src.config import Config
+from pathlib import Path
+from halib.filetype import yamlfile
 
 
-class TimelineReportGenerator:
+class TimelineReportGen:
     """
     Generates an HTML report for timeline visualization using TimelineProcessor.
     """
 
+    CSV_PATH_DF_COLUMNS = ["video", "gt_csv_path"]
+    NOTEMP_METHOD_PATTERN = "mt_no_temp_method"
+
     def __init__(self, cols_to_types: Dict[str, str]):
         self.cols_to_types = cols_to_types
+
+    @staticmethod
+    def simplify_exp_name(exp_name: str) -> str:
+        """
+        Default function to shorten experiment names for column naming.
+        Example: "mt_temp_method_motion_block" -> "temp_method_motion_block"
+        """
+        SEP = "__"
+        parts = exp_name.split(SEP)
+        # only get the part after 'mt_'
+        for part in parts:
+            if part.startswith("mt_"):
+                return part[3:]  # Remove 'mt_' prefix
+        return exp_name  # Fallback to full name if no 'mt_' part found
+
+    @staticmethod
+    # ! col_name is the shortened name
+    def col_name_to_timeline_type(col_name: str) -> str:
+        # first find the part that starts with 'mt_'
+        if col_name.startswith("no_temp_method"):
+            return "no_skip"
+        elif col_name.startswith("temp_method"):
+            return "skip"
+        else:
+            raise ValueError(f"Cannot determine timeline type for col_name={col_name}")
+
+    @staticmethod
+    def get_timeline_csv_path_df(
+        exp_dir: str,
+        shorten_exp_name_func: Callable[[str], str] = simplify_exp_name,
+        exp_name_to_timeline_type: Callable[[str], str] = col_name_to_timeline_type,
+    ) -> tuple[pd.DataFrame, Dict[str, str], Dict[str, list]]:
+        """
+        Loads GT, Experiment, and Baseline data into a single frame-level DataFrame and a mapping of columns to timeline types.
+        1. Identifies the baseline 'no_temp' experiment directory.
+        2. Loads frame-level labels from CSVs for GT, Experiment, and Baseline.
+        3. Merges data on frame indices and constructs the final DataFrame.
+        4. Calculates timeline types for each column based on experiment names.
+
+        Return:
+            combined_df (pd.DataFrame): Merged DataFrame with frame-level labels.
+            timeline_types_by_col (Dict[str, str]): Mapping of column names to timeline types
+            unique_by_cols (Dict[str, list]): Unique values for each column, e.g: gt_label: ['fire', 'no_fire'], "temp_method_motion_block": ['fire', 'no_fire', "skip"]
+        """
+
+        def _find_bl_notemp_dir(exp_path: Path, ds_name: str) -> Path | None:
+            """Heuristic to find the latest 'no_temp' sibling directory."""
+            candidates = [
+                p
+                for p in exp_path.parent.iterdir()
+                if p.is_dir()
+                and p != exp_path
+                and TimelineReportGen.NOTEMP_METHOD_PATTERN in p.name
+                and f"ds_{ds_name}" in p.name
+            ]
+            # Return latest by name (lexicographical sort usually works for timestamps)
+            return max(candidates, key=lambda p: p.name) if candidates else None
+
+        def _load_frame_series(
+            path: Path, col_name: str, required: bool = False
+        ) -> pd.DataFrame:
+            """
+            Helper to read a 2-column CSV (frame_idx, value) and standardise it.
+            """
+            if not path.exists():
+                if required:
+                    raise FileNotFoundError(f"Required CSV not found: {path}")
+                return pd.DataFrame()
+
+            # Efficiently read only needed columns
+            # GT uses 'label', Predictions use 'pred_label'
+            val_col = "label" if col_name == "gt_label" else "pred_label"
+            # [Context: infer results of exp]
+            # ! pred_label column is set to "None", so if we do not specify dtype for it, it will be loaded as NaN type, but we need str type here
+            df = pd.read_csv(
+                path,
+                sep=";",
+                usecols=["frame_idx", val_col],
+                encoding="utf-8",
+                dtype={val_col: str},
+                keep_default_na=False,
+            )  # ty:ignore[no-matching-overload]
+
+            # all unique values is val_col, must not any nan values
+            if df[val_col].isna().any():
+                raise ValueError(
+                    f"Column '{val_col}' in {path} contains NaN values for col_name={col_name}"
+                )
+
+            # convert to lower case of val_col
+            df[val_col] = df[val_col].str.lower()
+
+            # Standardise to 'frame_id' + 'col_name'
+            return df.rename(columns={"frame_idx": "frame_id", val_col: col_name})
+
+        exp_path = Path(exp_dir)
+
+        # 1. Setup: Load Config to find Dataset Path
+        config_file = exp_path / "__config.yaml"
+        if not config_file.exists():
+            raise FileNotFoundError(f"Config file missing: {config_file}")
+
+        cfg_data = yamlfile.load_yaml(str(config_file), to_dict=True)
+        exp_cfg = Config.from_custom_yaml_file_or_str(cfg_data.get("original-yaml-str"))
+        dataset_dir = Path(exp_cfg.dbsetCfg.dir_path)  # ty:ignore[invalid-argument-type]
+
+        # 2. Discovery: Find Baseline Dir & Video Files
+        baseline_dir = _find_bl_notemp_dir(
+            exp_path,
+            exp_cfg.dbsetCfg.name,  # ty:ignore[invalid-argument-type]
+        )
+
+        video_files = fs.filter_files_by_extension(
+            str(dataset_dir), [".mp4", ".avi", ".mov", ".mkv"], recursive=True
+        )
+
+        # 3. Processing: Define Tracks & Iterate
+        dfs = []
+
+        # We merge these tracks onto the Ground Truth anchor
+        # Format: (directory, column_name)
+        exp_col_name = shorten_exp_name_func(exp_path.name)
+        to_merge_series = [(exp_path, exp_col_name)]
+        if baseline_dir:
+            to_merge_series.insert(
+                0, (baseline_dir, shorten_exp_name_func(baseline_dir.name))
+            )
+
+        # pprint(f"to merge series: {to_merge_series}")
+
+        for vid_path in video_files:
+            vid_name = fs.get_file_name(vid_path, split_file_ext=True)[0]
+            vid_parent = Path(vid_path).parent
+
+            # A. Load Anchor (Ground Truth)
+            gt_path = vid_parent / f"{vid_name}__labels.csv"
+            df_merged = _load_frame_series(gt_path, "gt_label", required=True)
+            gt_len = len(df_merged)
+
+            # B. Merge Additional Series
+            for series_dir, col_name in to_merge_series:
+                series_path = series_dir / f"{vid_name}_results.csv"
+                df_series = _load_frame_series(series_path, col_name, required=False)
+
+                if not df_series.empty:
+                    assert len(df_series) == gt_len, (
+                        f"Length mismatch for video={vid_name} in exp_name={col_name}"
+                    )
+
+                    df_merged = pd.merge(
+                        df_merged, df_series, on="frame_id", how="left"
+                    )
+                else:
+                    df_merged[col_name] = np.nan
+
+            df_merged["video"] = vid_name
+            dfs.append(df_merged)
+
+        # 4. Finalize
+        if not dfs:
+            return pd.DataFrame(), {}, {}
+
+        combined_df = pd.concat(dfs, ignore_index=True)
+
+        # Reorder columns: Metadata -> GT -> Exp -> Base
+        start_cols = ["video", "frame_id", "gt_label"]
+        other_cols = [col for col in combined_df.columns if col not in start_cols]
+        combined_df = combined_df[start_cols + other_cols]
+
+        timeline_types_by_col = {"gt_label": "gt"}
+        for col in other_cols:
+            timeline_types_by_col[col] = exp_name_to_timeline_type(col)
+
+        check_cols = ["gt_label"] + other_cols
+        unique_by_cols = {col: list(combined_df[col].unique()) for col in check_cols}
+
+        return combined_df, timeline_types_by_col, unique_by_cols
+
+    @staticmethod
+    def exp_dir_to_timeline_data(exp_dir: Path) -> tuple[pd.DataFrame, Dict[str, str]]:
+        """Loads timeline data and configuration from an experiment directory."""
+        data_path = exp_dir / "timeline_data.csv"
+        config_path = exp_dir / "timeline_config.yaml"
+
+        df = pd.read_csv(data_path)
+        cols_to_types = {
+            "algo_v3": "skip",
+            "baseline": "no_skip",
+            "gt_label": "gt",
+        }  # Example mapping
+
+        return df, cols_to_types
+
+    # {'gt_label': 'gt', 'no_temp_method': 'no_skip', 'temp_method_motion_block': 'skip'}
+    # {
+    # │   'gt_label': ['fire_smoke', 'none'],
+    # │   'no_temp_method': ['fire', 'smokeonly', 'none'],
+    # │   'temp_method_motion_block': ['skipped', 'fire', 'smokeonly', 'none']
+    # }
+    @classmethod
+    def run_exp_report(
+        cls, exp_dir: Path, title: str, table_mode: Literal["p", "fc", "pfc"]
+    ):
+        # from exp_dir, do something to get the dataframe and cols_to_types
+        df, cols_to_types = cls.exp_dir_to_timeline_data(exp_dir)
+        report_generator = cls(cols_to_types)
+        output_path = exp_dir / "timeline_report.html"
+        report_generator.run(df, str(output_path), title=title, table_mode=table_mode)
 
     def run(
         self,

@@ -223,7 +223,7 @@ class Config(ExpBaseCfg):
     general: GeneralCfg
     inferCfg: InferConfig
     modelCfg: ModelConfig
-    orignal_yaml_str: Optional[str] = None
+    original_yaml_str: Optional[str] = None
 
     def save_to_outdir(
         self, filename: str = "__config.yaml", outdir=None, override: bool = False
@@ -361,7 +361,7 @@ class Config(ExpBaseCfg):
     @classmethod
     def from_yaml_str(cls, yaml_str: str) -> "Config":
         instance = Config.from_yaml(yaml_str)
-        instance.orignal_yaml_str = yaml_str  # ty:ignore[invalid-assignment]
+        instance.original_yaml_str = yaml_str  # ty:ignore[invalid-assignment]
         # 2. Configuration for dynamic loading
         # Map: Attribute Name -> (Class Type, Folder Name Suffix)
         # Note: Logic assumes list attribute is "list_" + suffix + "s"

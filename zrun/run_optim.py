@@ -98,7 +98,7 @@ def main():
             optim_cfgs = optim_param_gen.expand()
             for optim_param_set in optim_cfgs:
                 base_cfg = Config.from_custom_yaml_file_or_str(
-                    cfg_item.orignal_yaml_str  # ty:ignore[invalid-argument-type]
+                    cfg_item.original_yaml_str  # ty:ignore[invalid-argument-type]
                 )
                 # ! only update the content of extra_cfgs
                 optim_params = optim_param_set["extra_cfgs"]

@@ -36,7 +36,7 @@ class UFireIndoorCsvLoader(BaseCsvLoader):
 
     def get_gt(self, video_name: str, num_frames: int, pred_df: pd.DataFrame) -> list:
         # 1. Get Path Mapping from Config
-        recursive = self.cfg.dbsetCfg.extra_cfgs.get("ds_recursive", False)
+        recursive = self.cfg.dbsetCfg.extra_cfgs.get("ds_recursive", False)  # ty:ignore[possibly-missing-attribute]
         vname2path_dict = self.cfg.dbsetCfg.get_vname2path(recursive=recursive)
 
         # 2. Construct Label File Path
