@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from typing import Dict, Literal, Callable, Optional
+from typing import Dict, Literal, Callable, Optional, Union
 from halib import *
 from src.results.timeline.data_parser import TimelineProcessor, TimelineConfig
 from src.config import Config
@@ -367,14 +367,20 @@ class TimelineReportGen:
 
     @staticmethod
     def gen_TlReport_exp(
-        exp_dir: Path, title: str, table_mode: Literal["p", "fc", "pfc"] = "p"
+        exp_dir: Union[Path, str],
+        title: Optional[str] = None,
+        table_mode: Literal["p", "fc", "pfc"] = "p",
     ):
+        exp_dir = Path(exp_dir)
+
         # from exp_dir, do something to get the dataframe and cols_to_types
         df, cols_to_types = TimelineReportGen.get_timeline_csv_path_df(
             str(exp_dir), do_normalize=True
         )
         report_generator = TimelineReportGen(cols_to_types)
         output_path = exp_dir / "timeline_report.html"
+        if title is None:
+            title = f"Timeline Report - {exp_dir.name}"
         report_generator.generate(
             df, str(output_path), title=title, table_mode=table_mode
         )
