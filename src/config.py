@@ -86,6 +86,7 @@ class InferConfig(YAMLWizard):
     log_transforms: bool
     use_profiler: bool
     verbose: bool
+    save_timeline_vis: Optional[bool] = True
 
 
 @dataclass

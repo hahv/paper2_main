@@ -24,3 +24,4 @@ zout/*
 
 __archived/datasets
 src/.slack_env.yaml
+uv.lock

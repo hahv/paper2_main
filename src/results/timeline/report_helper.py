@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from typing import Dict, Literal, Callable
+from typing import Dict, Literal, Callable, Optional
 from halib import *
 from src.results.timeline.data_parser import TimelineProcessor, TimelineConfig
 from src.config import Config
@@ -33,6 +33,53 @@ class TimelineReportGen:
             if part.startswith("mt_"):
                 return part[3:]  # Remove 'mt_' prefix
         return exp_name  # Fallback to full name if no 'mt_' part found
+
+    @staticmethod
+    def default_sort_func_tlreport(df: pd.DataFrame) -> pd.DataFrame:
+        sort_cols = []
+        ascending_vals = []
+
+        # 1. Priority: no_temp_method
+        # Check for columns under 'no_temp_method'
+        if "no_temp_method" in df.columns.get_level_values(0):
+            for sub_col in ["Miss (FN)", "False Alarm (FP)"]:
+                col_tuple = ("no_temp_method", sub_col)
+                if col_tuple in df.columns:
+                    sort_cols.append(col_tuple)
+                    ascending_vals.append(False)
+
+        # 2. Priority: temp_method*
+        # Check for columns starting with 'temp_method'
+        temp_cols = [
+            c
+            for c in df.columns.get_level_values(0).unique()
+            if str(c).startswith("temp_method")
+        ]
+
+        for t_col in temp_cols:
+            for sub_col in ["Miss (FN)", "Waste (FP)"]:
+                col_tuple = (t_col, sub_col)
+                if col_tuple in df.columns:
+                    sort_cols.append(col_tuple)
+                    ascending_vals.append(False)
+
+        # Separate TOTAL row to keep it at top
+        total_col = (" ", "VIDEO NAME")
+        if total_col in df.columns:
+            is_total = df[total_col] == "TOTAL"
+            df_total = df[is_total]
+            df_rest = df[~is_total]
+        else:
+            df_total = pd.DataFrame()
+            df_rest = df
+
+        if sort_cols:
+            df_rest = df_rest.sort_values(by=sort_cols, ascending=ascending_vals)
+
+        if not df_total.empty:
+            return pd.concat([df_total, df_rest], ignore_index=True)
+
+        return df_rest
 
     @staticmethod
     # ! col_name is the shortened name
@@ -125,6 +172,7 @@ class TimelineReportGen:
         cfg_data = yamlfile.load_yaml(str(config_file), to_dict=True)
         exp_cfg = Config.from_custom_yaml_file_or_str(cfg_data.get("original-yaml-str"))
         dataset_dir = Path(exp_cfg.dbsetCfg.dir_path)  # ty:ignore[invalid-argument-type]
+        assert dataset_dir.exists(), f"Dataset dir not found: {dataset_dir}"
 
         # 2. Discovery: Find Baseline Dir & Video Files
         baseline_dir = _find_bl_notemp_dir(
@@ -313,7 +361,9 @@ class TimelineReportGen:
                 pprint(f"[INFO] Report generated at: ⏬")
                 pprint_local_path(outfile, get_wins_path=True)
             except Exception as e:
-                pprint(f"[ERROR] Failed to generate report for {exp_dir.name}: {e}")
+                with ConsoleLog("Error Generating Report"):
+                    pprint(exp_dir.name)
+                    pprint(f"   >>>[ERROR] {e}")
 
     @staticmethod
     def gen_TlReport_exp(
@@ -336,6 +386,9 @@ class TimelineReportGen:
         output_path: str,
         title: str = "Timeline Report",
         table_mode: Literal["p", "fc", "pfc"] = "p",
+        sort_func_tlreport_df: Optional[
+            Callable[[pd.DataFrame], pd.DataFrame]
+        ] = default_sort_func_tlreport,
     ):
         """
         Main entry point: Process dataframe and generate HTML report.
@@ -424,6 +477,9 @@ class TimelineReportGen:
 
         # Select and reorder
         report_df = report_df[final_cols]
+        # ! Sort Rows if needed (Before generating HTML, and saving CSV)
+        if sort_func_tlreport_df:
+            report_df = sort_func_tlreport_df(report_df)
 
         # 3. Render HTML
         self.render_html(report_df, styles_map, output_path, title)
@@ -605,7 +661,27 @@ class TimelineReportGen:
                 h2 {{ margin: 0 0 15px 0; color: #2c3e50; font-size: 22px; }}
 
                 table {{ border-collapse: separate; border-spacing: 0; min-width: 100%; }}
-                th {{ position: sticky; top: 0; z-index: 10; border-bottom: 2px solid #ccc; }}
+
+                /* Sticky Headers Configuration */
+                th {{
+                    position: sticky;
+                    z-index: 10;
+                    border-bottom: 2px solid #ccc;
+                }}
+
+                /* Level 1 Header (Method names) */
+                thead tr:nth-child(1) th {{
+                    top: 0;
+                    z-index: 15;
+                }}
+
+                /* Level 2 Header (Metric names) */
+                /* Height estimate: 13px font + 16px padding + borders ~ 35px */
+                thead tr:nth-child(2) th {{
+                    top: 35px;
+                    z-index: 14;
+                    box-shadow: 0 2px 2px -1px rgba(0,0,0,0.1);
+                }}
             </style>
         </head>
         <body>

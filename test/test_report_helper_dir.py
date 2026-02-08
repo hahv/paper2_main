@@ -20,5 +20,5 @@ def test_gen_from_csv():
     pprint_local_path(output_html_path, get_wins_path=True)
 
 if __name__ == "__main__":
-    # test_gen_from_dir()
+    test_gen_from_dir()
     test_gen_from_csv()

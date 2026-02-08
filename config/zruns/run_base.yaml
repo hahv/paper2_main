@@ -44,4 +44,5 @@ inferCfg:
   calc_metrics: true
   log_transforms: true
   use_profiler: true
+  save_timeline_vis:  true
   verbose: false
