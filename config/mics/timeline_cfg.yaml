@@ -9,19 +9,12 @@ gt:
   timeline:
     labels_colors:
       FireSmoke: "#fc6065"
-      None: "#2ecc71"
+      None: "#95a5a6" # Changed to Gray for neutral background. Avoids confusion with "Correct" Green.
 
   # Reporting: Statistics Table settings
   table:
     include: true  # Single source of truth for visibility
-    highlight_rules:
-      # If FireSmoke % is < 20%, highlight red (Example logic)
-      FireSmoke:
-        condition: "< 20"
-        color: "#fc6065"
-      None:
-        condition: ">= 20"
-        color: "#2ecc71"
+    # highlight_rules: Removed for GT. Statistics are reference values, not performance metrics to alert on.
 
 # 2. NO SKIP (Baseline)
 no_skip:
@@ -32,18 +25,18 @@ no_skip:
     labels_colors:
       Correct: "#2ecc71"           # Green
       False Alarm (FP): "#f1c40f"  # Gold
-      Miss (FN): "#e74c3c"         # Red
+      Miss (FN): "#8e44ad"         # Purple. Matches 'skip' method Miss color for consistency.
 
   table:
     include: true
     highlight_rules:
-      # Highlight Miss (FN) if > 10%
+      # Highlight Miss (FN)
       Miss (FN):
-        condition: "> 10"
-        color: "#e74c3c"
+        condition: "> 1"
+        color: "#8e44ad"
       # Highlight False Alarm (FP) if > 15%
       False Alarm (FP):
-        condition: "> 15"
+        condition: "> 2"
         color: "#f1c40f"
     # Implicitly no highlighting if 'highlight_rules' is missing
 
@@ -64,7 +57,7 @@ skip:
     highlight_rules:
       # Highlight Miss (FN) if > 5%
       Miss (FN):
-        condition: "> 5"
+        condition: "> 1"
         color: "#8e44ad"
       # Highlight Waste (FP) if > 10%
       Waste (FP):
