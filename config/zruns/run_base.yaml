@@ -1,13 +1,13 @@
 general:
   seed: 1
-  skip_exp_if_exists: true # ! skip if same experiment with same config existed
+  skip_exp_if_exists: false # ! skip if same experiment with same config existed
   is_optim_mode: false # ! set to true when doing hyper-parameter optimization
   project_dir: /mnt/e/SyncData/paper2_main
   outdir: zout/zruns
   computer_name: null # PC name that run the experiment
   # time_stamp: 20250729.171542 #  add to outdir automatically, allow to resume training
 
-  time_stamp: null # will be set to current time if not provided
+  time_stamp: 20260209.142136 # null # will be set to current time if not provided
   log_cfg:
     wandb_cfg:
       project: "paper2_main"

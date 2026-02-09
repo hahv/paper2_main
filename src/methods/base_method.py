@@ -174,7 +174,11 @@ class BaseMethod(ABC):
             self.profiler.report_and_plot(outdir=self.outdir)
 
         if self.cfg.inferCfg.save_timeline_vis:
-            TlReportGen.gen_TlReport_exp(self.outdir)
+            with ConsoleLog("Generate timeline report"):
+                try:
+                    TlReportGen.gen_TlReport_exp(self.outdir)
+                except Exception as e:
+                    console.print(f"[red]Failed to generate timeline report: {e}[/red]")
 
     def before_infer_video(self, video_path: str):
         """Hook method called before starting inference on a video."""

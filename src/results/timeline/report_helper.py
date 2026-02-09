@@ -215,12 +215,21 @@ class TlReportGen:
                 df_series = _load_frame_series(series_path, col_name, required=False)
 
                 if not df_series.empty:
-                    assert len(df_series) == gt_len, (
-                        f"Length mismatch for video={vid_name} in exp_name={col_name}"
-                    )
+                    # assert len(df_series) == gt_len, (
+                    #     f"[Error][Video={vid_name}] Mismatched frame count for gt ({gt_len}) vs series data for col_name={col_name} ({len(df_series)})"
+                    # )
 
+                    if len(df_series) != gt_len:
+                        console.print(
+                            f"[yellow][Warning][Video={vid_name}] Mismatched frame count for gt ({gt_len}) vs series data for col_name={col_name} ({len(df_series)}). Using inner join to align frames.[/yellow]"
+                        )
+                    # "Inner" join ensures only frame_ids present in BOTH dataframes remain.
+                    # If df_series is missing rows, df_merged will shrink to match.
                     df_merged = pd.merge(
-                        df_merged, df_series, on="frame_id", how="left"
+                        df_merged,
+                        df_series[["frame_id", col_name]],
+                        on="frame_id",
+                        how="inner",
                     )
                 else:
                     df_merged[col_name] = np.nan
@@ -655,7 +664,7 @@ class TlReportGen:
         <head>
             <title>{title}</title>
             <style>
-                body {{ font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; color: #333; }}
+                body {{  font-family: 'CMU Serif', 'Times New Roman', serif; margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; color: #333; }}
 
                 #top-pane {{ flex: 0 0 auto; background: #fff; padding: 15px 30px; border-bottom: 4px solid #eee; z-index: 20; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }}
                 #bottom-pane {{ flex: 1 1 auto; overflow: auto; padding: 20px 30px; background: #fdfdfd; }}
