@@ -13,7 +13,7 @@ class TlReportGen:
     Generates an HTML report for timeline visualization using TimelineProcessor.
     """
 
-    FIX_COLUMNS = ["video", "frame_id", "gt_label"]
+    FIX_COLUMNS = ["video", "video_path", "frame_id", "gt_label"]
     CSV_PATH_DF_COLUMNS = ["video", "gt_csv_path"]
     NOTEMP_MT_PATTERN = "mt_no_temp_method"
 
@@ -109,7 +109,6 @@ class TlReportGen:
         Return:
             combined_df (pd.DataFrame): Merged DataFrame with frame-level labels.
             timeline_types_by_col (Dict[str, str]): Mapping of column names to timeline types
-            unique_by_cols (Dict[str, list]): Unique values for each column, e.g: gt_label: ['fire', 'no_fire'], "temp_method_motion_block": ['fire', 'no_fire', "skip"]
         """
 
         def _find_bl_notemp_dir(exp_path: Path, ds_name: str) -> Path | None:
@@ -235,6 +234,7 @@ class TlReportGen:
                     df_merged[col_name] = np.nan
 
             df_merged["video"] = vid_name
+            df_merged["video_path"] = str(os.path.abspath(vid_path))
             dfs.append(df_merged)
 
         # 4. Finalize
@@ -318,6 +318,16 @@ class TlReportGen:
         # Load Dataframe with MultiIndex columns (2 header rows)
         df = pd.read_csv(csv_path, header=[0, 1], sep=";", encoding="utf-8")
 
+        # Drop VIDEO_PATH if present (ignore it for reconstruction/visualization)
+        # Check if any column has 'VIDEO_PATH' (case-insensitive) in either level
+        cols_to_drop = [
+            c
+            for c in df.columns
+            if "video_path" in str(c[1]).lower() or "video_path" in str(c[0]).lower()
+        ]
+        if cols_to_drop:
+            df.drop(columns=cols_to_drop, inplace=True)
+
         # Deduce cols_to_types
         cols_to_types = {}
         # Level 0 contains Method names. Level 1 contains Outcomes.
@@ -390,6 +400,10 @@ class TlReportGen:
         df, cols_to_types = TlReportGen.get_timeline_csv_path_df(
             str(exp_dir), do_normalize=True
         )
+        # # !debug
+        # csvfile.fn_display_df(df.head(5))
+        # pprint(cols_to_types)
+        # assert False, "stop"
         report_generator = TlReportGen(cols_to_types)
         output_path = exp_dir / "timeline_report.html"
         if title is None:
@@ -437,22 +451,30 @@ class TlReportGen:
         # Prepare list for new columns (using dict for alignment)
         frames_list = []
         viz_list = []
+        path_list = []
 
         # Iterate stats_df.index to exact order (includes 'TOTAL')
         for video_name in stats_df.index:
             if video_name in video_groups:
                 vid_df = video_groups[video_name]
+                # !debug
+                # csvfile.fn_display_df(vid_df.head(5))
+                # assert False, "stop"
                 frames = len(vid_df)
                 viz = self.generate_timeline_html(vid_df, styles_map)
+                path = str(vid_df["video_path"].iloc[0]) if "video_path" in vid_df.columns else ""
             elif video_name == "TOTAL":
                 frames = sum(len(v) for v in video_groups.values())
                 viz = "-"
+                path = "TOTAL"
             else:
                 frames = 0
                 viz = "-"
+                path = ""
 
             frames_list.append(frames)
             viz_list.append(viz)
+            path_list.append(path)
 
         # 3. Construct Final Report DataFrame with MultiIndex Columns
         # Filter existing stats_df columns based on config `include`
@@ -470,6 +492,7 @@ class TlReportGen:
         report_df[(" ", "FRAMES")] = frames_list
         report_df[(" ", "VISUALIZATION")] = viz_list
         report_df[(" ", "VIDEO NAME")] = report_df.index
+        report_df[(" ", "VIDEO_PATH")] = path_list
 
         # Reset index (drop=True since we already copied it to a column)
         report_df.reset_index(drop=True, inplace=True)
@@ -488,6 +511,7 @@ class TlReportGen:
         final_cols = (
             [
                 (" ", "VIDEO NAME"),
+                (" ", "VIDEO_PATH"),
                 (" ", "FRAMES"),
             ]
             + method_cols
@@ -592,6 +616,9 @@ class TlReportGen:
             )
             .hide(axis="index")
         )
+
+        if (" ", "VIDEO_PATH") in df_report.columns:
+            styler.hide(axis="columns", subset=[(" ", "VIDEO_PATH")])
 
         # Highlight Rules logic updated for MultiIndex columns
         def highlight_cells(s):

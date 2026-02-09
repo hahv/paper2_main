@@ -182,7 +182,7 @@ class TLParserFactory:
 # 4. Processor (The Driver)
 # ======================================================
 class TimelineProcessor:
-    FIXED_COLS = ["video", "frame_id", "gt_label"]
+    FIXED_COLS = ["video", "video_path", "frame_id", "gt_label"]
 
     @classmethod
     def proc_dataframe(
