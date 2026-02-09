@@ -23,7 +23,8 @@ dependencies = [
     "optuna-dashboard",
     "moviepy==1.0.3",
     "ipynbname",
-    "typed-argument-parser"
+    "typed-argument-parser",
+    "lightning"
 
 ]
 
