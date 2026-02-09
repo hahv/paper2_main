@@ -10,7 +10,7 @@ sys.path.append("/mnt/e/SyncData/paper2_main")
 
 from halib import *
 from src.results.timeline.data_parser import TimelineConfig
-from src.results.timeline.report_helper import TimelineReportGen
+from src.results.timeline.report_helper import TlReportGen
 
 # ==========================================
 # 1. SETUP MOCK CONFIGURATION (Same as test_data_parser.py)
@@ -125,7 +125,7 @@ def main():
 
         print(f"[INFO] Generated DataFrame with {len(df)} rows across {df['video'].nunique()} videos.")
 
-        generator = TimelineReportGen(cols_to_timeline_types)
+        generator = TlReportGen(cols_to_timeline_types)
         generator.generate(df, output_html, title="Dynamic Timeline Report v2", table_mode="p")
 
     print("[SUCCESS] Report generated.")

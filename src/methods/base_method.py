@@ -19,7 +19,7 @@ from src.utils import get_cls_in_pkg
 import torch.multiprocessing as mp
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
-from src.results.timeline.report_helper import TimelineReportGen
+from src.results.timeline.report_helper import TlReportGen
 
 # Constants for package paths (avoids magic strings scattered in code)
 PKG_METHODS = "src.methods"
@@ -174,7 +174,7 @@ class BaseMethod(ABC):
             self.profiler.report_and_plot(outdir=self.outdir)
 
         if self.cfg.inferCfg.save_timeline_vis:
-            TimelineReportGen.gen_TlReport_exp(self.outdir)
+            TlReportGen.gen_TlReport_exp(self.outdir)
 
     def before_infer_video(self, video_path: str):
         """Hook method called before starting inference on a video."""

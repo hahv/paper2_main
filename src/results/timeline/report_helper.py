@@ -8,14 +8,14 @@ from pathlib import Path
 from halib.filetype import yamlfile
 
 
-class TimelineReportGen:
+class TlReportGen:
     """
     Generates an HTML report for timeline visualization using TimelineProcessor.
     """
 
     FIX_COLUMNS = ["video", "frame_id", "gt_label"]
     CSV_PATH_DF_COLUMNS = ["video", "gt_csv_path"]
-    NOTEMP_METHOD_PATTERN = "mt_no_temp_method"
+    NOTEMP_MT_PATTERN = "mt_no_temp_method"
 
     def __init__(self, cols_to_types: Dict[str, str]):
         self.cols_to_types = cols_to_types
@@ -114,12 +114,14 @@ class TimelineReportGen:
 
         def _find_bl_notemp_dir(exp_path: Path, ds_name: str) -> Path | None:
             """Heuristic to find the latest 'no_temp' sibling directory."""
+            if TlReportGen.NOTEMP_MT_PATTERN in exp_path.name:
+                return None  # Current is already no_temp_method
             candidates = [
                 p
                 for p in exp_path.parent.iterdir()
                 if p.is_dir()
                 and p != exp_path
-                and TimelineReportGen.NOTEMP_METHOD_PATTERN in p.name
+                and TlReportGen.NOTEMP_MT_PATTERN in p.name
                 and f"ds_{ds_name}" in p.name
             ]
             # Return latest by name (lexicographical sort usually works for timestamps)
@@ -233,7 +235,7 @@ class TimelineReportGen:
         combined_df = pd.concat(dfs, ignore_index=True)
 
         # Reorder columns: Metadata -> GT -> Exp -> Base
-        start_cols = TimelineReportGen.FIX_COLUMNS
+        start_cols = TlReportGen.FIX_COLUMNS
         other_cols = [col for col in combined_df.columns if col not in start_cols]
         combined_df = combined_df[start_cols + other_cols]
 
@@ -242,7 +244,7 @@ class TimelineReportGen:
             timeline_types_by_col[col] = exp_name_to_timeline_type(col)
 
         if do_normalize:
-            combined_df = TimelineReportGen.norm_timeline_df(combined_df)
+            combined_df = TlReportGen.norm_timeline_df(combined_df)
         return combined_df, timeline_types_by_col
 
     @staticmethod
@@ -250,12 +252,12 @@ class TimelineReportGen:
         """
         Get unique values for each column in the dataframe.
         """
-        assert all(col in df.columns for col in TimelineReportGen.FIX_COLUMNS), (
-            f"This function only supports dataframes with fixed columns: {TimelineReportGen.FIX_COLUMNS} - for timeline dataframe"
+        assert all(col in df.columns for col in TlReportGen.FIX_COLUMNS), (
+            f"This function only supports dataframes with fixed columns: {TlReportGen.FIX_COLUMNS} - for timeline dataframe"
         )
         unique_by_cols = {}
         for col in df.columns:
-            if col in TimelineReportGen.FIX_COLUMNS[:-1]:  # skip 'video' and 'frame_id'
+            if col in TlReportGen.FIX_COLUMNS[:-1]:  # skip 'video' and 'frame_id'
                 continue
             unique_by_cols[col] = list(df[col].unique())
         return unique_by_cols
@@ -287,7 +289,7 @@ class TimelineReportGen:
 
         df = df.copy()
         for col in df.columns:
-            if col in TimelineReportGen.FIX_COLUMNS[:-1]:  # skip 'video' and 'frame_id'
+            if col in TlReportGen.FIX_COLUMNS[:-1]:  # skip 'video' and 'frame_id'
                 continue
             df[col] = df[col].apply(lambda x: _standardize_label(col, x))
         return df
@@ -324,7 +326,7 @@ class TimelineReportGen:
                 continue
 
             try:
-                t_type = TimelineReportGen.col_name_to_timeline_type(col)
+                t_type = TlReportGen.col_name_to_timeline_type(col)
                 cols_to_types[col] = t_type
             except ValueError:
                 pass  # Not a recognized method column
@@ -334,7 +336,7 @@ class TimelineReportGen:
         for col, t_type in cols_to_types.items():
             styles_map[col] = TimelineConfig.get_timeline_dict(t_type)
 
-        gen = TimelineReportGen(cols_to_types)
+        gen = TlReportGen(cols_to_types)
         gen.render_html(df, styles_map, output_html_path, title)
 
         with ConsoleLog("Reconstructed Report"):
@@ -353,7 +355,7 @@ class TimelineReportGen:
         for exp_dir in exp_dirs:
             pprint(f"[INFO] Gen timeline report for exp: {exp_dir.name}")
             try:
-                outfile = TimelineReportGen.gen_TlReport_exp(
+                outfile = TlReportGen.gen_TlReport_exp(
                     exp_dir=exp_dir,
                     title=f"Timeline Report - {exp_dir.name}",
                     table_mode=table_mode,
@@ -374,10 +376,10 @@ class TimelineReportGen:
         exp_dir = Path(exp_dir)
 
         # from exp_dir, do something to get the dataframe and cols_to_types
-        df, cols_to_types = TimelineReportGen.get_timeline_csv_path_df(
+        df, cols_to_types = TlReportGen.get_timeline_csv_path_df(
             str(exp_dir), do_normalize=True
         )
-        report_generator = TimelineReportGen(cols_to_types)
+        report_generator = TlReportGen(cols_to_types)
         output_path = exp_dir / "timeline_report.html"
         if title is None:
             title = f"Timeline Report - {exp_dir.name}"
