@@ -1,4 +1,5 @@
-dir_path: /mnt/d/zdataset_paper2/build_video_dataset/my_firesmoke_indoor
+dir_path: datasets/UFireIndoorFull
 extra_cfgs:
   ds_metric_src: csv_metric_src
   ds_recursive: true
+  csv_loader_cls: ufireindoor_csv_loader.UFireIndoorCsvLoader

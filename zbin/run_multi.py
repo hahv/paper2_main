@@ -22,7 +22,7 @@ from halib.filetype import yamlfile
 class RunOptimArgs(Tap):
     base_yaml: str = r"./config/zruns/run_base.yaml"
     sweep_yaml: str = r"./config/zruns/run_optim.yaml"
-    clean_slack: bool = True
+    clean_slack: bool = False
 
 
 def get_opt_cfg(method_name: str):
@@ -147,7 +147,7 @@ def main():
         cfg_wandb_logger.experiment.log({"msg": cfg_run_status})
 
         method_name = current_cfg.methodCfg.name
-        wandb_params_cfg_path = get_wandb_params_cfg(method_name)  # ty:ignore[invalid-argument-type]
+        wandb_params_cfg_path = get_wandb_params_cfg(method_name)
         wandb_params_dict = {}
         if wandb_params_cfg_path:
             wandb_params_cfg_dict = yamlfile.load_yaml(

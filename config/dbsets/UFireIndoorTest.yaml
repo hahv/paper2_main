@@ -1,4 +1,4 @@
-dir_path: /mnt/e/zDatasets/paper2_datasets/test
+dir_path: datasets/UFireIndoor2/test
 extra_cfgs:
   ds_metric_src: csv_metric_src
   ds_recursive: true
