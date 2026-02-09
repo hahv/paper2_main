@@ -38,7 +38,7 @@ class TlReportGen:
     @staticmethod
     def default_sort_func_tlreport(df: pd.DataFrame) -> pd.DataFrame:
         """
-        Sorts the report dataframe by specific error columns (Miss, False Alarm).
+        Sorts the report dataframe by specific error columns defined in timeline_cfg.yaml.
         Handles table_mode formats:
           - 'p':   "30.5%"
           - 'fc':  "100"
@@ -54,34 +54,50 @@ class TlReportGen:
             df_total = pd.DataFrame()
             df_rest = df.copy()
 
-        # 2. Identify Sort Columns (Priority: Baseline errors -> Proposed errors)
-        sort_cols = []
-        ascending_vals = []
+        # 2. Collect Sort Instructions from Config
+        # List of tuples: (order, column_tuple, ascending)
+        sort_instructions = []
 
-        # Priority A: no_temp_method (Baseline)
-        if "no_temp_method" in df.columns.get_level_values(0):
-            # Sort by Miss first, then False Alarm
-            for sub_col in ["Miss (FN)", "False Alarm (FP)"]:
-                col_tuple = ("no_temp_method", sub_col)
-                if col_tuple in df.columns:
-                    sort_cols.append(col_tuple)
-                    ascending_vals.append(False)  # Descending (High Error first)
+        # Iterate over top-level columns (Methods)
+        method_cols = df.columns.get_level_values(0).unique()
 
-        # Priority B: temp_method (Proposed)
-        temp_cols = [
-            c
-            for c in df.columns.get_level_values(0).unique()
-            if str(c).startswith("temp_method")
-        ]
-        for t_col in temp_cols:
-            for sub_col in ["Miss (FN)", "Waste (FP)"]:
-                col_tuple = (t_col, sub_col)
-                if col_tuple in df.columns:
-                    sort_cols.append(col_tuple)
-                    ascending_vals.append(False)
+        for method_col in method_cols:
+            if str(method_col).strip() == "" or method_col == " ":
+                continue  # Skip metadata
 
-        if not sort_cols:
+            try:
+                # Resolve timeline type (e.g. 'no_temp_method' -> 'no_skip')
+                t_type = TlReportGen.col_name_to_timeline_type(method_col)
+                cfg = TimelineConfig.get_timeline_dict(t_type)
+
+                sort_cfg = cfg.get("table", {}).get("sort_by", {})
+
+                if not sort_cfg:
+                    continue
+
+                # sort_cfg is e.g. {'Miss (FN)': {'direction': 'desc', 'order': 1}, ...}
+                for outcome_key, rule in sort_cfg.items():
+                    col_tuple = (method_col, outcome_key)
+                    if col_tuple in df.columns:
+                        order = rule.get("order", 999)
+                        direction = rule.get("direction", "asc")
+                        ascending = direction.lower() == "asc"
+                        sort_instructions.append((order, col_tuple, ascending))
+
+            except (ValueError, KeyError):
+                # skip columns that don't match known timeline types
+                continue
+
+        if not sort_instructions:
             return df
+
+        # Sort by 'order' (primary key)
+        sort_instructions.sort(key=lambda x: x[0])
+
+        sort_cols = [x[1] for x in sort_instructions]
+        ascending_vals = [x[2] for x in sort_instructions]
+
+        pprint(f"[Debug] Sorting criteria: {sort_instructions}")
 
         # 3. Create a Numeric Shadow DataFrame for Sorting
         # We extract the first numeric value from the string
@@ -92,14 +108,19 @@ class TlReportGen:
         extract_regex = r"^([\d\.]+)"
 
         for col in sort_cols:
-            # 1. Force string
-            s_str = df_rest[col].astype(str).str.strip()
+            try:
+                # 1. Force string and strip
+                s_str = df_rest[col].astype(str).str.strip()
 
-            # 2. Extract first number (handles %, (, ) automatically by ignoring them)
-            s_nums = s_str.str.extract(extract_regex, expand=False)
+                # 2. Extract first number (handles %, (, ) automatically by ignoring them)
+                s_nums = s_str.str.extract(extract_regex, expand=False)
 
-            # 3. Convert to float (NaN for empty/failures -> 0)
-            df_numeric[col] = pd.to_numeric(s_nums, errors="coerce").fillna(0)
+                # 3. Convert to float (NaN for empty/failures -> 0)
+                # Using errors='coerce' to turn parsing failures into NaN, then filling with 0
+                df_numeric[col] = pd.to_numeric(s_nums, errors="coerce").fillna(0)
+            except Exception:
+                # Fallback: if something fails totally, use 0
+                df_numeric[col] = 0.0
 
         # 4. Perform Sort
         sorted_index = df_numeric.sort_values(
@@ -557,25 +578,9 @@ class TlReportGen:
 
         # Select and reorder
         report_df = report_df[final_cols]
-        # ! Sort Rows if needed (Before generating HTML, and saving CSV)
-        report_df_no_viz = report_df.copy().drop(
-            columns=[
-                (" ", "VISUALIZATION"),
-                (" ", "VIDEO_PATH"),
-            ]
-        )
-        with ConsoleLog("Before Report DataFrame"):
-            csvfile.fn_display_df(report_df_no_viz.head(5))
+
         if sort_func_tlreport_df:
             report_df = sort_func_tlreport_df(report_df)
-        with ConsoleLog("Sorted Report DataFrame"):
-            report_df_no_viz = report_df.copy().drop(
-                columns=[
-                    (" ", "VISUALIZATION"),
-                    (" ", "VIDEO_PATH"),
-                ]
-            )
-            csvfile.fn_display_df(report_df_no_viz.head(5))
 
         # 3. Render HTML
         self.render_html(report_df, styles_map, output_path, title)
