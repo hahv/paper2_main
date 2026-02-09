@@ -14,7 +14,7 @@ def test_gen_from_csv():
     output_html_path = "./zout/timeline_report_reconstructed.html"
     # get name of parent dir of the csv file
     csv_parent_dir = Path(csv_path).parent
-    TlReportGen.timeline_from_tlreport_df(
+    TlReportGen.tlreport_from_csv(
         csv_path, output_html_path, title=f"[Reconstructed] {csv_parent_dir.name}"
     )
     pprint_local_path(output_html_path, get_wins_path=True)

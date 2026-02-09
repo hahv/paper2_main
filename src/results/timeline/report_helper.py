@@ -304,9 +304,9 @@ class TlReportGen:
         return df
 
     @staticmethod
-    def timeline_from_tlreport_df(
+    def tlreport_from_csv(
         csv_path: str,
-        output_html_path: str,
+        output_html_path: Optional[str] = None,
         title: str = "Timeline Report (Reconstructed)",
     ):
         """
@@ -344,6 +344,8 @@ class TlReportGen:
         styles_map = {}
         for col, t_type in cols_to_types.items():
             styles_map[col] = TimelineConfig.get_timeline_dict(t_type)
+        if output_html_path is None:
+            output_html_path = csv_path.replace(".csv", "_reconstructed.html")
 
         gen = TlReportGen(cols_to_types)
         gen.render_html(df, styles_map, output_html_path, title)
@@ -659,12 +661,13 @@ class TlReportGen:
         legend_html = self._make_legend_html(styles_map)
 
         # 2. Final HTML Assembly
+        # !#TODO: font-family: 'CMU Serif' can be use to show as in paper
         full_html = f"""
         <html>
         <head>
             <title>{title}</title>
             <style>
-                body {{  font-family: 'CMU Serif', 'Times New Roman', serif; margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; color: #333; }}
+                body {{  font-family: 'Segoe UI', serif; margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; color: #333; }}
 
                 #top-pane {{ flex: 0 0 auto; background: #fff; padding: 15px 30px; border-bottom: 4px solid #eee; z-index: 20; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }}
                 #bottom-pane {{ flex: 1 1 auto; overflow: auto; padding: 20px 30px; background: #fdfdfd; }}
