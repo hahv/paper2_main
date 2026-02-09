@@ -1,5 +1,5 @@
 general:
-  is_optim_mode: true
+  is_optim_mode: false
 dbset_selector:
   selected_dbset: ["UFireIndoor2"] # "UFireIndoorFull", "UFireIndoor2", "UFire", "DFAN", "UFireIndoorVal"
 metric_selector:
