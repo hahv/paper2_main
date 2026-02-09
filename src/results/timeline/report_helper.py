@@ -6,6 +6,7 @@ from src.results.timeline.data_parser import TimelineProcessor, TimelineConfig
 from src.config import Config
 from pathlib import Path
 from halib.filetype import yamlfile
+from halib.common.common import log_func
 
 
 class TlReportGen:
@@ -36,6 +37,7 @@ class TlReportGen:
 
     @staticmethod
     def default_sort_func_tlreport(df: pd.DataFrame) -> pd.DataFrame:
+        pprint('[INFO] Applying default sort function for timeline report dataframe.')
         sort_cols = []
         ascending_vals = []
 
@@ -74,11 +76,13 @@ class TlReportGen:
             df_rest = df
 
         if sort_cols:
+            # pprint(f'[INFO] Sorting by columns: {sort_cols} with ascending={ascending_vals}')
             df_rest = df_rest.sort_values(by=sort_cols, ascending=ascending_vals)
 
         if not df_total.empty:
+            # pprint('case 1')
             return pd.concat([df_total, df_rest], ignore_index=True)
-
+        # pprint('case 2')
         return df_rest
 
     @staticmethod
@@ -521,8 +525,24 @@ class TlReportGen:
         # Select and reorder
         report_df = report_df[final_cols]
         # ! Sort Rows if needed (Before generating HTML, and saving CSV)
+        report_df_no_viz = report_df.copy().drop(
+            columns=[
+                (" ", "VISUALIZATION"),
+                (" ", "VIDEO_PATH"),
+            ]
+        )
+        with ConsoleLog("Before Report DataFrame"):
+            csvfile.fn_display_df(report_df_no_viz.head(5))
         if sort_func_tlreport_df:
             report_df = sort_func_tlreport_df(report_df)
+        with ConsoleLog("Sorted Report DataFrame"):
+            report_df_no_viz = report_df.copy().drop(
+                columns=[
+                    (" ", "VISUALIZATION"),
+                    (" ", "VIDEO_PATH"),
+                ]
+            )
+            csvfile.fn_display_df(report_df_no_viz.head(5))
 
         # 3. Render HTML
         self.render_html(report_df, styles_map, output_path, title)
