@@ -37,53 +37,103 @@ class TlReportGen:
 
     @staticmethod
     def default_sort_func_tlreport(df: pd.DataFrame) -> pd.DataFrame:
-        pprint('[INFO] Applying default sort function for timeline report dataframe.')
-        sort_cols = []
-        ascending_vals = []
-
-        # 1. Priority: no_temp_method
-        # Check for columns under 'no_temp_method'
-        if "no_temp_method" in df.columns.get_level_values(0):
-            for sub_col in ["Miss (FN)", "False Alarm (FP)"]:
-                col_tuple = ("no_temp_method", sub_col)
-                if col_tuple in df.columns:
-                    sort_cols.append(col_tuple)
-                    ascending_vals.append(False)
-
-        # 2. Priority: temp_method*
-        # Check for columns starting with 'temp_method'
-        temp_cols = [
-            c
-            for c in df.columns.get_level_values(0).unique()
-            if str(c).startswith("temp_method")
-        ]
-
-        for t_col in temp_cols:
-            for sub_col in ["Miss (FN)", "Waste (FP)"]:
-                col_tuple = (t_col, sub_col)
-                if col_tuple in df.columns:
-                    sort_cols.append(col_tuple)
-                    ascending_vals.append(False)
-
-        # Separate TOTAL row to keep it at top
+        """
+        Sorts the report dataframe by specific error columns defined in timeline_cfg.yaml.
+        Handles table_mode formats:
+          - 'p':   "30.5%"
+          - 'fc':  "100"
+          - 'pfc': "30.5% (100)"
+        """
+        # 1. Separate TOTAL row (Always keep at top)
         total_col = (" ", "VIDEO NAME")
         if total_col in df.columns:
             is_total = df[total_col] == "TOTAL"
             df_total = df[is_total]
-            df_rest = df[~is_total]
+            df_rest = df[~is_total].copy()
         else:
             df_total = pd.DataFrame()
-            df_rest = df
+            df_rest = df.copy()
 
-        if sort_cols:
-            # pprint(f'[INFO] Sorting by columns: {sort_cols} with ascending={ascending_vals}')
-            df_rest = df_rest.sort_values(by=sort_cols, ascending=ascending_vals)
+        # 2. Collect Sort Instructions from Config
+        # List of tuples: (order, column_tuple, ascending)
+        sort_instructions = []
+
+        # Iterate over top-level columns (Methods)
+        method_cols = df.columns.get_level_values(0).unique()
+
+        for method_col in method_cols:
+            if str(method_col).strip() == "" or method_col == " ":
+                continue  # Skip metadata
+
+            try:
+                # Resolve timeline type (e.g. 'no_temp_method' -> 'no_skip')
+                t_type = TlReportGen.col_name_to_timeline_type(method_col)
+                cfg = TimelineConfig.get_timeline_dict(t_type)
+
+                sort_cfg = cfg.get("table", {}).get("sort_by", {})
+
+                if not sort_cfg:
+                    continue
+
+                # sort_cfg is e.g. {'Miss (FN)': {'direction': 'desc', 'order': 1}, ...}
+                for outcome_key, rule in sort_cfg.items():
+                    col_tuple = (method_col, outcome_key)
+                    if col_tuple in df.columns:
+                        order = rule.get("order", 999)
+                        direction = rule.get("direction", "asc")
+                        ascending = direction.lower() == "asc"
+                        sort_instructions.append((order, col_tuple, ascending))
+
+            except (ValueError, KeyError):
+                # skip columns that don't match known timeline types
+                continue
+
+        if not sort_instructions:
+            return df
+
+        # Sort by 'order' (primary key)
+        sort_instructions.sort(key=lambda x: x[0])
+
+        sort_cols = [x[1] for x in sort_instructions]
+        ascending_vals = [x[2] for x in sort_instructions]
+
+        pprint(f"[Debug] Sorting criteria: {sort_instructions}")
+
+        # 3. Create a Numeric Shadow DataFrame for Sorting
+        # We extract the first numeric value from the string
+        df_numeric = pd.DataFrame(index=df_rest.index)
+
+        # Regex to capture the first float/int at the start of the string
+        # matches: "30.5", "100", "0.0", "0"
+        extract_regex = r"^([\d\.]+)"
+
+        for col in sort_cols:
+            try:
+                # 1. Force string and strip
+                s_str = df_rest[col].astype(str).str.strip()
+
+                # 2. Extract first number (handles %, (, ) automatically by ignoring them)
+                s_nums = s_str.str.extract(extract_regex, expand=False)
+
+                # 3. Convert to float (NaN for empty/failures -> 0)
+                # Using errors='coerce' to turn parsing failures into NaN, then filling with 0
+                df_numeric[col] = pd.to_numeric(s_nums, errors="coerce").fillna(0)
+            except Exception:
+                # Fallback: if something fails totally, use 0
+                df_numeric[col] = 0.0
+
+        # 4. Perform Sort
+        sorted_index = df_numeric.sort_values(
+            by=sort_cols, ascending=ascending_vals
+        ).index
+
+        # 5. Reassemble
+        df_sorted = df_rest.loc[sorted_index]
 
         if not df_total.empty:
-            # pprint('case 1')
-            return pd.concat([df_total, df_rest], ignore_index=True)
-        # pprint('case 2')
-        return df_rest
+            return pd.concat([df_total, df_sorted])
+
+        return df_sorted
 
     @staticmethod
     # ! col_name is the shortened name
@@ -466,7 +516,11 @@ class TlReportGen:
                 # assert False, "stop"
                 frames = len(vid_df)
                 viz = self.generate_timeline_html(vid_df, styles_map)
-                path = str(vid_df["video_path"].iloc[0]) if "video_path" in vid_df.columns else ""
+                path = (
+                    str(vid_df["video_path"].iloc[0])
+                    if "video_path" in vid_df.columns
+                    else ""
+                )
             elif video_name == "TOTAL":
                 frames = sum(len(v) for v in video_groups.values())
                 viz = "-"
@@ -524,25 +578,9 @@ class TlReportGen:
 
         # Select and reorder
         report_df = report_df[final_cols]
-        # ! Sort Rows if needed (Before generating HTML, and saving CSV)
-        report_df_no_viz = report_df.copy().drop(
-            columns=[
-                (" ", "VISUALIZATION"),
-                (" ", "VIDEO_PATH"),
-            ]
-        )
-        with ConsoleLog("Before Report DataFrame"):
-            csvfile.fn_display_df(report_df_no_viz.head(5))
+
         if sort_func_tlreport_df:
             report_df = sort_func_tlreport_df(report_df)
-        with ConsoleLog("Sorted Report DataFrame"):
-            report_df_no_viz = report_df.copy().drop(
-                columns=[
-                    (" ", "VISUALIZATION"),
-                    (" ", "VIDEO_PATH"),
-                ]
-            )
-            csvfile.fn_display_df(report_df_no_viz.head(5))
 
         # 3. Render HTML
         self.render_html(report_df, styles_map, output_path, title)

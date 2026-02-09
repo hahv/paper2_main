@@ -14,7 +14,14 @@ gt:
   # Reporting: Statistics Table settings
   table:
     include: true  # Single source of truth for visibility
-    # highlight_rules: Removed for GT. Statistics are reference values, not performance metrics to alert on.
+    # ! order smaller number = higher priority
+    # sort_by:
+    #   FireSmoke:
+    #     direction: "desc"
+    #     order: 999
+    #   None:
+    #     direction: "desc"
+    #     order: 12
 
 # 2. NO SKIP (Baseline)
 no_skip:
@@ -39,6 +46,14 @@ no_skip:
         condition: "> 2"
         color: "#f1c40f"
     # Implicitly no highlighting if 'highlight_rules' is missing
+    # ! order smaller number = higher priority
+    sort_by:
+      Miss (FN):
+        direction: "desc"
+        order: 1
+      False Alarm (FP):
+        direction: "desc"
+        order: 2
 
 # 3. SKIP (Proposed Method)
 skip:
@@ -63,3 +78,11 @@ skip:
       Waste (FP):
         condition: "> 10"
         color: "#f1c40f"
+    # ! order smaller number = higher priority
+    sort_by:
+      Miss (FN):
+        direction: "desc"
+        order: 3
+      Waste (FP):
+        direction: "desc"
+        order: 4

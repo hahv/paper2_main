@@ -15,12 +15,12 @@ class TimelineConfig:
     """Singleton-like config manager."""
 
     _config: Optional[Dict] = None
-    DEFAULT_PATH = "/mnt/e/SyncData/paper2_main/config/mics/timeline_cfg.yaml"
+    DEFAULT_TIMELINE_CFG = "/mnt/e/SyncData/paper2_main/config/mics/timeline_cfg.yaml"
 
     @classmethod
     def load(cls, path: Optional[str] = None) -> Dict:
         if cls._config is None:
-            load_path = path or cls.DEFAULT_PATH
+            load_path = path or cls.DEFAULT_TIMELINE_CFG
             cls._config = yamlfile.load_yaml(load_path, to_dict=True)
         return cls._config
 
