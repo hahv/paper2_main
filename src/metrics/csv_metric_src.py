@@ -1,14 +1,11 @@
-import os
-import torch
-import numpy as np
-import pandas as pd
-from typing import Dict, Any, List, Tuple
-
 from halib import *
+import torch
+from typing import Dict, Any
+
 from src.config import Config
 from src.utils import get_cls_in_pkg
 from src.metrics.base_metric_src import BaseMetricSrc
-from src.metrics.loaders.base_csv_loader import BaseCsvLoader
+from src.metrics.loaders.base_csv_loader import BaseVideoCsvLoader
 
 
 class CsvMetricSrc(BaseMetricSrc):
@@ -34,7 +31,7 @@ class CsvMetricSrc(BaseMetricSrc):
         )
 
         # Initialize adapter
-        self.csv_loader: BaseCsvLoader = csv_loader_cls(self.cfg)
+        self.csv_loader: BaseVideoCsvLoader = csv_loader_cls(self.cfg)
 
         # Expose labels from adapter for consistency
         self.POS_LABEL = self.csv_loader.POS_LABEL
@@ -72,6 +69,7 @@ class CsvMetricSrc(BaseMetricSrc):
         # 1. Filter CSV Files
         recursive = self.cfg.dbsetCfg.extra_cfgs.get("ds_recursive", False)  # ty:ignore[possibly-missing-attribute]
         csv_files = fs.filter_files_by_extension(indir, [".csv"], recursive=recursive)
+        pprint(f"Found {len(csv_files)} CSV files in {indir}")
 
         # Filter for "_results"
         result_csv_files = [f for f in csv_files if "_results" in os.path.basename(f)]
@@ -89,7 +87,7 @@ class CsvMetricSrc(BaseMetricSrc):
 
             # B. Load GT
             video_name = pred_df["video"].iloc[0]
-            gt = self.csv_loader.get_gt(
+            gt = self.csv_loader.get_gt_df(
                 video_name=video_name, num_frames=len(pred_df), pred_df=pred_df
             )
 

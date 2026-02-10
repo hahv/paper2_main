@@ -1,48 +1,26 @@
-import os
-import pandas as pd
-from halib import *  # Assuming fs and other utils are here
-from src.metrics.loaders.base_csv_loader import BaseCsvLoader
+from halib import *
+from typing import Optional
+from src.metrics.loaders.base_csv_loader import BaseVideoCsvLoader
+from pathlib import Path
 
 
-class DFireCsvLoader(BaseCsvLoader):
+class DFireCsvLoader(BaseVideoCsvLoader):
     """
     Adapter for the DFire dataset where Ground Truth is inferred
     heuristically from the video filename (e.g., if "FP" is in name).
     """
 
-    def load_pred_df(self, csv_file: str) -> pd.DataFrame:
-        # 1. Read Raw CSV
-        df = pd.read_csv(
-            csv_file,
-            sep=";",
-            encoding="utf-8",
-            dtype={"pred_label": str, "elapsed_time": float},
-            keep_default_na=False,
-        )
-
-        # 2. Normalize Video Name
-        # Logic: Extract filename, remove _results extension
-        video_name = fs.get_file_name(csv_file, split_file_ext=True)[0]
-        video_name = video_name.replace("_results", "")
-        df["video"] = video_name
-
-        # 3. Normalize Prediction Labels
-        # Logic: If 'fire' or 'smoke' in text -> Positive
-        df["pred"] = (
-            df["pred_label"]
-            .str.lower()
-            .apply(
-                lambda x: self.POS_LABEL
-                if ("fire" in x or "smoke" in x)
-                else self.NEG_LABEL
-            )
-        )
-        return df
-
-    def get_gt(self, video_name: str, num_frames: int, pred_df: pd.DataFrame) -> list:
-        # Logic: Heuristic based on filename
-        gt_label = self.POS_LABEL
-        if "FP" in video_name:
-            gt_label = self.NEG_LABEL
-
-        return [gt_label] * num_frames
+    def get_gt_df(
+        self, video_path: str, extra_data: Optional[dict] = None
+    ) -> pd.DataFrame:
+        num_frames: int = extra_data.get("num_frames")  # ty:ignore[possibly-missing-attribute, invalid-assignment]
+        video_name = Path(video_path).name
+        data_dict = {
+            "video": [video_name] * num_frames,
+            "video_path": [video_path] * num_frames,
+            "frame_idx": list(range(num_frames)),
+        }
+        video_label  = self.NONE_LABEL if "FP" in video_name else self.FIRESMOKE_LABEL
+        data_dict[self.COL_GT] = [video_label] * num_frames
+        gt_df = pd.DataFrame(data_dict)
+        return gt_df

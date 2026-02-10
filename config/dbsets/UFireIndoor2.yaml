@@ -2,4 +2,5 @@ dir_path: datasets/UFireIndoor2
 extra_cfgs:
   ds_metric_src: csv_metric_src
   ds_recursive: true
+  ds_gt_file_pattern: "__labels.csv"
   csv_loader_cls: ufireindoor_csv_loader.UFireIndoorCsvLoader

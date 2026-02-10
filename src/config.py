@@ -87,7 +87,10 @@ class InferConfig(YAMLWizard):
     use_profiler: bool
     verbose: bool
     save_timeline_vis: Optional[bool] = True
-    timeline_table_mode: Optional[str] = "p"  # options: p (percent), fc (frame count), both (pfc)
+    timeline_table_mode: Optional[str] = (
+        "p"  # options: p (percent), fc (frame count), both (pfc)
+    )
+    csv_infer_pattern: Optional[str] = "_results.csv"
 
 
 @dataclass
@@ -124,10 +127,20 @@ class DatasetCfg(AutoNamedCfg):
         )
         return len(video_files)
 
+    def get_gt_file_pattern(self):
+        pattern: str = "__labels.csv"
+        if self.extra_cfgs is not None:
+            pattern = self.extra_cfgs.get("ds_gt_file_pattern", pattern)
+        return pattern
+
     def get_csv_labels(self, recursive=False):
         csv_files = fs.filter_files_by_extension(
             self.dir_path, [".csv"], recursive=recursive
         )
+        # only keep those that match the gt file pattern
+        gt_file_pattern = self.get_gt_file_pattern()
+        csv_files = [f for f in csv_files if gt_file_pattern in os.path.basename(f)]
+        assert len(csv_files) > 0, f"No GT CSV files found in {self.dir_path} with pattern {gt_file_pattern}"
         return csv_files
 
 
@@ -342,6 +355,18 @@ class Config(ExpBaseCfg):
         self.method_selector.post_init()
         # ! must called for generating cfg_name
         self.get_cfg_name()
+
+    # !#TODO: TO_DELETE
+    # def get_infer_csv_files(self, recursive=False):
+    #     exp_dir = self.get_outdir()
+    #     csv_files = fs.filter_files_by_extension(
+    #         exp_dir, [".csv"], recursive=recursive
+    #     )
+    #     # only keep those that match the gt file pattern
+    #     infer_pattern = self.inferCfg.csv_infer_pattern
+    #     csv_files = [f for f in csv_files if infer_pattern in os.path.basename(f)]
+    #     assert len(csv_files) > 0, f"No infer CSV files found in {exp_dir} with pattern {infer_pattern}"
+    #     return csv_files
 
     def update_optim_params(self, optim_params: Dict[str, Any]) -> None:
         """

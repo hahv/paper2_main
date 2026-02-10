@@ -41,7 +41,7 @@ class TimelineConfig:
 # ======================================================
 # 2. Parsing Logic (Decoupled)
 # ======================================================
-class TLParser(ABC):
+class TLConverter(ABC):
     """
     Base class for parsing logic.
     'timeline_type' determines which color schema to validate against.
@@ -117,12 +117,12 @@ class TLParser(ABC):
 #         }
 
 
-class TLGtParser(TLParser):
+class TLGtConverter(TLConverter):
     def parse_logic(self, df: pd.DataFrame, method_col: str) -> np.ndarray:
         return np.where(df["gt_label"] == "fire", "FireSmoke", "None")
 
 
-class NoSkipParser(TLParser):
+class NoSkipConverter(TLConverter):
     def parse_logic(self, df: pd.DataFrame, method_col: str) -> np.ndarray:
         is_gt_fire = df["gt_label"] == "fire"
         is_pred_fire = df[method_col] == "fire"
@@ -133,7 +133,7 @@ class NoSkipParser(TLParser):
         )
 
 
-class SkipParser(TLParser):
+class SkipConverter(TLConverter):
     def parse_logic(self, df: pd.DataFrame, method_col: str) -> np.ndarray:
         is_gt_fire = df["gt_label"] == "fire"
         is_skipped = df[method_col] == "skipped"
@@ -161,14 +161,14 @@ class SkipParser(TLParser):
 # 3. Factory
 # ======================================================
 class TLParserFactory:
-    _REGISTRY: Dict[str, Type[TLParser]] = {
-        "gt": TLGtParser,
-        "no_skip": NoSkipParser,
-        "skip": SkipParser,
+    _REGISTRY: Dict[str, Type[TLConverter]] = {
+        "gt": TLGtConverter,
+        "no_skip": NoSkipConverter,
+        "skip": SkipConverter,
     }
 
     @classmethod
-    def create(cls, parser_type: str) -> TLParser:
+    def create(cls, parser_type: str) -> TLConverter:
         parser_cls = cls._REGISTRY.get(parser_type)
         if not parser_cls:
             raise NotImplementedError(
