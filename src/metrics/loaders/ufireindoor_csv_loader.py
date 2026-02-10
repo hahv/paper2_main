@@ -60,7 +60,24 @@ class UFireIndoorCsvLoader(BaseCsvLoader):
         )
 
         # 4. Convert Labels
-        raw_labels = gt_df["label"].tolist()[:num_frames]
+        # ! Fix: Align GT with Preds using frame_idx to ensure correct mapping
+        if "frame_idx" in gt_df.columns and "frame_idx" in pred_df.columns:
+            # Merge to align GT labels with predicted frames
+            # Use left join to ensure we have a GT (or NaN) for every prediction
+            merged = pd.merge(
+                pred_df[["frame_idx"]],
+                gt_df[["frame_idx", "label"]],
+                on="frame_idx",
+                how="left",
+            )
+            # Fill missing labels (if any) with a default non-fire label to avoid crash
+            # Ideally, GT should cover all frames.
+            merged["label"] = merged["label"].fillna("none")
+            raw_labels = merged["label"].tolist()
+        else:
+            # Fallback to sequential assuming 1-to-1 mapping
+            raw_labels = gt_df["label"].tolist()[:num_frames]
+
         gt_list = []
         for label in raw_labels:
             if "fire" in label.lower() or "smoke" in label.lower():

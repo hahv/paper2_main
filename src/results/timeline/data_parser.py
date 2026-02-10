@@ -181,7 +181,7 @@ class TLParserFactory:
 # ======================================================
 # 4. Processor (The Driver)
 # ======================================================
-class TimelineProcessor:
+class TlProcessor:
     FIXED_COLS = ["video", "video_path", "frame_id", "gt_label"]
 
     @classmethod

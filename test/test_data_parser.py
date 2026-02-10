@@ -6,7 +6,7 @@ sys.path.append("/mnt/e/SyncData/paper2_main")
 
 from halib import *
 # Import your actual classes
-from src.results.timeline.data_parser import TimelineProcessor, TimelineConfig
+from src.results.timeline.data_parser import TlProcessor, TimelineConfig
 
 # ==========================================
 # 1. SETUP MOCK CONFIGURATION
@@ -96,7 +96,7 @@ def main():
     print("\n[INFO] Processing Dataframe with MOCK configuration...")
 
     with patch.object(TimelineConfig, "load", return_value=MOCK_YAML_CONTENT):
-        final_df, stats_df, styles_map = TimelineProcessor.proc_dataframe(
+        final_df, stats_df, styles_map = TlProcessor.proc_dataframe(
             df, cols_to_timeline_types
         )
 

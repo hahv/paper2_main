@@ -2,11 +2,10 @@ import pandas as pd
 import numpy as np
 from typing import Dict, Literal, Callable, Optional, Union
 from halib import *
-from src.results.timeline.data_parser import TimelineProcessor, TimelineConfig
+from src.results.timeline.data_parser import TlProcessor, TimelineConfig
 from src.config import Config
 from pathlib import Path
 from halib.filetype import yamlfile
-from halib.common.common import log_func
 
 
 class TlReportGen:
@@ -268,10 +267,6 @@ class TlReportGen:
                 df_series = _load_frame_series(series_path, col_name, required=False)
 
                 if not df_series.empty:
-                    # assert len(df_series) == gt_len, (
-                    #     f"[Error][Video={vid_name}] Mismatched frame count for gt ({gt_len}) vs series data for col_name={col_name} ({len(df_series)})"
-                    # )
-
                     if len(df_series) != gt_len:
                         console.print(
                             f"[yellow][Warning][Video={vid_name}] Mismatched frame count for gt ({gt_len}) vs series data for col_name={col_name} ({len(df_series)}). Using inner join to align frames.[/yellow]"
@@ -489,7 +484,7 @@ class TlReportGen:
             pfc - percentages and frame counts
         """
         # 1. Process Data using the Logic Core
-        final_df, stats_df, styles_map = TimelineProcessor.proc_dataframe(
+        final_df, stats_df, styles_map = TlProcessor.proc_dataframe(
             df, self.cols_to_types, table_mode=table_mode
         )
 

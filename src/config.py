@@ -87,6 +87,7 @@ class InferConfig(YAMLWizard):
     use_profiler: bool
     verbose: bool
     save_timeline_vis: Optional[bool] = True
+    timeline_table_mode: Optional[str] = "p"  # options: p (percent), fc (frame count), both (pfc)
 
 
 @dataclass

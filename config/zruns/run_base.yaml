@@ -7,7 +7,7 @@ general:
   computer_name: null # PC name that run the experiment
   # time_stamp: 20250729.171542 #  add to outdir automatically, allow to resume training
 
-  time_stamp: 20260209.142136 # null # will be set to current time if not provided
+  time_stamp: null # 20260209.142136 # null # will be set to current time if not provided
   log_cfg:
     wandb_cfg:
       project: "paper2_main"
@@ -45,4 +45,5 @@ inferCfg:
   log_transforms: true
   use_profiler: true
   save_timeline_vis:  true
+  timeline_table_mode: fc # options: p (percent), fc (frame count), both (pfc)
   verbose: false

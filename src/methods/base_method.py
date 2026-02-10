@@ -78,6 +78,7 @@ class MethodFactory:
         return method_cls(cfg=config, rs_handlers=rs_handlers, *args, **kwargs)
 
 
+
 class BaseMethod(ABC):
     """
     An abstract base class for video inference that decouples inference logic
@@ -176,7 +177,9 @@ class BaseMethod(ABC):
         if self.cfg.inferCfg.save_timeline_vis:
             with ConsoleLog("Generate timeline report"):
                 try:
-                    TlReportGen.gen_TlReport_exp(self.outdir)
+                    TlReportGen.gen_TlReport_exp(
+                        self.outdir, table_mode=self.cfg.inferCfg.timeline_table_mode  # ty:ignore[invalid-argument-type]
+                    )
                 except Exception as e:
                     console.print(f"[red]Failed to generate timeline report: {e}[/red]")
 

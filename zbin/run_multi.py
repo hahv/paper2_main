@@ -21,7 +21,7 @@ from halib.filetype import yamlfile
 
 class RunOptimArgs(Tap):
     base_yaml: str = r"./config/zruns/run_base.yaml"
-    sweep_yaml: str = r"./config/zruns/run_optim.yaml"
+    sweep_yaml: str = r"./config/zruns/run_multi.yaml"
     clean_slack: bool = False
 
 

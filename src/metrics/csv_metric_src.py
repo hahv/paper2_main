@@ -25,14 +25,12 @@ class CsvMetricSrc(BaseMetricSrc):
         # We read 'adapter_cls' from config (e.g., 'DFireAdapter')
         # Defaulting to DFireAdapter to maintain backward compatibility
         # -----------------------------------------------------------
-        csv_loader_name = cfg.dbsetCfg.extra_cfgs.get(  # ty:ignore[possibly-missing-attribute]
-            "csv_loader_cls", "dfire_csv_loader.DFireCsvLoader"
-        )
+        csv_loader_name = cfg.dbsetCfg.extra_cfgs.get("csv_loader_cls")  # ty:ignore[possibly-missing-attribute]
 
         # Dynamically load the adapter class from src.metrics.adapters.dataset_adapters
         csv_loader_cls = get_cls_in_pkg(
             pkg_name="src.metrics.loaders",
-            fileName_ClsName=csv_loader_name,
+            fileName_ClsName=csv_loader_name,  # ty:ignore[invalid-argument-type]
         )
 
         # Initialize adapter
