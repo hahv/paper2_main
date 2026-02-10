@@ -20,7 +20,11 @@ class DFireCsvLoader(BaseVideoCsvLoader):
             "video_path": [video_path] * num_frames,
             "frame_idx": list(range(num_frames)),
         }
-        video_label  = self.NONE_LABEL if "FP" in video_name else self.FIRESMOKE_LABEL
+        video_label = (
+            BaseVideoCsvLoader.NONE_LABEL
+            if "FP" in video_name
+            else BaseVideoCsvLoader.FIRESMOKE_LABEL
+        )
         data_dict[self.COL_GT] = [video_label] * num_frames
         gt_df = pd.DataFrame(data_dict)
         return gt_df
