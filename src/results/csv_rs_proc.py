@@ -3,15 +3,17 @@ from src.config import *
 from halib.filetype import csvfile
 from collections import OrderedDict
 from src.results.base_rs_proc import *
+from src.common import GlobalConstants
+
+
 
 
 class CsvRsProc(BaseRsProc):
     CSV_FIXED_COLUMNS = [
-        "video",  # video name
-        "num_frames",  # total number of frames in the video
-        "frame_idx",  # frame index
-        "elapsed_time",  # infer elapsed time in seconds
-        # "do_infer",  # whether to perform inference on this frame
+        GlobalConstants.COL_VIDEO,
+        GlobalConstants.COL_NUM_FRAMES,
+        GlobalConstants.COL_FRAME_IDX,
+        GlobalConstants.COL_ELAPSED_TIME,
     ]
 
     def __init__(self, cfg: Config):

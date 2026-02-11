@@ -6,6 +6,7 @@ from typing import List, Optional
 from src.config import Config
 import os
 from pathlib import Path
+from src.common import GlobalConstants
 
 
 class BaseRawVideoCsvLoader(ABC):
@@ -15,16 +16,16 @@ class BaseRawVideoCsvLoader(ABC):
     Raw label can be further processed later (e.g., mapping to binary labels, etc).
     """
 
-    # # Default labels (can be overridden by subclasses)
-    FIRESMOKE_LABEL = "firesmoke"
-    NONE_LABEL = "none"
-    FIXED_COLS = ["video", "video_path", "frame_idx"]
-    COL_GT = "gt_label"
-    COL_PRED = "pred_label"
-    COL_ELAPSED_TIME = "elapsed_time"
+    RAW_FIXED_COLS = [
+        GlobalConstants.COL_VIDEO,
+        GlobalConstants.COL_VIDEO_PATH,
+        GlobalConstants.COL_FRAME_IDX,
+    ]
 
     def __init__(self, cfg: Config):
         self.cfg = cfg
+        self.gt_file_pattern = self.cfg.dbsetCfg.get_gt_file_pattern()
+        self.infer_file_pattern = self.cfg.inferCfg.csv_infer_pattern
 
     @staticmethod
     def video_path_to_csv(
@@ -70,9 +71,11 @@ class BaseRawVideoCsvLoader(ABC):
         gt_df = self.get_gt_df(video_path, extra_data)
         pred_df = self.load_pred_df(video_path, extra_data)
         # Verify required columns
-        self.verify_gt_pred(gt_df, self.FIXED_COLS + [self.COL_GT])
+        self.verify_gt_pred(gt_df, self.RAW_FIXED_COLS + [GlobalConstants.COL_GT])
         self.verify_gt_pred(
-            pred_df, self.FIXED_COLS + [self.COL_PRED, self.COL_ELAPSED_TIME]
+            pred_df,
+            self.RAW_FIXED_COLS
+            + [GlobalConstants.COL_PRED, GlobalConstants.COL_ELAPSED_TIME],
         )
         # ! do WARNING if lengths do not match?
         if len(gt_df) != len(pred_df):
@@ -80,14 +83,17 @@ class BaseRawVideoCsvLoader(ABC):
                 f"WARNING: GT and Prediction lengths do not match for video {video_path} ({len(gt_df)} vs {len(pred_df)})"
             )
         # Merge on FIXED_COLS
-        merged_df = pd.merge(gt_df, pred_df, on=self.FIXED_COLS, how="inner")
+        merged_df = pd.merge(gt_df, pred_df, on=self.RAW_FIXED_COLS, how="inner")
         return merged_df
 
     def get_gt_df(
         self, video_path: str, extra_data: Optional[dict] = None
     ) -> pd.DataFrame:
         csv_file = self.video_path_to_csv(
-            video_path=video_path, csv_pattern="__labels", is_gt=True, csv_dir=None
+            video_path=video_path,
+            csv_pattern=self.gt_file_pattern,
+            is_gt=True,
+            csv_dir=None,
         )
         assert os.path.exists(csv_file), f"GT CSV file {csv_file} does not exist"
         # 3. Read GT CSV
@@ -95,18 +101,20 @@ class BaseRawVideoCsvLoader(ABC):
             csv_file,
             sep=";",
             encoding="utf-8",
-            dtype={"label": str},
+            dtype={GlobalConstants.COL_GT: str},
             keep_default_na=False,
         )
-        gt_df.rename(columns={"label": self.COL_GT}, inplace=True)
+        gt_df.rename(columns={"label": GlobalConstants.COL_GT}, inplace=True)
         # Add fixed columns if not present
         video_name = Path(video_path).name
-        if "video" not in gt_df.columns:
-            gt_df["video"] = video_name
-        if "video_path" not in gt_df.columns:
-            gt_df["video_path"] = video_path
-        if "frame_idx" not in gt_df.columns:
-            gt_df["frame_idx"] = gt_df.index  # Assuming frame_idx is the row index
+        if GlobalConstants.COL_VIDEO not in gt_df.columns:
+            gt_df[GlobalConstants.COL_VIDEO] = video_name
+        if GlobalConstants.COL_VIDEO_PATH not in gt_df.columns:
+            gt_df[GlobalConstants.COL_VIDEO_PATH] = video_path
+        if GlobalConstants.COL_FRAME_IDX not in gt_df.columns:
+            gt_df[GlobalConstants.COL_FRAME_IDX] = (
+                gt_df.index
+            )  # Assuming frame_idx is the row index
         return gt_df
 
     def load_pred_df(
@@ -114,7 +122,7 @@ class BaseRawVideoCsvLoader(ABC):
     ) -> pd.DataFrame:
         csv_file = self.video_path_to_csv(
             video_path=video_path,
-            csv_pattern="_results",
+            csv_pattern=self.infer_file_pattern,  # ty:ignore[invalid-argument-type]
             is_gt=False,
             csv_dir=self.cfg.get_outdir(),
         )
@@ -125,15 +133,17 @@ class BaseRawVideoCsvLoader(ABC):
             csv_file,
             sep=";",
             encoding="utf-8",
-            dtype={self.COL_PRED: str, self.COL_ELAPSED_TIME: float},
+            dtype={GlobalConstants.COL_PRED: str, GlobalConstants.COL_ELAPSED_TIME: float},
             keep_default_na=False,
         )
         # Add fixed columns if not present
         video_name = Path(video_path).name
-        if "video" not in pred_df.columns:
-            pred_df["video"] = video_name
-        if "video_path" not in pred_df.columns:
-            pred_df["video_path"] = video_path
-        if "frame_idx" not in pred_df.columns:
-            pred_df["frame_idx"] = pred_df.index  # Assuming frame_idx is the row index
+        if GlobalConstants.COL_VIDEO not in pred_df.columns:
+            pred_df[GlobalConstants.COL_VIDEO] = video_name
+        if GlobalConstants.COL_VIDEO_PATH not in pred_df.columns:
+            pred_df[GlobalConstants.COL_VIDEO_PATH] = video_path
+        if GlobalConstants.COL_FRAME_IDX not in pred_df.columns:
+            pred_df[GlobalConstants.COL_FRAME_IDX] = (
+                pred_df.index
+            )  # Assuming frame_idx is the row index
         return pred_df

@@ -8,6 +8,7 @@ from src.metrics.custom_metrics import MetricFactory
 from src.methods.base_method import *
 from halib.utils.dict import DictUtils
 from collections import OrderedDict
+from src.common import GlobalConstants
 
 
 class Paper2Exp(BaseExp):
@@ -95,7 +96,7 @@ class Paper2Exp(BaseExp):
                 metrics_data = mode_metrics_data_dict[mode]
                 outfile = (
                     self.full_cfg.get_outdir()
-                    + f"/{self.full_cfg.get_cfg_name()}__{mode}.csv"
+                    + f"/{GlobalConstants.PERF_FILE_PREFIX}{self.full_cfg.get_cfg_name()}__{mode}.csv"
                 )
                 extra_data = None
                 if self.full_cfg.methodCfg.extra_cfgs is not None:

@@ -35,7 +35,7 @@ inferCfg:
   limit: -1 # -1 for no limit
   save_video_results: false
   save_csv_results: true
-  csv_infer_pattern: "_results.csv"
+  csv_infer_pattern: "_results"
   csv_columns:
     - class_names
     - logits

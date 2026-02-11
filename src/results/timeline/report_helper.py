@@ -6,7 +6,7 @@ from src.results.timeline.data_parser import TlProcessor, TimelineConfig
 from src.config import Config
 from pathlib import Path
 from halib.filetype import yamlfile
-
+from src.common import GlobalConstants
 
 class TlReportGen:
     """
@@ -449,12 +449,8 @@ class TlReportGen:
         df, cols_to_types = TlReportGen.get_timeline_csv_path_df(
             str(exp_dir), do_normalize=True
         )
-        # # !debug
-        # csvfile.fn_display_df(df.head(5))
-        # pprint(cols_to_types)
-        # assert False, "stop"
         report_generator = TlReportGen(cols_to_types)
-        output_path = exp_dir / "timeline_report.html"
+        output_path = exp_dir / f"{GlobalConstants.PERF_FILE_PREFIX}timeline_report.html"
         if title is None:
             title = f"Timeline Report - {exp_dir.name}"
         report_generator.generate(

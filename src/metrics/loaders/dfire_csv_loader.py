@@ -2,6 +2,7 @@ from halib import *
 from typing import Optional
 from src.metrics.loaders.base_csv_loader import BaseRawVideoCsvLoader
 from pathlib import Path
+from src.common import GlobalConstants
 
 
 class DFireCsvLoader(BaseRawVideoCsvLoader):
@@ -16,15 +17,15 @@ class DFireCsvLoader(BaseRawVideoCsvLoader):
         num_frames: int = extra_data.get("num_frames")  # ty:ignore[possibly-missing-attribute, invalid-assignment]
         video_name = Path(video_path).name
         data_dict = {
-            "video": [video_name] * num_frames,
-            "video_path": [video_path] * num_frames,
-            "frame_idx": list(range(num_frames)),
+            GlobalConstants.COL_VIDEO: [video_name] * num_frames,
+            GlobalConstants.COL_VIDEO_PATH: [video_path] * num_frames,
+            GlobalConstants.COL_FRAME_IDX: list(range(num_frames)),
         }
         video_label = (
-            BaseRawVideoCsvLoader.NONE_LABEL
+            GlobalConstants.NO_SMOKE_LABEL
             if "FP" in video_name
-            else BaseRawVideoCsvLoader.FIRESMOKE_LABEL
+            else GlobalConstants.FIRESMOKE_LABEL
         )
-        data_dict[self.COL_GT] = [video_label] * num_frames
+        data_dict[GlobalConstants.COL_GT] = [video_label] * num_frames
         gt_df = pd.DataFrame(data_dict)
         return gt_df
