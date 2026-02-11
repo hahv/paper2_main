@@ -184,42 +184,42 @@ class TlReportGen:
             # Return latest by name (lexicographical sort usually works for timestamps)
             return max(candidates, key=lambda p: p.name) if candidates else None
 
-        def _load_frame_series(
-            path: Path, col_name: str, required: bool = False
-        ) -> pd.DataFrame:
-            """
-            Helper to read a 2-column CSV (frame_idx, value) and standardise it.
-            """
-            if not path.exists():
-                if required:
-                    raise FileNotFoundError(f"Required CSV not found: {path}")
-                return pd.DataFrame()
+        # def _load_frame_series(
+        #     path: Path, col_name: str, required: bool = False
+        # ) -> pd.DataFrame:
+        #     """
+        #     Helper to read a 2-column CSV (frame_idx, value) and standardise it.
+        #     """
+        #     if not path.exists():
+        #         if required:
+        #             raise FileNotFoundError(f"Required CSV not found: {path}")
+        #         return pd.DataFrame()
 
-            # Efficiently read only needed columns
-            # GT uses 'label', Predictions use 'pred_label'
-            val_col = "label" if col_name == "gt_label" else "pred_label"
-            # [Context: infer results of exp]
-            # ! pred_label column is set to "None", so if we do not specify dtype for it, it will be loaded as NaN type, but we need str type here
-            df = pd.read_csv(
-                path,
-                sep=";",
-                usecols=["frame_idx", val_col],
-                encoding="utf-8",
-                dtype={val_col: str},
-                keep_default_na=False,
-            )  # ty:ignore[no-matching-overload]
+        #     # Efficiently read only needed columns
+        #     # GT uses 'label', Predictions use 'pred_label'
+        #     val_col = "label" if col_name == "gt_label" else "pred_label"
+        #     # [Context: infer results of exp]
+        #     # ! pred_label column is set to "None", so if we do not specify dtype for it, it will be loaded as NaN type, but we need str type here
+        #     df = pd.read_csv(
+        #         path,
+        #         sep=";",
+        #         usecols=["frame_idx", val_col],
+        #         encoding="utf-8",
+        #         dtype={val_col: str},
+        #         keep_default_na=False,
+        #     )  # ty:ignore[no-matching-overload]
 
-            # all unique values is val_col, must not any nan values
-            if df[val_col].isna().any():
-                raise ValueError(
-                    f"Column '{val_col}' in {path} contains NaN values for col_name={col_name}"
-                )
+        #     # all unique values is val_col, must not any nan values
+        #     if df[val_col].isna().any():
+        #         raise ValueError(
+        #             f"Column '{val_col}' in {path} contains NaN values for col_name={col_name}"
+        #         )
 
-            # convert to lower case of val_col
-            df[val_col] = df[val_col].str.lower()
+        #     # convert to lower case of val_col
+        #     df[val_col] = df[val_col].str.lower()
 
-            # Standardise to 'frame_id' + 'col_name'
-            return df.rename(columns={"frame_idx": "frame_id", val_col: col_name})
+        #     # Standardise to 'frame_id' + 'col_name'
+        #     return df.rename(columns={"frame_idx": "frame_id", val_col: col_name})
 
         exp_path = Path(exp_dir)
 

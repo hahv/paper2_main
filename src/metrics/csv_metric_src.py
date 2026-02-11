@@ -6,7 +6,7 @@ from pathlib import Path
 from src.config import Config
 from src.utils import get_cls_in_pkg
 from src.metrics.base_metric_src import BaseMetricSrc
-from src.metrics.loaders.base_csv_loader import BaseVideoRawCsvLoader
+from src.metrics.loaders.base_csv_loader import BaseRawCsvLoader
 from src.metrics.base_csv_converter import *
 from src.common import GlobalConst
 
@@ -38,7 +38,7 @@ class CsvMetricSrc(BaseMetricSrc):
         )
 
         # Initialize adapter
-        self.csv_loader: BaseVideoRawCsvLoader = csv_loader_cls(self.cfg)
+        self.csv_loader: BaseRawCsvLoader = csv_loader_cls(self.cfg)
         self.csv_converter: TorchMetricsConverter = TorchMetricsConverter()
 
         video_list = self.cfg.dbsetCfg.get_video_list()

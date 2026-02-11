@@ -2,7 +2,7 @@ from halib.system.path import *
 
 
 class GlobalConst:
-    # column names
+    # csv column names
     COL_VIDEO = "video"
     COL_VIDEO_PATH = "video_path"
     COL_NUM_FRAMES = "num_frames"
@@ -26,6 +26,7 @@ class GlobalConst:
     METRIC_PER_FRAME = "per_frame"
     METRIC_PER_VIDEO = "per_video"
 
+    # genaral
     # ! do not access directly, use proj_root() instead
     __PROJECT_ROOT = "/mnt/e/SyncData/paper2_main"
 

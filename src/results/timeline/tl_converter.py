@@ -51,18 +51,18 @@ class TLConverter(ABC):
 
     @property
     def supported_labels(self) -> List[str]:
-        timeline_cfg_dict = TlConfig.get_tl_dict(self.tl_type)
+        tl_cfg_dict = TlConfig.get_tl_dict(self.tl_type)
         # Search for labels_colors in "timeline" subsection (new format) or root (old format)
         if (
-            "timeline" in timeline_cfg_dict
-            and "labels_colors" in timeline_cfg_dict["timeline"]
+            "timeline" in tl_cfg_dict
+            and "labels_colors" in tl_cfg_dict["timeline"]
         ):
-            return list(timeline_cfg_dict["timeline"]["labels_colors"].keys())
+            return list(tl_cfg_dict["timeline"]["labels_colors"].keys())
 
-        assert "labels_colors" in timeline_cfg_dict, (
+        assert "labels_colors" in tl_cfg_dict, (
             f"Config for '{self.tl_type}' missing 'labels_colors' key (checked root and 'timeline')."
         )
-        return list(timeline_cfg_dict["labels_colors"].keys())
+        return list(tl_cfg_dict["labels_colors"].keys())
 
     def validate_output(self, labels: np.ndarray):
         """Ensures generated labels exist in the config for this type."""

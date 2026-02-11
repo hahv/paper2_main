@@ -9,7 +9,7 @@ from pathlib import Path
 from src.common import GlobalConst
 
 
-class BaseVideoRawCsvLoader(ABC):
+class BaseRawCsvLoader(ABC):
     """
     Base class for dataset-specific logic to load predictions and ground truth from CSV files.
     Load the RAW (gt_label, pred_label) without any processing.
@@ -61,29 +61,129 @@ class BaseVideoRawCsvLoader(ABC):
                 raise ValueError(f"Required column '{col}' not found in DataFrame")
         return True
 
-    def load_video_gt_pred_df(
-        self, video_path: str, extra_data: Optional[dict] = None
+    @staticmethod
+    def _read_raw_csv(
+        csv_path: str, video_path: str, is_gt: bool
     ) -> pd.DataFrame:
         """
-        Loads both GT and Prediction for a given video, merges them into a single DataFrame, and returns it.
-        The returned DataFrame will have columns: [video, video_path, frame_idx] + any GT and Prediction columns defined by the subclass.
+        Helper to read a CSV file, standardizes columns (renaming label -> gt_label),
+        and adds metadata columns (video, video_path, frame_idx).
         """
-        gt_df = self.get_gt_df(video_path, extra_data)
-        pred_df = self.load_pred_df(video_path, extra_data)
-        # Verify required columns
-        self.verify_gt_pred(gt_df, self.RAW_FIXED_COLS + [GlobalConst.COL_GT])
-        self.verify_gt_pred(
-            pred_df,
-            self.RAW_FIXED_COLS + [GlobalConst.COL_PRED, GlobalConst.COL_ELAPSED_TIME],
+        assert os.path.exists(csv_path), f"CSV file {csv_path} does not exist"
+
+        # Prepare read_csv options
+        if is_gt:
+            dtype_map = {GlobalConst.COL_GT: str}
+            # Also handle 'label' if it exists in the file before renaming
+            dtype_map["label"] = str
+        else:
+            dtype_map = {
+                GlobalConst.COL_PRED: str,
+                GlobalConst.COL_ELAPSED_TIME: float,
+            }
+
+        df = pd.read_csv(
+            csv_path,
+            sep=";",
+            encoding="utf-8",
+            dtype=dtype_map,
+            keep_default_na=False,
         )
-        # ! do WARNING if lengths do not match?
+
+        # Standardize GT label column
+        if is_gt and "label" in df.columns and GlobalConst.COL_GT not in df.columns:
+            df.rename(columns={"label": GlobalConst.COL_GT}, inplace=True)
+
+        # Add fixed columns if not present
+        video_name = Path(video_path).name
+        if GlobalConst.COL_VIDEO not in df.columns:
+            df[GlobalConst.COL_VIDEO] = video_name
+        if GlobalConst.COL_VIDEO_PATH not in df.columns:
+            df[GlobalConst.COL_VIDEO_PATH] = video_path
+        if GlobalConst.COL_FRAME_IDX not in df.columns:
+            df[GlobalConst.COL_FRAME_IDX] = df.index
+
+        return df
+
+    @staticmethod
+    def _merge_gt_pred_dfs(
+        gt_df: pd.DataFrame, pred_df: pd.DataFrame, video_path: str
+    ) -> pd.DataFrame:
+        """
+        Verifies and merges GT and Prediction DataFrames on fixed columns.
+        """
+        # Verify required columns
+        BaseRawCsvLoader.verify_gt_pred(
+            gt_df, BaseRawCsvLoader.RAW_FIXED_COLS + [GlobalConst.COL_GT]
+        )
+        BaseRawCsvLoader.verify_gt_pred(
+            pred_df,
+            BaseRawCsvLoader.RAW_FIXED_COLS
+            + [GlobalConst.COL_PRED, GlobalConst.COL_ELAPSED_TIME],
+        )
+
         if len(gt_df) != len(pred_df):
             logger.warning(
                 f"WARNING: GT and Prediction lengths do not match for video {video_path} ({len(gt_df)} vs {len(pred_df)})"
             )
+
         # Merge on FIXED_COLS
-        merged_df = pd.merge(gt_df, pred_df, on=self.RAW_FIXED_COLS, how="inner")
+        merged_df = pd.merge(
+            gt_df, pred_df, on=BaseRawCsvLoader.RAW_FIXED_COLS, how="inner"
+        )
         return merged_df
+
+    @staticmethod
+    def load_gt_pred_df_from_files(
+        video_path: str, gt_csv_path: str, pred_csv_path: str
+    ) -> pd.DataFrame:
+        """
+        Loads and merges GT and Pred DataFrames from explicit file paths.
+        """
+        gt_df = BaseRawCsvLoader._read_raw_csv(
+            gt_csv_path, video_path, is_gt=True
+        )
+        pred_df = BaseRawCsvLoader._read_raw_csv(
+            pred_csv_path, video_path, is_gt=False
+        )
+        return BaseRawCsvLoader._merge_gt_pred_dfs(gt_df, pred_df, video_path)
+
+    @staticmethod
+    def load_gt_pred_df_by_paths(
+        video_path: str,
+        gt_csv_dir: Optional[str] = None,
+        pred_csv_dir: Optional[str] = None,
+        gt_pattern: str = GlobalConst.GT_FILE_PATTERN,
+        pred_pattern: str = GlobalConst.INFER_FILE_PATTERN,
+    ) -> pd.DataFrame:
+        """
+        Resolves CSV paths from directories and patterns, then loads and merges them.
+        """
+        gt_csv_file = BaseRawCsvLoader.video_path_to_csv(
+            video_path=video_path,
+            csv_pattern=gt_pattern,
+            is_gt=True,
+            csv_dir=gt_csv_dir,
+        )
+        pred_csv_file = BaseRawCsvLoader.video_path_to_csv(
+            video_path=video_path,
+            csv_pattern=pred_pattern,
+            is_gt=False,
+            csv_dir=pred_csv_dir,
+        )
+        return BaseRawCsvLoader.load_gt_pred_df_from_files(
+            video_path, gt_csv_file, pred_csv_file
+        )
+
+    def load_video_gt_pred_df(
+        self, video_path: str, extra_data: Optional[dict] = None
+    ) -> pd.DataFrame:
+        """
+        Loads both GT and Prediction for a given video, merges them into a single DataFrame.
+        """
+        gt_df = self.get_gt_df(video_path, extra_data)
+        pred_df = self.load_pred_df(video_path, extra_data)
+        return self._merge_gt_pred_dfs(gt_df, pred_df, video_path)
 
     def get_gt_df(
         self, video_path: str, extra_data: Optional[dict] = None
@@ -94,27 +194,7 @@ class BaseVideoRawCsvLoader(ABC):
             is_gt=True,
             csv_dir=None,
         )
-        assert os.path.exists(csv_file), f"GT CSV file {csv_file} does not exist"
-        # 3. Read GT CSV
-        gt_df = pd.read_csv(
-            csv_file,
-            sep=";",
-            encoding="utf-8",
-            dtype={GlobalConst.COL_GT: str},
-            keep_default_na=False,
-        )
-        gt_df.rename(columns={"label": GlobalConst.COL_GT}, inplace=True)
-        # Add fixed columns if not present
-        video_name = Path(video_path).name
-        if GlobalConst.COL_VIDEO not in gt_df.columns:
-            gt_df[GlobalConst.COL_VIDEO] = video_name
-        if GlobalConst.COL_VIDEO_PATH not in gt_df.columns:
-            gt_df[GlobalConst.COL_VIDEO_PATH] = video_path
-        if GlobalConst.COL_FRAME_IDX not in gt_df.columns:
-            gt_df[GlobalConst.COL_FRAME_IDX] = (
-                gt_df.index
-            )  # Assuming frame_idx is the row index
-        return gt_df
+        return self._read_raw_csv(csv_file, video_path, is_gt=True)
 
     def load_pred_df(
         self, video_path: str, extra_data: Optional[dict] = None
@@ -125,24 +205,4 @@ class BaseVideoRawCsvLoader(ABC):
             is_gt=False,
             csv_dir=self.cfg.get_outdir(),
         )
-        assert os.path.exists(csv_file), (
-            f"Prediction CSV file {csv_file} does not exist"
-        )
-        pred_df = pd.read_csv(
-            csv_file,
-            sep=";",
-            encoding="utf-8",
-            dtype={GlobalConst.COL_PRED: str, GlobalConst.COL_ELAPSED_TIME: float},
-            keep_default_na=False,
-        )
-        # Add fixed columns if not present
-        video_name = Path(video_path).name
-        if GlobalConst.COL_VIDEO not in pred_df.columns:
-            pred_df[GlobalConst.COL_VIDEO] = video_name
-        if GlobalConst.COL_VIDEO_PATH not in pred_df.columns:
-            pred_df[GlobalConst.COL_VIDEO_PATH] = video_path
-        if GlobalConst.COL_FRAME_IDX not in pred_df.columns:
-            pred_df[GlobalConst.COL_FRAME_IDX] = (
-                pred_df.index
-            )  # Assuming frame_idx is the row index
-        return pred_df
+        return self._read_raw_csv(csv_file, video_path, is_gt=False)

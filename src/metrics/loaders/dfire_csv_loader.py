@@ -1,11 +1,11 @@
 from halib import *
 from typing import Optional
-from src.metrics.loaders.base_csv_loader import BaseVideoRawCsvLoader
+from src.metrics.loaders.base_csv_loader import BaseRawCsvLoader
 from pathlib import Path
 from src.common import GlobalConst
 
 
-class DFireCsvLoader(BaseVideoRawCsvLoader):
+class DFireCsvLoader(BaseRawCsvLoader):
     """
     Adapter for the DFire dataset where Ground Truth is inferred
     heuristically from the video filename (e.g., if "FP" is in name).
