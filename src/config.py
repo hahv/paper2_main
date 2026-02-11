@@ -15,6 +15,7 @@ from halib.exp.core.base_config import (
     ExpBaseCfg,
     NamedCfg,
 )
+from src.common import GlobalConst
 
 import wandb
 from lightning.pytorch.loggers.wandb import WandbLogger
@@ -87,7 +88,10 @@ class InferConfig(YAMLWizard):
     use_profiler: bool
     verbose: bool
     save_timeline_vis: Optional[bool] = True
-    timeline_table_mode: Optional[str] = "p"  # options: p (percent), fc (frame count), both (pfc)
+    timeline_table_mode: Optional[str] = (
+        "p"  # options: p (percent), fc (frame count), both (pfc)
+    )
+    csv_infer_pattern: Optional[str] = GlobalConst.INFER_FILE_PATTERN
 
 
 @dataclass
@@ -107,28 +111,24 @@ class DatasetCfg(AutoNamedCfg):
     extra_cfgs: Optional[Dict[str, Any]] = None
     vname2path: Optional[Dict[str, str]] = None
 
-    def get_vname2path(self, recursive=True):
-        if self.vname2path is None:
-            video_files = fs.filter_files_by_extension(
-                self.dir_path, [".mp4", ".avi", ".mov"], recursive=recursive
-            )
-            self.vname2path = {
-                fs.get_file_name(fpath, split_file_ext=True)[0]: fpath
-                for fpath in video_files
-            }
-        return self.vname2path
-
-    def get_num_videos(self, recursive=False):
+    def get_video_list(self):
+        recursive = True
+        if self.extra_cfgs:
+            recursive = self.extra_cfgs.get("ds_recursive", recursive)
         video_files = fs.filter_files_by_extension(
             self.dir_path, [".mp4", ".avi", ".mov"], recursive=recursive
         )
-        return len(video_files)
+        assert len(video_files) > 0, f"No video files found in {self.dir_path}"
+        return video_files
 
-    def get_csv_labels(self, recursive=False):
-        csv_files = fs.filter_files_by_extension(
-            self.dir_path, [".csv"], recursive=recursive
-        )
-        return csv_files
+    def get_num_videos(self):
+        return len(self.get_video_list())
+
+    def get_gt_file_pattern(self):
+        pattern: str = GlobalConst.GT_FILE_PATTERN
+        if self.extra_cfgs is not None:
+            pattern = self.extra_cfgs.get("ds_gt_file_pattern", pattern)
+        return pattern
 
 
 @dataclass
@@ -342,6 +342,18 @@ class Config(ExpBaseCfg):
         self.method_selector.post_init()
         # ! must called for generating cfg_name
         self.get_cfg_name()
+
+    # !#TODO: TO_DELETE
+    # def get_infer_csv_files(self, recursive=False):
+    #     exp_dir = self.get_outdir()
+    #     csv_files = fs.filter_files_by_extension(
+    #         exp_dir, [".csv"], recursive=recursive
+    #     )
+    #     # only keep those that match the gt file pattern
+    #     infer_pattern = self.inferCfg.csv_infer_pattern
+    #     csv_files = [f for f in csv_files if infer_pattern in os.path.basename(f)]
+    #     assert len(csv_files) > 0, f"No infer CSV files found in {exp_dir} with pattern {infer_pattern}"
+    #     return csv_files
 
     def update_optim_params(self, optim_params: Dict[str, Any]) -> None:
         """

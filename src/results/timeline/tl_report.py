@@ -1,11 +1,15 @@
+from IPython.testing.decorators import f
 import pandas as pd
 import numpy as np
 from typing import Dict, Literal, Callable, Optional, Union
 from halib import *
-from src.results.timeline.data_parser import TlProcessor, TimelineConfig
+from src.results.timeline.tl_converter import TlProcessor, TlConfig
 from src.config import Config
 from pathlib import Path
 from halib.filetype import yamlfile
+from src.common import GlobalConst
+from src.metrics.loaders.base_csv_loader import BaseRawCsvLoader
+from collections import OrderedDict
 
 
 class TlReportGen:
@@ -13,15 +17,19 @@ class TlReportGen:
     Generates an HTML report for timeline visualization using TimelineProcessor.
     """
 
-    FIX_COLUMNS = ["video", "video_path", "frame_id", "gt_label"]
-    CSV_PATH_DF_COLUMNS = ["video", "gt_csv_path"]
-    NOTEMP_MT_PATTERN = "mt_no_temp_method"
+    TL_FIXED_COLUMNS = [
+        GlobalConst.COL_VIDEO,
+        GlobalConst.COL_VIDEO_PATH,
+        GlobalConst.COL_NUM_FRAMES,
+        GlobalConst.COL_FRAME_IDX,
+        GlobalConst.COL_GT,
+    ]
 
     def __init__(self, cols_to_types: Dict[str, str]):
         self.cols_to_types = cols_to_types
 
     @staticmethod
-    def simplify_exp_name(exp_name: str) -> str:
+    def shorten_exp_name(exp_name: str) -> str:
         """
         Default function to shorten experiment names for column naming.
         Example: "mt_temp_method_motion_block" -> "temp_method_motion_block"
@@ -66,8 +74,8 @@ class TlReportGen:
 
             try:
                 # Resolve timeline type (e.g. 'no_temp_method' -> 'no_skip')
-                t_type = TlReportGen.col_name_to_timeline_type(method_col)
-                cfg = TimelineConfig.get_timeline_dict(t_type)
+                t_type = TlReportGen.col_name_to_tl_type(method_col)
+                cfg = TlConfig.get_tl_dict(t_type)
 
                 sort_cfg = cfg.get("table", {}).get("sort_by", {})
 
@@ -96,7 +104,7 @@ class TlReportGen:
         sort_cols = [x[1] for x in sort_instructions]
         ascending_vals = [x[2] for x in sort_instructions]
 
-        pprint(f"[Debug] Sorting criteria: {sort_instructions}")
+        # pprint(f"[Debug] Sorting criteria: {sort_instructions}")
 
         # 3. Create a Numeric Shadow DataFrame for Sorting
         # We extract the first numeric value from the string
@@ -136,7 +144,7 @@ class TlReportGen:
 
     @staticmethod
     # ! col_name is the shortened name
-    def col_name_to_timeline_type(col_name: str) -> str:
+    def col_name_to_tl_type(col_name: str) -> str:
         # first find the part that starts with 'mt_'
         if col_name.startswith("no_temp_method"):
             return "no_skip"
@@ -146,11 +154,10 @@ class TlReportGen:
             raise ValueError(f"Cannot determine timeline type for col_name={col_name}")
 
     @staticmethod
-    def get_timeline_csv_path_df(
+    def get_tl_df_by_exp_dir(
         exp_dir: str,
-        shorten_exp_name_func: Callable[[str], str] = simplify_exp_name,
-        exp_name_to_timeline_type: Callable[[str], str] = col_name_to_timeline_type,
-        do_normalize: bool = True,
+        exp_name_shorten_func: Callable[[str], str] = shorten_exp_name,
+        exp_name_to_tltype: Callable[[str], str] = col_name_to_tl_type,
     ) -> tuple[pd.DataFrame, Dict[str, str]]:
         """
         Loads GT, Experiment, and Baseline data into a single frame-level DataFrame and a mapping of columns to timeline types.
@@ -160,61 +167,24 @@ class TlReportGen:
         4. Calculates timeline types for each column based on experiment names.
 
         Return:
-            combined_df (pd.DataFrame): Merged DataFrame with frame-level labels.
+            all_video_df (pd.DataFrame): Merged DataFrame with frame-level labels.
             timeline_types_by_col (Dict[str, str]): Mapping of column names to timeline types
         """
 
         def _find_bl_notemp_dir(exp_path: Path, ds_name: str) -> Path | None:
             """Heuristic to find the latest 'no_temp' sibling directory."""
-            if TlReportGen.NOTEMP_MT_PATTERN in exp_path.name:
+            if GlobalConst.NOTEMP_MT_PATTERN in exp_path.name:
                 return None  # Current is already no_temp_method
             candidates = [
                 p
                 for p in exp_path.parent.iterdir()
                 if p.is_dir()
                 and p != exp_path
-                and TlReportGen.NOTEMP_MT_PATTERN in p.name
+                and GlobalConst.NOTEMP_MT_PATTERN in p.name
                 and f"ds_{ds_name}" in p.name
             ]
             # Return latest by name (lexicographical sort usually works for timestamps)
             return max(candidates, key=lambda p: p.name) if candidates else None
-
-        def _load_frame_series(
-            path: Path, col_name: str, required: bool = False
-        ) -> pd.DataFrame:
-            """
-            Helper to read a 2-column CSV (frame_idx, value) and standardise it.
-            """
-            if not path.exists():
-                if required:
-                    raise FileNotFoundError(f"Required CSV not found: {path}")
-                return pd.DataFrame()
-
-            # Efficiently read only needed columns
-            # GT uses 'label', Predictions use 'pred_label'
-            val_col = "label" if col_name == "gt_label" else "pred_label"
-            # [Context: infer results of exp]
-            # ! pred_label column is set to "None", so if we do not specify dtype for it, it will be loaded as NaN type, but we need str type here
-            df = pd.read_csv(
-                path,
-                sep=";",
-                usecols=["frame_idx", val_col],
-                encoding="utf-8",
-                dtype={val_col: str},
-                keep_default_na=False,
-            )  # ty:ignore[no-matching-overload]
-
-            # all unique values is val_col, must not any nan values
-            if df[val_col].isna().any():
-                raise ValueError(
-                    f"Column '{val_col}' in {path} contains NaN values for col_name={col_name}"
-                )
-
-            # convert to lower case of val_col
-            df[val_col] = df[val_col].str.lower()
-
-            # Standardise to 'frame_id' + 'col_name'
-            return df.rename(columns={"frame_idx": "frame_id", val_col: col_name})
 
         exp_path = Path(exp_dir)
 
@@ -228,8 +198,8 @@ class TlReportGen:
         dataset_dir = Path(exp_cfg.dbsetCfg.dir_path)  # ty:ignore[invalid-argument-type]
         assert dataset_dir.exists(), f"Dataset dir not found: {dataset_dir}"
 
-        # 2. Discovery: Find Baseline Dir & Video Files
-        baseline_dir = _find_bl_notemp_dir(
+        # 2. Discovery: Find Baseline (No Skip) Dir & Video Files
+        bl_noskip_dir = _find_bl_notemp_dir(
             exp_path,
             exp_cfg.dbsetCfg.name,  # ty:ignore[invalid-argument-type]
         )
@@ -237,123 +207,107 @@ class TlReportGen:
         video_files = fs.filter_files_by_extension(
             str(dataset_dir), [".mp4", ".avi", ".mov", ".mkv"], recursive=True
         )
+        tl_csv_info_all = OrderedDict()
+        # ! gt first
+        tl_csv_info_all[GlobalConst.COL_GT] = {
+            "csv_pattern": GlobalConst.GT_FILE_PATTERN,
+            "is_gt": True,
+            "csv_dir": None,
+            "tl_type": GlobalConst.TL_TYPE_GT,
+        }
+        # ! NOTE: make sure csv_dir is absolute path to avoid issues when merging
+        # ! add baseline no-skip if exists before current exp for comparison
+        if bl_noskip_dir:
+            # ! baseline no-skip
+            tl_csv_info_all[exp_name_shorten_func(bl_noskip_dir.name)] = {
+                "csv_pattern": GlobalConst.INFER_FILE_PATTERN,
+                "is_gt": False,
+                "csv_dir": str(bl_noskip_dir),
+                "tl_type": GlobalConst.TL_TYPE_NO_SKIP,
+            }
+        # ! current exp
+        c_exp_short_name = exp_name_shorten_func(exp_path.name)
+        tl_csv_info_all[c_exp_short_name] = {
+            "csv_pattern": GlobalConst.INFER_FILE_PATTERN,
+            "is_gt": False,
+            "csv_dir": str(exp_path),
+            "tl_type": GlobalConst.TL_TYPE_NO_SKIP
+            if GlobalConst.NOTEMP_MT_PATTERN in exp_path.name
+            else GlobalConst.TL_TYPE_SKIP,
+        }
 
-        # 3. Processing: Define Tracks & Iterate
-        dfs = []
+        tl_csv_info_infer = {
+            k: v for k, v in tl_csv_info_all.items() if k != GlobalConst.COL_GT
+        }
 
-        # We merge these tracks onto the Ground Truth anchor
-        # Format: (directory, column_name)
-        exp_col_name = shorten_exp_name_func(exp_path.name)
-        to_merge_series = [(exp_path, exp_col_name)]
-        if baseline_dir:
-            to_merge_series.insert(
-                0, (baseline_dir, shorten_exp_name_func(baseline_dir.name))
+        timeline_types_by_col = {k: v["tl_type"] for k, v in tl_csv_info_all.items()}
+
+        # ! after loop, gt_df has: BaseRawCsvLoader.RAW_FIXED_COLS + [gt_label, exp1 (no_skip), exp2 (skip), ...]
+        def combine_df_single_video(
+            vid_path: str,
+        ) -> pd.DataFrame:
+            gt_load_info = tl_csv_info_all[GlobalConst.COL_GT]
+            gt_df = BaseRawCsvLoader.load_csv_by_pattern(
+                video_path=vid_path,
+                csv_pattern=gt_load_info["csv_pattern"],
+                is_gt=gt_load_info["is_gt"],
+                csv_dir=gt_load_info["csv_dir"],
             )
+            for load_info_key in tl_csv_info_infer:
+                load_info = tl_csv_info_infer[load_info_key]
+                pred_df = BaseRawCsvLoader.load_csv_by_pattern(
+                    video_path=vid_path,
+                    csv_pattern=load_info["csv_pattern"],
+                    is_gt=load_info["is_gt"],
+                    csv_dir=load_info["csv_dir"],
+                )
+                # create a new column with load_info_key name = pred_label
+                pred_df[load_info_key] = pred_df[GlobalConst.COL_PRED]
+                pred_df = pred_df[
+                    BaseRawCsvLoader.RAW_FIXED_COLS + [load_info_key]
+                ]  # keep only necessary cols
+                # ! set verify to False to avoid flexible concat
+                gt_df = BaseRawCsvLoader._merge_gt_pred_dfs(
+                    gt_df, pred_df, vid_path, do_verify=False
+                )
+            gt_df[GlobalConst.COL_NUM_FRAMES] = len(gt_df)
+            return gt_df
 
-        # pprint(f"to merge series: {to_merge_series}")
+        ls_dfs = []
 
         for vid_path in video_files:
-            vid_name = fs.get_file_name(vid_path, split_file_ext=True)[0]
-            vid_parent = Path(vid_path).parent
+            single_video_df = combine_df_single_video(vid_path)
+            ls_dfs.append(single_video_df)
 
-            # A. Load Anchor (Ground Truth)
-            gt_path = vid_parent / f"{vid_name}__labels.csv"
-            df_merged = _load_frame_series(gt_path, "gt_label", required=True)
-            gt_len = len(df_merged)
-
-            # B. Merge Additional Series
-            for series_dir, col_name in to_merge_series:
-                series_path = series_dir / f"{vid_name}_results.csv"
-                df_series = _load_frame_series(series_path, col_name, required=False)
-
-                if not df_series.empty:
-                    if len(df_series) != gt_len:
-                        console.print(
-                            f"[yellow][Warning][Video={vid_name}] Mismatched frame count for gt ({gt_len}) vs series data for col_name={col_name} ({len(df_series)}). Using inner join to align frames.[/yellow]"
-                        )
-                    # "Inner" join ensures only frame_ids present in BOTH dataframes remain.
-                    # If df_series is missing rows, df_merged will shrink to match.
-                    df_merged = pd.merge(
-                        df_merged,
-                        df_series[["frame_id", col_name]],
-                        on="frame_id",
-                        how="inner",
-                    )
-                else:
-                    df_merged[col_name] = np.nan
-
-            df_merged["video"] = vid_name
-            df_merged["video_path"] = str(os.path.abspath(vid_path))
-            dfs.append(df_merged)
-
-        # 4. Finalize
-        if not dfs:
-            return pd.DataFrame(), {}
-
-        combined_df = pd.concat(dfs, ignore_index=True)
-
-        # Reorder columns: Metadata -> GT -> Exp -> Base
-        start_cols = TlReportGen.FIX_COLUMNS
-        other_cols = [col for col in combined_df.columns if col not in start_cols]
-        combined_df = combined_df[start_cols + other_cols]
-
-        timeline_types_by_col = {"gt_label": "gt"}
-        for col in other_cols:
-            timeline_types_by_col[col] = exp_name_to_timeline_type(col)
-
-        if do_normalize:
-            combined_df = TlReportGen.norm_timeline_df(combined_df)
-        return combined_df, timeline_types_by_col
+        all_video_df = pd.concat(ls_dfs, ignore_index=True)
+        # re-order columns
+        all_video_df = all_video_df[
+            TlReportGen.TL_FIXED_COLUMNS
+            + [
+                col
+                for col in all_video_df.columns
+                if col not in TlReportGen.TL_FIXED_COLUMNS
+            ]
+        ]
+        return all_video_df, timeline_types_by_col
 
     @staticmethod
     def get_unique_values(df: pd.DataFrame) -> Dict[str, list]:
         """
         Get unique values for each column in the dataframe.
         """
-        assert all(col in df.columns for col in TlReportGen.FIX_COLUMNS), (
-            f"This function only supports dataframes with fixed columns: {TlReportGen.FIX_COLUMNS} - for timeline dataframe"
+        assert all(col in df.columns for col in TlReportGen.TL_FIXED_COLUMNS), (
+            f"This function only supports dataframes with fixed columns: {TlReportGen.TL_FIXED_COLUMNS} - for timeline dataframe"
         )
         unique_by_cols = {}
         for col in df.columns:
-            if col in TlReportGen.FIX_COLUMNS[:-1]:  # skip 'video' and 'frame_id'
+            if col in TlReportGen.TL_FIXED_COLUMNS[:-1]:  # skip 'video' and 'frame_id'
                 continue
             unique_by_cols[col] = list(df[col].unique())
         return unique_by_cols
 
     @staticmethod
-    def norm_timeline_df(df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Convert gt_label and other columns to standard labels with respect to 'fire' and 'none' and 'skipped' (if using temp method).
-
-        Example:
-        Input:  {
-                │   'gt_label': ['fire_smoke', 'none'],
-                │   'no_temp_method': ['fire', 'smokeonly', 'none'],
-                │   'temp_method_motion_block': ['skipped', 'fire', 'smokeonly', 'none']
-                }
-        Output: {
-                │   'gt_label': ['fire', 'none'],
-                │   'no_temp_method': ['fire', 'none'],
-                │   'temp_method_motion_block': ['skipped', 'fire', 'none']
-                }
-        """
-
-        def _standardize_label(col: str, label: str) -> str:
-            if "fire" in label or "smoke" in label:
-                return "fire"
-            if col.startswith("temp_method"):
-                return label  # keep 'skipped' as is
-            return "none"
-
-        df = df.copy()
-        for col in df.columns:
-            if col in TlReportGen.FIX_COLUMNS[:-1]:  # skip 'video' and 'frame_id'
-                continue
-            df[col] = df[col].apply(lambda x: _standardize_label(col, x))
-        return df
-
-    @staticmethod
-    def tlreport_from_csv(
+    def tlReport_from_csv(
         csv_path: str,
         output_html_path: Optional[str] = None,
         title: str = "Timeline Report (Reconstructed)",
@@ -394,7 +348,7 @@ class TlReportGen:
                 continue
 
             try:
-                t_type = TlReportGen.col_name_to_timeline_type(col)
+                t_type = TlReportGen.col_name_to_tl_type(col)
                 cols_to_types[col] = t_type
             except ValueError:
                 pass  # Not a recognized method column
@@ -402,7 +356,7 @@ class TlReportGen:
         # Reconstruct Styles Map
         styles_map = {}
         for col, t_type in cols_to_types.items():
-            styles_map[col] = TimelineConfig.get_timeline_dict(t_type)
+            styles_map[col] = TlConfig.get_tl_dict(t_type)
         if output_html_path is None:
             output_html_path = csv_path.replace(".csv", "_reconstructed.html")
 
@@ -446,23 +400,17 @@ class TlReportGen:
         exp_dir = Path(exp_dir)
 
         # from exp_dir, do something to get the dataframe and cols_to_types
-        df, cols_to_types = TlReportGen.get_timeline_csv_path_df(
-            str(exp_dir), do_normalize=True
-        )
-        # # !debug
-        # csvfile.fn_display_df(df.head(5))
-        # pprint(cols_to_types)
-        # assert False, "stop"
+        df, cols_to_types = TlReportGen.get_tl_df_by_exp_dir(str(exp_dir))
         report_generator = TlReportGen(cols_to_types)
-        output_path = exp_dir / "timeline_report.html"
+        output_path = exp_dir / f"{GlobalConst.PERF_FILE_PREFIX}timeline_report.html"
         if title is None:
             title = f"Timeline Report - {exp_dir.name}"
-        report_generator.generate(
+        report_generator._generate(
             df, str(output_path), title=title, table_mode=table_mode
         )
         return os.path.abspath(output_path)
 
-    def generate(
+    def _generate(
         self,
         df: pd.DataFrame,
         output_path: str,
@@ -484,17 +432,18 @@ class TlReportGen:
             pfc - percentages and frame counts
         """
         # 1. Process Data using the Logic Core
-        final_df, stats_df, styles_map = TlProcessor.proc_dataframe(
+        raw_df = df.copy()
+        proc_tl_df, stats_df, styles_map = TlProcessor.proc_dataframe(
             df, self.cols_to_types, table_mode=table_mode
         )
 
         # 2. Add "FRAMES" and "VISUALIZATION"
         # We need to construct metadata for each video in stats_df
-        # Use final_df to get per-video frame data
-        final_df_reset = final_df.reset_index()
+        # Use proc_tl_df to get per-video frame data
+        final_df_reset = proc_tl_df.reset_index()
         video_groups = {
-            vid: grp.sort_values("frame_id")
-            for vid, grp in final_df_reset.groupby("video")
+            vid: grp.sort_values(by=GlobalConst.COL_FRAME_IDX)
+            for vid, grp in final_df_reset.groupby(GlobalConst.COL_VIDEO)
         }
 
         # Prepare list for new columns (using dict for alignment)
@@ -506,14 +455,11 @@ class TlReportGen:
         for video_name in stats_df.index:
             if video_name in video_groups:
                 vid_df = video_groups[video_name]
-                # !debug
-                # csvfile.fn_display_df(vid_df.head(5))
-                # assert False, "stop"
                 frames = len(vid_df)
                 viz = self.generate_timeline_html(vid_df, styles_map)
                 path = (
-                    str(vid_df["video_path"].iloc[0])
-                    if "video_path" in vid_df.columns
+                    str(vid_df[GlobalConst.COL_VIDEO_PATH].iloc[0])
+                    if GlobalConst.COL_VIDEO_PATH in vid_df.columns
                     else ""
                 )
             elif video_name == "TOTAL":
@@ -580,14 +526,30 @@ class TlReportGen:
         # 3. Render HTML
         self.render_html(report_df, styles_map, output_path, title)
 
-        # also save report_df to csv for easier debugging
-        csv_output_path = output_path.replace(".html", ".csv")
-        report_df.to_csv(csv_output_path, index=False, sep=";", encoding="utf-8")
+        # save raw timeline csv and report csv
+        # proc timeline csv
+        raw_timeline_csv_path = output_path.replace(".html", "_raw_timeline.csv")
+        raw_df.to_csv(raw_timeline_csv_path, index=False, sep=";", encoding="utf-8")
+        proc_timeline_csv_path = output_path.replace(".html", "_proc_timeline.csv")
+        proc_tl_df.to_csv(
+            proc_timeline_csv_path, index=False, sep=";", encoding="utf-8"
+        )
+        # report csv
+        report_csv_output_path = output_path.replace(".html", ".csv")
+        report_df.to_csv(report_csv_output_path, index=False, sep=";", encoding="utf-8")
+
         with ConsoleLog("Saving report results:"):
             print(f"[INFO] Report generated at: ⏬")
             pprint_local_path(output_path, get_wins_path=True)
+
+            print(f"[INFO] Raw timeline data saved at: ⏬")
+            pprint_local_path(raw_timeline_csv_path, get_wins_path=True)
+
+            print(f"[INFO] Processed timeline data saved at: ⏬")
+            pprint_local_path(proc_timeline_csv_path, get_wins_path=True)
+
             print(f"[INFO] CSV version saved at: ⏬")
-            pprint_local_path(csv_output_path, get_wins_path=True)
+            pprint_local_path(report_csv_output_path, get_wins_path=True)
 
     def generate_timeline_html(self, vid_df: pd.DataFrame, styles_map: Dict) -> str:
         """Generates the stacked bar HTML for a single video."""

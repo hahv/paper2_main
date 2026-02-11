@@ -3,7 +3,8 @@ import sys
 sys.path.append("/mnt/e/SyncData/paper2_main")
 from collections import OrderedDict
 from halib import *
-from src.results.timeline.report_helper import TlReportGen
+from src.results.timeline.tl_report import TlReportGen
+
 
 baseline_dir = (
     "MainPC__ds_UFireIndoorVal__mt_no_temp_method__af4b0d32a3d2__20260204.045007"
@@ -23,9 +24,8 @@ DO_NORMALIZE = True
 for name, dir in list_items:
     console.rule()
     print(f"{name}: {dir}")
-    df, timeline_types = TlReportGen.get_timeline_csv_path_df(
+    df, timeline_types = TlReportGen.get_tl_df_by_exp_dir(
         f"./zout/zruns/{dir}",
-        do_normalize=DO_NORMALIZE,
     )
 
     pprint(timeline_types)

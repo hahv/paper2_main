@@ -59,7 +59,8 @@ def verify_csv_video(methods, indir, videodir):
         # ! if no vis files, use video files as placeholders
         if len(vis_files) == 0:
             vis_files = video_files.copy()
-        sort_key = lambda x: os.path.basename(x).split("_")[0]
+        def sort_key(x):
+            return os.path.basename(x).split("_")[0]
         video_files, gt_files, csv_files, vis_files = map(
             lambda x: sorted(x, key=sort_key),
             [video_files, gt_files, csv_files, vis_files],
@@ -357,8 +358,6 @@ def cal_metric(df, methods, mode="per_video"):  # mode: per_frame or per_video
         "per_frame",
         "per_video",
     ], "mode should be 'per_frame' or 'per_video'"
-    # csvfile.fn_display_df(df)
-    # assert False, "Debug stop"
     results = []
     for method in methods:
         method_rs_dict = {"method": method}

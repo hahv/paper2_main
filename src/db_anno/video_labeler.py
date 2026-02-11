@@ -33,7 +33,7 @@ class VideoLabelerBase(ABC):
 
         console.rule(f"Processing labeling for {self.dataset_name}")
         # Save configuration to YAML (directly in dataset path)
-        config_file = os.path.join(self.dataset_path, "__cfg.yaml")
+        config_file = os.path.join(self.dataset_path, "__cfg.yaml")  # ty:ignore[no-matching-overload]
 
         with open(config_file, "w") as f:
             yaml.dump(self._generate_config(), f)

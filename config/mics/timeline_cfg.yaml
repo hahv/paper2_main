@@ -1,6 +1,8 @@
 # Timeline Visualization & Reporting Configuration
 
+# -----------------------------------------------------------------------------
 # 1. Ground Truth (GT)
+# -----------------------------------------------------------------------------
 gt:
   meta:
     legend_title: "1. GT (Ground Truth)"
@@ -9,21 +11,15 @@ gt:
   timeline:
     labels_colors:
       FireSmoke: "#fc6065"
-      None: "#95a5a6" # Changed to Gray for neutral background. Avoids confusion with "Correct" Green.
+      None: "#95a5a6" # Gray for neutral background (to avoid confusion with "Correct" Green)
 
   # Reporting: Statistics Table settings
   table:
-    include: true  # Single source of truth for visibility
-    # ! order smaller number = higher priority
-    # sort_by:
-    #   FireSmoke:
-    #     direction: "desc"
-    #     order: 999
-    #   None:
-    #     direction: "desc"
-    #     order: 12
+    include: true
 
+# -----------------------------------------------------------------------------
 # 2. NO SKIP (Baseline)
+# -----------------------------------------------------------------------------
 no_skip:
   meta:
     legend_title: "2. NO SKIP (Baseline)"
@@ -32,21 +28,22 @@ no_skip:
     labels_colors:
       Correct: "#2ecc71"           # Green
       False Alarm (FP): "#f1c40f"  # Gold
-      Miss (FN): "#8e44ad"         # Purple. Matches 'skip' method Miss color for consistency.
+      Miss (FN): "#8e44ad"         # Purple (matches 'skip' method Miss color for consistency)
 
   table:
     include: true
     highlight_rules:
-      # Highlight Miss (FN)
+      # Highlight Miss (FN) when count > 1
       Miss (FN):
         condition: "> 1"
         color: "#8e44ad"
-      # Highlight False Alarm (FP) if > 15%
+
+      # Highlight False Alarm (FP) when count > 2
       False Alarm (FP):
         condition: "> 2"
         color: "#f1c40f"
-    # Implicitly no highlighting if 'highlight_rules' is missing
-    # ! order smaller number = higher priority
+
+    # Sort priority: smaller number = higher priority
     sort_by:
       Miss (FN):
         direction: "desc"
@@ -55,7 +52,9 @@ no_skip:
         direction: "desc"
         order: 2
 
+# -----------------------------------------------------------------------------
 # 3. SKIP (Proposed Method)
+# -----------------------------------------------------------------------------
 skip:
   meta:
     legend_title: "3. SKIP (Proposed Method)"
@@ -70,15 +69,17 @@ skip:
   table:
     include: true
     highlight_rules:
-      # Highlight Miss (FN) if > 5%
+      # Highlight Miss (FN) when count > 1
       Miss (FN):
         condition: "> 1"
         color: "#8e44ad"
-      # Highlight Waste (FP) if > 10%
+
+      # Highlight Waste (FP) when count > 10
       Waste (FP):
         condition: "> 10"
         color: "#f1c40f"
-    # ! order smaller number = higher priority
+
+    # Sort priority: smaller number = higher priority
     sort_by:
       Miss (FN):
         direction: "desc"
