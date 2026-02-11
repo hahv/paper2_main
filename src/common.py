@@ -30,6 +30,9 @@ class GlobalConst:
     # ! do not access directly, use proj_root() instead
     __PROJECT_ROOT = "/mnt/e/SyncData/paper2_main"
 
+    # method name pattern
+    NOTEMP_MT_PATTERN = "no_temp_method"
+
     # timeline
     TL_TYPE_GT = "gt"
     TL_TYPE_NO_SKIP = "no_skip"

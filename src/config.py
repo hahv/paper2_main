@@ -111,17 +111,6 @@ class DatasetCfg(AutoNamedCfg):
     extra_cfgs: Optional[Dict[str, Any]] = None
     vname2path: Optional[Dict[str, str]] = None
 
-    def get_vname2path(self, recursive=True):
-        if self.vname2path is None:
-            video_files = fs.filter_files_by_extension(
-                self.dir_path, [".mp4", ".avi", ".mov"], recursive=recursive
-            )
-            self.vname2path = {
-                fs.get_file_name(fpath, split_file_ext=True)[0]: fpath
-                for fpath in video_files
-            }
-        return self.vname2path
-
     def get_video_list(self):
         recursive = True
         if self.extra_cfgs:

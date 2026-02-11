@@ -1,3 +1,5 @@
+from PIL.ImageStat import Global
+import csv
 from halib import *
 from loguru import logger
 from abc import ABC
@@ -52,7 +54,7 @@ class BaseRawCsvLoader(ABC):
         return csv_file
 
     @staticmethod
-    def verify_gt_pred(df: pd.DataFrame, required_cols: List[str]) -> bool:
+    def check_required_cols(df: pd.DataFrame, required_cols: List[str]) -> bool:
         """
         Verifies that the GT and Prediction DataFrame contains the required columns.
         """
@@ -98,8 +100,8 @@ class BaseRawCsvLoader(ABC):
         video_name = Path(video_path).name
         if GlobalConst.COL_VIDEO not in df.columns:
             df[GlobalConst.COL_VIDEO] = video_name
-        if GlobalConst.COL_VIDEO_PATH not in df.columns:
-            df[GlobalConst.COL_VIDEO_PATH] = video_path
+        # ! Add video_path column (event if already exists, to ensure consistency)
+        df[GlobalConst.COL_VIDEO_PATH] = str(os.path.abspath(video_path))
         if GlobalConst.COL_FRAME_IDX not in df.columns:
             df[GlobalConst.COL_FRAME_IDX] = df.index
 
@@ -107,27 +109,27 @@ class BaseRawCsvLoader(ABC):
 
     @staticmethod
     def _merge_gt_pred_dfs(
-        gt_df: pd.DataFrame, pred_df: pd.DataFrame, video_path: str
+        gt_df: pd.DataFrame, pred_df: pd.DataFrame, video_path: str, do_verify: bool = True
     ) -> pd.DataFrame:
         """
         Verifies and merges GT and Prediction DataFrames on fixed columns.
         """
-        # Verify required columns
-        BaseRawCsvLoader.verify_gt_pred(
-            gt_df, BaseRawCsvLoader.RAW_FIXED_COLS + [GlobalConst.COL_GT]
-        )
-        BaseRawCsvLoader.verify_gt_pred(
-            pred_df,
-            BaseRawCsvLoader.RAW_FIXED_COLS
-            + [GlobalConst.COL_PRED, GlobalConst.COL_ELAPSED_TIME],
-        )
+        if do_verify:
+            # Verify required columns
+            BaseRawCsvLoader.check_required_cols(
+                gt_df, BaseRawCsvLoader.RAW_FIXED_COLS + [GlobalConst.COL_GT]
+            )
+            BaseRawCsvLoader.check_required_cols(
+                pred_df,
+                BaseRawCsvLoader.RAW_FIXED_COLS
+                + [GlobalConst.COL_PRED, GlobalConst.COL_ELAPSED_TIME],
+            )
 
         if len(gt_df) != len(pred_df):
             logger.warning(
                 f"WARNING: GT and Prediction lengths do not match for video {video_path} ({len(gt_df)} vs {len(pred_df)})"
-            )
+        )
 
-        # Merge on FIXED_COLS
         merged_df = pd.merge(
             gt_df, pred_df, on=BaseRawCsvLoader.RAW_FIXED_COLS, how="inner"
         )

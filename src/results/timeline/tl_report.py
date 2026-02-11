@@ -1,3 +1,4 @@
+from future.moves.pickle import GLOBAL
 from sqlalchemy.testing.pickleable import Order
 import pandas as pd
 import numpy as np
@@ -23,7 +24,6 @@ class TlReportGen:
         GlobalConst.COL_FRAME_IDX,
         GlobalConst.COL_GT,
     ]
-    NOTEMP_MT_PATTERN = "mt_no_temp_method"
 
     def __init__(self, cols_to_types: Dict[str, str]):
         self.cols_to_types = cols_to_types
@@ -173,14 +173,14 @@ class TlReportGen:
 
         def _find_bl_notemp_dir(exp_path: Path, ds_name: str) -> Path | None:
             """Heuristic to find the latest 'no_temp' sibling directory."""
-            if TlReportGen.NOTEMP_MT_PATTERN in exp_path.name:
+            if GlobalConst.NOTEMP_MT_PATTERN in exp_path.name:
                 return None  # Current is already no_temp_method
             candidates = [
                 p
                 for p in exp_path.parent.iterdir()
                 if p.is_dir()
                 and p != exp_path
-                and TlReportGen.NOTEMP_MT_PATTERN in p.name
+                and GlobalConst.NOTEMP_MT_PATTERN in p.name
                 and f"ds_{ds_name}" in p.name
             ]
             # Return latest by name (lexicographical sort usually works for timestamps)
@@ -215,6 +215,7 @@ class TlReportGen:
             "csv_dir": None,
             "tl_type": GlobalConst.TL_TYPE_GT,
         }
+        # ! NOTE: make sure csv_dir is absolute path to avoid issues when merging
         # ! add baseline no-skip if exists before current exp for comparison
         if bl_noskip_dir:
             # ! baseline no-skip
@@ -225,11 +226,14 @@ class TlReportGen:
                 "tl_type": GlobalConst.TL_TYPE_NO_SKIP,
             }
         # ! current exp
-        tl_csv_info_all[exp_name_shorten_func(exp_path.name)] = {
+        c_exp_short_name = exp_name_shorten_func(exp_path.name)
+        tl_csv_info_all[c_exp_short_name] = {
             "csv_pattern": GlobalConst.INFER_FILE_PATTERN,
             "is_gt": False,
             "csv_dir": str(exp_path),
-            "tl_type": GlobalConst.TL_TYPE_SKIP,
+            "tl_type": GlobalConst.TL_TYPE_NO_SKIP
+            if GlobalConst.NOTEMP_MT_PATTERN in exp_path.name
+            else GlobalConst.TL_TYPE_SKIP,
         }
 
         tl_csv_info_infer = {
@@ -239,7 +243,9 @@ class TlReportGen:
         timeline_types_by_col = {k: v["tl_type"] for k, v in tl_csv_info_all.items()}
 
         # ! after loop, gt_df has: BaseRawCsvLoader.RAW_FIXED_COLS + [gt_label, exp1 (no_skip), exp2 (skip), ...]
-        for vid_path in video_files:
+        def combine_df_single_video(
+            vid_path: str,
+        ) -> pd.DataFrame:
             gt_load_info = tl_csv_info_all[GlobalConst.COL_GT]
             gt_df = BaseRawCsvLoader.load_csv_by_pattern(
                 video_path=vid_path,
@@ -257,11 +263,23 @@ class TlReportGen:
                 )
                 # create a new column with load_info_key name = pred_label
                 pred_df[load_info_key] = pred_df[GlobalConst.COL_PRED]
-                pred_df = pred_df[BaseRawCsvLoader.RAW_FIXED_COLS + [load_info_key]] # keep only necessary cols
-                gt_df = BaseRawCsvLoader._merge_gt_pred_dfs(gt_df, pred_df, vid_path)
+                pred_df = pred_df[
+                    BaseRawCsvLoader.RAW_FIXED_COLS + [load_info_key]
+                ]  # keep only necessary cols
+                # ! set verify to False to avoid flexible concat
+                gt_df = BaseRawCsvLoader._merge_gt_pred_dfs(
+                    gt_df, pred_df, vid_path, do_verify=False
+                )
+            gt_df[GlobalConst.COL_NUM_FRAMES] = len(gt_df)
+            return gt_df
 
+        ls_dfs = []
 
-        combined_df = gt_df.copy()
+        for vid_path in video_files:
+            console.rule(f"Processing video: {vid_path}")
+            combined_df = combine_df_single_video(vid_path)
+            ls_dfs.append(combined_df)
+        combined_df = pd.concat(ls_dfs, ignore_index=True)
         return combined_df, timeline_types_by_col
 
     @staticmethod
@@ -373,9 +391,7 @@ class TlReportGen:
         exp_dir = Path(exp_dir)
 
         # from exp_dir, do something to get the dataframe and cols_to_types
-        df, cols_to_types = TlReportGen.get_tl_csv_path_df(
-            str(exp_dir)
-        )
+        df, cols_to_types = TlReportGen.get_tl_csv_path_df(str(exp_dir))
         report_generator = TlReportGen(cols_to_types)
         output_path = exp_dir / f"{GlobalConst.PERF_FILE_PREFIX}timeline_report.html"
         if title is None:
@@ -429,9 +445,6 @@ class TlReportGen:
         for video_name in stats_df.index:
             if video_name in video_groups:
                 vid_df = video_groups[video_name]
-                # !debug
-                # csvfile.fn_display_df(vid_df.head(5))
-                # assert False, "stop"
                 frames = len(vid_df)
                 viz = self.generate_timeline_html(vid_df, styles_map)
                 path = (

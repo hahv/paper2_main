@@ -194,23 +194,24 @@ class TlProcessor:
 
         styles_map = {}
         # timeline cfg per column (i.e timeline type: gt, no_skip, skip)
-        for col_name, timeline_type in cols_to_tl_types.items():
-            styles_map[col_name] = TlConfig.get_tl_dict(timeline_type)
-
+        for col_name, tl_type in cols_to_tl_types.items():
+            styles_map[col_name] = TlConfig.get_tl_dict(tl_type)
+        pprint(f"{cols_to_tl_types=}")
         # ! make sure COL_GT labels are normalized first (for downstream converters)
         df = TLGtConverter(tl_type=GlobalConst.TL_TYPE_GT).do_convert(
             df,
             ls_target_cols=[GlobalConst.COL_GT],
             inplace=True,
         )
-        for col_name, timeline_type in cols_to_tl_types.items():
+
+        for col_name, tl_type in cols_to_tl_types.items():
             if col_name not in df.columns:
                 print(f"[Error] Configured column '{col_name}' not found. Skipping.")
                 continue
             if col_name == GlobalConst.COL_GT:
                 continue  # GT already processed
             try:
-                converter = TLConverterFactory.create(timeline_type)
+                converter = TLConverterFactory.create(tl_type)
                 # auto convert target column and validate
                 df = converter.do_convert(
                     df,
@@ -218,7 +219,6 @@ class TlProcessor:
                     inplace=True,
                     extra_dict={"is_label_column": True},
                 )
-
             except Exception as e:
                 print(f"[Exception] Failed processing column '{col_name}': {e}")
                 continue
