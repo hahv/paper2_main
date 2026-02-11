@@ -15,7 +15,7 @@ from halib.exp.core.base_config import (
     ExpBaseCfg,
     NamedCfg,
 )
-from src.common import GlobalConstants
+from src.common import GlobalConst
 
 import wandb
 from lightning.pytorch.loggers.wandb import WandbLogger
@@ -91,7 +91,8 @@ class InferConfig(YAMLWizard):
     timeline_table_mode: Optional[str] = (
         "p"  # options: p (percent), fc (frame count), both (pfc)
     )
-    csv_infer_pattern: Optional[str] =  GlobalConstants.INFER_FILE_PATTERN
+    csv_infer_pattern: Optional[str] = GlobalConst.INFER_FILE_PATTERN
+
 
 @dataclass
 class ModelConfig(YAMLWizard):
@@ -135,7 +136,7 @@ class DatasetCfg(AutoNamedCfg):
         return len(self.get_video_list())
 
     def get_gt_file_pattern(self):
-        pattern: str = GlobalConstants.GT_FILE_PATTERN
+        pattern: str = GlobalConst.GT_FILE_PATTERN
         if self.extra_cfgs is not None:
             pattern = self.extra_cfgs.get("ds_gt_file_pattern", pattern)
         return pattern

@@ -6,9 +6,9 @@ from pathlib import Path
 from src.config import Config
 from src.utils import get_cls_in_pkg
 from src.metrics.base_metric_src import BaseMetricSrc
-from src.metrics.loaders.base_csv_loader import BaseRawVideoCsvLoader
+from src.metrics.loaders.base_csv_loader import BaseVideoRawCsvLoader
 from src.metrics.base_csv_converter import *
-from src.common import GlobalConstants
+from src.common import GlobalConst
 
 
 class CsvMetricSrc(BaseMetricSrc):
@@ -38,7 +38,7 @@ class CsvMetricSrc(BaseMetricSrc):
         )
 
         # Initialize adapter
-        self.csv_loader: BaseRawVideoCsvLoader = csv_loader_cls(self.cfg)
+        self.csv_loader: BaseVideoRawCsvLoader = csv_loader_cls(self.cfg)
         self.csv_converter: TorchMetricsConverter = TorchMetricsConverter()
 
         video_list = self.cfg.dbsetCfg.get_video_list()
@@ -67,8 +67,8 @@ class CsvMetricSrc(BaseMetricSrc):
             converted_df = self.csv_converter.do_convert(
                 df,
                 ls_target_cols=[
-                    GlobalConstants.COL_GT,
-                    GlobalConstants.COL_PRED,
+                    GlobalConst.COL_GT,
+                    GlobalConst.COL_PRED,
                 ],
                 inplace=False,
                 extra_dict={"metric_mode": mode},
@@ -85,7 +85,7 @@ class CsvMetricSrc(BaseMetricSrc):
     def get_metric_data_by_mode(self, metric, mode, **kwargs) -> Any:
         if metric == "FPS":
             mode = (
-                TorchMetricsConverter.METRIC_MODE_PER_FRAME
+                GlobalConst.METRIC_PER_FRAME
             )  # FPS is always per-frame
         if "mode" in self.cache_unified_df_dict:
             unified_df = self.cache_unified_df_dict[mode]
@@ -94,13 +94,11 @@ class CsvMetricSrc(BaseMetricSrc):
             self.cache_unified_df_dict[mode] = unified_df
 
         if metric == "FPS":
-            elapsed_times = unified_df[
-                GlobalConstants.COL_ELAPSED_TIME
-            ].to_numpy()
+            elapsed_times = unified_df[GlobalConst.COL_ELAPSED_TIME].to_numpy()
             return torch.from_numpy(elapsed_times).to(torch.float)
         else:
-            preds = unified_df[GlobalConstants.COL_PRED].to_numpy()
-            gts = unified_df[GlobalConstants.COL_GT].to_numpy()
+            preds = unified_df[GlobalConst.COL_PRED].to_numpy()
+            gts = unified_df[GlobalConst.COL_GT].to_numpy()
             return (
                 torch.from_numpy(preds).to(torch.int),
                 torch.from_numpy(gts).to(torch.int),
@@ -108,20 +106,20 @@ class CsvMetricSrc(BaseMetricSrc):
         if self.did_save_unified_metric_df[mode] is False:
             # Save unified CSV for reference
             outfile = os.path.join(
-                self.cfg.get_outdir(), f"{GlobalConstants.PERF_FILE_PREFIX}[{mode}]__{UNIFIED_CSV_FILE}"
+                self.cfg.get_outdir(),
+                f"{GlobalConst.PERF_FILE_PREFIX}[{mode}]__{UNIFIED_CSV_FILE}",
             )
             report_df = unified_df.copy()
             report_df["correct"] = (
-                report_df[GlobalConstants.COL_PRED]
-                == report_df[GlobalConstants.COL_GT]
+                report_df[GlobalConst.COL_PRED] == report_df[GlobalConst.COL_GT]
             )
             # sort by video, frame_idx, correctness
-            if mode == TorchMetricsConverter.METRIC_MODE_PER_FRAME:
+            if mode == GlobalConst.METRIC_PER_FRAME:
                 report_df = report_df.sort_values(
                     by=[
-                        GlobalConstants.COL_VIDEO,
+                        GlobalConst.COL_VIDEO,
                         "correct",
-                        GlobalConstants.COL_FRAME_IDX,
+                        GlobalConst.COL_FRAME_IDX,
                     ],
                     ascending=[True, False, True],
                 )

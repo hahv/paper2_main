@@ -5,17 +5,18 @@ from typing import Dict, List, Tuple, Type, Optional, Literal, Any
 from dataclasses import dataclass
 from halib import *
 from halib.filetype import yamlfile
+from common import GlobalConst
 
 
 # ======================================================
-# 1. Configuration Management
+# 1. Timeline Configuration Management
 # ======================================================
 @dataclass
-class TimelineConfig:
+class TlConfig:
     """Singleton-like config manager."""
 
     _config: Optional[Dict] = None
-    DEFAULT_TIMELINE_CFG = "/mnt/e/SyncData/paper2_main/config/mics/timeline_cfg.yaml"
+    DEFAULT_TIMELINE_CFG = f"{GlobalConst.proj_root()}/config/mics/timeline_cfg.yaml"
 
     @classmethod
     def load(cls, path: Optional[str] = None) -> Dict:
@@ -25,17 +26,15 @@ class TimelineConfig:
         return cls._config
 
     @classmethod
-    def get_supported_types(cls) -> List[str]:
+    def get_supported_tltypes(cls) -> List[str]:
         # Returns keys like ['gt', 'no_skip', 'skip']
         return list(cls.load().keys())
 
     @classmethod
-    def get_timeline_dict(cls, timeline_type: str) -> Dict[str, Any]:
+    def get_tl_dict(cls, tl_type: str) -> Dict[str, Any]:
         cfg = cls.load()
-        assert timeline_type in cfg, (
-            f"Timeline type '{timeline_type}' not found in config."
-        )
-        return cfg[timeline_type]
+        assert tl_type in cfg, f"Timeline type '{tl_type}' not found in config."
+        return cfg[tl_type]
 
 
 # ======================================================
@@ -44,15 +43,15 @@ class TimelineConfig:
 class TLConverter(ABC):
     """
     Base class for parsing logic.
-    'timeline_type' determines which color schema to validate against.
+    'tl_type' determines which color schema to validate against.
     """
 
-    def __init__(self, timeline_type: str):
-        self.timeline_type = timeline_type
+    def __init__(self, tl_type: str):
+        self.tl_type = tl_type
 
     @property
     def supported_labels(self) -> List[str]:
-        timeline_cfg_dict = TimelineConfig.get_timeline_dict(self.timeline_type)
+        timeline_cfg_dict = TlConfig.get_tl_dict(self.tl_type)
         # Search for labels_colors in "timeline" subsection (new format) or root (old format)
         if (
             "timeline" in timeline_cfg_dict
@@ -61,7 +60,7 @@ class TLConverter(ABC):
             return list(timeline_cfg_dict["timeline"]["labels_colors"].keys())
 
         assert "labels_colors" in timeline_cfg_dict, (
-            f"Config for '{self.timeline_type}' missing 'labels_colors' key (checked root and 'timeline')."
+            f"Config for '{self.tl_type}' missing 'labels_colors' key (checked root and 'timeline')."
         )
         return list(timeline_cfg_dict["labels_colors"].keys())
 
@@ -76,7 +75,7 @@ class TLConverter(ABC):
         for label in unique_labels:
             if label not in valid_set:
                 raise ValueError(
-                    f"[{self.timeline_type}] Parser produced label '{label}' "
+                    f"[{self.tl_type}] Parser produced label '{label}' "
                     f"which is not in config. Allowed: {valid_set}"
                 )
 
@@ -216,7 +215,7 @@ class TlProcessor:
                 parsed_series.name = col_name
 
                 parsed_series_list.append(parsed_series)
-                styles_map[col_name] = TimelineConfig.get_timeline_dict(timeline_type)
+                styles_map[col_name] = TlConfig.get_tl_dict(timeline_type)
 
             except Exception as e:
                 print(f"[Exception] Failed processing column '{col_name}': {e}")

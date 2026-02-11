@@ -3,7 +3,8 @@ import sys
 
 sys.path.append("/mnt/e/SyncData/paper2_main")
 from halib import *
-from src.results.timeline.report_helper import TlReportGen
+from src.results.timeline.tl_report import TlReportGen
+
 
 def test_gen_from_dir():
     all_exp_dir = "./zout/zruns"
@@ -14,7 +15,7 @@ def test_gen_from_csv():
     output_html_path = "./zout/timeline_report_reconstructed.html"
     # get name of parent dir of the csv file
     csv_parent_dir = Path(csv_path).parent
-    TlReportGen.tlreport_from_csv(
+    TlReportGen.tlReport_from_csv(
         csv_path, output_html_path, title=f"[Reconstructed] {csv_parent_dir.name}"
     )
     pprint_local_path(output_html_path, get_wins_path=True)

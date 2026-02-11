@@ -2,26 +2,31 @@ import pandas as pd
 import numpy as np
 from typing import Dict, Literal, Callable, Optional, Union
 from halib import *
-from src.results.timeline.data_parser import TlProcessor, TimelineConfig
+from src.results.timeline.tl_converter import TlProcessor, TlConfig
 from src.config import Config
 from pathlib import Path
 from halib.filetype import yamlfile
-from src.common import GlobalConstants
+from src.common import GlobalConst
+
 
 class TlReportGen:
     """
     Generates an HTML report for timeline visualization using TimelineProcessor.
     """
 
-    FIX_COLUMNS = ["video", "video_path", "frame_id", "gt_label"]
-    CSV_PATH_DF_COLUMNS = ["video", "gt_csv_path"]
+    TL_FIXED_COLUMNS = [
+        GlobalConst.COL_VIDEO,
+        GlobalConst.COL_VIDEO_PATH,
+        GlobalConst.COL_FRAME_IDX,
+        GlobalConst.COL_GT,
+    ]
     NOTEMP_MT_PATTERN = "mt_no_temp_method"
 
     def __init__(self, cols_to_types: Dict[str, str]):
         self.cols_to_types = cols_to_types
 
     @staticmethod
-    def simplify_exp_name(exp_name: str) -> str:
+    def shorten_exp_name(exp_name: str) -> str:
         """
         Default function to shorten experiment names for column naming.
         Example: "mt_temp_method_motion_block" -> "temp_method_motion_block"
@@ -66,8 +71,8 @@ class TlReportGen:
 
             try:
                 # Resolve timeline type (e.g. 'no_temp_method' -> 'no_skip')
-                t_type = TlReportGen.col_name_to_timeline_type(method_col)
-                cfg = TimelineConfig.get_timeline_dict(t_type)
+                t_type = TlReportGen.col_name_to_tl_type(method_col)
+                cfg = TlConfig.get_tl_dict(t_type)
 
                 sort_cfg = cfg.get("table", {}).get("sort_by", {})
 
@@ -136,7 +141,7 @@ class TlReportGen:
 
     @staticmethod
     # ! col_name is the shortened name
-    def col_name_to_timeline_type(col_name: str) -> str:
+    def col_name_to_tl_type(col_name: str) -> str:
         # first find the part that starts with 'mt_'
         if col_name.startswith("no_temp_method"):
             return "no_skip"
@@ -146,10 +151,10 @@ class TlReportGen:
             raise ValueError(f"Cannot determine timeline type for col_name={col_name}")
 
     @staticmethod
-    def get_timeline_csv_path_df(
+    def get_tl_csv_path_df(
         exp_dir: str,
-        shorten_exp_name_func: Callable[[str], str] = simplify_exp_name,
-        exp_name_to_timeline_type: Callable[[str], str] = col_name_to_timeline_type,
+        exp_name_shorten_func: Callable[[str], str] = shorten_exp_name,
+        exp_name_to_tltype: Callable[[str], str] = col_name_to_tl_type,
         do_normalize: bool = True,
     ) -> tuple[pd.DataFrame, Dict[str, str]]:
         """
@@ -243,11 +248,11 @@ class TlReportGen:
 
         # We merge these tracks onto the Ground Truth anchor
         # Format: (directory, column_name)
-        exp_col_name = shorten_exp_name_func(exp_path.name)
+        exp_col_name = exp_name_shorten_func(exp_path.name)
         to_merge_series = [(exp_path, exp_col_name)]
         if baseline_dir:
             to_merge_series.insert(
-                0, (baseline_dir, shorten_exp_name_func(baseline_dir.name))
+                0, (baseline_dir, exp_name_shorten_func(baseline_dir.name))
             )
 
         # pprint(f"to merge series: {to_merge_series}")
@@ -293,16 +298,16 @@ class TlReportGen:
         combined_df = pd.concat(dfs, ignore_index=True)
 
         # Reorder columns: Metadata -> GT -> Exp -> Base
-        start_cols = TlReportGen.FIX_COLUMNS
+        start_cols = TlReportGen.TL_FIXED_COLUMNS
         other_cols = [col for col in combined_df.columns if col not in start_cols]
         combined_df = combined_df[start_cols + other_cols]
 
         timeline_types_by_col = {"gt_label": "gt"}
         for col in other_cols:
-            timeline_types_by_col[col] = exp_name_to_timeline_type(col)
+            timeline_types_by_col[col] = exp_name_to_tltype(col)
 
         if do_normalize:
-            combined_df = TlReportGen.norm_timeline_df(combined_df)
+            combined_df = TlReportGen.norm_tl_df(combined_df)
         return combined_df, timeline_types_by_col
 
     @staticmethod
@@ -310,18 +315,18 @@ class TlReportGen:
         """
         Get unique values for each column in the dataframe.
         """
-        assert all(col in df.columns for col in TlReportGen.FIX_COLUMNS), (
-            f"This function only supports dataframes with fixed columns: {TlReportGen.FIX_COLUMNS} - for timeline dataframe"
+        assert all(col in df.columns for col in TlReportGen.TL_FIXED_COLUMNS), (
+            f"This function only supports dataframes with fixed columns: {TlReportGen.TL_FIXED_COLUMNS} - for timeline dataframe"
         )
         unique_by_cols = {}
         for col in df.columns:
-            if col in TlReportGen.FIX_COLUMNS[:-1]:  # skip 'video' and 'frame_id'
+            if col in TlReportGen.TL_FIXED_COLUMNS[:-1]:  # skip 'video' and 'frame_id'
                 continue
             unique_by_cols[col] = list(df[col].unique())
         return unique_by_cols
 
     @staticmethod
-    def norm_timeline_df(df: pd.DataFrame) -> pd.DataFrame:
+    def norm_tl_df(df: pd.DataFrame) -> pd.DataFrame:
         """
         Convert gt_label and other columns to standard labels with respect to 'fire' and 'none' and 'skipped' (if using temp method).
 
@@ -347,13 +352,13 @@ class TlReportGen:
 
         df = df.copy()
         for col in df.columns:
-            if col in TlReportGen.FIX_COLUMNS[:-1]:  # skip 'video' and 'frame_id'
+            if col in TlReportGen.TL_FIXED_COLUMNS[:-1]:  # skip 'video' and 'frame_id'
                 continue
             df[col] = df[col].apply(lambda x: _standardize_label(col, x))
         return df
 
     @staticmethod
-    def tlreport_from_csv(
+    def tlReport_from_csv(
         csv_path: str,
         output_html_path: Optional[str] = None,
         title: str = "Timeline Report (Reconstructed)",
@@ -394,7 +399,7 @@ class TlReportGen:
                 continue
 
             try:
-                t_type = TlReportGen.col_name_to_timeline_type(col)
+                t_type = TlReportGen.col_name_to_tl_type(col)
                 cols_to_types[col] = t_type
             except ValueError:
                 pass  # Not a recognized method column
@@ -402,7 +407,7 @@ class TlReportGen:
         # Reconstruct Styles Map
         styles_map = {}
         for col, t_type in cols_to_types.items():
-            styles_map[col] = TimelineConfig.get_timeline_dict(t_type)
+            styles_map[col] = TlConfig.get_tl_dict(t_type)
         if output_html_path is None:
             output_html_path = csv_path.replace(".csv", "_reconstructed.html")
 
@@ -446,19 +451,19 @@ class TlReportGen:
         exp_dir = Path(exp_dir)
 
         # from exp_dir, do something to get the dataframe and cols_to_types
-        df, cols_to_types = TlReportGen.get_timeline_csv_path_df(
+        df, cols_to_types = TlReportGen.get_tl_csv_path_df(
             str(exp_dir), do_normalize=True
         )
         report_generator = TlReportGen(cols_to_types)
-        output_path = exp_dir / f"{GlobalConstants.PERF_FILE_PREFIX}timeline_report.html"
+        output_path = exp_dir / f"{GlobalConst.PERF_FILE_PREFIX}timeline_report.html"
         if title is None:
             title = f"Timeline Report - {exp_dir.name}"
-        report_generator.generate(
+        report_generator._generate(
             df, str(output_path), title=title, table_mode=table_mode
         )
         return os.path.abspath(output_path)
 
-    def generate(
+    def _generate(
         self,
         df: pd.DataFrame,
         output_path: str,

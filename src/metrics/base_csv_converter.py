@@ -1,7 +1,7 @@
 from halib import *
 from abc import ABC
 from typing import List, Optional
-from src.metrics.loaders.base_csv_loader import BaseRawVideoCsvLoader
+from src.common import GlobalConst
 
 
 class BaseCSVConverter(ABC):
@@ -14,14 +14,14 @@ class BaseCSVConverter(ABC):
         assert target_col in df.columns, (
             f"Target column '{target_col}' not found in DataFrame"
         )
-        if target_col in [BaseRawVideoCsvLoader.COL_GT, BaseRawVideoCsvLoader.COL_PRED]:
+        if target_col in [GlobalConst.COL_GT, GlobalConst.COL_PRED]:
             return (
                 df[target_col]
                 .str.lower()
                 .apply(
-                    lambda x: BaseRawVideoCsvLoader.FIRESMOKE_LABEL
+                    lambda x: GlobalConst.FIRESMOKE_LABEL
                     if ("fire" in x or "smoke" in x)
-                    else BaseRawVideoCsvLoader.NONE_LABEL
+                    else GlobalConst.NONE_LABEL
                 )
                 .to_numpy()
             )
@@ -55,11 +55,9 @@ class BaseCSVConverter(ABC):
 
 
 class TorchMetricsConverter(BaseCSVConverter):
-    METRIC_MODE_PER_FRAME = "per_frame"
-    METRIC_MODE_PER_VIDEO = "per_video"
     LABEL_NUM_MAPPING = {
-        BaseRawVideoCsvLoader.FIRESMOKE_LABEL: 1,
-        BaseRawVideoCsvLoader.NONE_LABEL: 0,
+        GlobalConst.FIRESMOKE_LABEL: 1,
+        GlobalConst.NONE_LABEL: 0,
     }
 
     def convert_col(
@@ -68,8 +66,8 @@ class TorchMetricsConverter(BaseCSVConverter):
         # first apply base conversion
         converted_array = super().convert_col(df, target_col, extra_dict)
         if target_col not in [
-            BaseRawVideoCsvLoader.COL_GT,
-            BaseRawVideoCsvLoader.COL_PRED,
+            GlobalConst.COL_GT,
+            GlobalConst.COL_PRED,
         ]:  # only convert GT/PRED labels to integers
             return np.array(
                 [self.LABEL_NUM_MAPPING[label] for label in converted_array]
@@ -85,20 +83,17 @@ class TorchMetricsConverter(BaseCSVConverter):
         extra_dict: Optional[dict] = None,
     ) -> pd.DataFrame:
         metric_mode = extra_dict.get(  # ty:ignore[possibly-missing-attribute]
-            "metric_mode", TorchMetricsConverter.METRIC_MODE_PER_FRAME
+            "metric_mode", GlobalConst.METRIC_PER_FRAME
         )
-        if metric_mode == TorchMetricsConverter.METRIC_MODE_PER_VIDEO:
+        if metric_mode == GlobalConst.METRIC_PER_VIDEO:
             temp_df = super().do_convert(df, ls_target_cols, inplace, extra_dict)
-            gt = temp_df[BaseRawVideoCsvLoader.COL_GT].to_numpy().tolist()
+            gt = temp_df[GlobalConst.COL_GT].to_numpy().tolist()
             type_in_gt = list(set(gt))
-            final_video_gt = BaseRawVideoCsvLoader.NONE_LABEL
-            if (
-                self.LABEL_NUM_MAPPING[BaseRawVideoCsvLoader.FIRESMOKE_LABEL]
-                in type_in_gt
-            ):
-                final_video_gt = BaseRawVideoCsvLoader.FIRESMOKE_LABEL
+            final_video_gt = GlobalConst.NONE_LABEL
+            if self.LABEL_NUM_MAPPING[GlobalConst.FIRESMOKE_LABEL] in type_in_gt:
+                final_video_gt = GlobalConst.FIRESMOKE_LABEL
 
-            temp_df[BaseRawVideoCsvLoader.COL_GT] = [
+            temp_df[GlobalConst.COL_GT] = [
                 self.LABEL_NUM_MAPPING[final_video_gt]
             ] * len(temp_df)
 

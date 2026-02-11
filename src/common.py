@@ -1,6 +1,7 @@
+from halib.system.path import *
 
-class GlobalConstants:
 
+class GlobalConst:
     # column names
     COL_VIDEO = "video"
     COL_VIDEO_PATH = "video_path"
@@ -12,11 +13,22 @@ class GlobalConstants:
 
     # label names
     FIRESMOKE_LABEL = "firesmoke"
-    NO_SMOKE_LABEL = "none"
+    NONE_LABEL = "none"
 
     # file names / patterns
     GT_FILE_PATTERN = "__labels"
     INFER_FILE_PATTERN = "_results"
 
     # perf/analysis-related file
-    PERF_FILE_PREFIX = "_" # to make it appear at the top in file explorers
+    PERF_FILE_PREFIX = "_"  # to make it appear at the top in file explorers
+
+    # metrics
+    METRIC_PER_FRAME = "per_frame"
+    METRIC_PER_VIDEO = "per_video"
+
+    # ! do not access directly, use proj_root() instead
+    __PROJECT_ROOT = "/mnt/e/SyncData/paper2_main"
+
+    @staticmethod
+    def proj_root() -> str:
+        return normalize_paths(GlobalConst.__PROJECT_ROOT)

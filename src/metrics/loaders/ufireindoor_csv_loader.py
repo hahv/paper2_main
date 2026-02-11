@@ -1,10 +1,10 @@
 import os
 import pandas as pd
 from halib import *  # Assuming fs and other utils are here
-from src.metrics.loaders.base_csv_loader import BaseRawVideoCsvLoader
+from src.metrics.loaders.base_csv_loader import BaseVideoRawCsvLoader
 
 
-class UFireIndoorCsvLoader(BaseRawVideoCsvLoader):
+class UFireIndoorCsvLoader(BaseVideoRawCsvLoader):
     """
     Adapter for datasets that provide a separate CSV file for Ground Truth labels.
     Expected format: [video_name]__labels.csv

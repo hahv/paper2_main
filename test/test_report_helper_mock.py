@@ -9,8 +9,8 @@ from halib.filetype import yamlfile
 sys.path.append("/mnt/e/SyncData/paper2_main")
 
 from halib import *
-from src.results.timeline.data_parser import TimelineConfig
-from src.results.timeline.report_helper import TlReportGen
+from src.results.timeline.tl_converter import TlConfig
+from src.results.timeline.tl_report import TlReportGen
 
 # ==========================================
 # 1. SETUP MOCK CONFIGURATION (Same as test_data_parser.py)
@@ -117,7 +117,7 @@ def main():
     print(f"[INFO] Generating report to {output_html}...")
 
     # 2. Initialize Generator
-    with patch.object(TimelineConfig, "load", return_value=MOCK_YAML_CONTENT):
+    with patch.object(TlConfig, "load", return_value=MOCK_YAML_CONTENT):
         # 3. Generate Dynamic Mock Data
         # We must generate data inside the patch context if we used config-dependent generation,
         # but our generic generation above uses MOCK_YAML_CONTENT directly.
@@ -126,7 +126,7 @@ def main():
         print(f"[INFO] Generated DataFrame with {len(df)} rows across {df['video'].nunique()} videos.")
 
         generator = TlReportGen(cols_to_timeline_types)
-        generator.generate(df, output_html, title="Dynamic Timeline Report v2", table_mode="p")
+        generator._generate(df, output_html, title="Dynamic Timeline Report v2", table_mode="p")
 
     print("[SUCCESS] Report generated.")
 

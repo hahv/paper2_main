@@ -6,10 +6,10 @@ from typing import List, Optional
 from src.config import Config
 import os
 from pathlib import Path
-from src.common import GlobalConstants
+from src.common import GlobalConst
 
 
-class BaseRawVideoCsvLoader(ABC):
+class BaseVideoRawCsvLoader(ABC):
     """
     Base class for dataset-specific logic to load predictions and ground truth from CSV files.
     Load the RAW (gt_label, pred_label) without any processing.
@@ -17,9 +17,9 @@ class BaseRawVideoCsvLoader(ABC):
     """
 
     RAW_FIXED_COLS = [
-        GlobalConstants.COL_VIDEO,
-        GlobalConstants.COL_VIDEO_PATH,
-        GlobalConstants.COL_FRAME_IDX,
+        GlobalConst.COL_VIDEO,
+        GlobalConst.COL_VIDEO_PATH,
+        GlobalConst.COL_FRAME_IDX,
     ]
 
     def __init__(self, cfg: Config):
@@ -71,11 +71,10 @@ class BaseRawVideoCsvLoader(ABC):
         gt_df = self.get_gt_df(video_path, extra_data)
         pred_df = self.load_pred_df(video_path, extra_data)
         # Verify required columns
-        self.verify_gt_pred(gt_df, self.RAW_FIXED_COLS + [GlobalConstants.COL_GT])
+        self.verify_gt_pred(gt_df, self.RAW_FIXED_COLS + [GlobalConst.COL_GT])
         self.verify_gt_pred(
             pred_df,
-            self.RAW_FIXED_COLS
-            + [GlobalConstants.COL_PRED, GlobalConstants.COL_ELAPSED_TIME],
+            self.RAW_FIXED_COLS + [GlobalConst.COL_PRED, GlobalConst.COL_ELAPSED_TIME],
         )
         # ! do WARNING if lengths do not match?
         if len(gt_df) != len(pred_df):
@@ -101,18 +100,18 @@ class BaseRawVideoCsvLoader(ABC):
             csv_file,
             sep=";",
             encoding="utf-8",
-            dtype={GlobalConstants.COL_GT: str},
+            dtype={GlobalConst.COL_GT: str},
             keep_default_na=False,
         )
-        gt_df.rename(columns={"label": GlobalConstants.COL_GT}, inplace=True)
+        gt_df.rename(columns={"label": GlobalConst.COL_GT}, inplace=True)
         # Add fixed columns if not present
         video_name = Path(video_path).name
-        if GlobalConstants.COL_VIDEO not in gt_df.columns:
-            gt_df[GlobalConstants.COL_VIDEO] = video_name
-        if GlobalConstants.COL_VIDEO_PATH not in gt_df.columns:
-            gt_df[GlobalConstants.COL_VIDEO_PATH] = video_path
-        if GlobalConstants.COL_FRAME_IDX not in gt_df.columns:
-            gt_df[GlobalConstants.COL_FRAME_IDX] = (
+        if GlobalConst.COL_VIDEO not in gt_df.columns:
+            gt_df[GlobalConst.COL_VIDEO] = video_name
+        if GlobalConst.COL_VIDEO_PATH not in gt_df.columns:
+            gt_df[GlobalConst.COL_VIDEO_PATH] = video_path
+        if GlobalConst.COL_FRAME_IDX not in gt_df.columns:
+            gt_df[GlobalConst.COL_FRAME_IDX] = (
                 gt_df.index
             )  # Assuming frame_idx is the row index
         return gt_df
@@ -133,17 +132,17 @@ class BaseRawVideoCsvLoader(ABC):
             csv_file,
             sep=";",
             encoding="utf-8",
-            dtype={GlobalConstants.COL_PRED: str, GlobalConstants.COL_ELAPSED_TIME: float},
+            dtype={GlobalConst.COL_PRED: str, GlobalConst.COL_ELAPSED_TIME: float},
             keep_default_na=False,
         )
         # Add fixed columns if not present
         video_name = Path(video_path).name
-        if GlobalConstants.COL_VIDEO not in pred_df.columns:
-            pred_df[GlobalConstants.COL_VIDEO] = video_name
-        if GlobalConstants.COL_VIDEO_PATH not in pred_df.columns:
-            pred_df[GlobalConstants.COL_VIDEO_PATH] = video_path
-        if GlobalConstants.COL_FRAME_IDX not in pred_df.columns:
-            pred_df[GlobalConstants.COL_FRAME_IDX] = (
+        if GlobalConst.COL_VIDEO not in pred_df.columns:
+            pred_df[GlobalConst.COL_VIDEO] = video_name
+        if GlobalConst.COL_VIDEO_PATH not in pred_df.columns:
+            pred_df[GlobalConst.COL_VIDEO_PATH] = video_path
+        if GlobalConst.COL_FRAME_IDX not in pred_df.columns:
+            pred_df[GlobalConst.COL_FRAME_IDX] = (
                 pred_df.index
             )  # Assuming frame_idx is the row index
         return pred_df
