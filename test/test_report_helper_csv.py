@@ -24,7 +24,7 @@ DO_NORMALIZE = True
 for name, dir in list_items:
     console.rule()
     print(f"{name}: {dir}")
-    df, timeline_types = TlReportGen.get_tl_csv_path_df(
+    df, timeline_types = TlReportGen.get_tl_df_by_exp_dir(
         f"./zout/zruns/{dir}",
     )
 

@@ -1,5 +1,4 @@
-from future.moves.pickle import GLOBAL
-from sqlalchemy.testing.pickleable import Order
+from IPython.testing.decorators import f
 import pandas as pd
 import numpy as np
 from typing import Dict, Literal, Callable, Optional, Union
@@ -21,6 +20,7 @@ class TlReportGen:
     TL_FIXED_COLUMNS = [
         GlobalConst.COL_VIDEO,
         GlobalConst.COL_VIDEO_PATH,
+        GlobalConst.COL_NUM_FRAMES,
         GlobalConst.COL_FRAME_IDX,
         GlobalConst.COL_GT,
     ]
@@ -104,7 +104,7 @@ class TlReportGen:
         sort_cols = [x[1] for x in sort_instructions]
         ascending_vals = [x[2] for x in sort_instructions]
 
-        pprint(f"[Debug] Sorting criteria: {sort_instructions}")
+        # pprint(f"[Debug] Sorting criteria: {sort_instructions}")
 
         # 3. Create a Numeric Shadow DataFrame for Sorting
         # We extract the first numeric value from the string
@@ -154,7 +154,7 @@ class TlReportGen:
             raise ValueError(f"Cannot determine timeline type for col_name={col_name}")
 
     @staticmethod
-    def get_tl_csv_path_df(
+    def get_tl_df_by_exp_dir(
         exp_dir: str,
         exp_name_shorten_func: Callable[[str], str] = shorten_exp_name,
         exp_name_to_tltype: Callable[[str], str] = col_name_to_tl_type,
@@ -167,7 +167,7 @@ class TlReportGen:
         4. Calculates timeline types for each column based on experiment names.
 
         Return:
-            combined_df (pd.DataFrame): Merged DataFrame with frame-level labels.
+            all_video_df (pd.DataFrame): Merged DataFrame with frame-level labels.
             timeline_types_by_col (Dict[str, str]): Mapping of column names to timeline types
         """
 
@@ -276,11 +276,20 @@ class TlReportGen:
         ls_dfs = []
 
         for vid_path in video_files:
-            console.rule(f"Processing video: {vid_path}")
-            combined_df = combine_df_single_video(vid_path)
-            ls_dfs.append(combined_df)
-        combined_df = pd.concat(ls_dfs, ignore_index=True)
-        return combined_df, timeline_types_by_col
+            single_video_df = combine_df_single_video(vid_path)
+            ls_dfs.append(single_video_df)
+
+        all_video_df = pd.concat(ls_dfs, ignore_index=True)
+        # re-order columns
+        all_video_df = all_video_df[
+            TlReportGen.TL_FIXED_COLUMNS
+            + [
+                col
+                for col in all_video_df.columns
+                if col not in TlReportGen.TL_FIXED_COLUMNS
+            ]
+        ]
+        return all_video_df, timeline_types_by_col
 
     @staticmethod
     def get_unique_values(df: pd.DataFrame) -> Dict[str, list]:
@@ -391,7 +400,7 @@ class TlReportGen:
         exp_dir = Path(exp_dir)
 
         # from exp_dir, do something to get the dataframe and cols_to_types
-        df, cols_to_types = TlReportGen.get_tl_csv_path_df(str(exp_dir))
+        df, cols_to_types = TlReportGen.get_tl_df_by_exp_dir(str(exp_dir))
         report_generator = TlReportGen(cols_to_types)
         output_path = exp_dir / f"{GlobalConst.PERF_FILE_PREFIX}timeline_report.html"
         if title is None:
@@ -423,17 +432,18 @@ class TlReportGen:
             pfc - percentages and frame counts
         """
         # 1. Process Data using the Logic Core
-        final_df, stats_df, styles_map = TlProcessor.proc_dataframe(
+        raw_df = df.copy()
+        proc_tl_df, stats_df, styles_map = TlProcessor.proc_dataframe(
             df, self.cols_to_types, table_mode=table_mode
         )
 
         # 2. Add "FRAMES" and "VISUALIZATION"
         # We need to construct metadata for each video in stats_df
-        # Use final_df to get per-video frame data
-        final_df_reset = final_df.reset_index()
+        # Use proc_tl_df to get per-video frame data
+        final_df_reset = proc_tl_df.reset_index()
         video_groups = {
-            vid: grp.sort_values("frame_id")
-            for vid, grp in final_df_reset.groupby("video")
+            vid: grp.sort_values(by=GlobalConst.COL_FRAME_IDX)
+            for vid, grp in final_df_reset.groupby(GlobalConst.COL_VIDEO)
         }
 
         # Prepare list for new columns (using dict for alignment)
@@ -448,8 +458,8 @@ class TlReportGen:
                 frames = len(vid_df)
                 viz = self.generate_timeline_html(vid_df, styles_map)
                 path = (
-                    str(vid_df["video_path"].iloc[0])
-                    if "video_path" in vid_df.columns
+                    str(vid_df[GlobalConst.COL_VIDEO_PATH].iloc[0])
+                    if GlobalConst.COL_VIDEO_PATH in vid_df.columns
                     else ""
                 )
             elif video_name == "TOTAL":
@@ -516,14 +526,30 @@ class TlReportGen:
         # 3. Render HTML
         self.render_html(report_df, styles_map, output_path, title)
 
-        # also save report_df to csv for easier debugging
-        csv_output_path = output_path.replace(".html", ".csv")
-        report_df.to_csv(csv_output_path, index=False, sep=";", encoding="utf-8")
+        # save raw timeline csv and report csv
+        # proc timeline csv
+        raw_timeline_csv_path = output_path.replace(".html", "_raw_timeline.csv")
+        raw_df.to_csv(raw_timeline_csv_path, index=False, sep=";", encoding="utf-8")
+        proc_timeline_csv_path = output_path.replace(".html", "_proc_timeline.csv")
+        proc_tl_df.to_csv(
+            proc_timeline_csv_path, index=False, sep=";", encoding="utf-8"
+        )
+        # report csv
+        report_csv_output_path = output_path.replace(".html", ".csv")
+        report_df.to_csv(report_csv_output_path, index=False, sep=";", encoding="utf-8")
+
         with ConsoleLog("Saving report results:"):
             print(f"[INFO] Report generated at: ⏬")
             pprint_local_path(output_path, get_wins_path=True)
+
+            print(f"[INFO] Raw timeline data saved at: ⏬")
+            pprint_local_path(raw_timeline_csv_path, get_wins_path=True)
+
+            print(f"[INFO] Processed timeline data saved at: ⏬")
+            pprint_local_path(proc_timeline_csv_path, get_wins_path=True)
+
             print(f"[INFO] CSV version saved at: ⏬")
-            pprint_local_path(csv_output_path, get_wins_path=True)
+            pprint_local_path(report_csv_output_path, get_wins_path=True)
 
     def generate_timeline_html(self, vid_df: pd.DataFrame, styles_map: Dict) -> str:
         """Generates the stacked bar HTML for a single video."""

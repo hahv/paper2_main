@@ -95,6 +95,11 @@ class NoSkipConverter(TLConverter):
     def convert_col(
         self, df: pd.DataFrame, target_col: str, extra_dict: Optional[dict] = None
     ) -> np.ndarray:
+        norm_cols = [GlobalConst.COL_GT, target_col]
+        for col in norm_cols:
+            df[col] = super().convert_col(
+                df, col, extra_dict={"is_label_column": True}
+            )
         is_gt_fire = df[GlobalConst.COL_GT] == GlobalConst.FIRESMOKE_LABEL
         is_pred_fire = df[target_col] == GlobalConst.FIRESMOKE_LABEL
         return np.select(
@@ -108,6 +113,11 @@ class SkipConverter(TLConverter):
     def convert_col(
         self, df: pd.DataFrame, target_col: str, extra_dict: Optional[dict] = None
     ) -> np.ndarray:
+        norm_cols = [GlobalConst.COL_GT]
+        for col in norm_cols:
+            df[col] = super().convert_col(
+                df, col, extra_dict={"is_label_column": True}
+            )
         is_gt_fire = df[GlobalConst.COL_GT] == GlobalConst.FIRESMOKE_LABEL
         is_skipped = df[target_col] == GlobalConst.SKIP_LABEL
 
@@ -141,14 +151,14 @@ class TLConverterFactory:
     }
 
     @classmethod
-    def create(cls, converter_type: str) -> TLConverter:
-        converter_cls = cls._REGISTRY.get(converter_type)
+    def create(cls, tl_type: str) -> TLConverter:
+        converter_cls = cls._REGISTRY.get(tl_type)
         if not converter_cls:
             raise NotImplementedError(
-                f"Logic type '{converter_type}' not found in registry. "
+                f"Logic type '{tl_type}' not found in registry. "
                 f"Available: {list(cls._REGISTRY.keys())}"
             )
-        return converter_cls(timeline_type=converter_type)
+        return converter_cls(tl_type=tl_type)
 
 
 class TlProcessor:
@@ -183,7 +193,9 @@ class TlProcessor:
         table_mode: Literal["p", "fc", "pfc"] = "pfc",
     ) -> Tuple[pd.DataFrame, pd.DataFrame, Dict]:
         """
-        Generates the frame-level timeline data.
+        Generates the frame-level timeline data. The input df header is expected to have at least the following columns:
+        ! video | video_path| num_frames |frame_idx|gt_label| <<no_temp_method| temp_method_motion_block| ...>>
+
         """
         # 1. Validate Metadata
         missing_fixed = [c for c in cls.FIXED_COLS if c not in df.columns]
@@ -196,7 +208,6 @@ class TlProcessor:
         # timeline cfg per column (i.e timeline type: gt, no_skip, skip)
         for col_name, tl_type in cols_to_tl_types.items():
             styles_map[col_name] = TlConfig.get_tl_dict(tl_type)
-        pprint(f"{cols_to_tl_types=}")
         # ! make sure COL_GT labels are normalized first (for downstream converters)
         df = TLGtConverter(tl_type=GlobalConst.TL_TYPE_GT).do_convert(
             df,
@@ -223,12 +234,8 @@ class TlProcessor:
                 print(f"[Exception] Failed processing column '{col_name}': {e}")
                 continue
 
-        needed_cols = cls.FIXED_COLS + list(cols_to_tl_types.keys())
-        final_df = df[needed_cols].copy()
-
-        # 3. Set Index (Safe now that columns are unique)
-        final_df.set_index(cls.FIXED_COLS, inplace=True)
-
+        # csvfile.fn_display_df(df.head(3))
+        final_df = df.copy()
         # 4. Compute Stats
         stats_df = cls.compute_stats_df(final_df.copy(), styles_map, mode=table_mode)
         return final_df, stats_df, styles_map
