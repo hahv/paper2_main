@@ -1,7 +1,7 @@
 from halib import *
 from abc import ABC
 from typing import List, Optional
-from src.metrics.loaders.base_csv_loader import BaseVideoCsvLoader
+from src.metrics.loaders.base_csv_loader import BaseRawVideoCsvLoader
 
 
 class BaseCSVConverter(ABC):
@@ -14,26 +14,27 @@ class BaseCSVConverter(ABC):
         assert target_col in df.columns, (
             f"Target column '{target_col}' not found in DataFrame"
         )
-        suppported_col = [BaseVideoCsvLoader.COL_GT, BaseVideoCsvLoader.COL_PRED]
-        assert target_col in suppported_col, (
-            f"Conversion for column '{target_col}' is not supported"
-        )
-        return (
-            df[target_col]
-            .str.lower()
-            .apply(
-                lambda x: BaseVideoCsvLoader.FIRESMOKE_LABEL
-                if ("fire" in x or "smoke" in x)
-                else BaseVideoCsvLoader.NONE_LABEL
+        if target_col in [BaseRawVideoCsvLoader.COL_GT, BaseRawVideoCsvLoader.COL_PRED]:
+            return (
+                df[target_col]
+                .str.lower()
+                .apply(
+                    lambda x: BaseRawVideoCsvLoader.FIRESMOKE_LABEL
+                    if ("fire" in x or "smoke" in x)
+                    else BaseRawVideoCsvLoader.NONE_LABEL
+                )
+                .to_numpy()
             )
-            .to_numpy()
-        )
+        else:
+            return df[
+                target_col
+            ].to_numpy()  # no conversion applied (e.g., elapsed_time)
 
     def do_convert(
         self,
         df: pd.DataFrame,
         ls_target_cols: List[str],
-        inplace=True,
+        inplace=False,
         extra_dict: Optional[dict] = None,
     ) -> pd.DataFrame:
         """Run converting logic on specified target columns.
@@ -57,8 +58,8 @@ class TorchMetricsConverter(BaseCSVConverter):
     METRIC_MODE_PER_FRAME = "per_frame"
     METRIC_MODE_PER_VIDEO = "per_video"
     LABEL_NUM_MAPPING = {
-        BaseVideoCsvLoader.FIRESMOKE_LABEL: 1,
-        BaseVideoCsvLoader.NONE_LABEL: 0,
+        BaseRawVideoCsvLoader.FIRESMOKE_LABEL: 1,
+        BaseRawVideoCsvLoader.NONE_LABEL: 0,
     }
 
     def convert_col(
@@ -66,17 +67,21 @@ class TorchMetricsConverter(BaseCSVConverter):
     ) -> np.ndarray:
         # first apply base conversion
         converted_array = super().convert_col(df, target_col, extra_dict)
-
-        mapped_array = np.array(
-            [self.LABEL_NUM_MAPPING[label] for label in converted_array]
-        )
-        return mapped_array
+        if target_col not in [
+            BaseRawVideoCsvLoader.COL_GT,
+            BaseRawVideoCsvLoader.COL_PRED,
+        ]:  # only convert GT/PRED labels to integers
+            return np.array(
+                [self.LABEL_NUM_MAPPING[label] for label in converted_array]
+            )
+        # for other columns, no further conversion
+        return converted_array
 
     def do_convert(
         self,
         df: pd.DataFrame,
         ls_target_cols: List[str],
-        inplace=True,
+        inplace=False,
         extra_dict: Optional[dict] = None,
     ) -> pd.DataFrame:
         metric_mode = extra_dict.get(  # ty:ignore[possibly-missing-attribute]
@@ -84,13 +89,16 @@ class TorchMetricsConverter(BaseCSVConverter):
         )
         if metric_mode == TorchMetricsConverter.METRIC_MODE_PER_VIDEO:
             temp_df = super().do_convert(df, ls_target_cols, inplace, extra_dict)
-            gt = temp_df[BaseVideoCsvLoader.COL_GT].to_numpy().tolist()
+            gt = temp_df[BaseRawVideoCsvLoader.COL_GT].to_numpy().tolist()
             type_in_gt = list(set(gt))
-            final_video_gt = BaseVideoCsvLoader.NONE_LABEL
-            if self.LABEL_NUM_MAPPING[BaseVideoCsvLoader.FIRESMOKE_LABEL] in type_in_gt:
-                final_video_gt = BaseVideoCsvLoader.FIRESMOKE_LABEL
+            final_video_gt = BaseRawVideoCsvLoader.NONE_LABEL
+            if (
+                self.LABEL_NUM_MAPPING[BaseRawVideoCsvLoader.FIRESMOKE_LABEL]
+                in type_in_gt
+            ):
+                final_video_gt = BaseRawVideoCsvLoader.FIRESMOKE_LABEL
 
-            temp_df[BaseVideoCsvLoader.COL_GT] = [
+            temp_df[BaseRawVideoCsvLoader.COL_GT] = [
                 self.LABEL_NUM_MAPPING[final_video_gt]
             ] * len(temp_df)
 

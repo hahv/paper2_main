@@ -121,27 +121,24 @@ class DatasetCfg(AutoNamedCfg):
             }
         return self.vname2path
 
-    def get_num_videos(self, recursive=False):
+    def get_video_list(self):
+        recursive = True
+        if self.extra_cfgs:
+            recursive = self.extra_cfgs.get("ds_recursive", recursive)
         video_files = fs.filter_files_by_extension(
             self.dir_path, [".mp4", ".avi", ".mov"], recursive=recursive
         )
-        return len(video_files)
+        assert len(video_files) > 0, f"No video files found in {self.dir_path}"
+        return video_files
+
+    def get_num_videos(self):
+        return len(self.get_video_list())
 
     def get_gt_file_pattern(self):
         pattern: str = "__labels.csv"
         if self.extra_cfgs is not None:
             pattern = self.extra_cfgs.get("ds_gt_file_pattern", pattern)
         return pattern
-
-    def get_csv_labels(self, recursive=False):
-        csv_files = fs.filter_files_by_extension(
-            self.dir_path, [".csv"], recursive=recursive
-        )
-        # only keep those that match the gt file pattern
-        gt_file_pattern = self.get_gt_file_pattern()
-        csv_files = [f for f in csv_files if gt_file_pattern in os.path.basename(f)]
-        assert len(csv_files) > 0, f"No GT CSV files found in {self.dir_path} with pattern {gt_file_pattern}"
-        return csv_files
 
 
 @dataclass

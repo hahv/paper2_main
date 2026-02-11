@@ -1,3 +1,5 @@
+from halib import *
+from loguru import logger
 from abc import ABC
 import pandas as pd
 from typing import List, Optional
@@ -6,15 +8,16 @@ import os
 from pathlib import Path
 
 
-class BaseVideoCsvLoader(ABC):
+class BaseRawVideoCsvLoader(ABC):
     """
     Base class for dataset-specific logic to load predictions and ground truth from CSV files.
+    Load the RAW (gt_label, pred_label) without any processing.
+    Raw label can be further processed later (e.g., mapping to binary labels, etc).
     """
 
     # # Default labels (can be overridden by subclasses)
     FIRESMOKE_LABEL = "firesmoke"
     NONE_LABEL = "none"
-
     FIXED_COLS = ["video", "video_path", "frame_idx"]
     COL_GT = "gt_label"
     COL_PRED = "pred_label"
@@ -71,6 +74,11 @@ class BaseVideoCsvLoader(ABC):
         self.verify_gt_pred(
             pred_df, self.FIXED_COLS + [self.COL_PRED, self.COL_ELAPSED_TIME]
         )
+        # ! do WARNING if lengths do not match?
+        if len(gt_df) != len(pred_df):
+            logger.warning(
+                f"WARNING: GT and Prediction lengths do not match for video {video_path} ({len(gt_df)} vs {len(pred_df)})"
+            )
         # Merge on FIXED_COLS
         merged_df = pd.merge(gt_df, pred_df, on=self.FIXED_COLS, how="inner")
         return merged_df

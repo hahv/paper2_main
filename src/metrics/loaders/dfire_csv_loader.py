@@ -1,10 +1,10 @@
 from halib import *
 from typing import Optional
-from src.metrics.loaders.base_csv_loader import BaseVideoCsvLoader
+from src.metrics.loaders.base_csv_loader import BaseRawVideoCsvLoader
 from pathlib import Path
 
 
-class DFireCsvLoader(BaseVideoCsvLoader):
+class DFireCsvLoader(BaseRawVideoCsvLoader):
     """
     Adapter for the DFire dataset where Ground Truth is inferred
     heuristically from the video filename (e.g., if "FP" is in name).
@@ -21,9 +21,9 @@ class DFireCsvLoader(BaseVideoCsvLoader):
             "frame_idx": list(range(num_frames)),
         }
         video_label = (
-            BaseVideoCsvLoader.NONE_LABEL
+            BaseRawVideoCsvLoader.NONE_LABEL
             if "FP" in video_name
-            else BaseVideoCsvLoader.FIRESMOKE_LABEL
+            else BaseRawVideoCsvLoader.FIRESMOKE_LABEL
         )
         data_dict[self.COL_GT] = [video_label] * num_frames
         gt_df = pd.DataFrame(data_dict)

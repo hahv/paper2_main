@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Callable
+from typing import Dict, Any, Callable, List, Optional
 
 from src.config import Config
 from src.utils import get_cls_in_pkg
@@ -24,16 +24,18 @@ class BaseMetricSrc(ABC):
     a specific dataset and handles data retrieval for various metrics and modes.
     """
 
-    def __init__(self, dataset_name: str):
+    DEFAULT_METRIC_MODE = "DEFAULT"
+
+    def __init__(self, dataset_name: str, modes: Optional[List[str]] = None):
         self.dataset_name = dataset_name
+        if modes is None:
+            self.modes = [self.DEFAULT_METRIC_MODE]
+        else:
+            self.modes = modes
 
         # ! metric_name => func_to_get_data for that metric
         self.metric_data_getters_dict: Dict[str, Callable[..., Dict[str, Any]]] = {}
-        # ! mode_name (per-video, per-frame, etc) => func_to_process_data for that mode (data processor use the metric_data_getters to get data for each metric)
-        self.mode_processors_dict: Dict[str, Callable[..., Dict[str, Any]]] = {}
         self._register_handlers()
-        if len(self.mode_processors_dict) == 0:
-            self.mode_processors_dict["default"] = self.default_mode_processor
 
     def default_mode_processor(
         self, metric: str, mode: str, metric_data: Dict[str, Any], **kwargs
@@ -53,10 +55,6 @@ class BaseMetricSrc(ABC):
             # Implementation for fetching metric-specific data
             pass
 
-        def mode_processor(metric: str, metric_data: Dict[str, Any], **kwargs) -> Dict[str, Any]:
-            # Implementation for processing data according to the mode
-            return metric_data
-
         """
         pass
 
@@ -72,17 +70,13 @@ class BaseMetricSrc(ABC):
         metrics = self.metric_data_getters_dict.keys()
 
         final_data = {}
-        for mode in self.mode_processors_dict:
-            mode_proc = self.mode_processors_dict[mode]
+        for mode in self.modes:
             mode_proc_dict = {}
             for metric in metrics:
                 metric_data_getter = self.metric_data_getters_dict.get(metric)
-                # ! get raw data for that metric
-                metric_data = metric_data_getter(metric=metric, mode=mode, **kwargs)  # ty:ignore[call-non-callable]
-                # ! the metric data getter func will give raw data for that metric, then the mode processor will process the raw data to get the final data for that metric and mode
-                proc_data = mode_proc(
-                    metric=metric, mode=mode, metric_data=metric_data, **kwargs
-                )
-                mode_proc_dict[metric] = proc_data
+                metric_data_by_mode = metric_data_getter(
+                    metric=metric, mode=mode, **kwargs
+                )  # ty:ignore[call-non-callable]
+                mode_proc_dict[metric] = metric_data_by_mode
             final_data[mode] = mode_proc_dict
         return final_data
