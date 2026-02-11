@@ -2,7 +2,7 @@ from halib import *
 from loguru import logger
 from abc import ABC
 import pandas as pd
-from typing import List, Optional
+from typing import List, Optional, Literal
 from src.config import Config
 import os
 from pathlib import Path
@@ -140,13 +140,27 @@ class BaseRawCsvLoader(ABC):
         """
         Loads and merges GT and Pred DataFrames from explicit file paths.
         """
-        gt_df = BaseRawCsvLoader._read_raw_csv(
-            gt_csv_path, video_path, is_gt=True
-        )
-        pred_df = BaseRawCsvLoader._read_raw_csv(
-            pred_csv_path, video_path, is_gt=False
-        )
+        gt_df = BaseRawCsvLoader._read_raw_csv(gt_csv_path, video_path, is_gt=True)
+        pred_df = BaseRawCsvLoader._read_raw_csv(pred_csv_path, video_path, is_gt=False)
         return BaseRawCsvLoader._merge_gt_pred_dfs(gt_df, pred_df, video_path)
+
+    @staticmethod
+    def load_csv_by_pattern(
+        video_path: str,
+        csv_pattern: str,
+        is_gt: bool = True,
+        csv_dir: Optional[str] = None,
+    ) -> pd.DataFrame:
+        """
+        Resolves the CSV path and loads it with standard columns.
+        """
+        csv_file = BaseRawCsvLoader.video_path_to_csv(
+            video_path=video_path,
+            csv_pattern=csv_pattern,
+            is_gt=is_gt,
+            csv_dir=csv_dir,
+        )
+        return BaseRawCsvLoader._read_raw_csv(csv_file, video_path, is_gt=is_gt)
 
     @staticmethod
     def load_gt_pred_df_by_paths(
@@ -159,21 +173,13 @@ class BaseRawCsvLoader(ABC):
         """
         Resolves CSV paths from directories and patterns, then loads and merges them.
         """
-        gt_csv_file = BaseRawCsvLoader.video_path_to_csv(
-            video_path=video_path,
-            csv_pattern=gt_pattern,
-            is_gt=True,
-            csv_dir=gt_csv_dir,
+        gt_df = BaseRawCsvLoader.load_csv_by_pattern(
+            video_path, gt_pattern, is_gt=True, csv_dir=gt_csv_dir
         )
-        pred_csv_file = BaseRawCsvLoader.video_path_to_csv(
-            video_path=video_path,
-            csv_pattern=pred_pattern,
-            is_gt=False,
-            csv_dir=pred_csv_dir,
+        pred_df = BaseRawCsvLoader.load_csv_by_pattern(
+            video_path, pred_pattern, is_gt=False, csv_dir=pred_csv_dir
         )
-        return BaseRawCsvLoader.load_gt_pred_df_from_files(
-            video_path, gt_csv_file, pred_csv_file
-        )
+        return BaseRawCsvLoader._merge_gt_pred_dfs(gt_df, pred_df, video_path)
 
     def load_video_gt_pred_df(
         self, video_path: str, extra_data: Optional[dict] = None
@@ -181,28 +187,27 @@ class BaseRawCsvLoader(ABC):
         """
         Loads both GT and Prediction for a given video, merges them into a single DataFrame.
         """
-        gt_df = self.get_gt_df(video_path, extra_data)
-        pred_df = self.load_pred_df(video_path, extra_data)
-        return self._merge_gt_pred_dfs(gt_df, pred_df, video_path)
+        return self.load_gt_pred_df_by_paths(
+            video_path=video_path,
+            gt_csv_dir=None,
+            pred_csv_dir=self.cfg.get_outdir(),
+            gt_pattern=self.gt_file_pattern,
+            pred_pattern=self.infer_file_pattern,  # ty:ignore[invalid-argument-type]
+        )
 
     def get_gt_df(
         self, video_path: str, extra_data: Optional[dict] = None
     ) -> pd.DataFrame:
-        csv_file = self.video_path_to_csv(
-            video_path=video_path,
-            csv_pattern=self.gt_file_pattern,
-            is_gt=True,
-            csv_dir=None,
+        return self.load_csv_by_pattern(
+            video_path, self.gt_file_pattern, is_gt=True, csv_dir=None
         )
-        return self._read_raw_csv(csv_file, video_path, is_gt=True)
 
     def load_pred_df(
         self, video_path: str, extra_data: Optional[dict] = None
     ) -> pd.DataFrame:
-        csv_file = self.video_path_to_csv(
-            video_path=video_path,
-            csv_pattern=self.infer_file_pattern,  # ty:ignore[invalid-argument-type]
+        return self.load_csv_by_pattern(
+            video_path,
+            self.infer_file_pattern,  # ty:ignore[invalid-argument-type]
             is_gt=False,
             csv_dir=self.cfg.get_outdir(),
         )
-        return self._read_raw_csv(csv_file, video_path, is_gt=False)

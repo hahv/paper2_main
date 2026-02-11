@@ -1,3 +1,4 @@
+from sqlalchemy.testing.pickleable import Order
 import pandas as pd
 import numpy as np
 from typing import Dict, Literal, Callable, Optional, Union
@@ -7,6 +8,8 @@ from src.config import Config
 from pathlib import Path
 from halib.filetype import yamlfile
 from src.common import GlobalConst
+from src.metrics.loaders.base_csv_loader import BaseRawCsvLoader
+from collections import OrderedDict
 
 
 class TlReportGen:
@@ -155,7 +158,6 @@ class TlReportGen:
         exp_dir: str,
         exp_name_shorten_func: Callable[[str], str] = shorten_exp_name,
         exp_name_to_tltype: Callable[[str], str] = col_name_to_tl_type,
-        do_normalize: bool = True,
     ) -> tuple[pd.DataFrame, Dict[str, str]]:
         """
         Loads GT, Experiment, and Baseline data into a single frame-level DataFrame and a mapping of columns to timeline types.
@@ -184,43 +186,6 @@ class TlReportGen:
             # Return latest by name (lexicographical sort usually works for timestamps)
             return max(candidates, key=lambda p: p.name) if candidates else None
 
-        # def _load_frame_series(
-        #     path: Path, col_name: str, required: bool = False
-        # ) -> pd.DataFrame:
-        #     """
-        #     Helper to read a 2-column CSV (frame_idx, value) and standardise it.
-        #     """
-        #     if not path.exists():
-        #         if required:
-        #             raise FileNotFoundError(f"Required CSV not found: {path}")
-        #         return pd.DataFrame()
-
-        #     # Efficiently read only needed columns
-        #     # GT uses 'label', Predictions use 'pred_label'
-        #     val_col = "label" if col_name == "gt_label" else "pred_label"
-        #     # [Context: infer results of exp]
-        #     # ! pred_label column is set to "None", so if we do not specify dtype for it, it will be loaded as NaN type, but we need str type here
-        #     df = pd.read_csv(
-        #         path,
-        #         sep=";",
-        #         usecols=["frame_idx", val_col],
-        #         encoding="utf-8",
-        #         dtype={val_col: str},
-        #         keep_default_na=False,
-        #     )  # ty:ignore[no-matching-overload]
-
-        #     # all unique values is val_col, must not any nan values
-        #     if df[val_col].isna().any():
-        #         raise ValueError(
-        #             f"Column '{val_col}' in {path} contains NaN values for col_name={col_name}"
-        #         )
-
-        #     # convert to lower case of val_col
-        #     df[val_col] = df[val_col].str.lower()
-
-        #     # Standardise to 'frame_id' + 'col_name'
-        #     return df.rename(columns={"frame_idx": "frame_id", val_col: col_name})
-
         exp_path = Path(exp_dir)
 
         # 1. Setup: Load Config to find Dataset Path
@@ -233,8 +198,8 @@ class TlReportGen:
         dataset_dir = Path(exp_cfg.dbsetCfg.dir_path)  # ty:ignore[invalid-argument-type]
         assert dataset_dir.exists(), f"Dataset dir not found: {dataset_dir}"
 
-        # 2. Discovery: Find Baseline Dir & Video Files
-        baseline_dir = _find_bl_notemp_dir(
+        # 2. Discovery: Find Baseline (No Skip) Dir & Video Files
+        bl_noskip_dir = _find_bl_notemp_dir(
             exp_path,
             exp_cfg.dbsetCfg.name,  # ty:ignore[invalid-argument-type]
         )
@@ -242,72 +207,61 @@ class TlReportGen:
         video_files = fs.filter_files_by_extension(
             str(dataset_dir), [".mp4", ".avi", ".mov", ".mkv"], recursive=True
         )
+        tl_csv_info_all = OrderedDict()
+        # ! gt first
+        tl_csv_info_all[GlobalConst.COL_GT] = {
+            "csv_pattern": GlobalConst.GT_FILE_PATTERN,
+            "is_gt": True,
+            "csv_dir": None,
+            "tl_type": GlobalConst.TL_TYPE_GT,
+        }
+        # ! add baseline no-skip if exists before current exp for comparison
+        if bl_noskip_dir:
+            # ! baseline no-skip
+            tl_csv_info_all[exp_name_shorten_func(bl_noskip_dir.name)] = {
+                "csv_pattern": GlobalConst.INFER_FILE_PATTERN,
+                "is_gt": False,
+                "csv_dir": str(bl_noskip_dir),
+                "tl_type": GlobalConst.TL_TYPE_NO_SKIP,
+            }
+        # ! current exp
+        tl_csv_info_all[exp_name_shorten_func(exp_path.name)] = {
+            "csv_pattern": GlobalConst.INFER_FILE_PATTERN,
+            "is_gt": False,
+            "csv_dir": str(exp_path),
+            "tl_type": GlobalConst.TL_TYPE_SKIP,
+        }
 
-        # 3. Processing: Define Tracks & Iterate
-        dfs = []
+        tl_csv_info_infer = {
+            k: v for k, v in tl_csv_info_all.items() if k != GlobalConst.COL_GT
+        }
 
-        # We merge these tracks onto the Ground Truth anchor
-        # Format: (directory, column_name)
-        exp_col_name = exp_name_shorten_func(exp_path.name)
-        to_merge_series = [(exp_path, exp_col_name)]
-        if baseline_dir:
-            to_merge_series.insert(
-                0, (baseline_dir, exp_name_shorten_func(baseline_dir.name))
-            )
+        timeline_types_by_col = {k: v["tl_type"] for k, v in tl_csv_info_all.items()}
 
-        # pprint(f"to merge series: {to_merge_series}")
-
+        # ! after loop, gt_df has: BaseRawCsvLoader.RAW_FIXED_COLS + [gt_label, exp1 (no_skip), exp2 (skip), ...]
         for vid_path in video_files:
-            vid_name = fs.get_file_name(vid_path, split_file_ext=True)[0]
-            vid_parent = Path(vid_path).parent
+            gt_load_info = tl_csv_info_all[GlobalConst.COL_GT]
+            gt_df = BaseRawCsvLoader.load_csv_by_pattern(
+                video_path=vid_path,
+                csv_pattern=gt_load_info["csv_pattern"],
+                is_gt=gt_load_info["is_gt"],
+                csv_dir=gt_load_info["csv_dir"],
+            )
+            for load_info_key in tl_csv_info_infer:
+                load_info = tl_csv_info_infer[load_info_key]
+                pred_df = BaseRawCsvLoader.load_csv_by_pattern(
+                    video_path=vid_path,
+                    csv_pattern=load_info["csv_pattern"],
+                    is_gt=load_info["is_gt"],
+                    csv_dir=load_info["csv_dir"],
+                )
+                # create a new column with load_info_key name = pred_label
+                pred_df[load_info_key] = pred_df[GlobalConst.COL_PRED]
+                pred_df = pred_df[BaseRawCsvLoader.RAW_FIXED_COLS + [load_info_key]] # keep only necessary cols
+                gt_df = BaseRawCsvLoader._merge_gt_pred_dfs(gt_df, pred_df, vid_path)
 
-            # A. Load Anchor (Ground Truth)
-            gt_path = vid_parent / f"{vid_name}__labels.csv"
-            df_merged = _load_frame_series(gt_path, "gt_label", required=True)
-            gt_len = len(df_merged)
 
-            # B. Merge Additional Series
-            for series_dir, col_name in to_merge_series:
-                series_path = series_dir / f"{vid_name}_results.csv"
-                df_series = _load_frame_series(series_path, col_name, required=False)
-
-                if not df_series.empty:
-                    if len(df_series) != gt_len:
-                        console.print(
-                            f"[yellow][Warning][Video={vid_name}] Mismatched frame count for gt ({gt_len}) vs series data for col_name={col_name} ({len(df_series)}). Using inner join to align frames.[/yellow]"
-                        )
-                    # "Inner" join ensures only frame_ids present in BOTH dataframes remain.
-                    # If df_series is missing rows, df_merged will shrink to match.
-                    df_merged = pd.merge(
-                        df_merged,
-                        df_series[["frame_id", col_name]],
-                        on="frame_id",
-                        how="inner",
-                    )
-                else:
-                    df_merged[col_name] = np.nan
-
-            df_merged["video"] = vid_name
-            df_merged["video_path"] = str(os.path.abspath(vid_path))
-            dfs.append(df_merged)
-
-        # 4. Finalize
-        if not dfs:
-            return pd.DataFrame(), {}
-
-        combined_df = pd.concat(dfs, ignore_index=True)
-
-        # Reorder columns: Metadata -> GT -> Exp -> Base
-        start_cols = TlReportGen.TL_FIXED_COLUMNS
-        other_cols = [col for col in combined_df.columns if col not in start_cols]
-        combined_df = combined_df[start_cols + other_cols]
-
-        timeline_types_by_col = {"gt_label": "gt"}
-        for col in other_cols:
-            timeline_types_by_col[col] = exp_name_to_tltype(col)
-
-        if do_normalize:
-            combined_df = TlReportGen.norm_tl_df(combined_df)
+        combined_df = gt_df.copy()
         return combined_df, timeline_types_by_col
 
     @staticmethod
@@ -324,38 +278,6 @@ class TlReportGen:
                 continue
             unique_by_cols[col] = list(df[col].unique())
         return unique_by_cols
-
-    @staticmethod
-    def norm_tl_df(df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Convert gt_label and other columns to standard labels with respect to 'fire' and 'none' and 'skipped' (if using temp method).
-
-        Example:
-        Input:  {
-                │   'gt_label': ['fire_smoke', 'none'],
-                │   'no_temp_method': ['fire', 'smokeonly', 'none'],
-                │   'temp_method_motion_block': ['skipped', 'fire', 'smokeonly', 'none']
-                }
-        Output: {
-                │   'gt_label': ['fire', 'none'],
-                │   'no_temp_method': ['fire', 'none'],
-                │   'temp_method_motion_block': ['skipped', 'fire', 'none']
-                }
-        """
-
-        def _standardize_label(col: str, label: str) -> str:
-            if "fire" in label or "smoke" in label:
-                return "fire"
-            if col.startswith("temp_method"):
-                return label  # keep 'skipped' as is
-            return "none"
-
-        df = df.copy()
-        for col in df.columns:
-            if col in TlReportGen.TL_FIXED_COLUMNS[:-1]:  # skip 'video' and 'frame_id'
-                continue
-            df[col] = df[col].apply(lambda x: _standardize_label(col, x))
-        return df
 
     @staticmethod
     def tlReport_from_csv(
@@ -452,7 +374,7 @@ class TlReportGen:
 
         # from exp_dir, do something to get the dataframe and cols_to_types
         df, cols_to_types = TlReportGen.get_tl_csv_path_df(
-            str(exp_dir), do_normalize=True
+            str(exp_dir)
         )
         report_generator = TlReportGen(cols_to_types)
         output_path = exp_dir / f"{GlobalConst.PERF_FILE_PREFIX}timeline_report.html"

@@ -1,34 +1,33 @@
 from halib import *
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import List, Optional
 from src.common import GlobalConst
 
 
 class BaseCSVConverter(ABC):
-    """This converter is responsible for converting CSV field values to target formats."""
+    """Base class for converting CSV/DataFrame columns to target formats."""
 
-    # ! default, can be overridden by subclasses
+    @abstractmethod
     def convert_col(
         self, df: pd.DataFrame, target_col: str, extra_dict: Optional[dict] = None
     ) -> np.ndarray:
-        assert target_col in df.columns, (
-            f"Target column '{target_col}' not found in DataFrame"
-        )
-        if target_col in [GlobalConst.COL_GT, GlobalConst.COL_PRED]:
-            return (
-                df[target_col]
-                .str.lower()
-                .apply(
-                    lambda x: GlobalConst.FIRESMOKE_LABEL
-                    if ("fire" in x or "smoke" in x)
-                    else GlobalConst.NONE_LABEL
-                )
-                .to_numpy()
-            )
-        else:
-            return df[
-                target_col
-            ].to_numpy()  # no conversion applied (e.g., elapsed_time)
+        """
+        Convert a single column. Must be implemented by subclasses.
+        """
+        pass
+
+    def validate_output(self, labels: np.ndarray):
+        """Validate the converted output labels.
+
+        Args:
+            labels (np.ndarray): The array of converted labels.
+
+        Raises:
+            ValueError: If any label is None or NaN.
+        """
+        for label in labels:
+            if label is None or (isinstance(label, float) and np.isnan(label)):
+                raise ValueError("Converted labels contain None or NaN values.")
 
     def do_convert(
         self,
@@ -50,11 +49,44 @@ class BaseCSVConverter(ABC):
         rs_df = df if inplace else df.copy()
         for target_col in ls_target_cols:
             converted_array = self.convert_col(rs_df, target_col, extra_dict)
+            self.validate_output(converted_array)
             rs_df[target_col] = converted_array
         return rs_df
 
 
-class TorchMetricsConverter(BaseCSVConverter):
+class FireSmokeLabelConverter(BaseCSVConverter):
+    """
+    Standard converter that helps normalizing fire/smoke labels to 'firesmoke' or 'none'.
+    Used as a pre-processing step for metrics or other analyses.
+    """
+
+    def convert_col(
+        self, df: pd.DataFrame, target_col: str, extra_dict: Optional[dict] = None
+    ) -> np.ndarray:
+        assert target_col in df.columns, (
+            f"Target column '{target_col}' not found in DataFrame"
+        )
+        is_label_column = False
+        if extra_dict is not None:
+            is_label_column = extra_dict.get("is_label_column", False)
+        # Apply normalization only to known label columns
+        if target_col in [GlobalConst.COL_GT, GlobalConst.COL_PRED] or is_label_column:
+            return (
+                df[target_col]
+                .str.lower()
+                .apply(
+                    lambda x: GlobalConst.FIRESMOKE_LABEL
+                    if ("fire" in x or "smoke" in x)
+                    else (GlobalConst.NONE_LABEL if "none" in x else x)
+                )
+                .to_numpy()
+            )
+        else:
+            # no conversion applied (e.g., elapsed_time)
+            return df[target_col].to_numpy()
+
+
+class TorchMetricsConverter(FireSmokeLabelConverter):
     LABEL_NUM_MAPPING = {
         GlobalConst.FIRESMOKE_LABEL: 1,
         GlobalConst.NONE_LABEL: 0,
@@ -63,17 +95,16 @@ class TorchMetricsConverter(BaseCSVConverter):
     def convert_col(
         self, df: pd.DataFrame, target_col: str, extra_dict: Optional[dict] = None
     ) -> np.ndarray:
-        # first apply base conversion
+        # first apply base conversion (FireSmokeLabelConverter)
         converted_array = super().convert_col(df, target_col, extra_dict)
+
         if target_col not in [
             GlobalConst.COL_GT,
             GlobalConst.COL_PRED,
         ]:  # only convert GT/PRED labels to integers
-            return np.array(
-                [self.LABEL_NUM_MAPPING[label] for label in converted_array]
-            )
-        # for other columns, no further conversion
-        return converted_array
+            return converted_array
+
+        return np.array([self.LABEL_NUM_MAPPING[label] for label in converted_array])
 
     def do_convert(
         self,

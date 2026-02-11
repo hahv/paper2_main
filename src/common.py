@@ -1,6 +1,5 @@
 from halib.system.path import *
 
-
 class GlobalConst:
     # csv column names
     COL_VIDEO = "video"
@@ -14,6 +13,7 @@ class GlobalConst:
     # label names
     FIRESMOKE_LABEL = "firesmoke"
     NONE_LABEL = "none"
+    SKIP_LABEL = "skipped"
 
     # file names / patterns
     GT_FILE_PATTERN = "__labels"
@@ -26,9 +26,14 @@ class GlobalConst:
     METRIC_PER_FRAME = "per_frame"
     METRIC_PER_VIDEO = "per_video"
 
-    # genaral
+    # general
     # ! do not access directly, use proj_root() instead
     __PROJECT_ROOT = "/mnt/e/SyncData/paper2_main"
+
+    # timeline
+    TL_TYPE_GT = "gt"
+    TL_TYPE_NO_SKIP = "no_skip"
+    TL_TYPE_SKIP = "skip"
 
     @staticmethod
     def proj_root() -> str:

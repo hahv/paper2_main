@@ -1,11 +1,10 @@
-import pandas as pd
-import numpy as np
-from abc import ABC, abstractmethod
-from typing import Dict, List, Tuple, Type, Optional, Literal, Any
-from dataclasses import dataclass
 from halib import *
 from halib.filetype import yamlfile
-from common import GlobalConst
+from typing import Dict, List, Tuple, Type, Optional, Literal, Any
+from dataclasses import dataclass
+
+from src.common import GlobalConst
+from src.metrics.base_csv_converter import FireSmokeLabelConverter
 
 
 # ======================================================
@@ -40,7 +39,7 @@ class TlConfig:
 # ======================================================
 # 2. Parsing Logic (Decoupled)
 # ======================================================
-class TLConverter(ABC):
+class TLConverter(FireSmokeLabelConverter):
     """
     Base class for parsing logic.
     'tl_type' determines which color schema to validate against.
@@ -53,10 +52,7 @@ class TLConverter(ABC):
     def supported_labels(self) -> List[str]:
         tl_cfg_dict = TlConfig.get_tl_dict(self.tl_type)
         # Search for labels_colors in "timeline" subsection (new format) or root (old format)
-        if (
-            "timeline" in tl_cfg_dict
-            and "labels_colors" in tl_cfg_dict["timeline"]
-        ):
+        if "timeline" in tl_cfg_dict and "labels_colors" in tl_cfg_dict["timeline"]:
             return list(tl_cfg_dict["timeline"]["labels_colors"].keys())
 
         assert "labels_colors" in tl_cfg_dict, (
@@ -66,6 +62,9 @@ class TLConverter(ABC):
 
     def validate_output(self, labels: np.ndarray):
         """Ensures generated labels exist in the config for this type."""
+        # general validation (no None, NaN)
+        super().validate_output(labels)
+        # custom validation against timeline config
         unique_labels = np.unique(labels)
         valid_set = set(self.supported_labels)
 
@@ -79,52 +78,25 @@ class TLConverter(ABC):
                     f"which is not in config. Allowed: {valid_set}"
                 )
 
-    @abstractmethod
-    def parse_logic(self, df: pd.DataFrame, method_col: str) -> np.ndarray:
-        """Pure logic implementation."""
-        pass
-
-    def run(self, df: pd.DataFrame, method_col: str) -> pd.Series:
-        """
-        Orchestrates parsing:
-        1. Checks column existence
-        2. runs logic
-        3. validates output against config
-        """
-        if method_col not in df.columns:
-            raise ValueError(f"Column '{method_col}' not found in DataFrame.")
-
-        raw_labels = self.parse_logic(df, method_col)
-        self.validate_output(raw_labels)
-
-        # Return Series with original index
-        return pd.Series(raw_labels, index=df.index, name=method_col)
-
-
-# --- IMPLEMENATIONS ---
-# CSV label Input (gt or pred):
-#         {
-#         │   'gt_label': ['fire_smoke', 'none'],
-#         │   'no_temp_method': ['fire', 'smokeonly', 'none'],
-#         │   'temp_method_motion_block': ['skipped', 'fire', 'smokeonly', 'none']
-#         }
-# !label Output (normalized):
-#         {
-#         │   'gt_label': ['fire', 'none'],
-#         │   'no_temp_method': ['fire', 'none'],
-#         │   'temp_method_motion_block': ['skipped', 'fire', 'none']
-#         }
-
 
 class TLGtConverter(TLConverter):
-    def parse_logic(self, df: pd.DataFrame, method_col: str) -> np.ndarray:
-        return np.where(df["gt_label"] == "fire", "FireSmoke", "None")
+    def convert_col(
+        self, df: pd.DataFrame, target_col: str, extra_dict: Optional[dict] = None
+    ) -> np.ndarray:
+        df[GlobalConst.COL_GT] = super().convert_col(
+            df, GlobalConst.COL_GT, extra_dict={"is_label_column": True}
+        )
+        return np.where(
+            df[GlobalConst.COL_GT] == GlobalConst.FIRESMOKE_LABEL, "FireSmoke", "None"
+        )
 
 
 class NoSkipConverter(TLConverter):
-    def parse_logic(self, df: pd.DataFrame, method_col: str) -> np.ndarray:
-        is_gt_fire = df["gt_label"] == "fire"
-        is_pred_fire = df[method_col] == "fire"
+    def convert_col(
+        self, df: pd.DataFrame, target_col: str, extra_dict: Optional[dict] = None
+    ) -> np.ndarray:
+        is_gt_fire = df[GlobalConst.COL_GT] == GlobalConst.FIRESMOKE_LABEL
+        is_pred_fire = df[target_col] == GlobalConst.FIRESMOKE_LABEL
         return np.select(
             [(~is_gt_fire) & (is_pred_fire), (is_gt_fire) & (~is_pred_fire)],
             ["False Alarm (FP)", "Miss (FN)"],
@@ -133,9 +105,11 @@ class NoSkipConverter(TLConverter):
 
 
 class SkipConverter(TLConverter):
-    def parse_logic(self, df: pd.DataFrame, method_col: str) -> np.ndarray:
-        is_gt_fire = df["gt_label"] == "fire"
-        is_skipped = df[method_col] == "skipped"
+    def convert_col(
+        self, df: pd.DataFrame, target_col: str, extra_dict: Optional[dict] = None
+    ) -> np.ndarray:
+        is_gt_fire = df[GlobalConst.COL_GT] == GlobalConst.FIRESMOKE_LABEL
+        is_skipped = df[target_col] == GlobalConst.SKIP_LABEL
 
         # Logic for Temporal Skipping Efficiency:
         # We evaluate whether the decision to SKIP or PROCESS was correct relative to the GT.
@@ -159,7 +133,7 @@ class SkipConverter(TLConverter):
 # ======================================================
 # 3. Factory
 # ======================================================
-class TLParserFactory:
+class TLConverterFactory:
     _REGISTRY: Dict[str, Type[TLConverter]] = {
         "gt": TLGtConverter,
         "no_skip": NoSkipConverter,
@@ -167,27 +141,45 @@ class TLParserFactory:
     }
 
     @classmethod
-    def create(cls, parser_type: str) -> TLConverter:
-        parser_cls = cls._REGISTRY.get(parser_type)
-        if not parser_cls:
+    def create(cls, converter_type: str) -> TLConverter:
+        converter_cls = cls._REGISTRY.get(converter_type)
+        if not converter_cls:
             raise NotImplementedError(
-                f"Logic type '{parser_type}' not found in registry. "
+                f"Logic type '{converter_type}' not found in registry. "
                 f"Available: {list(cls._REGISTRY.keys())}"
             )
-        return parser_cls(timeline_type=parser_type)
+        return converter_cls(timeline_type=converter_type)
 
 
-# ======================================================
-# 4. Processor (The Driver)
-# ======================================================
 class TlProcessor:
-    FIXED_COLS = ["video", "video_path", "frame_id", "gt_label"]
+    FIXED_COLS = [
+        GlobalConst.COL_VIDEO,
+        GlobalConst.COL_VIDEO_PATH,
+        GlobalConst.COL_FRAME_IDX,
+        GlobalConst.COL_GT,
+    ]
 
+    # ======================================================
+    # 4. Processor (The Driver)
+    # --- IMPLEMENATIONS ---
+    # CSV label Input (gt or pred):
+    #         {
+    #         │   'gt_label': ['fire_smoke', 'none'],
+    #         │   'no_temp_method': ['fire', 'smokeonly', 'none'],
+    #         │   'temp_method_motion_block': ['skipped', 'fire', 'smokeonly', 'none']
+    #         }
+    # !label Output (normalized):
+    #         {
+    #         │   'gt_label': ['fire', 'none'],
+    #         │   'no_temp_method': ['fire', 'none'],
+    #         │   'temp_method_motion_block': ['skipped', 'fire', 'none']
+    #         }
+    # ======================================================
     @classmethod
     def proc_dataframe(
         cls,
         df: pd.DataFrame,
-        cols_to_timeline_types: Dict[str, str],
+        cols_to_tl_types: Dict[str, str],
         table_mode: Literal["p", "fc", "pfc"] = "pfc",
     ) -> Tuple[pd.DataFrame, pd.DataFrame, Dict]:
         """
@@ -200,44 +192,39 @@ class TlProcessor:
                 f"Input DataFrame is missing required fixed columns: {missing_fixed}"
             )
 
-        parsed_series_list = []
         styles_map = {}
+        # timeline cfg per column (i.e timeline type: gt, no_skip, skip)
+        for col_name, timeline_type in cols_to_tl_types.items():
+            styles_map[col_name] = TlConfig.get_tl_dict(timeline_type)
 
-        for col_name, timeline_type in cols_to_timeline_types.items():
+        # ! make sure COL_GT labels are normalized first (for downstream converters)
+        df = TLGtConverter(tl_type=GlobalConst.TL_TYPE_GT).do_convert(
+            df,
+            ls_target_cols=[GlobalConst.COL_GT],
+            inplace=True,
+        )
+        for col_name, timeline_type in cols_to_tl_types.items():
             if col_name not in df.columns:
                 print(f"[Error] Configured column '{col_name}' not found. Skipping.")
                 continue
-
+            if col_name == GlobalConst.COL_GT:
+                continue  # GT already processed
             try:
-                parser = TLParserFactory.create(timeline_type)
-                # Parse and force name to match column
-                parsed_series = parser.run(df, col_name)
-                parsed_series.name = col_name
-
-                parsed_series_list.append(parsed_series)
-                styles_map[col_name] = TlConfig.get_tl_dict(timeline_type)
+                converter = TLConverterFactory.create(timeline_type)
+                # auto convert target column and validate
+                df = converter.do_convert(
+                    df,
+                    ls_target_cols=[col_name],
+                    inplace=True,
+                    extra_dict={"is_label_column": True},
+                )
 
             except Exception as e:
                 print(f"[Exception] Failed processing column '{col_name}': {e}")
                 continue
 
-        # 2. Merge Results (Fixing Duplicate Columns Issue)
-        base_df = df[cls.FIXED_COLS].copy()
-
-        if parsed_series_list:
-            parsed_results = pd.concat(parsed_series_list, axis=1)
-
-            # Identify columns in parsed_results that are ALSO in base_df (e.g., 'gt_label')
-            # We must drop them from base_df to avoid duplicates (overwriting raw with parsed)
-            cols_to_overwrite = [
-                c for c in parsed_results.columns if c in base_df.columns
-            ]
-            if cols_to_overwrite:
-                base_df = base_df.drop(columns=cols_to_overwrite)
-
-            final_df = pd.concat([base_df, parsed_results], axis=1)
-        else:
-            final_df = base_df
+        needed_cols = cls.FIXED_COLS + list(cols_to_tl_types.keys())
+        final_df = df[needed_cols].copy()
 
         # 3. Set Index (Safe now that columns are unique)
         final_df.set_index(cls.FIXED_COLS, inplace=True)

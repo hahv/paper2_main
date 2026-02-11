@@ -26,7 +26,6 @@ for name, dir in list_items:
     print(f"{name}: {dir}")
     df, timeline_types = TlReportGen.get_tl_csv_path_df(
         f"./zout/zruns/{dir}",
-        do_normalize=DO_NORMALIZE,
     )
 
     pprint(timeline_types)
