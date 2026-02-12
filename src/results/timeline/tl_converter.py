@@ -228,7 +228,7 @@ class TlProcessor:
         # final_df.to_csv("./zout/debug_timeline_converted.csv", index=False, sep=";")
         # 4. Compute Stats
         stats_df = cls.compute_stats_df(final_df.copy(), styles_map, mode=table_mode)
-        return normed_df, stats_df, styles_map
+        return final_df, stats_df, styles_map
 
     @classmethod
     def compute_stats_df(
