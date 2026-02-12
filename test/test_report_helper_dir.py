@@ -24,9 +24,8 @@ def test_gen_from_csv():
     TlReportGen.tlReport_from_csv(
         csv_path, output_html_path, title=f"[Reconstructed] {csv_parent_dir.name}"
     )
-    pprint_local_path(output_html_path, get_wins_path=True)
 
 if __name__ == "__main__":
-    test_gen_from_single_dir()
+    # test_gen_from_single_dir()
     # test_gen_from_muti_dir()
-    # test_gen_from_csv()
+    test_gen_from_csv()

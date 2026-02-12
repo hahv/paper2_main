@@ -61,9 +61,9 @@ skip:
 
   timeline:
     labels_colors:
-      Miss (FN): "#8e44ad"         # Purple (Critical Failure)
-      Waste (FP): "#f1c40f"        # Gold (Inefficiency)
-      Correct Skip: "#00b894"      # Teal (Efficiency Success)
+      Miss (FN): "#e84393"         # Purple (Critical Failure)
+      Waste (FP): "#e67e22"        # Gold (Inefficiency)
+      Correct Skip: "#3498db"      # Teal (Efficiency Success)
       Correct Proc.: "#2c3e50"     # Navy (Valid Hit)
 
   table:
@@ -72,12 +72,12 @@ skip:
       # Highlight Miss (FN) when count > 1
       Miss (FN):
         condition: "> 1"
-        color: "#8e44ad"
+        color: "#e84393"
 
       # Highlight Waste (FP) when count > 10
       Waste (FP):
         condition: "> 10"
-        color: "#f1c40f"
+        color: "#e67e22"
 
     # Sort priority: smaller number = higher priority
     sort_by:
