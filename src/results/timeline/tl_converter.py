@@ -4,7 +4,7 @@ from typing import Dict, List, Tuple, Type, Optional, Literal, Any
 from dataclasses import dataclass
 
 from src.common import GlobalConst
-from src.metrics.base_csv_converter import FireSmokeLabelConverter
+from src.metrics.base_csv_converter import *
 
 
 # ======================================================
@@ -60,64 +60,68 @@ class TLConverter(FireSmokeLabelConverter):
         )
         return list(tl_cfg_dict["labels_colors"].keys())
 
-    def validate_output(self, labels: np.ndarray):
-        """Ensures generated labels exist in the config for this type."""
-        # general validation (no None, NaN)
-        super().validate_output(labels)
-        # custom validation against timeline config
-        unique_labels = np.unique(labels)
-        valid_set = set(self.supported_labels)
-
-        if not valid_set:
-            return
-
-        for label in unique_labels:
-            if label not in valid_set:
-                raise ValueError(
-                    f"[{self.tl_type}] Parser produced label '{label}' "
-                    f"which is not in config. Allowed: {valid_set}"
-                )
-
+    def get_valid_output_label(self):
+        return self.supported_labels
 
 class TLGtConverter(TLConverter):
+
+    def get_valid_input_label(self):
+        """Validate input labels before conversion."""
+        return [GlobalConst.FIRESMOKE_LABEL, GlobalConst.NONE_LABEL]
+
     def convert_col(
         self, df: pd.DataFrame, target_col: str, extra_dict: Optional[dict] = None
     ) -> np.ndarray:
-        df[GlobalConst.COL_GT] = super().convert_col(
-            df, GlobalConst.COL_GT, extra_dict={"is_label_column": True}
-        )
-        return np.where(
+        rs = np.where(
             df[GlobalConst.COL_GT] == GlobalConst.FIRESMOKE_LABEL, "FireSmoke", "None"
         )
-
+        return rs
 
 class NoSkipConverter(TLConverter):
+    def get_valid_input_label(self):
+        """Validate input labels before conversion."""
+        return [GlobalConst.FIRESMOKE_LABEL, GlobalConst.NONE_LABEL]
+
     def convert_col(
         self, df: pd.DataFrame, target_col: str, extra_dict: Optional[dict] = None
     ) -> np.ndarray:
-        norm_cols = [GlobalConst.COL_GT, target_col]
-        for col in norm_cols:
-            df[col] = super().convert_col(
-                df, col, extra_dict={"is_label_column": True}
-            )
+        # ! make sure GT is normalized first
+        dummy_tlgt = TLGtConverter(tl_type=GlobalConst.TL_TYPE_GT)
+        BaseCSVConverter.validate_col_labels(
+            df[GlobalConst.COL_GT].to_numpy(), dummy_tlgt.get_valid_input_label()
+        )
+        df[target_col] = super().convert_col(
+            df, target_col, extra_dict={"is_label_column": True}
+        )
         is_gt_fire = df[GlobalConst.COL_GT] == GlobalConst.FIRESMOKE_LABEL
         is_pred_fire = df[target_col] == GlobalConst.FIRESMOKE_LABEL
-        return np.select(
+        rs = np.select(
             [(~is_gt_fire) & (is_pred_fire), (is_gt_fire) & (~is_pred_fire)],
             ["False Alarm (FP)", "Miss (FN)"],
             default="Correct",
         )
+        return rs
 
 
 class SkipConverter(TLConverter):
+    def get_valid_input_label(self):
+        """Validate input labels before conversion."""
+        return [
+            GlobalConst.FIRESMOKE_LABEL,
+            GlobalConst.NONE_LABEL,
+            GlobalConst.SKIP_LABEL,
+        ]
     def convert_col(
         self, df: pd.DataFrame, target_col: str, extra_dict: Optional[dict] = None
     ) -> np.ndarray:
-        norm_cols = [GlobalConst.COL_GT]
-        for col in norm_cols:
-            df[col] = super().convert_col(
-                df, col, extra_dict={"is_label_column": True}
-            )
+         # ! make sure GT is normalized first
+        dummy_tlgt = TLGtConverter(tl_type=GlobalConst.TL_TYPE_GT)
+        BaseCSVConverter.validate_col_labels(
+            df[GlobalConst.COL_GT].to_numpy(), dummy_tlgt.get_valid_input_label()
+        )
+        df[target_col] = super().convert_col(
+            df, target_col, extra_dict={"is_label_column": True}
+        )
         is_gt_fire = df[GlobalConst.COL_GT] == GlobalConst.FIRESMOKE_LABEL
         is_skipped = df[target_col] == GlobalConst.SKIP_LABEL
 
@@ -208,34 +212,28 @@ class TlProcessor:
         # timeline cfg per column (i.e timeline type: gt, no_skip, skip)
         for col_name, tl_type in cols_to_tl_types.items():
             styles_map[col_name] = TlConfig.get_tl_dict(tl_type)
-        # ! make sure COL_GT labels are normalized first (for downstream converters)
-        df = TLGtConverter(tl_type=GlobalConst.TL_TYPE_GT).do_convert(
-            df,
-            ls_target_cols=[GlobalConst.COL_GT],
-            inplace=True,
-        )
+
+        final_df = df.copy()
 
         for col_name, tl_type in cols_to_tl_types.items():
-            if col_name not in df.columns:
-                print(f"[Error] Configured column '{col_name}' not found. Skipping.")
+            if col_name not in final_df.columns:
+                pprint(f"[Error] Configured column '{col_name}' not found. Skipping.")
                 continue
-            if col_name == GlobalConst.COL_GT:
-                continue  # GT already processed
-            try:
+            # try:
                 converter = TLConverterFactory.create(tl_type)
-                # auto convert target column and validate
-                df = converter.do_convert(
-                    df,
+                # ! convert each column separately (e.g: gt_label, temp_method_motion_block, etc.) do not affect others
+                normed_col_df = converter.do_convert(
+                    df.copy(),
                     ls_target_cols=[col_name],
                     inplace=True,
                     extra_dict={"is_label_column": True},
                 )
-            except Exception as e:
-                print(f"[Exception] Failed processing column '{col_name}': {e}")
-                continue
+                # update main df with processed column
+                final_df[col_name] = normed_col_df[col_name]
+            # except Exception as e:
+            #     pprint(f"[Exception] Failed processing column '{col_name}': {e}")
+            #     continue
 
-        # csvfile.fn_display_df(df.head(3))
-        final_df = df.copy()
         # 4. Compute Stats
         stats_df = cls.compute_stats_df(final_df.copy(), styles_map, mode=table_mode)
         return final_df, stats_df, styles_map

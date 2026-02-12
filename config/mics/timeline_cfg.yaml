@@ -11,7 +11,7 @@ gt:
   timeline:
     labels_colors:
       FireSmoke: "#fc6065"
-      None: "#95a5a6" # Gray for neutral background (to avoid confusion with "Correct" Green)
+      "None": "#95a5a6" # Gray for neutral background (to avoid confusion with "Correct" Green)
 
   # Reporting: Statistics Table settings
   table:

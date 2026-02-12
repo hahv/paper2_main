@@ -1,6 +1,18 @@
 from halib import *
-from src.results.timeline.report_helper import TlReportGen
+from tap import *
 
-exp_dir = r"./zout/zruns/4GPU_SV__ds_UFireIndoorFull__mt_no_temp_method__af4b0d32a3d2__20260209.142136"
-TlReportGen.gen_TlReport_exp(exp_dir)
-# TlReportGen.tlreport_from_csv(f"{exp_dir}/timeline_report.csv")
+class CustomArgs(Tap):
+    arg_str: str = "MyProject"
+    arg_int: int = 32
+    verbose: bool = False # use --verbose to set True
+
+def main():
+    # Parse arguments
+    args = CustomArgs().parse_args()
+    console.rule("Parsed args")
+    with ConsoleLog("arg values"):
+        pprint(args.arg_str)
+        pprint(args.arg_int)
+        pprint(args.verbose)
+if __name__ == "__main__":
+    main()

@@ -16,18 +16,29 @@ class BaseCSVConverter(ABC):
         """
         pass
 
-    def validate_output(self, labels: np.ndarray):
-        """Validate the converted output labels.
+    @staticmethod
+    def validate_col_labels(to_check_labels: np.ndarray, valid_labels: List[str]):
+        """Validate that all labels in to_check_labels are in valid_labels.
 
         Args:
-            labels (np.ndarray): The array of converted labels.
-
+            to_check_labels (np.ndarray): The array of labels to validate.
+            valid_labels (List[str]): The list of valid labels
         Raises:
-            ValueError: If any label is None or NaN.
+            ValueError: If any label in to_check_labels is not in valid_labels.
         """
-        for label in labels:
-            if label is None or (isinstance(label, float) and np.isnan(label)):
-                raise ValueError("Converted labels contain None or NaN values.")
+        for label in to_check_labels:
+            if label not in valid_labels:
+                raise ValueError(
+                    f"Invalid label '{label}' found. Valid labels are: {valid_labels}"
+                )
+
+    def get_valid_input_label(self):
+        """Validate input labels before conversion."""
+        return []
+
+    def get_valid_output_label(self):
+        """Validate output labels after conversion."""
+        return []
 
     def do_convert(
         self,
@@ -47,9 +58,17 @@ class BaseCSVConverter(ABC):
             pd.DataFrame: The DataFrame with converted columns.
         """
         rs_df = df if inplace else df.copy()
+        pprint(f"{ls_target_cols=}, {inplace=}, {extra_dict=}")
         for target_col in ls_target_cols:
+            valid_input_labels = self.get_valid_input_label()
+            if valid_input_labels:
+                self.validate_col_labels(
+                    rs_df[target_col].to_numpy(), valid_input_labels
+                )
             converted_array = self.convert_col(rs_df, target_col, extra_dict)
-            self.validate_output(converted_array)
+            valid_ouput_labels = self.get_valid_output_label()
+            if valid_ouput_labels:
+                self.validate_col_labels(converted_array, valid_ouput_labels)
             rs_df[target_col] = converted_array
         return rs_df
 
