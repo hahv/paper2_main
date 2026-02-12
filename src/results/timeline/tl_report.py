@@ -522,7 +522,7 @@ class TlReportGen:
 
         if sort_func_tlreport_df:
             report_df = sort_func_tlreport_df(report_df)
-
+        pprint(f"[Debug] {styles_map=}:")
         # 3. Render HTML
         self.render_html(report_df, styles_map, output_path, title)
 

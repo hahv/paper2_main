@@ -1,3 +1,4 @@
+import csv
 from halib import *
 from halib.filetype import yamlfile
 from typing import Dict, List, Tuple, Type, Optional, Literal, Any
@@ -39,7 +40,7 @@ class TlConfig:
 # ======================================================
 # 2. Parsing Logic (Decoupled)
 # ======================================================
-class TLConverter(FireSmokeLabelConverter):
+class TLConverter(BaseCSVConverter):
     """
     Base class for parsing logic.
     'tl_type' determines which color schema to validate against.
@@ -49,7 +50,11 @@ class TLConverter(FireSmokeLabelConverter):
         self.tl_type = tl_type
 
     @property
-    def supported_labels(self) -> List[str]:
+    def valid_out_lbs(self) -> Optional[List[str]]:
+        return self.tl_supported_labels
+
+    @property
+    def tl_supported_labels(self) -> List[str]:
         tl_cfg_dict = TlConfig.get_tl_dict(self.tl_type)
         # Search for labels_colors in "timeline" subsection (new format) or root (old format)
         if "timeline" in tl_cfg_dict and "labels_colors" in tl_cfg_dict["timeline"]:
@@ -60,12 +65,10 @@ class TLConverter(FireSmokeLabelConverter):
         )
         return list(tl_cfg_dict["labels_colors"].keys())
 
-    def get_valid_output_label(self):
-        return self.supported_labels
 
 class TLGtConverter(TLConverter):
-
-    def get_valid_input_label(self):
+    @property
+    def valid_in_lbs(self) -> Optional[List[str]]:
         """Validate input labels before conversion."""
         return [GlobalConst.FIRESMOKE_LABEL, GlobalConst.NONE_LABEL]
 
@@ -77,22 +80,11 @@ class TLGtConverter(TLConverter):
         )
         return rs
 
-class NoSkipConverter(TLConverter):
-    def get_valid_input_label(self):
-        """Validate input labels before conversion."""
-        return [GlobalConst.FIRESMOKE_LABEL, GlobalConst.NONE_LABEL]
 
+class NoSkipConverter(TLGtConverter):
     def convert_col(
         self, df: pd.DataFrame, target_col: str, extra_dict: Optional[dict] = None
     ) -> np.ndarray:
-        # ! make sure GT is normalized first
-        dummy_tlgt = TLGtConverter(tl_type=GlobalConst.TL_TYPE_GT)
-        BaseCSVConverter.validate_col_labels(
-            df[GlobalConst.COL_GT].to_numpy(), dummy_tlgt.get_valid_input_label()
-        )
-        df[target_col] = super().convert_col(
-            df, target_col, extra_dict={"is_label_column": True}
-        )
         is_gt_fire = df[GlobalConst.COL_GT] == GlobalConst.FIRESMOKE_LABEL
         is_pred_fire = df[target_col] == GlobalConst.FIRESMOKE_LABEL
         rs = np.select(
@@ -104,24 +96,18 @@ class NoSkipConverter(TLConverter):
 
 
 class SkipConverter(TLConverter):
-    def get_valid_input_label(self):
+    @property
+    def valid_in_lbs(self) -> Optional[List[str]]:
         """Validate input labels before conversion."""
         return [
             GlobalConst.FIRESMOKE_LABEL,
             GlobalConst.NONE_LABEL,
             GlobalConst.SKIP_LABEL,
         ]
+
     def convert_col(
         self, df: pd.DataFrame, target_col: str, extra_dict: Optional[dict] = None
     ) -> np.ndarray:
-         # ! make sure GT is normalized first
-        dummy_tlgt = TLGtConverter(tl_type=GlobalConst.TL_TYPE_GT)
-        BaseCSVConverter.validate_col_labels(
-            df[GlobalConst.COL_GT].to_numpy(), dummy_tlgt.get_valid_input_label()
-        )
-        df[target_col] = super().convert_col(
-            df, target_col, extra_dict={"is_label_column": True}
-        )
         is_gt_fire = df[GlobalConst.COL_GT] == GlobalConst.FIRESMOKE_LABEL
         is_skipped = df[target_col] == GlobalConst.SKIP_LABEL
 
@@ -213,30 +199,36 @@ class TlProcessor:
         for col_name, tl_type in cols_to_tl_types.items():
             styles_map[col_name] = TlConfig.get_tl_dict(tl_type)
 
-        final_df = df.copy()
+        normed_df = df.copy()
 
-        for col_name, tl_type in cols_to_tl_types.items():
-            if col_name not in final_df.columns:
-                pprint(f"[Error] Configured column '{col_name}' not found. Skipping.")
-                continue
-            # try:
-                converter = TLConverterFactory.create(tl_type)
-                # ! convert each column separately (e.g: gt_label, temp_method_motion_block, etc.) do not affect others
-                normed_col_df = converter.do_convert(
-                    df.copy(),
-                    ls_target_cols=[col_name],
-                    inplace=True,
-                    extra_dict={"is_label_column": True},
-                )
-                # update main df with processed column
-                final_df[col_name] = normed_col_df[col_name]
-            # except Exception as e:
-            #     pprint(f"[Exception] Failed processing column '{col_name}': {e}")
-            #     continue
+        def __normalize_col(final_df, col_list: List[str]) -> pd.DataFrame:
+            firemoske_converter = FireSmokeLabelConverter()
+            BaseCSVConverter.do_convert_chain(
+                final_df,
+                [(col_name, firemoske_converter) for col_name in col_list],
+                inplace=True,
+            )
+            return final_df
 
+        # ! First normalize all specified columns to standard GlobalConst labels = [FIRESMOKE_LABEL, NONE_LABEL, SKIP_LABEL]
+        normed_df = __normalize_col(normed_df, list(cols_to_tl_types.keys()))
+        final_df = normed_df.copy()  # to avoid modifying during iteration
+        for idx, (col_name, tl_type) in enumerate(cols_to_tl_types.items()):
+            temp_df = normed_df.copy()
+            converter = TLConverterFactory.create(tl_type)
+            temp_df = BaseCSVConverter.do_convert_chain(
+                temp_df,
+                [(col_name, converter)],
+                inplace=True,
+                # context=f"TL Conversion: col='{col_name}', tl='{tl_type}'",
+            )
+            final_df[col_name] = temp_df[col_name]
+        # ! debug
+        # csvfile.fn_display_df(final_df.head(3))
+        # final_df.to_csv("./zout/debug_timeline_converted.csv", index=False, sep=";")
         # 4. Compute Stats
         stats_df = cls.compute_stats_df(final_df.copy(), styles_map, mode=table_mode)
-        return final_df, stats_df, styles_map
+        return normed_df, stats_df, styles_map
 
     @classmethod
     def compute_stats_df(

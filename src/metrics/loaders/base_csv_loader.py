@@ -64,9 +64,7 @@ class BaseRawCsvLoader(ABC):
         return True
 
     @staticmethod
-    def _read_raw_csv(
-        csv_path: str, video_path: str, is_gt: bool
-    ) -> pd.DataFrame:
+    def _read_raw_csv(csv_path: str, video_path: str, is_gt: bool) -> pd.DataFrame:
         """
         Helper to read a CSV file, standardizes columns (renaming label -> gt_label),
         and adds metadata columns (video, video_path, frame_idx).
@@ -109,7 +107,10 @@ class BaseRawCsvLoader(ABC):
 
     @staticmethod
     def _merge_gt_pred_dfs(
-        gt_df: pd.DataFrame, pred_df: pd.DataFrame, video_path: str, do_verify: bool = True
+        gt_df: pd.DataFrame,
+        pred_df: pd.DataFrame,
+        video_path: str,
+        do_verify: bool = True,
     ) -> pd.DataFrame:
         """
         Verifies and merges GT and Prediction DataFrames on fixed columns.
@@ -128,7 +129,7 @@ class BaseRawCsvLoader(ABC):
         if len(gt_df) != len(pred_df):
             logger.warning(
                 f"WARNING: GT and Prediction lengths do not match for video {video_path} ({len(gt_df)} vs {len(pred_df)})"
-        )
+            )
 
         merged_df = pd.merge(
             gt_df, pred_df, on=BaseRawCsvLoader.RAW_FIXED_COLS, how="inner"

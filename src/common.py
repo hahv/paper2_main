@@ -1,5 +1,6 @@
 from halib.system.path import *
 
+
 class GlobalConst:
     # csv column names
     COL_VIDEO = "video"

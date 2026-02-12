@@ -40,7 +40,7 @@ no_skip:
 
       # Highlight False Alarm (FP) when count > 2
       False Alarm (FP):
-        condition: "> 2"
+        condition: "> 0.1"
         color: "#f1c40f"
 
     # Sort priority: smaller number = higher priority

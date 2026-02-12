@@ -1,14 +1,16 @@
-from config import s
 import torch
 from halib import *
+
 from typing import Any
 from pathlib import Path
+
+from src.common import GlobalConst
 from src.config import Config
 from src.utils import get_cls_in_pkg
+
 from src.metrics.base_metric_src import BaseMetricSrc
 from src.metrics.loaders.base_csv_loader import BaseRawCsvLoader
 from src.metrics.base_csv_converter import *
-from src.common import GlobalConst
 
 
 class CsvMetricSrc(BaseMetricSrc):
@@ -39,8 +41,6 @@ class CsvMetricSrc(BaseMetricSrc):
 
         # Initialize adapter
         self.csv_loader: BaseRawCsvLoader = csv_loader_cls(self.cfg)
-        self.csv_converter: TorchMetricsConverter = TorchMetricsConverter()
-
         video_list = self.cfg.dbsetCfg.get_video_list()
         # ! global cache of video_name => raw_gt_pred_df
         self.video_gt_pred_df_dict = {}
@@ -63,14 +63,15 @@ class CsvMetricSrc(BaseMetricSrc):
 
     def unify_df_by_mode(self, mode, metric, **kwargs) -> pd.DataFrame:
         list_of_converted_dfs = []
+        torchConverter = TorchMetricsConverter()
         for video_name, df in self.video_gt_pred_df_dict.items():
-            converted_df = self.csv_converter.do_convert(
+            converted_df = BaseCSVConverter.do_convert_chain(
                 df,
-                ls_target_cols=[
-                    GlobalConst.COL_GT,
-                    GlobalConst.COL_PRED,
+                [
+                    (GlobalConst.COL_GT, torchConverter),
+                    (GlobalConst.COL_PRED, torchConverter),
                 ],
-                inplace=False,
+                inplace=True,
                 extra_dict={"metric_mode": mode},
             )
             if metric == "FPS":
@@ -84,9 +85,7 @@ class CsvMetricSrc(BaseMetricSrc):
 
     def get_metric_data_by_mode(self, metric, mode, **kwargs) -> Any:
         if metric == "FPS":
-            mode = (
-                GlobalConst.METRIC_PER_FRAME
-            )  # FPS is always per-frame
+            mode = GlobalConst.METRIC_PER_FRAME  # FPS is always per-frame
         if "mode" in self.cache_unified_df_dict:
             unified_df = self.cache_unified_df_dict[mode]
         else:
