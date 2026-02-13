@@ -5,9 +5,8 @@ general:
   project_dir: /mnt/e/SyncData/paper2_main
   outdir: zout/zruns
   computer_name: null # PC name that run the experiment
-  # time_stamp: 20250729.171542 #  add to outdir automatically, allow to resume training
-
-  time_stamp: null # 20260209.142136 # null # will be set to current time if not provided
+  time_stamp: null
+  # time_stamp: 20260212.174219 # 20260209.142136 # null # will be set to current time if not provided
   log_cfg:
     wandb_cfg:
       project: "paper2_main"
@@ -30,10 +29,10 @@ modelCfg:
   # class_names: [FireSmoke, None]
 inferCfg:
   do_infer: true
-  num_infer_workers: 3 # set to 0 for no parallel; 1 worker for 1 video
+  num_infer_workers: 0 # set to 0 for no parallel; 1 worker for 1 video
   skip_if_exists: true
   limit: -1 # -1 for no limit
-  save_video_results: false
+  save_video_results: true
   save_csv_results: true
   csv_infer_pattern: "_results"
   csv_columns:
@@ -46,5 +45,5 @@ inferCfg:
   log_transforms: true
   use_profiler: true
   save_timeline_vis:  true
-  timeline_table_mode: fc # options: p (percent), fc (frame count), both (pfc)
+  timeline_table_mode: p # options: p (percent), fc (frame count), both (pfc)
   verbose: false

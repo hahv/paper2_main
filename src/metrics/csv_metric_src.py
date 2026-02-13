@@ -18,7 +18,7 @@ class CsvMetricSrc(BaseMetricSrc):
     Concrete data source that delegates dataset-specific parsing to an Adapter.
     """
 
-    SKIP_FRAME_FOR_FPS = 1  # skip first frame for FPS calculation
+    SKIP_FRAME_FOR_FPS = 3  # skip first frame for FPS calculation
     UNIFED_CSV_FILE = "pred_vs_gt.csv"
 
     def __init__(self, cfg: Config):
@@ -61,36 +61,60 @@ class CsvMetricSrc(BaseMetricSrc):
         for metric in metric_names:
             self.metric_data_getters_dict[metric] = self.get_metric_data_by_mode
 
-    def unify_df_by_mode(self, mode, metric, **kwargs) -> pd.DataFrame:
+    def metric_mode_to_cache_key(self, mode, metric):
+        if metric == "FPS":
+            return "FPS"  # FPS is always per-frame, so we can use a unified key for caching
+        else:
+            return mode  # for other metrics, we cache by mode (per-frame or per-video)
+
+    def unify_df_by_mode(self, mode, metric, **kwargs) -> tuple[pd.DataFrame, str]:
         list_of_converted_dfs = []
-        torchConverter = TorchMetricsConverter()
         for video_name, df in self.video_gt_pred_df_dict.items():
+            df = df.copy()
+            df = BaseCSVConverter.do_convert_chain(
+                df,
+                [
+                    (GlobalConst.COL_GT, FireSmokeLabelConverter()),
+                    (GlobalConst.COL_PRED, FireSmokeLabelConverter()),
+                ],
+                inplace=True,
+            )
+            if metric == "FPS":
+                mode = GlobalConst.METRIC_PER_FRAME  # FPS is always per-frame
             converted_df = BaseCSVConverter.do_convert_chain(
                 df,
                 [
-                    (GlobalConst.COL_GT, torchConverter),
-                    (GlobalConst.COL_PRED, torchConverter),
+                    (GlobalConst.COL_GT, TorchMetricsConverter()),
+                    (GlobalConst.COL_PRED, TorchMetricsConverter()),
                 ],
                 inplace=True,
                 extra_dict={"metric_mode": mode},
             )
+            csvfile.fn_display_df(converted_df.head(10))
             if metric == "FPS":
                 # we need to skip first frame for FPS calculation
                 converted_df = converted_df.iloc[self.SKIP_FRAME_FOR_FPS :].reset_index(
                     drop=True
                 )
+            # assert False, "Debugging unify_df_by_mode"
             list_of_converted_dfs.append(converted_df)
-        unified_df = pd.concat(list_of_converted_dfs, ignore_index=True)
-        return unified_df
+        all_videos_df = pd.concat(list_of_converted_dfs, ignore_index=True)
+        cache_key = self.metric_mode_to_cache_key(mode, metric)
+        all_videos_df.to_csv(
+            f"{self.cfg.get_outdir()}/{cache_key}.csv", index=False, sep=";"
+        )
+        return all_videos_df, cache_key
 
     def get_metric_data_by_mode(self, metric, mode, **kwargs) -> Any:
-        if metric == "FPS":
-            mode = GlobalConst.METRIC_PER_FRAME  # FPS is always per-frame
-        if "mode" in self.cache_unified_df_dict:
-            unified_df = self.cache_unified_df_dict[mode]
+        metric = metric.strip()
+        cache_key = self.metric_mode_to_cache_key(mode, metric)
+        if cache_key in self.cache_unified_df_dict:
+            print('Using cached unified_df for key:', cache_key)
+            unified_df = self.cache_unified_df_dict[cache_key]
         else:
-            unified_df = self.unify_df_by_mode(mode, metric, **kwargs)
-            self.cache_unified_df_dict[mode] = unified_df
+            print('Generating unified_df for key:', cache_key)
+            unified_df, cache_key = self.unify_df_by_mode(mode, metric, **kwargs)
+            self.cache_unified_df_dict[cache_key] = unified_df
 
         if metric == "FPS":
             elapsed_times = unified_df[GlobalConst.COL_ELAPSED_TIME].to_numpy()
