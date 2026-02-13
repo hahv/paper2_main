@@ -1,4 +1,3 @@
-import csv
 from halib import *
 from halib.filetype import yamlfile
 from typing import Dict, List, Tuple, Type, Optional, Literal, Any
@@ -228,7 +227,9 @@ class TlProcessor:
         # csvfile.fn_display_df(final_df.head(3))
         # final_df.to_csv("./zout/debug_timeline_converted.csv", index=False, sep=";")
         # 4. Compute Stats
-        stats_df = cls.compute_stats_df(final_df.copy(), styles_map, mode=table_mode, table_decimals=table_decimals)
+        stats_df = cls.compute_stats_df(
+            final_df.copy(), styles_map, mode=table_mode, table_decimals=table_decimals
+        )
         return final_df, stats_df, styles_map
 
     @classmethod
@@ -281,7 +282,9 @@ class TlProcessor:
 
             for col in counts_df.columns:
                 if mode == "p":
-                    formatted_df[col] = pct_df[col].map(f"{{:.{table_decimals}f}}%".format)
+                    formatted_df[col] = pct_df[col].map(
+                        f"{{:.{table_decimals}f}}%".format
+                    )
                 elif mode == "fc":
                     formatted_df[col] = counts_df[col].astype(str)
                 elif mode == "pfc":

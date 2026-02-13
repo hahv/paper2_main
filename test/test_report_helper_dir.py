@@ -6,31 +6,70 @@ from halib import *
 from src.results.timeline.tl_report import TlReportGen
 
 ALL_EXP_DIR = "./zout/zruns"
-SINGLE_EXP_DIR = "./zout/zruns/MainPC__ds_UFireIndoor2__mt_no_temp_method__af4b0d32a3d2__20260211.104731"
+SINGLE_EXP_DIR = f"{ALL_EXP_DIR}/test/MainPC__ds_UFireIndoor2__mt_no_temp_method__af4b0d32a3d2__20260211.104731"
 TABLE_DECIMALS = 4
+MULTIPLE_EXPS_DIR = f"{ALL_EXP_DIR}/test/test_exp_with_baseline"
+
+TABLE_MODE = "fc"
 
 
-def test_gen_from_single_dir():
-    exp_dir = SINGLE_EXP_DIR
-    TlReportGen.gen_TlReport_exp(exp_dir, table_mode="p", table_decimals=TABLE_DECIMALS)
+def test_gen_from_single_dir(single_exp_dir=SINGLE_EXP_DIR):
+    """Test generating a report for one specific experiment directory."""
+    print(f"\n[Test] Single Exp: {single_exp_dir}")
+    TlReportGen.gen_TlReport_exp(
+        single_exp_dir, table_mode=TABLE_MODE, table_decimals=TABLE_DECIMALS
+    )
 
 
-def test_gen_from_muti_dir():
-    all_exp_dir = ALL_EXP_DIR
-    TlReportGen.gen_TlReport_muti_exps(all_exp_dir, table_mode="p")
+def test_gen_from_muti_dir(muti_exp_dir=MULTIPLE_EXPS_DIR):
+    """Test generating individual reports for ALL experiments in the root folder."""
+    print(f"\n[Test] Batch Gen for Root: {muti_exp_dir}")
+    TlReportGen.gen_TlReport_muti_exps(muti_exp_dir, table_mode=TABLE_MODE)
 
 
 def test_gen_from_csv():
+    """Test reconstructing a report from an existing CSV."""
+    print(f"\n[Test] Reconstruct from CSV")
     csv_path = f"{SINGLE_EXP_DIR}/_timeline_report.csv"
     output_html_path = f"{SINGLE_EXP_DIR}/_timeline_report_reconstructed.html"
-    # get name of parent dir of the csv file
+
     csv_parent_dir = Path(csv_path).parent
     TlReportGen.tlReport_from_csv(
         csv_path, output_html_path, title=f"[Reconstructed] {csv_parent_dir.name}"
     )
 
 
+def test_gen_compare_exps():
+    """
+    Test generating a SINGLE comparison report combining multiple experiment directories.
+    """
+    print(f"\n[Test] Compare Multiple Experiments")
+    root_path = Path(f"{ALL_EXP_DIR}/test/test_compare")
+    exp_dirs = [str(p) for p in root_path.iterdir() if p.is_dir()]
+    assert len(exp_dirs) >= 2, "Need at least two experiment directories to compare."
+
+    # 2. Define Output Path
+    output_html = f"{root_path}/comparison_report.html"
+
+    # 3. Run Comparison Generation
+    TlReportGen.gen_TlReport_compare(
+        exp_dirs=exp_dirs,
+        output_path=output_html,
+        title="Compare Multiple Experiments",
+        table_mode=TABLE_MODE,
+        table_decimals=TABLE_DECIMALS,
+    )
+
+
 if __name__ == "__main__":
-    test_gen_from_single_dir()
+    # 1. Single Experiment
+    # test_gen_from_single_dir()
+
+    # 2. Batch Processing (Individual Reports)
     # test_gen_from_muti_dir()
+
+    # 3. CSV Reconstruction
     # test_gen_from_csv()
+
+    # 4. Comparison Report (New)
+    test_gen_compare_exps()

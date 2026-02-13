@@ -19,7 +19,9 @@ class BaseCSVConverter(ABC):
         pass
 
     @staticmethod
-    def do_validate_lbs(to_check_labels: np.ndarray, valid_labels: Optional[List[str]]):
+    def do_validate_lbs(
+        to_check_labels: np.ndarray, valid_labels: Optional[List[str]], context=""
+    ):
         """Validate that all labels in to_check_labels are in valid_labels.
 
         Args:
@@ -33,7 +35,7 @@ class BaseCSVConverter(ABC):
         for label in to_check_labels:
             if label not in valid_labels:
                 assert False, (
-                    f"Invalid label '{label}' found. Valid labels are: {valid_labels}"
+                    f"[{context}] Invalid label '{label}' found in column. Valid labels are: {valid_labels}"
                 )
 
     # --- Configuration Properties ---
@@ -75,11 +77,18 @@ class BaseCSVConverter(ABC):
             for target_col, converter in cols_convert_tuple_ls:
                 pprint(f"col:{target_col} => converter: {converter.__class__.__name__}")
         for target_col, converter in cols_convert_tuple_ls:
+            converter_type = converter.__class__.__name__
             converter.do_validate_lbs(
-                rs_df[target_col].to_numpy(), converter.valid_in_lbs
+                rs_df[target_col].to_numpy(),
+                converter.valid_in_lbs,
+                context=f"{converter_type} valid-in:{target_col}",
             )
             converted_array = converter.convert_col(rs_df, target_col, extra_dict)
-            converter.do_validate_lbs(converted_array, converter.valid_out_lbs)
+            converter.do_validate_lbs(
+                converted_array,
+                converter.valid_out_lbs,
+                context=f"{converter_type} valid-out:{target_col}",
+            )
             rs_df[target_col] = converted_array
             if context:
                 console.rule(
@@ -114,9 +123,13 @@ class BaseCSVConverter(ABC):
         rs_df = df if inplace else df.copy()
         pprint(f"{ls_target_cols=}, {inplace=}, {extra_dict=}")
         for target_col in ls_target_cols:
-            self.do_validate_lbs(rs_df[target_col].to_numpy(), self.valid_in_lbs)
+            self.do_validate_lbs(
+                rs_df[target_col].to_numpy(), self.valid_in_lbs, context=f"valid-in:{target_col}"
+            )
             converted_array = self.convert_col(rs_df, target_col, extra_dict)
-            self.do_validate_lbs(converted_array, self.valid_out_lbs)
+            self.do_validate_lbs(
+                converted_array, self.valid_out_lbs, context=f"valid-out:{target_col}"
+            )
             rs_df[target_col] = converted_array
         return rs_df
 
@@ -126,10 +139,15 @@ class FireSmokeLabelConverter(BaseCSVConverter):
     Standard converter that helps normalizing fire/smoke labels to 'firesmoke' or 'none'.
     Used as a pre-processing step for metrics or other analyses.
     """
+
     @property
     def valid_out_lbs(self) -> Optional[List[Any]]:
         """Override to provide a default list of valid output labels."""
-        return [GlobalConst.FIRESMOKE_LABEL, GlobalConst.NONE_LABEL]
+        return [
+            GlobalConst.FIRESMOKE_LABEL,
+            GlobalConst.NONE_LABEL,
+            GlobalConst.SKIP_LABEL, # "skip" label also allowed; since this is to do the normalization only (before further col conversion)
+        ]
 
     def convert_col(
         self, df: pd.DataFrame, target_col: str, extra_dict: Optional[dict] = None
