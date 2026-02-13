@@ -1,3 +1,4 @@
+from PIL.ImageStat import Global
 from IPython.testing.decorators import f
 from halib import *
 from abc import ABC, abstractmethod
@@ -125,7 +126,6 @@ class FireSmokeLabelConverter(BaseCSVConverter):
     Standard converter that helps normalizing fire/smoke labels to 'firesmoke' or 'none'.
     Used as a pre-processing step for metrics or other analyses.
     """
-
     @property
     def valid_out_lbs(self) -> Optional[List[Any]]:
         """Override to provide a default list of valid output labels."""
@@ -164,11 +164,16 @@ class TorchMetricsConverter(BaseCSVConverter):
     LABEL_NUM_MAPPING = {
         GlobalConst.FIRESMOKE_LABEL: 1,
         GlobalConst.NONE_LABEL: 0,
+        GlobalConst.SKIP_LABEL: 0,
     }
 
     @property
     def valid_in_lbs(self) -> Optional[List[Any]]:
-        return [GlobalConst.FIRESMOKE_LABEL, GlobalConst.NONE_LABEL]
+        return [
+            GlobalConst.FIRESMOKE_LABEL,
+            GlobalConst.NONE_LABEL,
+            GlobalConst.SKIP_LABEL,
+        ]
 
     @property
     def valid_out_lbs(self) -> Optional[List[Any]]:

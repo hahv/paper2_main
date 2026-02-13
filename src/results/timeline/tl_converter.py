@@ -181,6 +181,7 @@ class TlProcessor:
         df: pd.DataFrame,
         cols_to_tl_types: Dict[str, str],
         table_mode: Literal["p", "fc", "pfc"] = "pfc",
+        table_decimals: int = 2,
     ) -> Tuple[pd.DataFrame, pd.DataFrame, Dict]:
         """
         Generates the frame-level timeline data. The input df header is expected to have at least the following columns:
@@ -227,7 +228,7 @@ class TlProcessor:
         # csvfile.fn_display_df(final_df.head(3))
         # final_df.to_csv("./zout/debug_timeline_converted.csv", index=False, sep=";")
         # 4. Compute Stats
-        stats_df = cls.compute_stats_df(final_df.copy(), styles_map, mode=table_mode)
+        stats_df = cls.compute_stats_df(final_df.copy(), styles_map, mode=table_mode, table_decimals=table_decimals)
         return final_df, stats_df, styles_map
 
     @classmethod
@@ -236,6 +237,7 @@ class TlProcessor:
         processed_df: pd.DataFrame,
         styles_map: Dict[str, Dict],
         mode: Literal["p", "fc", "pfc"] = "p",
+        table_decimals: int = 2,
     ) -> pd.DataFrame:
         """
         Generates the Summary Pivot Table with TOTAL row at the top.
@@ -279,12 +281,12 @@ class TlProcessor:
 
             for col in counts_df.columns:
                 if mode == "p":
-                    formatted_df[col] = pct_df[col].map("{:.1f}%".format)
+                    formatted_df[col] = pct_df[col].map(f"{{:.{table_decimals}f}}%".format)
                 elif mode == "fc":
                     formatted_df[col] = counts_df[col].astype(str)
                 elif mode == "pfc":
                     formatted_df[col] = (
-                        pct_df[col].map("{:.1f}%".format)
+                        pct_df[col].map(f"{{:.{table_decimals}f}}%".format)
                         + " ("
                         + counts_df[col].astype(str)
                         + ")"

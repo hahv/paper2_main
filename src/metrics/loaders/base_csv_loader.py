@@ -1,10 +1,8 @@
-from PIL.ImageStat import Global
-import csv
 from halib import *
 from loguru import logger
 from abc import ABC
 import pandas as pd
-from typing import List, Optional, Literal
+from typing import List, Optional
 from src.config import Config
 import os
 from pathlib import Path

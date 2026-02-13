@@ -19,7 +19,7 @@ from src.utils import get_cls_in_pkg
 import torch.multiprocessing as mp
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
-from src.results.timeline.report_helper import TlReportGen
+from src.results.timeline.tl_report import TlReportGen
 
 # Constants for package paths (avoids magic strings scattered in code)
 PKG_METHODS = "src.methods"

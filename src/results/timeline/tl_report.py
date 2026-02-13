@@ -369,7 +369,7 @@ class TlReportGen:
 
     @staticmethod
     def gen_TlReport_muti_exps(
-        parent_dir: str = "./zout/zruns", table_mode: Literal["p", "fc", "pfc"] = "p"
+        parent_dir: str = "./zout/zruns", table_mode: Literal["p", "fc", "pfc"] = "p", table_decimals: int = 2
     ):
         """
         Generate timeline reports for all experiment directories under the given parent directory.
@@ -383,6 +383,7 @@ class TlReportGen:
                     exp_dir=exp_dir,
                     title=f"Timeline Report - {exp_dir.name}",
                     table_mode=table_mode,
+                    table_decimals=table_decimals,
                 )
                 pprint(f"[INFO] Report generated at: ⏬")
                 pprint_local_path(outfile, get_wins_path=True)
@@ -396,6 +397,7 @@ class TlReportGen:
         exp_dir: Union[Path, str],
         title: Optional[str] = None,
         table_mode: Literal["p", "fc", "pfc"] = "p",
+        table_decimals: int = 2,
     ):
         exp_dir = Path(exp_dir)
 
@@ -406,7 +408,7 @@ class TlReportGen:
         if title is None:
             title = f"Timeline Report - {exp_dir.name}"
         report_generator._generate(
-            df, str(output_path), title=title, table_mode=table_mode
+            df, str(output_path), title=title, table_mode=table_mode, table_decimals=table_decimals
         )
         return os.path.abspath(output_path)
 
@@ -416,6 +418,7 @@ class TlReportGen:
         output_path: str,
         title: str = "Timeline Report",
         table_mode: Literal["p", "fc", "pfc"] = "p",
+        table_decimals: int = 2,
         sort_func_tlreport_df: Optional[
             Callable[[pd.DataFrame], pd.DataFrame]
         ] = default_sort_func_tlreport,
@@ -434,7 +437,7 @@ class TlReportGen:
         # 1. Process Data using the Logic Core
         raw_df = df.copy()
         proc_tl_df, stats_df, styles_map = TlProcessor.proc_dataframe(
-            df, self.cols_to_types, table_mode=table_mode
+            df, self.cols_to_types, table_mode=table_mode, table_decimals=table_decimals
         )
 
         # 2. Add "FRAMES" and "VISUALIZATION"
