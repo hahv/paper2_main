@@ -153,6 +153,15 @@ class SkipConverter(TLConverter):
         ]
 
     @property
+    def valid_out_lbs(self) -> Optional[List[str]]:
+        return [
+            GlobalConst.TL_SKIP_CORRECT_INFER,
+            GlobalConst.TL_SKIP_CORRECT_SKIP,
+            GlobalConst.TL_SKIP_FALSE_SKIP,
+            GlobalConst.TL_SKIP_REDUNDANT_INFER,
+        ]
+
+    @property
     def pos_labels(self) -> List[str]:
         return [
             GlobalConst.TL_SKIP_CORRECT_INFER,
@@ -311,7 +320,6 @@ class TlProcessor:
         styles_tuple_map: Dict[str, tuple[str, Dict]],
         mode: Literal["p", "fc", "pfc"] = "p",
         table_decimals: int = 2,
-        combine_correct: bool = True,
     ) -> pd.DataFrame:
         """
         Generates the Summary Pivot Table with smart denominators for error rates.
@@ -336,9 +344,11 @@ class TlProcessor:
                 tl_type_neg_labels = converter.neg_labels
                 pprint(f"tl_type_pos_labels for {method_col}: {tl_type_pos_labels}")
                 pprint(f"tl_type_neg_labels for {method_col}: {tl_type_neg_labels}")
-                row_total = counts_df[counts_df.columns.intersection(total_labels)].sum(
-                    axis=1
-                ).replace(0, 1)
+                row_total = (
+                    counts_df[counts_df.columns.intersection(total_labels)]
+                    .sum(axis=1)
+                    .replace(0, 1)
+                )
                 pprint(f"row_total for label '{label}' in method_col '{method_col}':")
                 pprint(row_total)
 
@@ -348,6 +358,7 @@ class TlProcessor:
         for method_col, style_cfg_tuple in styles_tuple_map.items():
             # 1. Get ordered list of labels
             tl_type = style_cfg_tuple[0]  # extract tl_type from the tuple
+            style_cfg = style_cfg_tuple[1]
             converter = TLConverterFactory.create(tl_type)
             expected_labels = converter.valid_out_lbs
             assert expected_labels is not None, (
@@ -363,6 +374,21 @@ class TlProcessor:
             counts_df = counts_df.reindex(columns=expected_labels, fill_value=0).astype(
                 int
             )
+
+            # 3. Apply combine_rules
+            combine_rules = style_cfg.get("timeline", {}).get("combine_rules", {})
+            orig_counts_df = counts_df.copy()
+
+            if combine_rules:
+                for new_col, cols_to_combine in combine_rules.items():
+                    valid_cols = [c for c in cols_to_combine if c in counts_df.columns]
+                    if valid_cols:
+                        counts_df[new_col] = counts_df[valid_cols].sum(axis=1)
+                        counts_df.drop(columns=valid_cols, inplace=True)
+                        # just move the new combined column as first column for better visibility
+                        cols = [new_col] + [c for c in counts_df.columns if c != new_col]
+                        counts_df = counts_df[cols]
+
             # ! debug:
             console.rule(f"count_df for method_col: {method_col}")
             csvfile.fn_display_df(counts_df.head(5))
@@ -370,25 +396,21 @@ class TlProcessor:
                 f"./zout/test/counts_df_{method_col}.csv", sep=";", index=True
             )
 
-            # 3. Calculate Smart Percentages
+            # 4. Calculate Smart Percentages and Format Output Strings
             percent_df = pd.DataFrame(index=counts_df.index, columns=counts_df.columns)
-            for col in expected_labels:
+            formatted_df = pd.DataFrame(
+                index=counts_df.index, columns=counts_df.columns
+            )
+
+            for col in counts_df.columns:
                 row_total = _get_row_total(
-                    counts_df=counts_df,
+                    counts_df=orig_counts_df,
                     method_col=method_col,
                     label=col,
                     tl_type=tl_type,
                 )
                 percent_df[col] = (counts_df[col] / row_total) * 100
-            # ! debug:
-            console.rule(f"Percentages for {method_col} - {col} with tl_type={tl_type}")
-            percent_df.to_csv(
-                f"./zout/test/percent_df_{method_col}.csv", sep=";", index=True
-            )
 
-            # 4. Format Output Strings
-            formatted_df = counts_df.copy().astype(object)
-            for col in counts_df.columns:
                 if mode == "p":
                     formatted_df[col] = percent_df[col].map(
                         f"{{:.{table_decimals}f}}%".format
@@ -402,6 +424,12 @@ class TlProcessor:
                         + counts_df[col].astype(str)
                         + ")"
                     )
+
+            # ! debug:
+            console.rule(f"Percentages for {method_col} with tl_type={tl_type}")
+            percent_df.to_csv(
+                f"./zout/test/percent_df_{method_col}.csv", sep=";", index=True
+            )
 
             # 5. Add MultiIndex Header
             formatted_df.columns = pd.MultiIndex.from_product(

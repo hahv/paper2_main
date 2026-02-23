@@ -25,10 +25,14 @@ no_skip:
     legend_title: "2. NO SKIP (Baseline)"
 
   timeline:
+    # ! Combine two or more labels into one for cleaner visualization (e.g., "Correct Pos." and "Correct Neg." into "Correct") - Optional
+    combine_rules:
+      Correct: ["Correct Pos.", "Correct Neg."]
+
     labels_colors:
-      Correct: "#2ecc71"      # Green
-      False Alarm: "#f1c40f"  # Gold
-      Miss: "#8e44ad"         # Purple (matches 'skip' method Miss color for consistency)
+      Correct: "#2ecc71" # Green
+      False Alarm: "#f1c40f" # Gold
+      Miss: "#8e44ad" # Purple (matches 'skip' method Miss color for consistency)
 
   table:
     include: true
@@ -61,10 +65,10 @@ skip:
 
   timeline:
     labels_colors:
-      False Skip: "#e84393"         # Purple (Critical Failure)
-      Redundant Infer.: "#e67e22"        # Gold (Inefficiency)
-      Correct Skip: "#3498db"      # Teal (Efficiency Success)
-      Correct Infer.: "#2c3e50"     # Navy (Valid Hit)
+      False Skip: "#e84393" # Purple (Critical Failure)
+      Redundant Infer.: "#e67e22" # Gold (Inefficiency)
+      Correct Skip: "#3498db" # Teal (Efficiency Success)
+      Correct Infer.: "#2c3e50" # Navy (Valid Hit)
 
   table:
     include: true
