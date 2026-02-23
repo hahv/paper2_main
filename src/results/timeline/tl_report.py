@@ -1,6 +1,3 @@
-from pandas.tests.indexing.multiindex.test_indexing_slow import cols
-from fiftyone.core.storage import sep
-from IPython.testing.decorators import f
 import pandas as pd
 import numpy as np
 from typing import Dict, Literal, Callable, Optional, Union, List
@@ -210,7 +207,7 @@ class TlReportGen:
         return tl_info, dataset_dir
 
     @staticmethod
-    def get_tl_df_by_exp_dirs(
+    def get_df_by_exp_dirs(
         exp_dirs: List[str],
         exp_name_shorten_func: Callable[[str], str] = shorten_exp_name,
         exp_name_to_tltype: Callable[[str], str] = col_name_to_tl_type,
@@ -266,7 +263,7 @@ class TlReportGen:
 
         if not all_exp_info or dataset_dir_ref is None:
             raise ValueError(
-                "No valid experiments found or dataset directory could not be determined."
+                f"No valid experiments found or dataset directory could not be determined. {all_exp_info=} - {dataset_dir_ref=}"
             )
 
         # 2. GT Info (Always present)
@@ -473,7 +470,7 @@ class TlReportGen:
                 print(f"[Warning] Failed to auto-discover baseline: {e}")
 
         # Use the new multi-exp loader with a single item list
-        df, cols_to_types = TlReportGen.get_tl_df_by_exp_dirs(exp_dirs)
+        df, cols_to_types = TlReportGen.get_df_by_exp_dirs(exp_dirs)
         # !debug
         # # save df, cols_to_types for debugging
         # df.to_csv("./zout/debug.csv", sep=";", index=False, encoding="utf-8")
@@ -505,7 +502,7 @@ class TlReportGen:
         """
         Generates a comparison report for MULTIPLE experiments.
         """
-        df, cols_to_types = TlReportGen.get_tl_df_by_exp_dirs(exp_dirs)
+        df, cols_to_types = TlReportGen.get_df_by_exp_dirs(exp_dirs)
 
         report_generator = TlReportGen(cols_to_types)
         report_generator._generate(
@@ -612,9 +609,9 @@ class TlReportGen:
         self.render_html(report_df, styles_map, output_path, title)
 
         # save raw timeline csv and report csv
-        raw_timeline_csv_path = output_path.replace(".html", "_raw_timeline.csv")
+        raw_timeline_csv_path = output_path.replace(".html", "_raw.csv")
         raw_df.to_csv(raw_timeline_csv_path, index=False, sep=";", encoding="utf-8")
-        proc_timeline_csv_path = output_path.replace(".html", "_proc_timeline.csv")
+        proc_timeline_csv_path = output_path.replace(".html", "_proc.csv")
         proc_tl_df.to_csv(
             proc_timeline_csv_path, index=False, sep=";", encoding="utf-8"
         )

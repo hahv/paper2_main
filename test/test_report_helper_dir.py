@@ -6,11 +6,11 @@ from halib import *
 from src.results.timeline.tl_report import TlReportGen
 
 TEST_DIR = "./zout/test"
-SINGLE_EXP_DIR = f"{TEST_DIR}/MainPC__ds_UFireIndoor2__mt_no_temp_method__af4b0d32a3d2__20260211.104731"
-MULTIPLE_EXPS_DIR = f"{TEST_DIR}/test_exp_with_baseline"
+SINGLE_EXP_DIR = f"{TEST_DIR}/test_single_exp/MainPC__ds_UFireIndoor2__mt_no_temp_method__af4b0d32a3d2__20260211.104731"
+MULTIPLE_EXPS_DIR = f"{TEST_DIR}/test_exp_vs_baseline"
 
-TABLE_DECIMALS = 2
-TABLE_MODE = "pfc" # percent + frame count
+TABLE_DECIMALS = 4
+TABLE_MODE = "pfc"  # percent + frame count
 
 
 def test_gen_single_dir(single_exp_dir=SINGLE_EXP_DIR):
@@ -24,7 +24,9 @@ def test_gen_single_dir(single_exp_dir=SINGLE_EXP_DIR):
 def test_gen_multiple_dirs(multi_exp_dir=MULTIPLE_EXPS_DIR):
     """Test generating individual reports for ALL experiments in the root folder."""
     print(f"\n[Test] Batch Gen for Root: {multi_exp_dir}")
-    TlReportGen.gen_TlReport_muti_exps(multi_exp_dir, table_mode=TABLE_MODE)
+    TlReportGen.gen_TlReport_muti_exps(
+        multi_exp_dir, table_mode=TABLE_MODE, table_decimals=TABLE_DECIMALS
+    )
 
 
 def test_gen_from_csv():
@@ -63,7 +65,7 @@ def test_gen_compare_exps():
 
 if __name__ == "__main__":
     # 1. Single Experiment
-    # test_gen_single_dir()
+    test_gen_single_dir()
 
     # 2. Batch Processing (Individual Reports)
     # test_gen_multiple_dirs()
@@ -72,4 +74,4 @@ if __name__ == "__main__":
     # test_gen_from_csv()
 
     # 4. Comparison Report (New)
-    test_gen_compare_exps()
+    # test_gen_compare_exps()
