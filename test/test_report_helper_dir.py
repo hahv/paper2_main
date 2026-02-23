@@ -5,15 +5,15 @@ sys.path.append("/mnt/e/SyncData/paper2_main")
 from halib import *
 from src.results.timeline.tl_report import TlReportGen
 
-ALL_EXP_DIR = "./zout/zruns"
-SINGLE_EXP_DIR = f"{ALL_EXP_DIR}/test/MainPC__ds_UFireIndoor2__mt_no_temp_method__af4b0d32a3d2__20260211.104731"
-TABLE_DECIMALS = 4
-MULTIPLE_EXPS_DIR = f"{ALL_EXP_DIR}/test/test_exp_with_baseline"
+TEST_DIR = "./zout/test"
+SINGLE_EXP_DIR = f"{TEST_DIR}/MainPC__ds_UFireIndoor2__mt_no_temp_method__af4b0d32a3d2__20260211.104731"
+MULTIPLE_EXPS_DIR = f"{TEST_DIR}/test_exp_with_baseline"
 
-TABLE_MODE = "fc"
+TABLE_DECIMALS = 2
+TABLE_MODE = "pfc" # percent + frame count
 
 
-def test_gen_from_single_dir(single_exp_dir=SINGLE_EXP_DIR):
+def test_gen_single_dir(single_exp_dir=SINGLE_EXP_DIR):
     """Test generating a report for one specific experiment directory."""
     print(f"\n[Test] Single Exp: {single_exp_dir}")
     TlReportGen.gen_TlReport_exp(
@@ -21,10 +21,10 @@ def test_gen_from_single_dir(single_exp_dir=SINGLE_EXP_DIR):
     )
 
 
-def test_gen_from_muti_dir(muti_exp_dir=MULTIPLE_EXPS_DIR):
+def test_gen_multiple_dirs(multi_exp_dir=MULTIPLE_EXPS_DIR):
     """Test generating individual reports for ALL experiments in the root folder."""
-    print(f"\n[Test] Batch Gen for Root: {muti_exp_dir}")
-    TlReportGen.gen_TlReport_muti_exps(muti_exp_dir, table_mode=TABLE_MODE)
+    print(f"\n[Test] Batch Gen for Root: {multi_exp_dir}")
+    TlReportGen.gen_TlReport_muti_exps(multi_exp_dir, table_mode=TABLE_MODE)
 
 
 def test_gen_from_csv():
@@ -44,7 +44,7 @@ def test_gen_compare_exps():
     Test generating a SINGLE comparison report combining multiple experiment directories.
     """
     print(f"\n[Test] Compare Multiple Experiments")
-    root_path = Path(f"{ALL_EXP_DIR}/test/test_compare")
+    root_path = Path(f"{TEST_DIR}/test_prof_old_model_vs_new_model")
     exp_dirs = [str(p) for p in root_path.iterdir() if p.is_dir()]
     assert len(exp_dirs) >= 2, "Need at least two experiment directories to compare."
 
@@ -63,10 +63,10 @@ def test_gen_compare_exps():
 
 if __name__ == "__main__":
     # 1. Single Experiment
-    # test_gen_from_single_dir()
+    # test_gen_single_dir()
 
     # 2. Batch Processing (Individual Reports)
-    # test_gen_from_muti_dir()
+    # test_gen_multiple_dirs()
 
     # 3. CSV Reconstruction
     # test_gen_from_csv()
