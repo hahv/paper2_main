@@ -1,3 +1,4 @@
+from sympy.physics.quantum.tests.test_qapply import po
 from halib import *
 from halib.filetype import yamlfile
 from typing import Dict, List, Tuple, Type, Optional, Literal, Any
@@ -64,6 +65,24 @@ class TLConverter(BaseCSVConverter):
         )
         return list(tl_cfg_dict["labels_colors"].keys())
 
+    @property
+    def pos_labels(self) -> List[str]:
+        """Defines which labels are considered 'positive' for metrics calculations."""
+        raise NotImplementedError(
+            f"{self.__class__.__name__} must implement 'pos_labels' property."
+        )
+
+    @property
+    def neg_labels(self) -> List[str]:
+        assert self.valid_out_lbs is not None, (
+            "valid_out_lbs must be defined to determine negative labels."
+        )
+        assert self.pos_labels is not None, (
+            "positive_labels must be defined to determine negative labels."
+        )
+
+        return [lb for lb in self.valid_out_lbs if lb not in self.pos_labels]
+
 
 class TLGtConverter(TLConverter):
     @property
@@ -71,25 +90,54 @@ class TLGtConverter(TLConverter):
         """Validate input labels before conversion."""
         return [GlobalConst.FIRESMOKE_LABEL, GlobalConst.NONE_LABEL]
 
+    @property
+    def pos_labels(self) -> List[str]:
+        return [GlobalConst.TL_GT_FIRESMOKE]
+
     def convert_col(
         self, df: pd.DataFrame, target_col: str, extra_dict: Optional[dict] = None
     ) -> np.ndarray:
         rs = np.where(
-            df[GlobalConst.COL_GT] == GlobalConst.FIRESMOKE_LABEL, "FireSmoke", "None"
+            df[GlobalConst.COL_GT] == GlobalConst.FIRESMOKE_LABEL,
+            GlobalConst.TL_GT_FIRESMOKE,
+            GlobalConst.TL_GT_NONE,
         )
         return rs
 
 
 class NoSkipConverter(TLGtConverter):
+    @property
+    def valid_out_lbs(self) -> Optional[List[str]]:
+        return [
+            GlobalConst.TL_NOSKIP_CORRECT_POS,
+            GlobalConst.TL_NOSKIP_CORRECT_NEG,
+            GlobalConst.TL_NOSKIP_FALSE_ALARM_FP,
+            GlobalConst.TL_NOSKIP_MISS_FN,
+        ]
+
+    @property
+    def pos_labels(self) -> List[str]:
+        return [GlobalConst.TL_NOSKIP_CORRECT_POS, GlobalConst.TL_NOSKIP_MISS_FN]
+
     def convert_col(
         self, df: pd.DataFrame, target_col: str, extra_dict: Optional[dict] = None
     ) -> np.ndarray:
         is_gt_fire = df[GlobalConst.COL_GT] == GlobalConst.FIRESMOKE_LABEL
         is_pred_fire = df[target_col] == GlobalConst.FIRESMOKE_LABEL
         rs = np.select(
-            [(~is_gt_fire) & (is_pred_fire), (is_gt_fire) & (~is_pred_fire)],
-            ["False Alarm (FP)", "Miss (FN)"],
-            default="Correct",
+            [
+                (is_gt_fire) & (is_pred_fire),  # GT=Fire, Pred=Fire
+                (~is_gt_fire) & (~is_pred_fire),  # GT=None, Pred=None
+                (~is_gt_fire) & (is_pred_fire),  # GT=None, Pred=Fire
+                (is_gt_fire) & (~is_pred_fire),  # GT=Fire, Pred=None
+            ],
+            [
+                GlobalConst.TL_NOSKIP_CORRECT_POS,  # TP
+                GlobalConst.TL_NOSKIP_CORRECT_NEG,  # TN
+                GlobalConst.TL_NOSKIP_FALSE_ALARM_FP,  # FP
+                GlobalConst.TL_NOSKIP_MISS_FN,  # FN
+            ],
+            default="Unknown",
         )
         return rs
 
@@ -102,6 +150,13 @@ class SkipConverter(TLConverter):
             GlobalConst.FIRESMOKE_LABEL,
             GlobalConst.NONE_LABEL,
             GlobalConst.SKIP_LABEL,
+        ]
+
+    @property
+    def pos_labels(self) -> List[str]:
+        return [
+            GlobalConst.TL_SKIP_CORRECT_INFER,
+            GlobalConst.TL_SKIP_FALSE_SKIP,
         ]
 
     def convert_col(
@@ -119,12 +174,17 @@ class SkipConverter(TLConverter):
 
         return np.select(
             [
-                is_gt_fire & is_skipped,  # GT=Fire, Action=Skip
-                (~is_gt_fire) & (~is_skipped),  # GT=None, Action=Process
-                is_gt_fire & (~is_skipped),  # GT=Fire, Action=Process
-                (~is_gt_fire) & is_skipped,  # GT=None, Action=Skip
+                (is_gt_fire) & (~is_skipped),  # GT=Fire, Processed
+                (~is_gt_fire) & (is_skipped),  # GT=None, Skipped
+                (is_gt_fire) & (is_skipped),  # GT=Fire, Skipped
+                (~is_gt_fire) & (~is_skipped),  # GT=None, Processed
             ],
-            ["Miss (FN)", "Waste (FP)", "Correct Proc.", "Correct Skip"],
+            [
+                GlobalConst.TL_SKIP_CORRECT_INFER,
+                GlobalConst.TL_SKIP_CORRECT_SKIP,
+                GlobalConst.TL_SKIP_FALSE_SKIP,
+                GlobalConst.TL_SKIP_REDUNDANT_INFER,
+            ],
             default="Unknown",
         )
 
@@ -163,15 +223,22 @@ class TlProcessor:
     # --- IMPLEMENATIONS ---
     # CSV label Input (gt or pred):
     #         {
-    #         │   'gt_label': ['fire_smoke', 'none'],
-    #         │   'no_temp_method': ['fire', 'smokeonly', 'none'],
-    #         │   'temp_method_motion_block': ['skipped', 'fire', 'smokeonly', 'none']
+    #         │   'gt_label':
+    #                   ['fire_smoke', 'none', 'fire_smoke'],
+    #         │   'no_temp_method':
+    #                   ['fire', 'smokeonly', 'none'],
+    #         │   'temp_method_motion_block':
+    #                   ['skipped', 'fire', 'smokeonly']
     #         }
-    # !label Output (normalized):
+    # ! first input will be normalized to standard GlobalConst labels = [FIRESMOKE_LABEL, NONE_LABEL, SKIP_LABEL] (if applicable), then converted to timeline labels based on config mapping
+    # !Example of label Output:
     #         {
-    #         │   'gt_label': ['fire', 'none'],
-    #         │   'no_temp_method': ['fire', 'none'],
-    #         │   'temp_method_motion_block': ['skipped', 'fire', 'none']
+    #         │   'gt_label':
+    #                   ['FireSmoke', 'None', 'FireSmoke'],
+    #         │   'no_temp_method':
+    #                   ['Correct', 'False Alarm (FP)', 'Miss (FN)'],
+    #         │   'temp_method_motion_block':
+    #                   ['Miss (FN)', 'Waste (FP)', 'Correct Proc.']
     #         }
     # ======================================================
     @classmethod
@@ -195,9 +262,13 @@ class TlProcessor:
             )
 
         styles_map = {}
+        styles_tuple_map = {}
+
         # timeline cfg per column (i.e timeline type: gt, no_skip, skip)
         for col_name, tl_type in cols_to_tl_types.items():
-            styles_map[col_name] = TlConfig.get_tl_dict(tl_type)
+            style = TlConfig.get_tl_dict(tl_type)
+            styles_map[col_name] = style
+            styles_tuple_map[col_name] = (tl_type, style)
 
         normed_df = df.copy()
 
@@ -223,12 +294,13 @@ class TlProcessor:
                 # context=f"TL Conversion: col='{col_name}', tl='{tl_type}'",
             )
             final_df[col_name] = temp_df[col_name]
-        # ! debug
-        # csvfile.fn_display_df(final_df.head(3))
-        # final_df.to_csv("./zout/debug_timeline_converted.csv", index=False, sep=";")
+
         # 4. Compute Stats
         stats_df = cls.compute_stats_df(
-            final_df.copy(), styles_map, mode=table_mode, table_decimals=table_decimals
+            final_df.copy(),
+            styles_tuple_map,
+            mode=table_mode,
+            table_decimals=table_decimals,
         )
         return final_df, stats_df, styles_map
 
@@ -236,76 +308,108 @@ class TlProcessor:
     def compute_stats_df(
         cls,
         processed_df: pd.DataFrame,
-        styles_map: Dict[str, Dict],
+        styles_tuple_map: Dict[str, tuple[str, Dict]],
         mode: Literal["p", "fc", "pfc"] = "p",
         table_decimals: int = 2,
+        combine_correct: bool = True,
     ) -> pd.DataFrame:
         """
-        Generates the Summary Pivot Table with TOTAL row at the top.
+        Generates the Summary Pivot Table with smart denominators for error rates.
         """
-        # Ensure we are working with a flat dataframe for easy groupby
         df_flat = processed_df.reset_index()
-
         summary_tables = []
 
-        # Iterate through each processed method column
-        for method_col, style_cfg in styles_map.items():
-            # 1. Get ordered list of expected labels from config
-            # Handle new nested config structure
-            labels_source = style_cfg.get("timeline", {}).get(
-                "labels_colors"
-            ) or style_cfg.get("labels_colors", {})
-            expected_labels = list(labels_source.keys())
+        def _get_row_total(counts_df, method_col, label, tl_type):
+            console.rule(f"_get_row_total {method_col=}, {label=},{tl_type=}")
 
-            # 2. Calculate Counts per Video
+            if tl_type == GlobalConst.TL_TYPE_GT or "Correct" in label:
+                # ! In this case, we want to calculate the total frames for the entire row (video) as the denominator, since GT distribution is what matters for both Fire and None, and for "Correct" we want overall accuracy.
+                row_total = counts_df.sum(axis=1).replace(0, 1)
+            else:
+                converter = TLConverterFactory.create(tl_type)
+                total_labels = (
+                    converter.pos_labels
+                    if label in converter.pos_labels
+                    else converter.neg_labels
+                )
+                tl_type_pos_labels = converter.pos_labels
+                tl_type_neg_labels = converter.neg_labels
+                pprint(f"tl_type_pos_labels for {method_col}: {tl_type_pos_labels}")
+                pprint(f"tl_type_neg_labels for {method_col}: {tl_type_neg_labels}")
+                row_total = counts_df[counts_df.columns.intersection(total_labels)].sum(
+                    axis=1
+                ).replace(0, 1)
+                pprint(f"row_total for label '{label}' in method_col '{method_col}':")
+                pprint(row_total)
+
+            # ! debug:
+            return row_total
+
+        for method_col, style_cfg_tuple in styles_tuple_map.items():
+            # 1. Get ordered list of labels
+            tl_type = style_cfg_tuple[0]  # extract tl_type from the tuple
+            converter = TLConverterFactory.create(tl_type)
+            expected_labels = converter.valid_out_lbs
+            assert expected_labels is not None, (
+                f"Expected labels cannot be None for method_col '{method_col}' with tl_type '{tl_type}'"
+            )
+
+            # 2. Calculate Counts per Video and add TOTAL row
             counts_df = pd.crosstab(index=df_flat["video"], columns=df_flat[method_col])
-
-            # 3. Add "TOTAL" Row at the TOP
             total_row = counts_df.sum(axis=0)
             total_row.name = "TOTAL"
 
-            # Concatenate TOTAL first, then the rest
             counts_df = pd.concat([total_row.to_frame().T, counts_df])
+            counts_df = counts_df.reindex(columns=expected_labels, fill_value=0).astype(
+                int
+            )
+            # ! debug:
+            console.rule(f"count_df for method_col: {method_col}")
+            csvfile.fn_display_df(counts_df.head(5))
+            counts_df.to_csv(
+                f"./zout/test/counts_df_{method_col}.csv", sep=";", index=True
+            )
 
-            # 4. Reindex columns to ensure ALL configured labels exist (fill 0 if missing)
-            counts_df = counts_df.reindex(columns=expected_labels, fill_value=0)
+            # 3. Calculate Smart Percentages
+            percent_df = pd.DataFrame(index=counts_df.index, columns=counts_df.columns)
+            for col in expected_labels:
+                row_total = _get_row_total(
+                    counts_df=counts_df,
+                    method_col=method_col,
+                    label=col,
+                    tl_type=tl_type,
+                )
+                percent_df[col] = (counts_df[col] / row_total) * 100
+            # ! debug:
+            console.rule(f"Percentages for {method_col} - {col} with tl_type={tl_type}")
+            percent_df.to_csv(
+                f"./zout/test/percent_df_{method_col}.csv", sep=";", index=True
+            )
 
-            # Force integer type for clean display (avoids '5.0' counts)
-            counts_df = counts_df.astype(int)
-
-            # 5. Calculate Percentages
-            row_sums = counts_df.sum(axis=1)
-            pct_df = counts_df.div(row_sums.replace(0, 1), axis=0) * 100
-
-            # 6. Format Output Strings based on Mode
+            # 4. Format Output Strings
             formatted_df = counts_df.copy().astype(object)
-
             for col in counts_df.columns:
                 if mode == "p":
-                    formatted_df[col] = pct_df[col].map(
+                    formatted_df[col] = percent_df[col].map(
                         f"{{:.{table_decimals}f}}%".format
                     )
                 elif mode == "fc":
                     formatted_df[col] = counts_df[col].astype(str)
                 elif mode == "pfc":
                     formatted_df[col] = (
-                        pct_df[col].map(f"{{:.{table_decimals}f}}%".format)
+                        percent_df[col].map(f"{{:.{table_decimals}f}}%".format)
                         + " ("
                         + counts_df[col].astype(str)
                         + ")"
                     )
 
-            # 7. Add Top-Level MultiIndex for the Method Name
+            # 5. Add MultiIndex Header
             formatted_df.columns = pd.MultiIndex.from_product(
                 [[method_col], formatted_df.columns], names=["Method", "Outcome"]
             )
-
             summary_tables.append(formatted_df)
 
         if not summary_tables:
             return pd.DataFrame()
 
-        # Concatenate all method tables horizontally
-        final_stats_df = pd.concat(summary_tables, axis=1)
-
-        return final_stats_df
+        return pd.concat(summary_tables, axis=1)

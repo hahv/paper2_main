@@ -39,6 +39,23 @@ class GlobalConst:
     TL_TYPE_NO_SKIP = "no_skip"
     TL_TYPE_SKIP = "skip"
 
+    # timeline labels for ground truth
+    TL_GT_FIRESMOKE = "FireSmoke"
+    TL_GT_NONE = "None"
+
+    # timeline labels for baseline methods (no-skip)
+    TL_NOSKIP_CORRECT_POS = "Correct Pos."  # TP
+    TL_NOSKIP_CORRECT_NEG = "Correct Neg."  # TN
+    TL_NOSKIP_CORRECT = "Correct"  # TP+TN (combined for reporting)
+    TL_NOSKIP_FALSE_ALARM_FP = "False Alarm"  # FP
+    TL_NOSKIP_MISS_FN = "Miss"  # FN
+
+    # timeline labels for skip/temporal method
+    TL_SKIP_CORRECT_SKIP = "Correct Skip"  # no fire/smoke+correctly skipped
+    TL_SKIP_CORRECT_INFER = "Correct Infer."  # fire/smoke+correctly processed
+    TL_SKIP_FALSE_SKIP = "False Skip"  # fire/smoke but incorrectly skipped
+    TL_SKIP_REDUNDANT_INFER = "Redundant Infer."  # incorrectly proc (wasted resources)
+
     @staticmethod
     def proj_root() -> str:
         return normalize_paths(GlobalConst.__PROJECT_ROOT)
