@@ -1,3 +1,5 @@
+# Timeline Visualization & Reporting Configuration
+
 # -----------------------------------------------------------------------------
 # 1. Ground Truth (GT)
 # -----------------------------------------------------------------------------
@@ -6,9 +8,13 @@ gt:
     legend_title: "1. GT (Ground Truth)"
 
   timeline:
-    labels_colors:
-      FireSmoke: "#fc6065" # Kept: Soft Coral/Red. Good reference color.
-      "None": "#95a5a6" # Kept: Neutral Gray. Recedes perfectly into the background.
+    labels:
+      FireSmoke:
+        color: "#fc6065"
+        additional_note: ~
+      "None":
+        color: "#95a5a6"
+        additional_note: ~
 
   table:
     include: true
@@ -24,20 +30,26 @@ no_skip:
     combine_rules:
       Correct: ["Correct Pos.", "Correct Neg."]
 
-    labels_colors:
-      Correct: "#2ecc71" # Kept: Green (Universal Success)
-      False Alarm: "#f39c12" # TWEAKED: Deep Amber/Yellow. Slightly darker than previous gold for better readability against white text.
-      Miss: "#c0392b" # CHANGED: Deep Crimson Red. A Miss is a critical failure. Crimson instantly alerts the user without matching GT's Coral.
+    labels:
+      Correct:
+        color: "#2ecc71"
+        additional_note: "Accurate predictions (TP/TN). Normalized by total frames."
+      False Alarm:
+        color: "#f39c12"
+        additional_note: "False Positive (FP). Normalized by actual negative frames."
+      Miss:
+        color: "#c0392b"
+        additional_note: "False Negative (FN). Normalized by actual positive frames."
 
   table:
     include: true
     highlight_rules:
       Miss:
         condition: "> 1"
-        color: "#c0392b" # Updated to match timeline
+        color: "#c0392b"
       False Alarm:
         condition: "> 0.1"
-        color: "#f39c12" # Updated to match timeline
+        color: "#f39c12"
     sort_by:
       Miss:
         direction: "desc"
@@ -54,18 +66,26 @@ skip:
     legend_title: "3. SKIP (Proposed Method)"
 
   timeline:
-    labels_colors:
-      Correct Infer.: "#2c3e50" # Kept: Navy. Feels "heavy" (computation was done), but successful.
-      Correct Skip: "#3498db" # Kept: Bright Blue. Feels "light" and cool (computation was saved).
-      False Skip: "#d81b60" # TWEAKED: Ruby/Deep Magenta. Replaces the neon pink. It screams "Error!" but is highly distinct from Baseline's Crimson and GT's Coral.
-      Wasted Infer.: "#e67e22" # Kept: Carrot Orange. Distinct from Baseline's Amber/Yellow False Alarm.
+    labels:
+      Correct Infer.:
+        color: "#2c3e50"
+        additional_note: "Valid inference on target (TP). Normalized by total frames."
+      Correct Skip:
+        color: "#3498db"
+        additional_note: "Valid computational bypass (TN). Normalized by total frames."
+      False Skip:
+        color: "#d81b60"
+        additional_note: "Missed target due to unsafe skip (FN). Normalized by actual positive frames."
+      Wasted Infer.:
+        color: "#e67e22"
+        additional_note: "Unnecessary inference on background (FP). Normalized by actual negative frames."
 
   table:
     include: true
     highlight_rules:
       False Skip:
         condition: "> 1"
-        color: "#d81b60" # Updated to match timeline
+        color: "#d81b60"
       Wasted Infer.:
         condition: "> 10"
         color: "#e67e22"

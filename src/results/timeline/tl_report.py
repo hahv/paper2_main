@@ -653,17 +653,13 @@ class TlReportGen:
             if col_name not in vid_df.columns:
                 continue
 
-            style_cfg = styles_map.get(col_name, {})
             labels = vid_df[col_name].values
 
-            labels_colors = style_cfg.get("timeline", {}).get(
-                "labels_colors"
-            )
-            # @log_func(log_args=True, log_return=True)
-            def get_color(label):
-                assert label in labels_colors, f"'{label=}' not found in {labels_colors=} for column '{col_name}'"
-                entry = labels_colors.get(label)
-                return entry
+            color_map = TlConfig.get_labels_color_map(type_key)
+
+            def get_color(label, _color_map=color_map):
+                assert label in _color_map, f"'{label=}' not found in {_color_map=} for column '{col_name}'"
+                return _color_map[label]
 
             colors = [get_color(lb) for lb in labels]
             segments = self._rle_encoding(colors)
@@ -850,23 +846,26 @@ class TlReportGen:
             title = style_cfg.get("meta", {}).get("legend_title") or style_cfg.get(
                 "legend_title", col_name
             )
-            labels_colors = style_cfg.get("timeline", {}).get(
-                "labels_colors"
-            ) or style_cfg.get("labels_colors", {})
+            labels = TlConfig.get_labels(type_key)
 
             html += (
                 f'<div class="legend-section"><div class="legend-title">{title}</div>'
             )
 
-            for label, val in labels_colors.items():
+            for label, val in labels.items():
                 if isinstance(val, dict):
                     color = val.get("color", "#ccc")
-                    desc = val.get("desc", label)
+                    note = val.get("additional_note")
                 else:
+                    # legacy bare hex string
                     color = val
-                    desc = label
+                    note = None
 
-                html += f'<div class="legend-item"><span class="dot" style="background:{color}"></span><span>{desc}</span></div>'
+                note_html = ""
+                if note:
+                    note_html = f' <span style="color:#888; font-style:italic;">— {note}</span>'
+
+                html += f'<div class="legend-item"><span class="dot" style="background:{color}"></span><span><b>{label}</b>{note_html}</span></div>'
             html += "</div>"
 
         html += "</div>"
