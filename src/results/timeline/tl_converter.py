@@ -304,8 +304,8 @@ class TlProcessor:
             )
             final_df[col_name] = temp_df[col_name]
 
-        # 4. Compute Stats
-        stats_df = cls.compute_stats_df(
+        # 4. Compute Stats; also returns processed_df with combine_rules applied to frame-level labels
+        stats_df, final_df = cls.compute_stats_df(
             final_df.copy(),
             styles_tuple_map,
             mode=table_mode,
@@ -320,7 +320,7 @@ class TlProcessor:
         styles_tuple_map: Dict[str, tuple[str, Dict]],
         mode: Literal["p", "fc", "pfc"] = "p",
         table_decimals: int = 2,
-    ) -> pd.DataFrame:
+    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """
         Generates the Summary Pivot Table with smart denominators for error rates.
         """
@@ -328,7 +328,9 @@ class TlProcessor:
         summary_tables = []
 
         def _get_row_total(counts_df, method_col, label, tl_type):
-            console.rule(f"_get_row_total {method_col=}, {label=},{tl_type=}")
+            # !debug start
+            #console.rule(f"_get_row_total {method_col=}, {label=},{tl_type=}")
+            # !debug end
 
             if tl_type == GlobalConst.TL_TYPE_GT or "Correct" in label:
                 # ! In this case, we want to calculate the total frames for the entire row (video) as the denominator, since GT distribution is what matters for both Fire and None, and for "Correct" we want overall accuracy.
@@ -340,19 +342,21 @@ class TlProcessor:
                     if label in converter.pos_labels
                     else converter.neg_labels
                 )
-                tl_type_pos_labels = converter.pos_labels
-                tl_type_neg_labels = converter.neg_labels
-                pprint(f"tl_type_pos_labels for {method_col}: {tl_type_pos_labels}")
-                pprint(f"tl_type_neg_labels for {method_col}: {tl_type_neg_labels}")
                 row_total = (
                     counts_df[counts_df.columns.intersection(total_labels)]
                     .sum(axis=1)
                     .replace(0, 1)
                 )
-                pprint(f"row_total for label '{label}' in method_col '{method_col}':")
-                pprint(row_total)
+                # !debug start
+                #tl_type_pos_labels = converter.pos_labels
+                #tl_type_neg_labels = converter.neg_labels
+                #pprint(f"tl_type_pos_labels for {method_col}: {tl_type_pos_labels}")
+                #pprint(f"tl_type_neg_labels for {method_col}: {tl_type_neg_labels}")
+                #pprint(f"row_total for label '{label}' in method_col '{method_col}':")
+                #pprint(row_total)
+                # !debug end
 
-            # ! debug:
+
             return row_total
 
         for method_col, style_cfg_tuple in styles_tuple_map.items():
@@ -380,6 +384,7 @@ class TlProcessor:
             orig_counts_df = counts_df.copy()
 
             if combine_rules:
+                label_map: Dict[str, str] = {}
                 for new_col, cols_to_combine in combine_rules.items():
                     valid_cols = [c for c in cols_to_combine if c in counts_df.columns]
                     if valid_cols:
@@ -390,13 +395,18 @@ class TlProcessor:
                             c for c in counts_df.columns if c != new_col
                         ]
                         counts_df = counts_df[cols]
+                    # Map all listed labels → new_col in the frame-level data
+                    for old_label in cols_to_combine:
+                        label_map[old_label] = new_col
+                if label_map:
+                    processed_df[method_col] = processed_df[method_col].replace(label_map)
 
             # !debug start
-            console.rule(f"count_df for method_col: {method_col}")
-            csvfile.fn_display_df(counts_df.head(5))
-            counts_df.to_csv(
-             f"./zout/test/counts_df_{method_col}.csv", sep=";", index=True
-             )
+            #console.rule(f"count_df for method_col: {method_col}")
+            #csvfile.fn_display_df(counts_df.head(5))
+            #counts_df.to_csv(
+             #f"./zout/test/counts_df_{method_col}.csv", sep=";", index=True
+             #)
             # !debug end
 
 
@@ -430,10 +440,10 @@ class TlProcessor:
                     )
 
             # !debug start
-            console.rule(f"Percentages for {method_col} with tl_type={tl_type}")
-            percent_df.to_csv(
-                f"./zout/test/percent_df_{method_col}.csv", sep=";", index=True
-            )
+            #console.rule(f"Percentages for {method_col} with tl_type={tl_type}")
+            #percent_df.to_csv(
+                #f"./zout/test/percent_df_{method_col}.csv", sep=";", index=True
+            #)
             # !debug end
 
             # 5. Add MultiIndex Header
@@ -443,6 +453,6 @@ class TlProcessor:
             summary_tables.append(formatted_df)
 
         if not summary_tables:
-            return pd.DataFrame()
+            return pd.DataFrame(), processed_df
 
-        return pd.concat(summary_tables, axis=1)
+        return pd.concat(summary_tables, axis=1), processed_df
