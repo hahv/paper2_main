@@ -125,24 +125,32 @@ class TlReportGen:
 
     @staticmethod
     def _truncate_video_name(name: str, limit: int) -> str:
-        """Truncate a video file name to `limit` chars, preserving the file extension.
-
-        Example (limit=20): 'Very_long_long_long_long.mp4' -> 'Very_long_long...mp4'
-        If limit <= 0 or the name already fits, it is returned unchanged.
+        """Truncate a video file name in the middle to `limit` chars.
+        Example (limit=22): 'Very_long_video_name_cam1.mp4' -> 'Very_lon..._cam1.mp4'
         """
         if limit <= 0 or len(name) <= limit:
             return name
+
         dot_idx = name.rfind(".")
         if dot_idx > 0:
             stem = name[:dot_idx]
-            ext = name[dot_idx:]  # includes the dot, e.g. ".mp4"
+            ext = name[dot_idx:]
         else:
             stem = name
             ext = ""
-        keep = limit - 3 - len(ext)  # stem chars to keep before "..."
-        if keep <= 0:
+
+        chars_to_keep = limit - 3 - len(ext)
+
+        if chars_to_keep <= 0:
             return name[: limit - 3] + "..."
-        return stem[:keep] + "..." + ext
+
+        keep_front = chars_to_keep // 2 + (chars_to_keep % 2)
+        keep_back = chars_to_keep // 2
+
+        if keep_back == 0:
+            return stem[:keep_front] + "..." + ext
+
+        return stem[:keep_front] + "..." + stem[-keep_back:] + ext
 
     @staticmethod
     def col_name_to_tl_type(col_name: str) -> str:

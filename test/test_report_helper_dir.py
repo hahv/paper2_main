@@ -9,9 +9,9 @@ TEST_DIR = "./zout/test"
 SINGLE_EXP_DIR = f"{TEST_DIR}/test_single_exp/MainPC__ds_UFireIndoor2__mt_no_temp_method__af4b0d32a3d2__20260211.104731"
 MULTIPLE_EXPS_DIR = f"{TEST_DIR}/test_exp_vs_baseline"
 
-TABLE_DECIMALS = 4
+TABLE_DECIMALS = 2
 TABLE_MODE = "pfc"  # percent + frame count
-VIDEO_NAME_LIMIT = 60  # Max characters for video names in the report table
+VIDEO_NAME_LIMIT = 40  # Max characters for video names in the report table
 
 def test_gen_single_dir(single_exp_dir=SINGLE_EXP_DIR):
     """Test generating a report for one specific experiment directory."""

@@ -68,7 +68,7 @@ skip:
   timeline:
     labels:
       Correct Infer.:
-        color: "#2c3e50"
+        color: "#042e59"
         additional_note: "Valid inference on target (TP). Normalized by total frames."
       Correct Skip:
         color: "#3498db"
