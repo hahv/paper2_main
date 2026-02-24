@@ -386,15 +386,19 @@ class TlProcessor:
                         counts_df[new_col] = counts_df[valid_cols].sum(axis=1)
                         counts_df.drop(columns=valid_cols, inplace=True)
                         # just move the new combined column as first column for better visibility
-                        cols = [new_col] + [c for c in counts_df.columns if c != new_col]
+                        cols = [new_col] + [
+                            c for c in counts_df.columns if c != new_col
+                        ]
                         counts_df = counts_df[cols]
 
-            # ! debug:
+            # !debug start
             console.rule(f"count_df for method_col: {method_col}")
             csvfile.fn_display_df(counts_df.head(5))
             counts_df.to_csv(
-                f"./zout/test/counts_df_{method_col}.csv", sep=";", index=True
-            )
+             f"./zout/test/counts_df_{method_col}.csv", sep=";", index=True
+             )
+            # !debug end
+
 
             # 4. Calculate Smart Percentages and Format Output Strings
             percent_df = pd.DataFrame(index=counts_df.index, columns=counts_df.columns)
@@ -425,11 +429,12 @@ class TlProcessor:
                         + ")"
                     )
 
-            # ! debug:
+            # !debug start
             console.rule(f"Percentages for {method_col} with tl_type={tl_type}")
             percent_df.to_csv(
                 f"./zout/test/percent_df_{method_col}.csv", sep=";", index=True
             )
+            # !debug end
 
             # 5. Add MultiIndex Header
             formatted_df.columns = pd.MultiIndex.from_product(
