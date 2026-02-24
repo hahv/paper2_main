@@ -43,14 +43,10 @@ class GridRenderer(BaseRenderer):
         )
         H, W = frame_bgr.shape[:2]
         block_size = self.get_render_block_size(renderer_ctx)
-        box_h, box_w = RenderUtils.calculate_osd_box(
-            renderer_ctx,
-        )
         START_Y = 30
-        START_X = W - box_w - 20
-        # Draw meta (block size, scale factor)
+        # Direction 4: right_align_x measures layout + draws in one pass (no separate calculate_osd_box)
         frame_bgr = RenderUtils.draw_osd(
-            frame_bgr, renderer_ctx, pos=(START_X, START_Y)
+            frame_bgr, renderer_ctx, pos=(0, START_Y), right_align_x=W - 20
         )
 
         # !Draw Grid (based on block size with adjusted for scale factor if needed)

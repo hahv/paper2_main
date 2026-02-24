@@ -174,18 +174,21 @@ class RenderUtils:
         bg_opacity: float = 0.5,
         padding: int = 10,
         line_spacing: int = 5,
+        right_align_x: Optional[int] = None,
     ) -> np.ndarray:
         """
-        Draws multi-line OSD using standard OpenCV functions.
+        Draws multi-line OSD using standard OpenCV functions (in-place, no frame copy).
+        If right_align_x is given, the OSD box is right-aligned so its right edge sits at
+        right_align_x, measuring the layout in the same single pass (avoids a separate
+        calculate_osd_box call).
         """
-        vis = frame.copy()
         x_start, y_start = pos
 
         # 1. Prepare Text Lines
         lines = cls._prepare_lines(data, config)
 
         if not lines:
-            return vis
+            return frame
 
         # 2. Measure for Background
         max_w = 0
@@ -216,9 +219,13 @@ class RenderUtils:
         box_w = max_w + 2 * padding
         box_h = total_h + 2 * padding - line_spacing
 
-        # 3. Draw Background
+        # Direction 4: single-pass right-alignment — no separate calculate_osd_box needed
+        if right_align_x is not None:
+            x_start = right_align_x - box_w
+
+        # 3. Draw Background (direction 3: use overlay of the original frame; no extra full copy at top)
         if bg_opacity > 0:
-            overlay = vis.copy()
+            overlay = frame.copy()
             cv2.rectangle(
                 overlay,
                 (x_start, y_start),
@@ -226,7 +233,7 @@ class RenderUtils:
                 (0, 0, 0),
                 -1,
             )
-            vis = cv2.addWeighted(overlay, bg_opacity, vis, 1 - bg_opacity, 0)
+            frame = cv2.addWeighted(overlay, bg_opacity, frame, 1 - bg_opacity, 0)
 
         # 4. Draw Text
         curr_y = y_start + padding
@@ -236,7 +243,7 @@ class RenderUtils:
             draw_y = curr_y + line["h"]
 
             cv2.putText(
-                vis,
+                frame,
                 line["text"],
                 (x_start + padding, draw_y),
                 line["font"],  # Correctly using line-specific font
@@ -247,7 +254,7 @@ class RenderUtils:
             )
             curr_y += line["row_h"]
 
-        return vis
+        return frame
 
     # ---------------- NEW PIL METHOD ----------------
 
