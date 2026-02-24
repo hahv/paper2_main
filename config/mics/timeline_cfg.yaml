@@ -1,5 +1,3 @@
-# Timeline Visualization & Reporting Configuration
-
 # -----------------------------------------------------------------------------
 # 1. Ground Truth (GT)
 # -----------------------------------------------------------------------------
@@ -7,13 +5,11 @@ gt:
   meta:
     legend_title: "1. GT (Ground Truth)"
 
-  # Visualization: Timeline colors
   timeline:
     labels_colors:
-      FireSmoke: "#fc6065"
-      "None": "#95a5a6" # Gray for neutral background (to avoid confusion with "Correct" Green)
+      FireSmoke: "#fc6065" # Kept: Soft Coral/Red. Good reference color.
+      "None": "#95a5a6" # Kept: Neutral Gray. Recedes perfectly into the background.
 
-  # Reporting: Statistics Table settings
   table:
     include: true
 
@@ -25,29 +21,23 @@ no_skip:
     legend_title: "2. NO SKIP (Baseline)"
 
   timeline:
-    # ! Combine two or more labels into one for cleaner visualization (e.g., "Correct Pos." and "Correct Neg." into "Correct") - Optional
     combine_rules:
       Correct: ["Correct Pos.", "Correct Neg."]
 
     labels_colors:
-      Correct: "#2ecc71" # Green
-      False Alarm: "#f1c40f" # Gold
-      Miss: "#8e44ad" # Purple (matches 'skip' method Miss color for consistency)
+      Correct: "#2ecc71" # Kept: Green (Universal Success)
+      False Alarm: "#f39c12" # TWEAKED: Deep Amber/Yellow. Slightly darker than previous gold for better readability against white text.
+      Miss: "#c0392b" # CHANGED: Deep Crimson Red. A Miss is a critical failure. Crimson instantly alerts the user without matching GT's Coral.
 
   table:
     include: true
     highlight_rules:
-      # Highlight Miss (FN) when count > 1
       Miss:
         condition: "> 1"
-        color: "#8e44ad"
-
-      # Highlight False Alarm (FP) when count > 2
+        color: "#c0392b" # Updated to match timeline
       False Alarm:
         condition: "> 0.1"
-        color: "#f1c40f"
-
-    # Sort priority: smaller number = higher priority
+        color: "#f39c12" # Updated to match timeline
     sort_by:
       Miss:
         direction: "desc"
@@ -65,29 +55,24 @@ skip:
 
   timeline:
     labels_colors:
-      False Skip: "#e84393" # Purple (Critical Failure)
-      Redundant Infer.: "#e67e22" # Gold (Inefficiency)
-      Correct Skip: "#3498db" # Teal (Efficiency Success)
-      Correct Infer.: "#2c3e50" # Navy (Valid Hit)
+      Correct Infer.: "#2c3e50" # Kept: Navy. Feels "heavy" (computation was done), but successful.
+      Correct Skip: "#3498db" # Kept: Bright Blue. Feels "light" and cool (computation was saved).
+      False Skip: "#d81b60" # TWEAKED: Ruby/Deep Magenta. Replaces the neon pink. It screams "Error!" but is highly distinct from Baseline's Crimson and GT's Coral.
+      Wasted Infer.: "#e67e22" # Kept: Carrot Orange. Distinct from Baseline's Amber/Yellow False Alarm.
 
   table:
     include: true
     highlight_rules:
-      # Highlight Miss (FN) when count > 1
       False Skip:
         condition: "> 1"
-        color: "#e84393"
-
-      # Highlight Waste (FP) when count > 10
-      Redundant Infer.:
+        color: "#d81b60" # Updated to match timeline
+      Wasted Infer.:
         condition: "> 10"
         color: "#e67e22"
-
-    # Sort priority: smaller number = higher priority
     sort_by:
       False Skip:
         direction: "desc"
         order: 1
-      Redundant Infer.:
+      Wasted Infer.:
         direction: "desc"
         order: 4

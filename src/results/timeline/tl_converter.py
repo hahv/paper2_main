@@ -158,7 +158,7 @@ class SkipConverter(TLConverter):
             GlobalConst.TL_SKIP_CORRECT_INFER,
             GlobalConst.TL_SKIP_CORRECT_SKIP,
             GlobalConst.TL_SKIP_FALSE_SKIP,
-            GlobalConst.TL_SKIP_REDUNDANT_INFER,
+            GlobalConst.TL_SKIP_WASTED_INFER,
         ]
 
     @property
@@ -192,7 +192,7 @@ class SkipConverter(TLConverter):
                 GlobalConst.TL_SKIP_CORRECT_INFER,
                 GlobalConst.TL_SKIP_CORRECT_SKIP,
                 GlobalConst.TL_SKIP_FALSE_SKIP,
-                GlobalConst.TL_SKIP_REDUNDANT_INFER,
+                GlobalConst.TL_SKIP_WASTED_INFER,
             ],
             default="Unknown",
         )

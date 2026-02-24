@@ -423,6 +423,10 @@ class TlReportGen:
         parent_path = Path(parent_dir)
         exp_dirs = [p for p in parent_path.iterdir() if p.is_dir()]
         for exp_dir in exp_dirs:
+            config_file = exp_dir / "__config.yaml"
+            if not config_file.exists():
+                print(f"[Warning] Skipping {exp_dir.name}: Invalid exp dir - Missing __config.yaml")
+                continue
             pprint(f"[INFO] Gen timeline report for exp: {exp_dir.name}")
             try:
                 TlReportGen.gen_TlReport_exp(

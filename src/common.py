@@ -54,7 +54,7 @@ class GlobalConst:
     TL_SKIP_CORRECT_SKIP = "Correct Skip"  # no fire/smoke+correctly skipped
     TL_SKIP_CORRECT_INFER = "Correct Infer."  # fire/smoke+correctly processed
     TL_SKIP_FALSE_SKIP = "False Skip"  # fire/smoke but incorrectly skipped
-    TL_SKIP_REDUNDANT_INFER = "Redundant Infer."  # incorrectly proc (wasted resources)
+    TL_SKIP_WASTED_INFER = "Wasted Infer."  # incorrectly proc (wasted resources)
 
     @staticmethod
     def proj_root() -> str:
