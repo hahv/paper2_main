@@ -124,6 +124,27 @@ class TlReportGen:
         return df_sorted
 
     @staticmethod
+    def _truncate_video_name(name: str, limit: int) -> str:
+        """Truncate a video file name to `limit` chars, preserving the file extension.
+
+        Example (limit=20): 'Very_long_long_long_long.mp4' -> 'Very_long_long...mp4'
+        If limit <= 0 or the name already fits, it is returned unchanged.
+        """
+        if limit <= 0 or len(name) <= limit:
+            return name
+        dot_idx = name.rfind(".")
+        if dot_idx > 0:
+            stem = name[:dot_idx]
+            ext = name[dot_idx:]  # includes the dot, e.g. ".mp4"
+        else:
+            stem = name
+            ext = ""
+        keep = limit - 3 - len(ext)  # stem chars to keep before "..."
+        if keep <= 0:
+            return name[: limit - 3] + "..."
+        return stem[:keep] + "..." + ext
+
+    @staticmethod
     def col_name_to_tl_type(col_name: str) -> str:
         # first find the part that starts with 'mt_'
         if col_name.startswith("no_temp_method"):
@@ -416,6 +437,7 @@ class TlReportGen:
         parent_dir: str = "./zout/zruns",
         table_mode: Literal["p", "fc", "pfc"] = "p",
         table_decimals: int = 2,
+        video_name_limit: int = 0,
     ):
         """
         Generate timeline reports for all experiment directories under the given parent directory.
@@ -434,6 +456,7 @@ class TlReportGen:
                     title=f"Timeline Report - {exp_dir.name}",
                     table_mode=table_mode,
                     table_decimals=table_decimals,
+                    video_name_limit=video_name_limit,
                 )
             except Exception as e:
                 with ConsoleLog("Error Generating Report"):
@@ -447,6 +470,7 @@ class TlReportGen:
         table_mode: Literal["p", "fc", "pfc"] = "p",
         table_decimals: int = 2,
         include_baseline: bool = True,
+        video_name_limit: int = 0,
     ):
         """
         Generates a report for a SINGLE experiment (backward compatibility wrapper).
@@ -492,6 +516,7 @@ class TlReportGen:
             title=title,
             table_mode=table_mode,
             table_decimals=table_decimals,
+            video_name_limit=video_name_limit,
         )
         return os.path.abspath(output_path)
 
@@ -502,6 +527,7 @@ class TlReportGen:
         title: str = "Comparison Timeline Report",
         table_mode: Literal["p", "fc", "pfc"] = "p",
         table_decimals: int = 2,
+        video_name_limit: int = 0,
     ):
         """
         Generates a comparison report for MULTIPLE experiments.
@@ -515,6 +541,7 @@ class TlReportGen:
             title=title,
             table_mode=table_mode,
             table_decimals=table_decimals,
+            video_name_limit=video_name_limit,
         )
         return os.path.abspath(output_path)
 
@@ -528,6 +555,7 @@ class TlReportGen:
         sort_func_tlreport_df: Optional[
             Callable[[pd.DataFrame], pd.DataFrame]
         ] = default_sort_func_tlreport,
+        video_name_limit: int = 0,
         debug=True
     ):
         """
@@ -592,7 +620,10 @@ class TlReportGen:
 
         report_df[(" ", "FRAMES")] = frames_list
         report_df[(" ", "VISUALIZATION")] = viz_list
-        report_df[(" ", "VIDEO NAME")] = report_df.index
+        report_df[(" ", "VIDEO NAME")] = [
+            TlReportGen._truncate_video_name(str(v), video_name_limit)
+            for v in report_df.index
+        ]
         report_df[(" ", "VIDEO_PATH")] = path_list
 
         report_df.reset_index(drop=True, inplace=True)

@@ -11,13 +11,13 @@ MULTIPLE_EXPS_DIR = f"{TEST_DIR}/test_exp_vs_baseline"
 
 TABLE_DECIMALS = 4
 TABLE_MODE = "pfc"  # percent + frame count
-
+VIDEO_NAME_LIMIT = 60  # Max characters for video names in the report table
 
 def test_gen_single_dir(single_exp_dir=SINGLE_EXP_DIR):
     """Test generating a report for one specific experiment directory."""
     print(f"\n[Test] Single Exp: {single_exp_dir}")
     TlReportGen.gen_TlReport_exp(
-        single_exp_dir, table_mode=TABLE_MODE, table_decimals=TABLE_DECIMALS
+        single_exp_dir, table_mode=TABLE_MODE, table_decimals=TABLE_DECIMALS, video_name_limit=VIDEO_NAME_LIMIT
     )
 
 
@@ -25,7 +25,7 @@ def test_gen_multiple_dirs(multi_exp_dir=MULTIPLE_EXPS_DIR):
     """Test generating individual reports for ALL experiments in the root folder."""
     print(f"\n[Test] Batch Gen for Root: {multi_exp_dir}")
     TlReportGen.gen_TlReport_muti_exps(
-        multi_exp_dir, table_mode=TABLE_MODE, table_decimals=TABLE_DECIMALS
+        multi_exp_dir, table_mode=TABLE_MODE, table_decimals=TABLE_DECIMALS, video_name_limit=VIDEO_NAME_LIMIT
     )
 
 
@@ -39,7 +39,6 @@ def test_gen_from_csv():
     TlReportGen.tlReport_from_csv(
         csv_path, output_html_path, title=f"[Reconstructed] {csv_parent_dir.name}"
     )
-
 
 def test_gen_compare_exps():
     """
