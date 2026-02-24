@@ -65,10 +65,10 @@ def test_gen_compare_exps():
 
 if __name__ == "__main__":
     # 1. Single Experiment
-    test_gen_single_dir()
+    # test_gen_single_dir()
 
     # 2. Batch Processing (Individual Reports)
-    # test_gen_multiple_dirs()
+    test_gen_multiple_dirs()
 
     # 3. CSV Reconstruction
     # test_gen_from_csv()

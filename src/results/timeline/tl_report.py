@@ -524,15 +524,24 @@ class TlReportGen:
         sort_func_tlreport_df: Optional[
             Callable[[pd.DataFrame], pd.DataFrame]
         ] = default_sort_func_tlreport,
+        debug=True
     ):
         """
         Main entry point: Process dataframe and generate HTML report.
+        raw -> proc -> final report df -> HTML
         """
         # 1. Process Data using the Logic Core
         raw_df = df.copy()
         proc_tl_df, stats_df, styles_map = TlProcessor.proc_dataframe(
             df, self.cols_to_types, table_mode=table_mode, table_decimals=table_decimals
         )
+        # !debug
+        # console.rule("Debug Info: Stats DataFrame and Styles Map")
+        # stats_df.to_csv(os.path.join(os.path.dirname(output_path), "stats_debug.csv"), index=True, sep=";", encoding="utf-8")
+        # pprint(styles_map)
+
+        # assert False, "Debug"
+        # !end debug
 
         # 2. Add "FRAMES" and "VISUALIZATION"
         final_df_reset = proc_tl_df.reset_index()
@@ -607,29 +616,29 @@ class TlReportGen:
 
         # 3. Render HTML
         self.render_html(report_df, styles_map, output_path, title)
+        if debug:
+            # save raw timeline csv and report csv
+            raw_timeline_csv_path = output_path.replace(".html", "_raw.csv")
+            raw_df.to_csv(raw_timeline_csv_path, index=False, sep=";", encoding="utf-8")
+            proc_timeline_csv_path = output_path.replace(".html", "_proc.csv")
+            proc_tl_df.to_csv(
+                proc_timeline_csv_path, index=False, sep=";", encoding="utf-8"
+            )
+            report_csv_output_path = output_path.replace(".html", ".csv")
+            report_df.to_csv(report_csv_output_path, index=False, sep=";", encoding="utf-8")
 
-        # save raw timeline csv and report csv
-        raw_timeline_csv_path = output_path.replace(".html", "_raw.csv")
-        raw_df.to_csv(raw_timeline_csv_path, index=False, sep=";", encoding="utf-8")
-        proc_timeline_csv_path = output_path.replace(".html", "_proc.csv")
-        proc_tl_df.to_csv(
-            proc_timeline_csv_path, index=False, sep=";", encoding="utf-8"
-        )
-        report_csv_output_path = output_path.replace(".html", ".csv")
-        report_df.to_csv(report_csv_output_path, index=False, sep=";", encoding="utf-8")
+            with ConsoleLog("Saving report results:"):
+                print(f"[INFO] Report generated at: ⏬")
+                pprint_local_path(output_path, get_wins_path=True)
 
-        with ConsoleLog("Saving report results:"):
-            print(f"[INFO] Report generated at: ⏬")
-            pprint_local_path(output_path, get_wins_path=True)
+                print(f"[INFO] Raw timeline data saved at: ⏬")
+                pprint_local_path(raw_timeline_csv_path, get_wins_path=True)
 
-            print(f"[INFO] Raw timeline data saved at: ⏬")
-            pprint_local_path(raw_timeline_csv_path, get_wins_path=True)
+                print(f"[INFO] Processed timeline data saved at: ⏬")
+                pprint_local_path(proc_timeline_csv_path, get_wins_path=True)
 
-            print(f"[INFO] Processed timeline data saved at: ⏬")
-            pprint_local_path(proc_timeline_csv_path, get_wins_path=True)
-
-            print(f"[INFO] CSV version saved at: ⏬")
-            pprint_local_path(report_csv_output_path, get_wins_path=True)
+                print(f"[INFO] CSV version saved at: ⏬")
+                pprint_local_path(report_csv_output_path, get_wins_path=True)
 
     def generate_timeline_html(self, vid_df: pd.DataFrame, styles_map: Dict) -> str:
         """Generates the stacked bar HTML for a single video."""
@@ -645,15 +654,14 @@ class TlReportGen:
 
             labels_colors = style_cfg.get("timeline", {}).get(
                 "labels_colors"
-            ) or style_cfg.get("labels_colors", {})
-
-            def get_color(lbl):
-                entry = labels_colors.get(lbl, "#ccc")
-                if isinstance(entry, dict):
-                    return entry.get("color", "#ccc")
+            )
+            # @log_func(log_args=True, log_return=True)
+            def get_color(label):
+                assert label in labels_colors, f"'{label=}' not found in {labels_colors=} for column '{col_name}'"
+                entry = labels_colors.get(label)
                 return entry
 
-            colors = [get_color(l) for l in labels]
+            colors = [get_color(lb) for lb in labels]
             segments = self._rle_encoding(colors)
             bar_html = self._make_bar_html(segments)
 

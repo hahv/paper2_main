@@ -25,30 +25,34 @@ no_skip:
     legend_title: "2. NO SKIP (Baseline)"
 
   timeline:
+    # ! Combine two or more labels into one for cleaner visualization (e.g., "Correct Pos." and "Correct Neg." into "Correct") - Optional
+    combine_rules:
+      Correct: ["Correct Pos.", "Correct Neg."]
+
     labels_colors:
-      Correct: "#2ecc71"           # Green
-      False Alarm (FP): "#f1c40f"  # Gold
-      Miss (FN): "#8e44ad"         # Purple (matches 'skip' method Miss color for consistency)
+      Correct: "#2ecc71" # Green
+      False Alarm: "#f1c40f" # Gold
+      Miss: "#8e44ad" # Purple (matches 'skip' method Miss color for consistency)
 
   table:
     include: true
     highlight_rules:
       # Highlight Miss (FN) when count > 1
-      Miss (FN):
+      Miss:
         condition: "> 1"
         color: "#8e44ad"
 
       # Highlight False Alarm (FP) when count > 2
-      False Alarm (FP):
+      False Alarm:
         condition: "> 0.1"
         color: "#f1c40f"
 
     # Sort priority: smaller number = higher priority
     sort_by:
-      Miss (FN):
+      Miss:
         direction: "desc"
         order: 1
-      False Alarm (FP):
+      False Alarm:
         direction: "desc"
         order: 2
 
@@ -61,29 +65,29 @@ skip:
 
   timeline:
     labels_colors:
-      Miss (FN): "#e84393"         # Purple (Critical Failure)
-      Waste (FP): "#e67e22"        # Gold (Inefficiency)
-      Correct Skip: "#3498db"      # Teal (Efficiency Success)
-      Correct Proc.: "#2c3e50"     # Navy (Valid Hit)
+      False Skip: "#e84393" # Purple (Critical Failure)
+      Redundant Infer.: "#e67e22" # Gold (Inefficiency)
+      Correct Skip: "#3498db" # Teal (Efficiency Success)
+      Correct Infer.: "#2c3e50" # Navy (Valid Hit)
 
   table:
     include: true
     highlight_rules:
       # Highlight Miss (FN) when count > 1
-      Miss (FN):
+      False Skip:
         condition: "> 1"
         color: "#e84393"
 
       # Highlight Waste (FP) when count > 10
-      Waste (FP):
+      Redundant Infer.:
         condition: "> 10"
         color: "#e67e22"
 
     # Sort priority: smaller number = higher priority
     sort_by:
-      Miss (FN):
+      False Skip:
         direction: "desc"
-        order: 3
-      Waste (FP):
+        order: 1
+      Redundant Infer.:
         direction: "desc"
         order: 4
