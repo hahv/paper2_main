@@ -1,11 +1,11 @@
-from fontTools.unicodedata import block
 from halib import *
 
 import cv2
 import numpy as np
 from typing import Any, Dict
 from src.results.viz.grid_renderer import GridRenderer
-from src.results.viz.renderer_utils import RenderUtils, OsdFmt
+from src.results.viz.renderer_utils import RenderUtils
+from line_profiler import profile
 
 
 class BlockMontionOnlyRenderer(GridRenderer):
@@ -37,6 +37,8 @@ class BlockMontionOnlyRenderer(GridRenderer):
             render_ctx.update(self.extra_cfg)
         return render_ctx
 
+    # @log_func(log_time=True)
+    # @profile
     def render(self, frame_bgr: np.ndarray, renderer_ctx: Dict[str, Any]) -> np.ndarray:
         # Basic validation
         if not renderer_ctx:
@@ -83,26 +85,17 @@ class BlockMontionOnlyRenderer(GridRenderer):
                 self.BLOCK_THICKNESS,
             )
 
-            # Draw Pixel Count Text
-            # Position text slightly inside the top-left corner of the block
-            text_pos = (x1 + 4, y1 + 14)
-            data = {"active_percent": percent_active_pixels}
-            data_render_cfg = {
-                "active_percent": {
-                    "label": "p",
-                    "fmt": OsdFmt.PERCENT,
-                    "scale": 0.4,
-                    "thickness": 1,
-                    "color": self.MOTION_BLOCK_COLOR,
-                }
-            }
-            # ! must re-assign frame_bgr after drawing with PIL to get updated image (in place modification won't work here)
-            frame_bgr = RenderUtils.draw_osd_pil(
-                frame=frame_bgr,
-                data=data,
-                config=data_render_cfg,
-                pos=text_pos,
-                bg_opacity=0.0,
+            # Direction 2: draw block percentage text with cv2.putText (no PIL roundtrip per block)
+            text = f"p:{percent_active_pixels:.1%}"
+            cv2.putText(
+                frame_bgr,
+                text,
+                (x1 + 4, y1 + 14),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.35,
+                self.MOTION_BLOCK_COLOR,
+                1,
+                cv2.LINE_AA,
             )
 
         # 4. Draw Crop ROI (Aggregated Bounding Box)
@@ -111,7 +104,8 @@ class BlockMontionOnlyRenderer(GridRenderer):
             # Draw Blue Box
             cv2.rectangle(frame_bgr, (rx, ry), (rx + rw, ry + rh), self.ROI_COLOR, 2)
 
-            frame_bgr = RenderUtils.draw_osd_pil(
+            # Direction 1: use draw_osd (OpenCV) instead of draw_osd_pil for ROI label
+            frame_bgr = RenderUtils.draw_osd(
                 frame=frame_bgr,
                 data={"ROI": f"{rw} x {rh}"},
                 config={"ROI": {"color": self.ROI_COLOR}},

@@ -7,6 +7,7 @@ from src.methods.skip.rule.base_rule import RuleResult
 from src.results.viz.renderer_utils import RenderUtils
 from src.results.viz.block_motion_only_renderer import BlockMontionOnlyRenderer
 
+from line_profiler import profile
 
 # ! Note that this only draws the grid, motion blocks will be draw in different renderer
 class BlockRuleBasedRenderer(BlockMontionOnlyRenderer):
@@ -27,6 +28,8 @@ class BlockRuleBasedRenderer(BlockMontionOnlyRenderer):
         """
         return super().global_ctx_to_render_ctx(global_context)
 
+    # @log_func(log_time=True)
+    # @profile
     def render(self, frame_bgr: np.ndarray, renderer_ctx: Dict[str, Any]) -> np.ndarray:
         assert renderer_ctx is not None and len(renderer_ctx) > 0, (
             "Renderer context is empty!"
