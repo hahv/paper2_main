@@ -24,11 +24,14 @@ def get_labels_for_type(timeline_type):
     """Retrieve label keys from the local MOCK config."""
     if timeline_type not in MOCK_YAML_CONTENT:
         return []
-    # Handle new config nesting under "timeline"
+    # Handle new config nesting under "timeline" with 'labels' key
     type_cfg = MOCK_YAML_CONTENT[timeline_type]
-    if "timeline" in type_cfg and "labels_colors" in type_cfg["timeline"]:
-        return list(type_cfg["timeline"]["labels_colors"].keys())
-    # Fallback for old flat structure if needed
+    tl_section = type_cfg.get("timeline", {})
+    if "labels" in tl_section:
+        return list(tl_section["labels"].keys())
+    # Fallback for legacy 'labels_colors' flat structure
+    if "labels_colors" in tl_section:
+        return list(tl_section["labels_colors"].keys())
     return list(type_cfg.get("labels_colors", {}).keys())
 
 def rand_mock_data_column(total_frames, timeline_type) -> list:

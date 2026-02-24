@@ -36,6 +36,25 @@ class TlConfig:
         assert tl_type in cfg, f"Timeline type '{tl_type}' not found in config."
         return cfg[tl_type]
 
+    @classmethod
+    def get_labels(cls, tl_type: str) -> Dict[str, Any]:
+        """Returns the labels dict: {label_name: {color, additional_note, ...}}"""
+        tl_cfg = cls.get_tl_dict(tl_type)
+        tl_section = tl_cfg.get("timeline", {})
+        if "labels" in tl_section:
+            return tl_section["labels"]
+        # Fallback: old flat labels_colors format (bare hex strings)
+        if "labels_colors" in tl_section:
+            return {k: {"color": v} for k, v in tl_section["labels_colors"].items()}
+        if "labels_colors" in tl_cfg:
+            return {k: {"color": v} for k, v in tl_cfg["labels_colors"].items()}
+        raise KeyError(f"Config for '{tl_type}' has no 'labels' (or legacy 'labels_colors') key.")
+
+    @classmethod
+    def get_labels_color_map(cls, tl_type: str) -> Dict[str, str]:
+        """Returns a flat {label_name: hex_color} dict, for bar rendering."""
+        return {k: v["color"] for k, v in cls.get_labels(tl_type).items()}
+
 
 # ======================================================
 # 2. Parsing Logic (Decoupled)
@@ -55,15 +74,7 @@ class TLConverter(BaseCSVConverter):
 
     @property
     def tl_supported_labels(self) -> List[str]:
-        tl_cfg_dict = TlConfig.get_tl_dict(self.tl_type)
-        # Search for labels_colors in "timeline" subsection (new format) or root (old format)
-        if "timeline" in tl_cfg_dict and "labels_colors" in tl_cfg_dict["timeline"]:
-            return list(tl_cfg_dict["timeline"]["labels_colors"].keys())
-
-        assert "labels_colors" in tl_cfg_dict, (
-            f"Config for '{self.tl_type}' missing 'labels_colors' key (checked root and 'timeline')."
-        )
-        return list(tl_cfg_dict["labels_colors"].keys())
+        return list(TlConfig.get_labels(self.tl_type).keys())
 
     @property
     def pos_labels(self) -> List[str]:

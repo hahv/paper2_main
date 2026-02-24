@@ -124,6 +124,35 @@ class TlReportGen:
         return df_sorted
 
     @staticmethod
+    def _truncate_video_name(name: str, limit: int) -> str:
+        """Truncate a video file name in the middle to `limit` chars.
+        Example (limit=22): 'Very_long_video_name_cam1.mp4' -> 'Very_lon..._cam1.mp4'
+        """
+        if limit <= 0 or len(name) <= limit:
+            return name
+
+        dot_idx = name.rfind(".")
+        if dot_idx > 0:
+            stem = name[:dot_idx]
+            ext = name[dot_idx:]
+        else:
+            stem = name
+            ext = ""
+
+        chars_to_keep = limit - 3 - len(ext)
+
+        if chars_to_keep <= 0:
+            return name[: limit - 3] + "..."
+
+        keep_front = chars_to_keep // 2 + (chars_to_keep % 2)
+        keep_back = chars_to_keep // 2
+
+        if keep_back == 0:
+            return stem[:keep_front] + "..." + ext
+
+        return stem[:keep_front] + "..." + stem[-keep_back:] + ext
+
+    @staticmethod
     def col_name_to_tl_type(col_name: str) -> str:
         # first find the part that starts with 'mt_'
         if col_name.startswith("no_temp_method"):
@@ -416,6 +445,7 @@ class TlReportGen:
         parent_dir: str = "./zout/zruns",
         table_mode: Literal["p", "fc", "pfc"] = "p",
         table_decimals: int = 2,
+        video_name_limit: int = 0,
     ):
         """
         Generate timeline reports for all experiment directories under the given parent directory.
@@ -434,6 +464,7 @@ class TlReportGen:
                     title=f"Timeline Report - {exp_dir.name}",
                     table_mode=table_mode,
                     table_decimals=table_decimals,
+                    video_name_limit=video_name_limit,
                 )
             except Exception as e:
                 with ConsoleLog("Error Generating Report"):
@@ -447,6 +478,7 @@ class TlReportGen:
         table_mode: Literal["p", "fc", "pfc"] = "p",
         table_decimals: int = 2,
         include_baseline: bool = True,
+        video_name_limit: int = 0,
     ):
         """
         Generates a report for a SINGLE experiment (backward compatibility wrapper).
@@ -492,6 +524,7 @@ class TlReportGen:
             title=title,
             table_mode=table_mode,
             table_decimals=table_decimals,
+            video_name_limit=video_name_limit,
         )
         return os.path.abspath(output_path)
 
@@ -502,6 +535,7 @@ class TlReportGen:
         title: str = "Comparison Timeline Report",
         table_mode: Literal["p", "fc", "pfc"] = "p",
         table_decimals: int = 2,
+        video_name_limit: int = 0,
     ):
         """
         Generates a comparison report for MULTIPLE experiments.
@@ -515,6 +549,7 @@ class TlReportGen:
             title=title,
             table_mode=table_mode,
             table_decimals=table_decimals,
+            video_name_limit=video_name_limit,
         )
         return os.path.abspath(output_path)
 
@@ -528,6 +563,7 @@ class TlReportGen:
         sort_func_tlreport_df: Optional[
             Callable[[pd.DataFrame], pd.DataFrame]
         ] = default_sort_func_tlreport,
+        video_name_limit: int = 0,
         debug=True
     ):
         """
@@ -592,7 +628,10 @@ class TlReportGen:
 
         report_df[(" ", "FRAMES")] = frames_list
         report_df[(" ", "VISUALIZATION")] = viz_list
-        report_df[(" ", "VIDEO NAME")] = report_df.index
+        report_df[(" ", "VIDEO NAME")] = [
+            TlReportGen._truncate_video_name(str(v), video_name_limit)
+            for v in report_df.index
+        ]
         report_df[(" ", "VIDEO_PATH")] = path_list
 
         report_df.reset_index(drop=True, inplace=True)
@@ -653,17 +692,13 @@ class TlReportGen:
             if col_name not in vid_df.columns:
                 continue
 
-            style_cfg = styles_map.get(col_name, {})
             labels = vid_df[col_name].values
 
-            labels_colors = style_cfg.get("timeline", {}).get(
-                "labels_colors"
-            )
-            # @log_func(log_args=True, log_return=True)
-            def get_color(label):
-                assert label in labels_colors, f"'{label=}' not found in {labels_colors=} for column '{col_name}'"
-                entry = labels_colors.get(label)
-                return entry
+            color_map = TlConfig.get_labels_color_map(type_key)
+
+            def get_color(label, _color_map=color_map):
+                assert label in _color_map, f"'{label=}' not found in {_color_map=} for column '{col_name}'"
+                return _color_map[label]
 
             colors = [get_color(lb) for lb in labels]
             segments = self._rle_encoding(colors)
@@ -850,23 +885,26 @@ class TlReportGen:
             title = style_cfg.get("meta", {}).get("legend_title") or style_cfg.get(
                 "legend_title", col_name
             )
-            labels_colors = style_cfg.get("timeline", {}).get(
-                "labels_colors"
-            ) or style_cfg.get("labels_colors", {})
+            labels = TlConfig.get_labels(type_key)
 
             html += (
                 f'<div class="legend-section"><div class="legend-title">{title}</div>'
             )
 
-            for label, val in labels_colors.items():
+            for label, val in labels.items():
                 if isinstance(val, dict):
                     color = val.get("color", "#ccc")
-                    desc = val.get("desc", label)
+                    note = val.get("additional_note")
                 else:
+                    # legacy bare hex string
                     color = val
-                    desc = label
+                    note = None
 
-                html += f'<div class="legend-item"><span class="dot" style="background:{color}"></span><span>{desc}</span></div>'
+                note_html = ""
+                if note:
+                    note_html = f' <span style="color:#888; font-style:italic;">— {note}</span>'
+
+                html += f'<div class="legend-item"><span class="dot" style="background:{color}"></span><span><b>{label}</b>{note_html}</span></div>'
             html += "</div>"
 
         html += "</div>"
