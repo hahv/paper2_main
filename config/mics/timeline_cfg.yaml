@@ -10,10 +10,10 @@ gt:
   timeline:
     labels:
       FireSmoke:
-        color: "#fc6065"
+        color: "#f76060"
         additional_note: ~
       "None":
-        color: "#95a5a6"
+        color: "#dee2e6"
         additional_note: ~
 
   table:
@@ -32,13 +32,13 @@ no_skip:
 
     labels:
       Correct:
-        color: "#2ecc71"
+        color: "#2b8a3e"
         additional_note: "Accurate predictions (TP/TN). Normalized by total frames."
       False Alarm:
-        color: "#f39c12"
+        color: "#ebd91a"
         additional_note: "False Positive (FP). Normalized by actual negative frames."
       Miss:
-        color: "#c0392b"
+        color: "#d00000"
         additional_note: "False Negative (FN). Normalized by actual positive frames."
 
   table:
@@ -46,10 +46,10 @@ no_skip:
     highlight_rules:
       Miss:
         condition: "> 1"
-        color: "#c0392b"
+        color: "#d00000"
       False Alarm:
         condition: "> 0.1"
-        color: "#f39c12"
+        color: "#ebd91a"
     sort_by:
       Miss:
         direction: "desc"
@@ -68,16 +68,16 @@ skip:
   timeline:
     labels:
       Correct Infer.:
-        color: "#042e59"
+        color: "#0060BD"
         additional_note: "Valid inference on target (TP). Normalized by total frames."
       Correct Skip:
-        color: "#3498db"
+        color: "#68B8F7"
         additional_note: "Valid computational bypass (TN). Normalized by total frames."
       False Skip:
-        color: "#d81b60"
+        color: "#cf2b2b"
         additional_note: "Missed target due to unsafe skip (FN). Normalized by actual positive frames."
       Wasted Infer.:
-        color: "#e67e22"
+        color: "#EB8B07"
         additional_note: "Unnecessary inference on background (FP). Normalized by actual negative frames."
 
   table:
@@ -85,10 +85,10 @@ skip:
     highlight_rules:
       False Skip:
         condition: "> 1"
-        color: "#d81b60"
+        color: "#cf2b2b"
       Wasted Infer.:
         condition: "> 10"
-        color: "#e67e22"
+        color: "#EB8B07"
     sort_by:
       False Skip:
         direction: "desc"

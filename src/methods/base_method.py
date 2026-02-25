@@ -25,7 +25,7 @@ from src.results.timeline.tl_report import TlReportGen
 PKG_METHODS = "src.methods"
 PKG_RESULTS = "src.results"
 DEFAULT_VIDEO_PROC = "video_infer_rs_proc"
-
+TIMELINE_VIDEO_NAME_LIMIT = 40
 
 class MethodFactory:
     TEMP_METHOD_NAME_PREFIX = "temp_method"
@@ -179,6 +179,7 @@ class BaseMethod(ABC):
                     TlReportGen.gen_TlReport_exp(
                         self.outdir,
                         table_mode=self.cfg.inferCfg.timeline_table_mode,  # ty:ignore[invalid-argument-type]
+                        video_name_limit=TIMELINE_VIDEO_NAME_LIMIT
                     )
                 except Exception as e:
                     console.print(f"[red]Failed to generate timeline report: {e}[/red]")
