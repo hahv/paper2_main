@@ -31,7 +31,8 @@
         "**/.ruff_cache": true,
         "uv.lock": true,
         "**/.python-version": true,
-        "**/wandb": true
+        "**/wandb": true,
+        "**/~$_issue_track.xlsx": true
     },
     "explorerExclude.backup": {},
     "notebook.formatOnSave.enabled": true,
