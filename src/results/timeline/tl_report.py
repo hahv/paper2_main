@@ -455,7 +455,9 @@ class TlReportGen:
         for exp_dir in exp_dirs:
             config_file = exp_dir / "__config.yaml"
             if not config_file.exists():
-                print(f"[Warning] Skipping {exp_dir.name}: Invalid exp dir - Missing __config.yaml")
+                print(
+                    f"[Warning] Skipping {exp_dir.name}: Invalid exp dir - Missing __config.yaml"
+                )
                 continue
             pprint(f"[INFO] Gen timeline report for exp: {exp_dir.name}")
             try:
@@ -564,7 +566,7 @@ class TlReportGen:
             Callable[[pd.DataFrame], pd.DataFrame]
         ] = default_sort_func_tlreport,
         video_name_limit: int = 0,
-        debug=True
+        debug=True,
     ):
         """
         Main entry point: Process dataframe and generate HTML report.
@@ -668,7 +670,9 @@ class TlReportGen:
                 proc_timeline_csv_path, index=False, sep=";", encoding="utf-8"
             )
             report_csv_output_path = output_path.replace(".html", ".csv")
-            report_df.to_csv(report_csv_output_path, index=False, sep=";", encoding="utf-8")
+            report_df.to_csv(
+                report_csv_output_path, index=False, sep=";", encoding="utf-8"
+            )
 
             with ConsoleLog("Saving report results:"):
                 print(f"[INFO] Report generated at: ⏬")
@@ -697,7 +701,9 @@ class TlReportGen:
             color_map = TlConfig.get_labels_color_map(type_key)
 
             def get_color(label, _color_map=color_map):
-                assert label in _color_map, f"'{label=}' not found in {_color_map=} for column '{col_name}'"
+                assert label in _color_map, (
+                    f"'{label=}' not found in {_color_map=} for column '{col_name}'"
+                )
                 return _color_map[label]
 
             colors = [get_color(lb) for lb in labels]
@@ -902,7 +908,9 @@ class TlReportGen:
 
                 note_html = ""
                 if note:
-                    note_html = f' <span style="color:#888; font-style:italic;">— {note}</span>'
+                    note_html = (
+                        f' <span style="color:#888; font-style:italic;">— {note}</span>'
+                    )
 
                 html += f'<div class="legend-item"><span class="dot" style="background:{color}"></span><span><b>{label}</b>{note_html}</span></div>'
             html += "</div>"

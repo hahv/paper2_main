@@ -9,6 +9,7 @@ from src.results.viz.block_motion_only_renderer import BlockMontionOnlyRenderer
 
 from line_profiler import profile
 
+
 # ! Note that this only draws the grid, motion blocks will be draw in different renderer
 class BlockRuleBasedRenderer(BlockMontionOnlyRenderer):
     """Draws the Grid, Yellow Motion Blocks, and Fire/Smoke Classification."""

@@ -1,0 +1,1 @@
+cd /d E:\Dev\__halib && call .venv\Scripts\activate && cd /d E:\SyncData\paper2_main\zbin\viz && python run_vdb_plot.py

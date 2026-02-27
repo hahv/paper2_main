@@ -124,7 +124,9 @@ class BaseCSVConverter(ABC):
         pprint(f"{ls_target_cols=}, {inplace=}, {extra_dict=}")
         for target_col in ls_target_cols:
             self.do_validate_lbs(
-                rs_df[target_col].to_numpy(), self.valid_in_lbs, context=f"valid-in:{target_col}"
+                rs_df[target_col].to_numpy(),
+                self.valid_in_lbs,
+                context=f"valid-in:{target_col}",
             )
             converted_array = self.convert_col(rs_df, target_col, extra_dict)
             self.do_validate_lbs(
@@ -146,7 +148,7 @@ class FireSmokeLabelConverter(BaseCSVConverter):
         return [
             GlobalConst.FIRESMOKE_LABEL,
             GlobalConst.NONE_LABEL,
-            GlobalConst.SKIP_LABEL, # "skip" label also allowed; since this is to do the normalization only (before further col conversion)
+            GlobalConst.SKIP_LABEL,  # "skip" label also allowed; since this is to do the normalization only (before further col conversion)
         ]
 
     def convert_col(

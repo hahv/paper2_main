@@ -48,7 +48,9 @@ class TlConfig:
             return {k: {"color": v} for k, v in tl_section["labels_colors"].items()}
         if "labels_colors" in tl_cfg:
             return {k: {"color": v} for k, v in tl_cfg["labels_colors"].items()}
-        raise KeyError(f"Config for '{tl_type}' has no 'labels' (or legacy 'labels_colors') key.")
+        raise KeyError(
+            f"Config for '{tl_type}' has no 'labels' (or legacy 'labels_colors') key."
+        )
 
     @classmethod
     def get_labels_color_map(cls, tl_type: str) -> Dict[str, str]:
@@ -340,7 +342,7 @@ class TlProcessor:
 
         def _get_row_total(counts_df, method_col, label, tl_type):
             # !debug start
-            #console.rule(f"_get_row_total {method_col=}, {label=},{tl_type=}")
+            # console.rule(f"_get_row_total {method_col=}, {label=},{tl_type=}")
             # !debug end
 
             if tl_type == GlobalConst.TL_TYPE_GT or "Correct" in label:
@@ -359,14 +361,13 @@ class TlProcessor:
                     .replace(0, 1)
                 )
                 # !debug start
-                #tl_type_pos_labels = converter.pos_labels
-                #tl_type_neg_labels = converter.neg_labels
-                #pprint(f"tl_type_pos_labels for {method_col}: {tl_type_pos_labels}")
-                #pprint(f"tl_type_neg_labels for {method_col}: {tl_type_neg_labels}")
-                #pprint(f"row_total for label '{label}' in method_col '{method_col}':")
-                #pprint(row_total)
+                # tl_type_pos_labels = converter.pos_labels
+                # tl_type_neg_labels = converter.neg_labels
+                # pprint(f"tl_type_pos_labels for {method_col}: {tl_type_pos_labels}")
+                # pprint(f"tl_type_neg_labels for {method_col}: {tl_type_neg_labels}")
+                # pprint(f"row_total for label '{label}' in method_col '{method_col}':")
+                # pprint(row_total)
                 # !debug end
-
 
             return row_total
 
@@ -410,16 +411,17 @@ class TlProcessor:
                     for old_label in cols_to_combine:
                         label_map[old_label] = new_col
                 if label_map:
-                    processed_df[method_col] = processed_df[method_col].replace(label_map)
+                    processed_df[method_col] = processed_df[method_col].replace(
+                        label_map
+                    )
 
             # !debug start
-            #console.rule(f"count_df for method_col: {method_col}")
-            #csvfile.fn_display_df(counts_df.head(5))
-            #counts_df.to_csv(
-             #f"./zout/test/counts_df_{method_col}.csv", sep=";", index=True
-             #)
+            # console.rule(f"count_df for method_col: {method_col}")
+            # csvfile.fn_display_df(counts_df.head(5))
+            # counts_df.to_csv(
+            # f"./zout/test/counts_df_{method_col}.csv", sep=";", index=True
+            # )
             # !debug end
-
 
             # 4. Calculate Smart Percentages and Format Output Strings
             percent_df = pd.DataFrame(index=counts_df.index, columns=counts_df.columns)
@@ -451,10 +453,10 @@ class TlProcessor:
                     )
 
             # !debug start
-            #console.rule(f"Percentages for {method_col} with tl_type={tl_type}")
-            #percent_df.to_csv(
-                #f"./zout/test/percent_df_{method_col}.csv", sep=";", index=True
-            #)
+            # console.rule(f"Percentages for {method_col} with tl_type={tl_type}")
+            # percent_df.to_csv(
+            # f"./zout/test/percent_df_{method_col}.csv", sep=";", index=True
+            # )
             # !debug end
 
             # 5. Add MultiIndex Header
