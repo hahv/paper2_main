@@ -1,71 +1,4 @@
-# The main document describing the project (goals, progress, etc.)
-
-## Task
-Design a lightweight skip module for real-time fire and smoke detection in static camera surveillance systems.
-
-### Problem Statement
-Current deep learning (DL) pipelines are computationally inefficient because they process every video frame through heavy models (~50ms per frame), even for static scenes with no fire or smoke activity. The goal is to implement a fast pre-check mechanism that filters out irrelevant frames before running expensive inference, ensuring that indicators for *both* fire and smoke are considered.
-
-**System Context:**
-- **Current Workflow:** Read frame → Preprocess → DL inference (detect fire/smoke) → Alarm if detected
-- **Proposed Workflow:** Read frame → Fast pre-check → Skip if negative *or* DL inference if positive → Alarm if detected
-
-### Data Specifications
-- **Input:** Video stream from static cameras (no camera movement or additional sensors).
-- **Expected Output:** The skip module must correctly bypass frames without fire/smoke and trigger DL inference for frames with potential indicators.
-
-### Requirements & Constraints
-- Methods must be computationally lightweight for real-time processing.
-- Crucially, the system must minimize false negatives (missing actual events) while maximizing skipped frames.
-- Must identify indicators for both fire and smoke.
-
-### Current Proposed Approaches
-
-**Approach 1: Naive Block-Based Motion Analysis**
-1. **Grid Formulation:** Divide the motion mask into an *N x N* grid and calculate the percentage of motion pixels per block.
-2. **Active Block Detection:** Mark a block as "active" if motion exceeds a defined threshold.
-3. **Skip Decision:** Skip the frame if there are no active blocks; otherwise, run DL inference.
-4. **Output:** "Skip" or "DL Inference Output."
-
-**Approach 2: Rule-Based Block-Based Motion Analysis**
-1. **Grid Formulation:** Same as Approach 1.
-2. **Active Block Detection:** Same as Approach 1.
-3. **Rule-Based Skip Decision:**
-    - Skip if no active blocks are found.
-    - If an active block is detected, apply heuristic rules to check for fire/smoke indicators. Examples include:
-        - **Color Rules:** Check for high red channel intensity (fire) or grayish colors (smoke).
-        - **Temporal Consistency:** Analyze texture and color changes over time (e.g., flickering for fire, growing/dissipating for smoke).
-        - **Additional Rules:** Other domain-specific heuristics.
-    - Run DL inference if rules suggest potential fire/smoke; otherwise, skip the frame.
-4. **Output:** "Skip" or "DL Inference Output."
-
-## Current Progress
-
-### Progress Summary
-*   **Dataset:** Created a high-quality custom dataset of 150 HD videos (balanced 50/50/50 split) from static cameras.
-*   **Implementation:** Developed two lightweight skip modules:
-    *   *Approach 1:* Naive Block-Based Motion Analysis.
-    *   *Approach 2:* Rule-Based Motion Analysis (color/texture heuristics).
-*   **Status:** Weeks 1-4 (Data partitioning, Metric definition, Tuning, Profiling) are complete.
-*   **The "Villain":** The "BIG MODEL"—a heavy, highly accurate, but slow (50ms/frame) deep learning model trained on millions of images.
-*   **The Goal:** Prove that your skip module makes the *system* faster without compromising the BIG MODEL's accuracy.
-
-***
-
-### Strategy: Choosing Baselines & Defining the Story
-You are worried about baselines because you are comparing a "pre-filter" against "models." This is a category error. **You are not competing with M1, M2, or M3 on accuracy.** You are competing on **Efficiency vs. Accuracy Trade-off.**
-
-**The Narrative Arc:**
-1.  **The Status Quo (Baseline 0):** Running "BIG MODEL" on *every single frame*. This is accurate but computationally wasteful (100% load).
-2.  **The Weak Competitor (M1/M2/M3):** Using a lightweight model *instead* of the BIG MODEL. These are fast but have poor accuracy (high False Negatives) because they were trained on small datasets (2k-5k images vs millions).
-3.  **The Solution (Your Method):** Running "Skip Module + BIG MODEL." This retains the high accuracy of the BIG MODEL but approaches the speed of the lightweight models.
-
-**How to handle M3 (Temporal/Voting):**
-Since M3 uses temporal voting to reduce false alarms *after* inference, it is actually complementary, not a direct competitor to a *pre-inference* skip module. However, you can frame M3 as a "Post-Processing Optimization" and your method as "Pre-Processing Optimization." *Recommendation: Keep M3 as a discussion point or secondary comparison, but focus on M1/M2 as the primary "Lightweight Alternatives."*
-
-***
-
-Here is the complete, formatted draft of the paper outline and Section 4, incorporating all of our discussions and the updated unified Recall metric.
+Below is the complete, formatted draft of the paper outline and Section 4, incorporating all of our discussions and the updated unified Recall metric.
 
 ------
 
@@ -112,9 +45,8 @@ Due to the lack of public high-resolution datasets specifically designed for sta
 
 The 150 videos were randomly split into Training/Validation (60%, n=90: 30 Fire, 30 Smoke, 30 Safe) for hyperparameter tuning and hyperparameter selection, and Test (40%, n=60: 20 per class) for unbiased final performance evaluation. Stratified sampling ensured balance across classes and environments.
 
-Perfect question—this is exactly the kind of reviewer concern we need to preempt. Your approach (Validation set for tuning, Test set for evaluation) is already methodologically sound, but you need to **explicitly document the process** in the paper with transparency, rigor, and a table showing the search space and final selected values. Reviewers love seeing the "how" behind hyperparameter selection, especially for heuristic methods.
-
 **Video Dataset Image Samples:**
+
 ```
 text...under varying lighting conditions.
 
@@ -132,19 +64,50 @@ To validate the effectiveness of the proposed skip module, we compare it against
 - **M2 (Lightweight Detector):** A YOLOv8-Nano object detector trained on a small dataset ($\sim$2k images). It offers localization but struggles with small or semi-transparent smoke features due to limited training data.
 - **M3 (Temporal Voting Method):** A video-level approach that aggregates inference results over a sliding window of 30 frames to reduce false alarms. While effective for reducing noise, it introduces inherent algorithmic latency.
 
+All inference latencies were measured on an NVIDIA Jetson Nano / RTX 3060 to simulate edge deployment
+
+**TODO**: add hardware and software context here
+
 ## 4.1.3. Hyperparameter Selection Strategy
 
 Both proposed skip modules contain tunable hyperparameters (e.g., grid size $N$, motion intensity threshold, color channel limits). To ensure rigorous, automated, and reproducible optimization, we employed **Grid Search** on the Validation set (60% of total dataset, ~90 videos).
 
 The primary **safety constraint** was **Recall(Anomaly) ≥ 99%**. To enable objective selection among feasible configurations, we introduce **SkipScore**, a unified composite metric analogous to mAP in object detection:
 
-SkipScore=Recall(Anomaly)×Filter_Rate×(1−FPR)\text{SkipScore} = \text{Recall(Anomaly)} \times \text{Filter\_Rate} \times (1 - \text{FPR})SkipScore=Recall(Anomaly)×Filter_Rate×(1−FPR)
+Let, for a given hyperparameter configuration \(h\):
 
-where:
+- \(R_{\text{sys}}(h)\): system-level anomaly recall (frame-level)
+  \[
+  R_{\text{sys}}(h) = \frac{\#\{\text{anomaly frames that produce at least one alarm}\}}{\#\{\text{anomaly frames}\}}
+  \]
+- \(\text{FR}(h)\): filter rate on safe frames (efficiency of gate)
+  \[
+  \text{FR}(h) = \frac{\#\{\text{safe frames skipped by gate}\}}{\#\{\text{safe frames}\}}
+  \]
+- \(\text{FAR}_{\text{sys}}(h)\): system false alarm rate on safe frames
+  \[
+  \text{FAR}_{\text{sys}}(h) = \frac{\#\{\text{safe frames that produce at least one alarm in full pipeline}\}}{\#\{\text{safe frames}\}}
+  \]
 
-- **Recall(Anomaly)**: Fraction of anomaly frames correctly passed to DL (0–1).
-- **Filter_Rate**: Fraction of safe frames successfully skipped (0–1).
-- **FPR** (False Positive Rate): Fraction of safe frames incorrectly passed to DL (= 1 - Filter_Rate).
+With a target recall \(R_{\text{target}}\) (e.g. \(0.99\)), your selection rule is:
+
+1. **Safety constraint**
+   \[
+   R_{\text{sys}}(h) \ge R_{\text{target}}
+   \]
+
+2. **Objective (SkipScore\(_B\)) among feasible configs**
+   \[
+   \text{SkipScore}_B(h) = \text{FR}(h)\cdot \left(1 - \text{FAR}_{\text{sys}}(h)\right)
+   \]
+
+3. **Final choice**
+   \[
+   h^\* = \arg\max_{h \in G,\; R_{\text{sys}}(h) \ge R_{\text{target}}} \text{SkipScore}_B(h)
+   \]
+
+Here, all three quantities are frame-based, satisfying the “same unit” caution, and recall is enforced as a hard constraint rather than traded off in the product. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/12933512/4c0b5553-c23e-43c4-8fdf-970746bb8760/paper_outline.md)
+
 
 **SkipScore** ∈; higher values indicate superior safety-efficiency trade-offs. The optimal configuration maximizes SkipScore among those satisfying the Recall constraint.[[sciencedirect](https://www.sciencedirect.com/science/article/abs/pii/S0020025525006139)]
 
@@ -233,9 +196,9 @@ We subsequently integrated the skip modules into the full inference pipeline to 
 
 | Pipeline Configuration         | Latency (ms/frame) | Effective FPS | System Acc/Recall | Comp. Cost Reduction |
 | :----------------------------- | :----------------- | :------------ | :---------------- | :------------------- |
+| **Baseline (BIG MODEL only)**  | 50.0               | 20            | **98.5%**         | 0% (Reference)       |
 | M1 (Lightweight Classifier)    | 15.0               | 66            | 76.0%             | 70%                  |
 | M2 (YOLO-Small)                | 22.0               | 45            | 81.5%             | 56%                  |
-| **Baseline (BIG MODEL only)**  | 50.0               | 20            | **98.5%**         | 0% (Reference)       |
 | **Ours (Appr. 1 + BIG MODEL)** | 18.3               | 54            | 98.3%             | 63%                  |
 | **Ours (Appr. 2 + BIG MODEL)** | **16.5**           | **60**        | **98.5%**         | **67%**              |
 
@@ -264,25 +227,26 @@ A critical distinction in anomaly detection is between frame-level and video-lev
 
 *Analysis:* Even when evaluated strictly on video-level metrics, our skip-module approach achieves higher recall and requires significantly less aggregate computational time per second of video, proving highly competitive in false alarm suppression.
 
-## 4.6. Discussion
+## 4.7. Ablation and Qualitative Analysis
 
-The empirical results demonstrate that the bottleneck in high-accuracy continuous surveillance is the redundancy of the input data, not the deep learning model itself. By successfully identifying and dropping non-informative frames at the edge, our proposed module enables the deployment of computationally heavy, expert-level models on resource-constrained hardware without sacrificing either system accuracy or real-time reaction speed.
+To isolate the impact of our specific heuristic rules, we conducted an ablation study comparing the naive motion baseline (Approach 1) against the full rule-based engine (Approach 2). While Approach 1 performed adequately for dynamic, rapidly flickering fires, its recall dropped significantly on smoke events. Because smoke diffuses slowly and lacks sharp edge transitions, naive background subtraction thresholds frequently misclassified it as static background lighting changes.
 
-## 4.7. Ablation Study
+The integration of the rule-based engine in Approach 2—specifically the grayish-color tracking and temporal texture consistency rules—corrected this deficiency, bridging the gap in Recall. This quantitative improvement is supported by qualitative reviews of edge cases (see Figure 4).
 
-We conducted an ablation study to isolate the impact of our specific heuristic rules. Approach 1 (Naive block motion) performed adequately for dynamic, rapidly flickering fires but frequently failed on smoke events. Because smoke diffuses slowly and lacks sharp edge transitions, naive background subtraction thresholds often misclassified it as static background lighting changes. The addition of the rule-based engine in Approach 2 (specifically the grayish-color tracking and temporal texture consistency rules) corrected this deficiency, successfully capturing slow-diffusion events and bridging the gap in Recall.
+*(Insert Figure 4 here: 2x2 grid showing a frame with smoke missed by Appr 1 but caught by Appr 2, and a safe frame with swaying trees flagged by Appr 1 but skipped by Appr 2).*
 
-## 4.8. Qualitative Analysis
+As illustrated in Figure 4, Approach 2 successfully captures slow-diffusion smoke events that lack the raw pixel displacement required to trigger Approach 1. Furthermore, in scenes featuring subtle twilight illumination shifts and swaying foliage, Approach 1 frequently generated false positives (unnecessarily passing safe frames to the BIG MODEL). Approach 2 successfully filtered these frames by applying color-channel heuristics, verifying that the moving pixels did not match the chromatic signatures of either fire or smoke.
 
-*(Insert Figure X here: Visual comparison of frame processing).*
- Qualitative reviews of edge cases highlight the superiority of the rule-based skip decision. For instance, in scenes featuring subtle twilight illumination shifts and swaying foliage, Approach 1 frequently generated false positives (passing safe frames to the BIG MODEL) due to raw pixel displacement. Approach 2 successfully skipped these frames by applying color-channel heuristics that verified the moving pixels did not match the chromatic signatures of either fire or smoke.
 
-<!-- ! Add image show how Approach 1 works, Aproach 2 works, Aproach 1 not work but 2 works -->
 
-<!-- ! Add images for failure cases -->
+## 5. Discussion
 
-------
+*(Focus on the "Why" and the "Limits")*
+ The empirical results demonstrate that the bottleneck in high-accuracy continuous surveillance is the redundancy of the input data, not the deep learning model itself. By successfully identifying and dropping non-informative frames at the edge, our proposed module enables the deployment of computationally heavy, expert-level models on resource-constrained hardware.
 
-## 5. Conclusion
+**Limitations and Generalization:** While Approach 2 proved highly robust, the reliance on color heuristics means the system is currently constrained to daytime or well-lit surveillance. In zero-light environments utilizing IR cameras, the red-channel heuristics for fire detection would fail, requiring a fallback to pure motion or thermal thresholds. Furthermore, extreme weather conditions such as heavy, moving fog can mimic the grayish diffusion of smoke, occasionally leading to false positives that reduce the overall Filter Rate.
 
-We proposed a lightweight, plug-and-play skip module designed to optimize real-time fire and smoke detection in static surveillance systems. By combining block-based motion analysis with targeted color and texture heuristics, our module safely filters out up to 72% of irrelevant background frames. Extensive evaluations demonstrate that our approach achieves a 3$\times$ system speedup and a 67% reduction in computational cost while fully preserving the near-perfect accuracy of heavy deep learning models. Ultimately, this methodology enables the robust deployment of state-of-the-art anomaly detection systems on affordable, resource-constrained edge devices.
+## 6. Conclusion
+
+*(Focus on the "What" and "Next")*
+ We proposed a lightweight, plug-and-play skip module designed to accelerate real-time fire and smoke detection in static surveillance systems. By combining block-based motion analysis with targeted color and texture heuristics, our module safely filters out up to 72% of irrelevant background frames without compromising safety. Extensive evaluations demonstrate that our approach achieves a 3$\times$ system speedup and a 67% reduction in computational cost, while fully preserving the near-perfect accuracy (98.5% F1-Score) of heavy deep learning models. Future work will focus on integrating adaptive, unsupervised thresholding to dynamically adjust heuristic rules based on real-time environmental lighting and weather shifts.
