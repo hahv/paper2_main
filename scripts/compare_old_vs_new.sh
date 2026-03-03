@@ -1,0 +1,1 @@
+ python zbin/report/run_report.py --indir "/mnt/e/SyncData/paper2_main/zout/test/test_prof_old_model_vs_new_model_vs_newest" --outdir "/mnt/e/SyncData/paper2_main/zout/test/test_prof_old_model_vs_new_model_vs_newest"

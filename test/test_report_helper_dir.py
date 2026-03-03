@@ -8,6 +8,7 @@ from src.results.timeline.tl_report import TlReportGen
 TEST_DIR = "./zout/test"
 SINGLE_EXP_DIR = f"{TEST_DIR}/test_single_exp/MainPC__ds_UFireIndoor2__mt_no_temp_method__af4b0d32a3d2__20260211.104731"
 MULTIPLE_EXPS_DIR = f"{TEST_DIR}/test_exp_vs_baseline"
+TEST_COMPARE_DIR = f"{TEST_DIR}/test_prof_old_model_vs_new_model_vs_newest"
 
 TABLE_DECIMALS = 2
 TABLE_MODE = "pfc"  # percent + frame count
@@ -45,7 +46,7 @@ def test_gen_compare_exps():
     Test generating a SINGLE comparison report combining multiple experiment directories.
     """
     print(f"\n[Test] Compare Multiple Experiments")
-    root_path = Path(f"{TEST_DIR}/test_prof_old_model_vs_new_model")
+    root_path = Path(TEST_COMPARE_DIR)
     exp_dirs = [str(p) for p in root_path.iterdir() if p.is_dir()]
     assert len(exp_dirs) >= 2, "Need at least two experiment directories to compare."
 
@@ -67,10 +68,10 @@ if __name__ == "__main__":
     # test_gen_single_dir()
 
     # 2. Batch Processing (Individual Reports)
-    test_gen_multiple_dirs()
+    # test_gen_multiple_dirs()
 
     # 3. CSV Reconstruction
     # test_gen_from_csv()
 
     # 4. Comparison Report (New)
-    # test_gen_compare_exps()
+    test_gen_compare_exps()

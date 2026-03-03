@@ -5,7 +5,7 @@ from tap import *
 class ReportArgs(Tap):
     indir: str = "./zout/zruns"  # output dir of runs
     metricDir: str = "config/metrics"  # metric config directory
-    reportDir: str = "./zout/reports"  # report output directory
+    outdir: str = "./zout/reports"  # report output directory
     now: bool = False  # whether to use current timestamp for report dir
 
 
@@ -20,7 +20,7 @@ def main():
     args = ReportArgs().parse_args()
     indir = args.indir
     metric_dir = args.metricDir
-    report_dir = args.reportDir
+    report_dir = args.outdir
 
     if args.now:
         report_dir = os.path.join(report_dir, now_str())
