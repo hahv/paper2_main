@@ -1,1 +1,0 @@
-CUDA_VISIBLE_DEVICES=1 python zbin/run_multi.py --base_yaml config/zruns/run_base.yaml --sweep_yaml config/zruns/run_ufirefull.yaml
