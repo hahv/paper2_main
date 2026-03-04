@@ -68,6 +68,59 @@ All inference latencies were measured on an NVIDIA Jetson Nano / RTX 3060 to sim
 
 **TODO**: add hardware and software context here
 
+<!-- !MainPC -->
+ha@DESKTOP-JQD9K01
+OS: Windows 10 Pro (22H2) x86_64
+Kernel: WIN32_NT 10.0.19045.5965
+Uptime: 15 days, 13 hours, 1 min
+Packages: 17 (scoop), 70 (choco)
+CPU: Intel(R) Core(TM) i9-10900K (20) @ 3.70 GHz
+GPU: NVIDIA GeForce RTX 3090 (23.76 GiB) [Discrete]
+Memory: 36.50 GiB / 63.88 GiB (57%)
+Disk (C:\): 396.30 GiB / 476.30 GiB (83%) - NTFS
+Disk (D:\): 4.75 TiB / 5.46 TiB (87%) - NTFS
+Disk (E:\): 776.22 GiB / 931.50 GiB (83%) - NTFS
+Disk (F:\): 66.01 MiB / 10.00 GiB (1%) - NTFS [External]
+Disk (G:\): 783.98 GiB / 931.50 GiB (84%) - FAT32
+Disk (H:\): 783.98 GiB / 931.50 GiB (84%) - FAT32
+Disk (J:\): 729.42 MiB / 3.00 GiB (24%) - NTFS [External]
+Local IP (vEthernet (Internet Switch)): 115.145.67.115/24
+
+<!-- !1GPU server -->
+comeduTa1@DESKTOP-QNS3DNF
+OS: Windows 10 Pro (21H2) x86_64
+Kernel: WIN32_NT 10.0.19044.3086
+Uptime: 23 days, 2 hours, 16 mins
+Packages: 45 (choco)
+CPU: 12th Gen Intel(R) Core(TM) i9-12900K (24) @ 3.19 GHz
+GPU 1: Microsoft Remote Display Adapter
+GPU 2: NVIDIA GeForce RTX 3090 (23.76 GiB) [Discrete]
+Memory: 17.99 GiB / 63.75 GiB (28%)
+Disk (C:\): 1.10 TiB / 1.82 TiB (61%) - NTFS
+Disk (D:\): 1.43 TiB / 1.82 TiB (79%) - NTFS
+Disk (E:\): 1.40 TiB / 7.28 TiB (19%) - NTFS
+Local IP (?대뜑??: 115.145.36.213/24
+
+<!-- !4GPU server -->
+comeduta5@DESKTOP-Q2IKLC0
+OS: Windows 10 Pro (22H2) x86_64
+Kernel: WIN32_NT 10.0.19045.6456
+Uptime: 92 days, 5 hours, 58 mins
+Packages: 35 (choco)
+CPU: 2 x Intel(R) Xeon(R) Silver 4210R (40) @ 4.00 GHz
+GPU 1: NVIDIA GeForce RTX 3090 (23.76 GiB) [Discrete]
+GPU 2: Microsoft Remote Display Adapter
+GPU 3: Microsoft Basic Display Adapter [Integrated]
+GPU 4: NVIDIA GeForce RTX 3090 (23.76 GiB) [Discrete]
+GPU 5: NVIDIA GeForce RTX 3090 (23.76 GiB) [Discrete]
+GPU 6: NVIDIA GeForce RTX 3090 (23.76 GiB) [Discrete]
+Memory: 24.69 GiB / 127.63 GiB (19%)
+Disk (C:\): 574.13 GiB / 975.92 GiB (59%) - NTFS
+Disk (D:\): 260.78 GiB / 446.62 GiB (58%) - NTFS
+Disk (E:\): 898.97 GiB / 1.23 TiB (71%) - NTFS
+Local IP (NIC1): 115.145.36.212/24
+
+
 ## 4.1.3. Hyperparameter Selection Strategy
 
 Both proposed skip modules contain tunable hyperparameters (e.g., grid size $N$, motion intensity threshold, color channel limits). To ensure rigorous, automated, and reproducible optimization, we employed **Grid Search** on the Validation set (60% of total dataset, ~90 videos).
