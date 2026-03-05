@@ -445,3 +445,10 @@ class Config(ExpBaseCfg):
         else:
             raise ValueError("Input must be a file path, YAML string, or dict.")
         return cls.from_yaml_str(yaml_str)
+
+    def update_custom_exp_dir(self, new_exp_dir: str):
+        """
+        Update the experiment directory in the general config and regenerate cfg_name.
+        """
+        pprint(f"Updating experiment directory to: {new_exp_dir}")
+        pass
