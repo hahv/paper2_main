@@ -1,0 +1,4 @@
+video;frame_id;pred_id;cls;cls_conf;x1;y1;x2;y2;elapsed_time
+MPIICooking2__lb_none__s24-d48-cam-002;137;0;Fire;0.28827136754989624;45;679;124;729;0.0040624141693115234
+MPIICooking2__lb_none__s24-d48-cam-002;138;0;Fire;0.347188264131546;56;682;133;729;0.017786502838134766
+MPIICooking2__lb_none__s24-d48-cam-002;142;0;Fire;0.26867297291755676;69;686;130;731;0.0

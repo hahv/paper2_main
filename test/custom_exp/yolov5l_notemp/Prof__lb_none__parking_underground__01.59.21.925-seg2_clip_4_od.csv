@@ -1,0 +1,11 @@
+video;frame_id;pred_id;cls;cls_conf;x1;y1;x2;y2;elapsed_time
+Prof__lb_none__parking_underground__01.59.21.925-seg2_clip_4;6424;0;Fire;0.3495170474052429;1;715;20;749;0.010575532913208008
+Prof__lb_none__parking_underground__01.59.21.925-seg2_clip_4;6426;0;Fire;0.2838035821914673;3;718;26;750;0.016767501831054688
+Prof__lb_none__parking_underground__01.59.21.925-seg2_clip_4;6427;0;Fire;0.3635667860507965;7;722;29;749;0.013644218444824219
+Prof__lb_none__parking_underground__01.59.21.925-seg2_clip_4;6428;0;Fire;0.4170173108577728;11;724;31;748;0.017325878143310547
+Prof__lb_none__parking_underground__01.59.21.925-seg2_clip_4;6429;0;Fire;0.3485022485256195;15;726;34;748;0.012576103210449219
+Prof__lb_none__parking_underground__01.59.21.925-seg2_clip_4;6430;0;Fire;0.36911091208457947;18;725;36;748;0.0
+Prof__lb_none__parking_underground__01.59.21.925-seg2_clip_4;6431;0;Fire;0.3869265913963318;21;725;39;748;0.0
+Prof__lb_none__parking_underground__01.59.21.925-seg2_clip_4;6432;0;Fire;0.25389307737350464;21;724;43;749;0.009598970413208008
+Prof__lb_none__parking_underground__01.59.21.925-seg2_clip_4;6433;0;Fire;0.263026624917984;27;726;46;749;0.007601499557495117
+Prof__lb_none__parking_underground__01.59.21.925-seg2_clip_4;6434;0;Fire;0.305284321308136;30;727;50;752;0.01307225227355957

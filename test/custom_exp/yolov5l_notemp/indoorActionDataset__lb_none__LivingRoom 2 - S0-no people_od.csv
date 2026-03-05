@@ -1,0 +1,6 @@
+video;frame_id;pred_id;cls;cls_conf;x1;y1;x2;y2;elapsed_time
+indoorActionDataset__lb_none__LivingRoom 2 - S0-no people;204;0;Smoke;0.2685234844684601;36;288;147;418;0.014564037322998047
+indoorActionDataset__lb_none__LivingRoom 2 - S0-no people;206;0;Smoke;0.5673165917396545;37;288;147;416;0.017690658569335938
+indoorActionDataset__lb_none__LivingRoom 2 - S0-no people;207;0;Smoke;0.47957944869995117;37;288;146;416;0.012522459030151367
+indoorActionDataset__lb_none__LivingRoom 2 - S0-no people;208;0;Smoke;0.2895857095718384;37;288;147;417;0.014550447463989258
+indoorActionDataset__lb_none__LivingRoom 2 - S0-no people;216;0;Smoke;0.513423502445221;38;289;146;417;0.014726877212524414
