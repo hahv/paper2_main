@@ -53,14 +53,17 @@ def _compute_binary_metrics(gt: np.ndarray, pred: np.ndarray) -> Dict[str, float
 
 
 def _compute_fps(all_dfs: Dict[str, pd.DataFrame]) -> float:
-    """Frame-level FPS, skipping the first _SKIP_N_FRAMES_FPS frames of each video."""
+    """Frame-level FPS, skipping the first _SKIP_N_FRAMES_FPS frames of each video
+    and ignoring any frames where elapsed_time == 0."""
     total_elapsed = 0.0
     total_frames = 0
     for df in all_dfs.values():
         elapsed = df[GlobalConst.COL_ELAPSED_TIME].values
         if len(elapsed) > _SKIP_N_FRAMES_FPS:
-            total_elapsed += float(elapsed[_SKIP_N_FRAMES_FPS:].sum())
-            total_frames += len(elapsed) - _SKIP_N_FRAMES_FPS
+            elapsed = elapsed[_SKIP_N_FRAMES_FPS:]
+            elapsed = elapsed[elapsed != 0.0]
+            total_elapsed += float(elapsed.sum())
+            total_frames += len(elapsed)
     return total_frames / total_elapsed if total_elapsed > 0 else 0.0
 
 
@@ -82,7 +85,6 @@ class ExternalExpRunner:
         runner = ExternalExpRunner(exp_dir, dataset_dir, loader)
         runner.run()
     """
-
     def __init__(
         self,
         exp_dir: Union[str, Path],
@@ -201,7 +203,7 @@ class ExternalExpRunner:
         df = pd.DataFrame([row])
         out_path = str(
             self.exp_dir
-            / f"{GlobalConst.PERF_FILE_PREFIX}{self.exp_name}__{mode}.csv"
+            / f"{GlobalConst.PERF_FILE_PREFIX}{self.exp_name}__{mode}{GlobalConst.PERF_FILE_POSTFIX}.csv"
         )
         df.to_csv(out_path, sep=";", index=False, encoding="utf-8")
         pprint_local_path(out_path, get_wins_path=True)

@@ -22,6 +22,7 @@ class GlobalConst:
 
     # perf/analysis-related file
     PERF_FILE_PREFIX = "_"  # to make it appear at the top in file explorers
+    PERF_FILE_POSTFIX = "__perf"  # to make it easily identifiable as perf file; also used in report generation to find relevant perf files
 
     # metrics
     METRIC_PER_FRAME = "per_frame"

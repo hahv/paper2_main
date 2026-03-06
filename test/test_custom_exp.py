@@ -1,5 +1,6 @@
 import os
 import sys
+
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(current_dir))  # Add parent directory to sys.path
 
@@ -28,32 +29,73 @@ VIDEO_NAME_LIMIT = 40
 # Existing Paper2Exp.from_custom_exp demo
 # ---------------------------------------------------------------------------
 
+
 class CustomArgs(Tap):
     parent_dir: str = r"./zout/zruns/_baseline/UFireIndoorFull"
     # indir: str = r"./zout/zruns/_baseline/UFireIndoorFull/firenet"
 
 
-def custom_exp_dir_to_cfg_file_fn(exp_dir_path: str) -> str:
-    # This is a custom function to determine the config file path based on the experiment directory path.
-    # For example, if the experiment directory contains "firenet", we can return a specific config file for firenet.
-    # if "firenet" in exp_dir_path:
-    #     return f"./config/zruns/run_firenet.yaml"
-    # Add more conditions here if there are different types of experiments with different config files.
+# def custom_exp_dir_to_cfg_file_fn(exp_dir_path: str) -> str:
+#     # This is a custom function to determine the config file path based on the experiment directory path.
+#     # For example, if the experiment directory contains "firenet", we can return a specific config file for firenet.
+#     # if "firenet" in exp_dir_path:
+#     #     return f"./config/zruns/run_firenet.yaml"
+#     # Add more conditions here if there are different types of experiments with different config files.
 
-    # Default config file if no specific condition is met
-    return f"config/zruns/run_base.yaml"
+#     # Default config file if no specific condition is met
+#     return f"config/zruns/run_base.yaml"
 
 
-def demo_paper2exp_from_custom():
+# def demo_paper2exp_from_custom():
+#     args = CustomArgs().parse_args()
+#     testdir = fs.list_dirs(args.parent_dir)[0]  # Assuming there's only one subdirectory
+#     exp = Paper2Exp.from_custom_exp(exp_dir_path=testdir, expDir_to_cfgFile_fn=custom_exp_dir_to_cfg_file_fn)
+#     pprint(exp.full_cfg)
+
+
+def gen_perf_report_custom_exps():
     args = CustomArgs().parse_args()
-    testdir = fs.list_dirs(args.parent_dir)[0]  # Assuming there's only one subdirectory
-    exp = Paper2Exp.from_custom_exp(exp_dir_path=testdir, expDir_to_cfgFile_fn=custom_exp_dir_to_cfg_file_fn)
-    pprint(exp.full_cfg)
+    custom_exp_dirs = fs.list_dirs(args.parent_dir)  # Assuming there's only one subdirectory
+    for exp_dir in tqdm(custom_exp_dirs):
+        exp_dir_name = fs.get_dir_name(exp_dir)
+        console.rule(f'Gen report for exp <<{exp_dir_name}>>')
+        runner = None
+        if "yolo" in exp_dir_name.lower():
+            print(f"Generating performance report for YOLO experiment: {exp_dir_name}")
+            runner = ExternalExpRunner.from_yolo_dir(
+                exp_dir=exp_dir,
+                dataset_dir=DATASET_DIR,
+                exp_name=exp_dir_name,
+                tl_type="no_skip",
+            )
+        elif "firenet" in exp_dir_name.lower() or "mobilenet" in exp_dir_name.lower():
+            print(
+                f"Generating performance report for classification experiment: {exp_dir_name}"
+            )
+            runner = ExternalExpRunner.from_cls_model_dir(
+                exp_dir=exp_dir,
+                dataset_dir=DATASET_DIR,
+                exp_name=exp_dir_name,
+                tl_type="no_skip",
+            )
+        else:
+            raise ValueError(
+                f"Unknown experiment type for directory: {exp_dir_name}. Skipping."
+            )
+        assert runner is not None, (
+            f"Runner was not created for experiment: {exp_dir_name}"
+        )
+        runner.run(
+            table_mode=TABLE_MODE,
+            table_decimals=TABLE_DECIMALS,
+            video_name_limit=VIDEO_NAME_LIMIT,
+        )
 
 
 # ---------------------------------------------------------------------------
 # ExternalExpRunner demos
 # ---------------------------------------------------------------------------
+
 
 def test_external_firenet():
     """
@@ -101,4 +143,7 @@ if __name__ == "__main__":
     # test_external_firenet()
 
     # --- External experiment: YOLO object-detection model ---
-    test_external_yolo()
+    # test_external_yolo()
+
+    # --- Generate performance reports for all custom experiments in the parent directory ---
+    gen_perf_report_custom_exps()
