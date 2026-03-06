@@ -70,7 +70,7 @@ general:
   project-dir: /mnt/e/SyncData/paper2_main/test/custom_exp
   seed: 1
   skip-exp-if-exists: false
-  time-stamp: '20260306.174640'
+  time-stamp: '20260306.192626'
 infer-cfg:
   calc-metrics: true
   csv-columns:

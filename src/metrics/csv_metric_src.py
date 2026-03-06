@@ -71,6 +71,7 @@ class CsvMetricSrc(BaseMetricSrc):
         list_of_converted_dfs = []
         for video_name, df in self.video_gt_pred_df_dict.items():
             df = df.copy()
+            # ! First convert GT/Pred labels to "firesmoke"/"none" using FireSmokeLabelConverter (kind of like a "preprocessor" step before the main conversion to torchmetrics format)
             df = BaseCSVConverter.do_convert_chain(
                 df,
                 [
@@ -81,6 +82,8 @@ class CsvMetricSrc(BaseMetricSrc):
             )
             if metric == "FPS":
                 mode = GlobalConst.METRIC_PER_FRAME  # FPS is always per-frame
+
+            # ! Then convert to unified format expected by torchmetrics using TorchMetricsConverter, which applies the appropriate groupby-max logic based on metric_mode in extra_dict, i.e. if metric_mode is "per-video", then all frames in a video get the same label based on max (i.e., if any frame is fire, the whole video is fire)
             converted_df = BaseCSVConverter.do_convert_chain(
                 df,
                 [
@@ -90,19 +93,14 @@ class CsvMetricSrc(BaseMetricSrc):
                 inplace=True,
                 extra_dict={"metric_mode": mode},
             )
-            # csvfile.fn_display_df(converted_df.head(10))
             if metric == "FPS":
-                # we need to skip first frame for FPS calculation
+                # ! we need to skip some first frames for FPS calculation, since the infer times for these first frames are usually an outlier (initialization overhead)
                 converted_df = converted_df.iloc[self.SKIP_FRAME_FOR_FPS :].reset_index(
                     drop=True
                 )
-            # assert False, "Debugging unify_df_by_mode"
             list_of_converted_dfs.append(converted_df)
         all_videos_df = pd.concat(list_of_converted_dfs, ignore_index=True)
         cache_key = self.metric_mode_to_cache_key(mode, metric)
-        all_videos_df.to_csv(
-            f"{self.cfg.get_outdir()}/{cache_key}.csv", index=False, sep=";"
-        )
         return all_videos_df, cache_key
 
     def get_metric_data_by_mode(self, metric, mode, **kwargs) -> Any:
@@ -120,40 +118,38 @@ class CsvMetricSrc(BaseMetricSrc):
             elapsed_times = unified_df[GlobalConst.COL_ELAPSED_TIME].to_numpy()
             return torch.from_numpy(elapsed_times).to(torch.float)
         else:
-            preds = unified_df[GlobalConst.COL_PRED].to_numpy()
-            gts = unified_df[GlobalConst.COL_GT].to_numpy()
+            metric_df = unified_df
+            if mode == GlobalConst.METRIC_PER_VIDEO:
+                # ! Deduplicate to one row per video so torchmetrics treats each video as a single sample. The "max" aggregation was already applied during conversion, so all frames within a video share identical gt/pred label values — duplicates can be safely dropped here.
+                metric_df = unified_df.drop_duplicates(subset=[GlobalConst.COL_VIDEO])
+            if self.did_save_unified_metric_df[mode] is False:
+                # Save unified CSV for reference
+                outfile = os.path.join(
+                    self.cfg.get_outdir(),
+                    f"{GlobalConst.PERF_FILE_PREFIX}[{mode}]__{self.UNIFED_CSV_FILE}",
+                )
+                report_df = metric_df.copy()
+                report_df["correct"] = (
+                    report_df[GlobalConst.COL_PRED] == report_df[GlobalConst.COL_GT]
+                )
+                if mode == GlobalConst.METRIC_PER_FRAME:
+                    report_df = report_df.sort_values(
+                        by=[
+                            GlobalConst.COL_VIDEO,
+                            "correct",
+                            GlobalConst.COL_FRAME_IDX,
+                        ],
+                        ascending=[True, False, True],
+                    )
+                else:
+                    report_df = report_df.sort_values(by=["correct"], ascending=[False])
+                report_df.to_csv(outfile, sep=";", index=False, encoding="utf-8")
+                pprint(f"Saved unified metric CSV for mode {mode} at ⏬:")
+                pprint_local_path(outfile, get_wins_path=True)
+                self.did_save_unified_metric_df[mode] = True
+            preds = metric_df[GlobalConst.COL_PRED].to_numpy()
+            gts = metric_df[GlobalConst.COL_GT].to_numpy()
             return (
                 torch.from_numpy(preds).to(torch.int),
                 torch.from_numpy(gts).to(torch.int),
             )
-        if self.did_save_unified_metric_df[mode] is False:
-            # Save unified CSV for reference
-            outfile = os.path.join(
-                self.cfg.get_outdir(),
-                f"{GlobalConst.PERF_FILE_PREFIX}[{mode}]__{UNIFIED_CSV_FILE}",
-            )
-            report_df = unified_df.copy()
-            report_df["correct"] = (
-                report_df[GlobalConst.COL_PRED] == report_df[GlobalConst.COL_GT]
-            )
-            # sort by video, frame_idx, correctness
-            if mode == GlobalConst.METRIC_PER_FRAME:
-                report_df = report_df.sort_values(
-                    by=[
-                        GlobalConst.COL_VIDEO,
-                        "correct",
-                        GlobalConst.COL_FRAME_IDX,
-                    ],
-                    ascending=[True, False, True],
-                )
-            else:
-                report_df = report_df.sort_values(
-                    by=[
-                        "correct",
-                    ],
-                    ascending=[False],
-                )
-            report_df.to_csv(outfile, sep=";", index=False, encoding="utf-8")
-            pprint(f"Saved unified metric CSV for mode {mode} at ⏬:")
-            pprint_local_path(outfile, get_wins_path=True)
-            self.did_save_unified_metric_df[mode] = True
