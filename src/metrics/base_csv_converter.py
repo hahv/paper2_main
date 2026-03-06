@@ -83,13 +83,15 @@ class BaseCSVConverter(ABC):
                 converter.valid_in_lbs,
                 context=f"{converter_type} valid-in:{target_col}",
             )
-            converted_array = converter.convert_col(rs_df, target_col, extra_dict)
+            # Call do_convert (not convert_col) so that subclass overrides like
+            # TorchMetricsConverter.do_convert (which applies per-video groupby-max)
+            # are respected when extra_dict contains 'metric_mode'.
+            rs_df = converter.do_convert(rs_df, [target_col], inplace=True, extra_dict=extra_dict)
             converter.do_validate_lbs(
-                converted_array,
+                rs_df[target_col].to_numpy(),
                 converter.valid_out_lbs,
                 context=f"{converter_type} valid-out:{target_col}",
             )
-            rs_df[target_col] = converted_array
             if context:
                 console.rule(
                     f"Converted column '{target_col}' using {converter.__class__.__name__}"
@@ -121,7 +123,7 @@ class BaseCSVConverter(ABC):
             pd.DataFrame: The DataFrame with converted columns.
         """
         rs_df = df if inplace else df.copy()
-        pprint(f"{ls_target_cols=}, {inplace=}, {extra_dict=}")
+        # pprint(f"{ls_target_cols=}, {inplace=}, {extra_dict=}")
         for target_col in ls_target_cols:
             self.do_validate_lbs(
                 rs_df[target_col].to_numpy(),
@@ -202,33 +204,12 @@ class TorchMetricsConverter(BaseCSVConverter):
     def convert_col(
         self, df: pd.DataFrame, target_col: str, extra_dict: Optional[dict] = None
     ) -> np.ndarray:
-        return df[target_col].apply(lambda x: self.LABEL_NUM_MAPPING[x]).to_numpy()
-
-    def do_convert(
-        self,
-        df: pd.DataFrame,
-        ls_target_cols: List[str],
-        inplace=False,
-        extra_dict: Optional[dict] = None,
-    ) -> pd.DataFrame:
-        metric_mode = extra_dict.get(  # ty:ignore[possibly-missing-attribute]
-            "metric_mode", GlobalConst.METRIC_PER_FRAME
-        )
-        assert metric_mode in [
-            GlobalConst.METRIC_PER_FRAME,
-            GlobalConst.METRIC_PER_VIDEO,
-        ], f"Unknown metric_mode: {metric_mode}"
-        if metric_mode == GlobalConst.METRIC_PER_FRAME:
-            # do normal conversion (per-frame), do not aggregate
-            return super().do_convert(df, ls_target_cols, inplace, extra_dict)
-        else:
-            # METRIC_PER_VIDEO = do per-video conversion (aggregate to single row)
-            df_converted = super().do_convert(
-                df, ls_target_cols, inplace=False, extra_dict=extra_dict
-            )
-            rs_df = df_converted.copy()
-            rs_df[ls_target_cols] = df_converted.groupby(GlobalConst.COL_VIDEO)[
-                ls_target_cols
-            ].transform("max")
-
-            return rs_df
+        metric_mode = (extra_dict or {}).get("metric_mode", GlobalConst.METRIC_PER_FRAME)
+        mapped = df[target_col].apply(lambda x: self.LABEL_NUM_MAPPING[x])
+        if metric_mode == GlobalConst.METRIC_PER_VIDEO:
+            # Per-video: propagate max (OR logic) — if any frame in a video is firesmoke (1),
+            # all frames of that video become 1.
+            df_tmp = df[[GlobalConst.COL_VIDEO]].copy()
+            df_tmp[target_col] = mapped
+            mapped = df_tmp.groupby(GlobalConst.COL_VIDEO)[target_col].transform("max")
+        return mapped.to_numpy()

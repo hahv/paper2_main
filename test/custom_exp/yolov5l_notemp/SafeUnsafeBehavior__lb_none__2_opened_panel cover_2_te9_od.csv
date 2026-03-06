@@ -1,0 +1,5 @@
+video;frame_id;pred_id;cls;cls_conf;x1;y1;x2;y2;elapsed_time
+SafeUnsafeBehavior__lb_none__2_opened_panel cover_2_te9;105;0;Smoke;0.26081350445747375;1448;10;1920;258;0.0
+SafeUnsafeBehavior__lb_none__2_opened_panel cover_2_te9;106;0;Smoke;0.2831774652004242;1448;10;1920;257;0.0
+SafeUnsafeBehavior__lb_none__2_opened_panel cover_2_te9;107;0;Smoke;0.28759077191352844;1447;10;1920;257;0.006035566329956055
+SafeUnsafeBehavior__lb_none__2_opened_panel cover_2_te9;108;0;Smoke;0.2774112820625305;1449;10;1920;256;0.00800776481628418

@@ -1,3 +1,4 @@
+from sqlalchemy.sql.operators import from_
 from halib import *
 import yaml
 
@@ -225,6 +226,7 @@ class Config(ExpBaseCfg):
     inferCfg: InferConfig
     modelCfg: ModelConfig
     original_yaml_str: Optional[str] = None
+    custom_exp_dir: Optional[str] = None
 
     def save_to_outdir(
         self, filename: str = "__config.yaml", outdir=None, override: bool = False
@@ -250,12 +252,16 @@ class Config(ExpBaseCfg):
         return self.method_selector.method_used  # ty:ignore[invalid-return-type]
 
     def get_cfg_name(self, sep=CFG_SEP, *args, **kwargs):
-        time_stamp_info = self.general.time_stamp
-        mt_cfg_hash = DictUtils.get_unique_hash(
-            self.method_selector.method_used.extra_cfgs  # ty:ignore[possibly-missing-attribute]
-        )
-        extra_info = f"{mt_cfg_hash}{sep}{time_stamp_info}"
-        return super().get_cfg_name(sep, extra=extra_info, *args, **kwargs)
+        if not self.custom_exp_dir:
+            time_stamp_info = self.general.time_stamp
+            mt_cfg_hash = DictUtils.get_unique_hash(
+                self.method_selector.method_used.extra_cfgs  # ty:ignore[possibly-missing-attribute]
+            )
+            extra_info = f"{mt_cfg_hash}{sep}{time_stamp_info}"
+            return super().get_cfg_name(sep, extra=extra_info, *args, **kwargs)
+        else:
+            # For custom experiments, we ignore the usual cfg_name generation and just use the directory name as cfg_name
+            return os.path.basename(self.custom_exp_dir)
 
     def get_outdir(self):
         exp_outdir = self.expDir
@@ -277,10 +283,14 @@ class Config(ExpBaseCfg):
 
     @property
     def expDir(self) -> str:
-        assert self.cfg_name is not None, "cfg_name is not set"
-        return os.path.join(
-            self.general.project_dir, self.general.outdir, self.cfg_name
-        )
+        if not self.custom_exp_dir:
+            # Default behavior: construct expDir from project_dir, outdir, and cfg_name
+            assert self.cfg_name is not None, "cfg_name is not set"
+            return os.path.join(
+                self.general.project_dir, self.general.outdir, self.cfg_name
+            )
+        else:
+            return self.custom_exp_dir
 
     @property
     def expSameCfgExists(self) -> tuple[bool, str]:
@@ -445,3 +455,24 @@ class Config(ExpBaseCfg):
         else:
             raise ValueError("Input must be a file path, YAML string, or dict.")
         return cls.from_yaml_str(yaml_str)
+
+    def update_custom_exp(self, new_exp_dir: str):
+        """
+        Redirect get_outdir() to the given external experiment directory.
+
+        expDir computes: os.path.join(general.project_dir, general.outdir, cfg_name)
+        We set project_dir = parent of new_exp_dir, outdir = "", cfg_name = dir name
+        so that expDir resolves directly to new_exp_dir.
+        """
+        assert os.path.exists(new_exp_dir) and os.path.isdir(new_exp_dir), (
+            f"Not found - custom exp dir: {new_exp_dir}"
+        )
+
+        self.custom_exp_dir = new_exp_dir
+        console.print(
+            "[bold red] This config is updated for custom experiment. [/bold red]"
+        )
+        exp_path = Path(os.path.abspath(new_exp_dir)).resolve()
+        self.general.project_dir = str(exp_path.parent)
+        self.general.outdir = ""
+        self.cfg_name = exp_path.name

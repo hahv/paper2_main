@@ -1,3 +1,4 @@
+from dill.tests.test_registered import p
 from halib import *
 from halib.common.common import seed_everything
 from halib.exp.core.base_exp import BaseExp
@@ -9,6 +10,7 @@ from src.methods.base_method import *
 from halib.utils.dict import DictUtils
 from collections import OrderedDict
 from src.common import GlobalConst
+from typing import Callable
 
 
 class Paper2Exp(BaseExp):
@@ -25,6 +27,27 @@ class Paper2Exp(BaseExp):
         self.wandb_logger = None
         if "wandb_logger" in kwargs:
             self.wandb_logger = kwargs["wandb_logger"]
+
+    @staticmethod
+    # This func to get the config file path based on the exp dir path, e.g: exp can be a classification or detection exp, and the config file can be different
+    def default_expDir_to_cfgFile_fn(exp_dir_path: str) -> str:
+        return f"./config/zruns/run_base.yaml"
+
+    # ! add a function to allow dynmmically load with baseline method (not Paper2Exp class) by creating a custom Config
+    @classmethod
+    def from_custom_exp(
+        cls, exp_dir_path: str, expDir_to_cfgFile_fn: Callable[[str], str] = default_expDir_to_cfgFile_fn
+    ):  # noqa: F811
+        # Load the configuration from the provided file path
+        placeholder_cfg_file = expDir_to_cfgFile_fn(exp_dir_path)
+        console.print(f'[bold green]Loading config from file: {placeholder_cfg_file}[/bold green]')
+        config = Config.from_custom_yaml_file(placeholder_cfg_file)
+
+        # Update the experiment directory in the config
+        config.update_custom_exp(exp_dir_path)
+
+        # Create and return a new instance of Paper2Exp with the updated config
+        return cls(config, from_custom_exp=True)
 
     def init_general(self, general_cfg: GeneralCfg):
         console.rule("General initialization")
@@ -101,7 +124,8 @@ class Paper2Exp(BaseExp):
                 extra_data = None
                 if self.full_cfg.methodCfg.extra_cfgs is not None:
                     extra_data_orig = self.full_cfg.methodCfg.extra_cfgs.copy()
-                    del extra_data_orig["result_proc"]
+                    if "result_proc" in extra_data_orig:
+                        del extra_data_orig["result_proc"]
                     extra_data = DictUtils.flatten(extra_data_orig)
                     # with ConsoleLog("Extra data"):
                     #     pprint(extra_data)

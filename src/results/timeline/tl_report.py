@@ -220,8 +220,18 @@ class TlReportGen:
         for d_path in dirs_to_process:
             short_name = exp_name_shorten_func(d_path.name)
 
-            # Determine Timeline Type
-            if GlobalConst.NOTEMP_MT_PATTERN in d_path.name:
+            # Determine Timeline Type:
+            # 1. Explicit tl_type stored in methodCfg.extra_cfgs (e.g. external experiments)
+            # 2. Fallback: infer from directory name convention
+            explicit_tl_type = None
+            try:
+                explicit_tl_type = (exp_cfg.methodCfg.extra_cfgs or {}).get("tl_type")
+            except Exception:
+                pass
+
+            if explicit_tl_type:
+                t_type = explicit_tl_type
+            elif GlobalConst.NOTEMP_MT_PATTERN in d_path.name:
                 t_type = GlobalConst.TL_TYPE_NO_SKIP
             else:
                 t_type = GlobalConst.TL_TYPE_SKIP
@@ -554,6 +564,119 @@ class TlReportGen:
             video_name_limit=video_name_limit,
         )
         return os.path.abspath(output_path)
+
+    @staticmethod
+    def gen_TlReport_external_exp(
+        exp_dir: Union[Path, str],
+        dataset_dir: Union[Path, str],
+        exp_col_name: str,
+        tl_type: str = GlobalConst.TL_TYPE_NO_SKIP,
+        pred_csv_pattern: str = GlobalConst.INFER_FILE_PATTERN,
+        output_html: Optional[str] = None,
+        title: Optional[str] = None,
+        table_mode: Literal["p", "fc", "pfc"] = "p",
+        table_decimals: int = 2,
+        video_name_limit: int = 0,
+    ) -> str:
+        """
+        Generates a timeline report for a custom (external) experiment directory
+        that does NOT have a __config.yaml file.
+
+        Unlike gen_TlReport_exp, this method accepts dataset_dir explicitly and
+        uses exp_col_name / tl_type directly instead of deriving them from config.
+
+        Args:
+            exp_dir:          Directory containing the normalized *_results.csv files.
+            dataset_dir:      Dataset directory with video files and GT CSVs.
+            exp_col_name:     Column label for this experiment in the report table
+                              (e.g. "firenet", "yolov5l_notemp").
+            tl_type:          Timeline comparison type: "no_skip" or "skip".
+            pred_csv_pattern: Suffix pattern for prediction CSVs (default "_results").
+            output_html:      Output HTML path (default: <exp_dir>/_timeline_report.html).
+            title:            Report title (default: "Timeline Report - <exp_col_name>").
+        """
+        exp_dir = Path(exp_dir)
+        dataset_dir = Path(dataset_dir)
+
+        # --- Build merged GT + pred DataFrame for all videos ---
+        gt_info = {
+            "csv_pattern": GlobalConst.GT_FILE_PATTERN,
+            "is_gt": True,
+            "csv_dir": None,
+        }
+        pred_info = {
+            "csv_pattern": pred_csv_pattern,
+            "is_gt": False,
+            "csv_dir": str(exp_dir),
+        }
+
+        video_files = fs.filter_files_by_extension(
+            str(dataset_dir), [".mp4", ".avi", ".mov", ".mkv"], recursive=True
+        )
+
+        ls_dfs = []
+        for vid_path in video_files:
+            gt_df = BaseRawCsvLoader.load_csv_by_pattern(
+                video_path=vid_path,
+                csv_pattern=gt_info["csv_pattern"],
+                is_gt=gt_info["is_gt"],
+                csv_dir=gt_info["csv_dir"],
+            )
+            pred_df = BaseRawCsvLoader.load_csv_by_pattern(
+                video_path=vid_path,
+                csv_pattern=pred_info["csv_pattern"],
+                is_gt=pred_info["is_gt"],
+                csv_dir=pred_info["csv_dir"],
+            )
+
+            if pred_df.empty:
+                gt_df[exp_col_name] = np.nan
+            else:
+                pred_df[exp_col_name] = pred_df[GlobalConst.COL_PRED]
+                pred_df = pred_df[BaseRawCsvLoader.RAW_FIXED_COLS + [exp_col_name]]
+                gt_df = BaseRawCsvLoader._merge_gt_pred_dfs(
+                    gt_df, pred_df, vid_path, do_verify=False
+                )
+
+            gt_df[GlobalConst.COL_NUM_FRAMES] = len(gt_df)
+            ls_dfs.append(gt_df)
+
+        if not ls_dfs:
+            raise ValueError(
+                f"No videos found in '{dataset_dir}' with matching pred CSVs in '{exp_dir}'."
+            )
+
+        all_video_df = pd.concat(ls_dfs, ignore_index=True)
+
+        # Reorder: fixed columns first, then the experiment column
+        fixed = TlReportGen.TL_FIXED_COLUMNS
+        all_video_df = all_video_df[
+            fixed + [c for c in all_video_df.columns if c not in fixed]
+        ]
+
+        # --- Build cols_to_types and generate report ---
+        cols_to_types = {
+            GlobalConst.COL_GT: GlobalConst.TL_TYPE_GT,
+            exp_col_name: tl_type,
+        }
+
+        if output_html is None:
+            output_html = str(
+                exp_dir / f"{GlobalConst.PERF_FILE_PREFIX}timeline_report.html"
+            )
+        if title is None:
+            title = f"Timeline Report - {exp_col_name}"
+
+        report_generator = TlReportGen(cols_to_types)
+        report_generator._generate(
+            all_video_df,
+            output_html,
+            title=title,
+            table_mode=table_mode,
+            table_decimals=table_decimals,
+            video_name_limit=video_name_limit,
+        )
+        return os.path.abspath(output_html)
 
     def _generate(
         self,

@@ -20,6 +20,10 @@ class FPS(Metric):
         if elapsed_times.numel() == 0:
             return  # Skip empty input
 
+        elapsed_times = elapsed_times[elapsed_times > 0]  # Ignore zero-duration frames
+        if elapsed_times.numel() == 0:
+            return
+
         self.total_time += elapsed_times.sum()
         self.num_frames += elapsed_times.numel()
 
@@ -89,8 +93,8 @@ class MetricFactory:
 def testFPS():
     fps = FPS()
     fps.update(
-        [0.033, 0.040, 0.042, 0.037]
-    )  # Simulate frame timings  # ty:ignore[invalid-argument-type]
+        [0.033, 0.040, 0.042, 0.037]  # ty:ignore[invalid-argument-type]
+    )
     print(f"Computed FPS: {fps.compute():.2f}")  # ty:ignore[missing-argument]
 
 

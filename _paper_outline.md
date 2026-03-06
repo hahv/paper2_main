@@ -1,7 +1,3 @@
-Below is the complete, formatted draft of the paper outline and Section 4, incorporating all of our discussions and the updated unified Recall metric.
-
-------
-
 # *Efficient Real-Time Fire Surveillance: A Lightweight Motion-Heuristic Skip Module for Accelerated Inference*
 
 ## 1. Introduction
