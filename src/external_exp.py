@@ -285,7 +285,12 @@ class ExternalExpRunner:
         from src.metrics.loaders.cls_csv_loader import ClsModelExternalLoader
 
         loader = ClsModelExternalLoader(str(exp_dir))
-        return cls(exp_dir, dataset_dir, loader, exp_name=exp_name, **kwargs)
+        return cls(
+            exp_dir, dataset_dir, loader,
+            exp_name=exp_name,
+            tl_type=GlobalConst.TL_TYPE_NO_SKIP,
+            **kwargs,
+        )
 
     @classmethod
     def from_yolo_dir(
@@ -299,4 +304,29 @@ class ExternalExpRunner:
         from src.metrics.loaders.yolo_csv_loader import YoloExternalLoader
 
         loader = YoloExternalLoader(str(exp_dir))
-        return cls(exp_dir, dataset_dir, loader, exp_name=exp_name, **kwargs)
+        return cls(
+            exp_dir, dataset_dir, loader,
+            exp_name=exp_name,
+            tl_type=GlobalConst.TL_TYPE_NO_SKIP,
+            **kwargs,
+        )
+
+    @classmethod
+    def from_dir(
+        cls,
+        exp_dir: Union[str, Path],
+        dataset_dir: Union[str, Path],
+        exp_name: Optional[str] = None,
+        **kwargs,
+    ) -> "ExternalExpRunner":
+        """
+        Auto-detect loader type from the experiment directory name:
+          - name contains "yolo"               → YoloExternalLoader  (_od.csv)
+          - otherwise (firenet, mobilenet, …)  → ClsModelExternalLoader (_pred.csv)
+        tl_type is always no_skip for all external experiments.
+        """
+        dir_name = Path(exp_dir).name.lower()
+        if "yolo" in dir_name:
+            return cls.from_yolo_dir(exp_dir, dataset_dir, exp_name=exp_name, **kwargs)
+        else:
+            return cls.from_cls_model_dir(exp_dir, dataset_dir, exp_name=exp_name, **kwargs)

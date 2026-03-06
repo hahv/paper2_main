@@ -1,0 +1,2 @@
+experiment;dataset;tl_type;metric_accuracy;metric_f1_score;metric_precision;metric_recall (TPR);metric_FPR (False Alarm Rate);metric_FPS
+firenet_per_video;UFireIndoorFull;no_skip;0.685113787651062;0.4487521052360534;0.4289688467979431;0.4704482853412628;0.2345030754804611;47.30718994140625

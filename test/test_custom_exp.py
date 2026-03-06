@@ -8,15 +8,10 @@ from halib import *
 from tap import *
 from src.config import *
 from src.exp import Paper2Exp
-from src.external_exp import ExternalExpRunner
-
 # ---------------------------------------------------------------------------
 # Paths — adjust to your local setup
 # ---------------------------------------------------------------------------
-# Dataset directory that contains the video files and __labels.csv GT files
-DATASET_DIR = "./datasets/UFireIndoorFull"
 
-# Pre-existing external experiment directories (no Paper2Exp config required)
 FIRENET_EXP_DIR = "./test/custom_exp/firenet"
 YOLO_EXP_DIR = "./test/custom_exp/yolov5l_notemp"
 
@@ -24,126 +19,56 @@ TABLE_MODE = "pfc"
 TABLE_DECIMALS = 2
 VIDEO_NAME_LIMIT = 40
 
-
-# ---------------------------------------------------------------------------
-# Existing Paper2Exp.from_custom_exp demo
-# ---------------------------------------------------------------------------
-
+DATASET_DIR = "./datasets/UFireIndoorFull"
+EXTERNAL_CFG = "config/zruns/run_external.yaml"
 
 class CustomArgs(Tap):
     parent_dir: str = r"./zout/zruns/_baseline/UFireIndoorFull"
-    # indir: str = r"./zout/zruns/_baseline/UFireIndoorFull/firenet"
+
+# ---------------------------------------------------------------------------
+# Approach 2 (new): Paper2Exp.from_custom_exp with placeholder config
+# Loader type is auto-detected from the experiment directory name.
+# tl_type is always no_skip (set in config/methods/external_method.yaml).
+# ---------------------------------------------------------------------------
+
+def _external_cfg_fn(exp_dir_path: str) -> str:
+    return EXTERNAL_CFG
 
 
-# def custom_exp_dir_to_cfg_file_fn(exp_dir_path: str) -> str:
-#     # This is a custom function to determine the config file path based on the experiment directory path.
-#     # For example, if the experiment directory contains "firenet", we can return a specific config file for firenet.
-#     # if "firenet" in exp_dir_path:
-#     #     return f"./config/zruns/run_firenet.yaml"
-#     # Add more conditions here if there are different types of experiments with different config files.
-
-#     # Default config file if no specific condition is met
-#     return f"config/zruns/run_base.yaml"
+def test_paper2exp_firenet():
+    """Run the full Paper2Exp pipeline for a firenet external experiment."""
+    exp = Paper2Exp.from_custom_exp(
+        exp_dir_path=FIRENET_EXP_DIR,
+        expDir_to_cfgFile_fn=_external_cfg_fn,
+    )
+    exp.run_exp()
 
 
-# def demo_paper2exp_from_custom():
-#     args = CustomArgs().parse_args()
-#     testdir = fs.list_dirs(args.parent_dir)[0]  # Assuming there's only one subdirectory
-#     exp = Paper2Exp.from_custom_exp(exp_dir_path=testdir, expDir_to_cfgFile_fn=custom_exp_dir_to_cfg_file_fn)
-#     pprint(exp.full_cfg)
+def test_paper2exp_yolo():
+    """Run the full Paper2Exp pipeline for a YOLO OD external experiment."""
+    exp = Paper2Exp.from_custom_exp(
+        exp_dir_path=YOLO_EXP_DIR,
+        expDir_to_cfgFile_fn=_external_cfg_fn,
+    )
+    exp.run_exp()
 
 
 def gen_perf_report_custom_exps():
+    """Batch: run Paper2Exp.from_custom_exp for every directory under parent_dir."""
     args = CustomArgs().parse_args()
-    custom_exp_dirs = fs.list_dirs(args.parent_dir)  # Assuming there's only one subdirectory
+    custom_exp_dirs = fs.list_dirs(args.parent_dir)
     for exp_dir in tqdm(custom_exp_dirs):
         exp_dir_name = fs.get_dir_name(exp_dir)
         console.rule(f'Gen report for exp <<{exp_dir_name}>>')
-        runner = None
-        if "yolo" in exp_dir_name.lower():
-            print(f"Generating performance report for YOLO experiment: {exp_dir_name}")
-            runner = ExternalExpRunner.from_yolo_dir(
-                exp_dir=exp_dir,
-                dataset_dir=DATASET_DIR,
-                exp_name=exp_dir_name,
-                tl_type="no_skip",
-            )
-        elif "firenet" in exp_dir_name.lower() or "mobilenet" in exp_dir_name.lower():
-            print(
-                f"Generating performance report for classification experiment: {exp_dir_name}"
-            )
-            runner = ExternalExpRunner.from_cls_model_dir(
-                exp_dir=exp_dir,
-                dataset_dir=DATASET_DIR,
-                exp_name=exp_dir_name,
-                tl_type="no_skip",
-            )
-        else:
-            raise ValueError(
-                f"Unknown experiment type for directory: {exp_dir_name}. Skipping."
-            )
-        assert runner is not None, (
-            f"Runner was not created for experiment: {exp_dir_name}"
+        exp = Paper2Exp.from_custom_exp(
+            exp_dir_path=exp_dir,
+            expDir_to_cfgFile_fn=_external_cfg_fn,
         )
-        runner.run(
-            table_mode=TABLE_MODE,
-            table_decimals=TABLE_DECIMALS,
-            video_name_limit=VIDEO_NAME_LIMIT,
-        )
-
-
-# ---------------------------------------------------------------------------
-# ExternalExpRunner demos
-# ---------------------------------------------------------------------------
-
-
-def test_external_firenet():
-    """
-    Run the full pipeline (normalize CSVs, compute __perf*.csv, generate timeline)
-    for a pre-existing firenet experiment directory.
-    """
-    runner = ExternalExpRunner.from_cls_model_dir(
-        exp_dir=FIRENET_EXP_DIR,
-        dataset_dir=DATASET_DIR,
-        exp_name="firenet",
-        tl_type="no_skip",
-    )
-    runner.run(
-        table_mode=TABLE_MODE,
-        table_decimals=TABLE_DECIMALS,
-        video_name_limit=VIDEO_NAME_LIMIT,
-    )
-
-
-def test_external_yolo():
-    """
-    Run the full pipeline for a pre-existing YOLO OD experiment directory.
-    Handles sparse _od.csv files (only detected frames have rows; empty = no detections).
-    """
-    runner = ExternalExpRunner.from_yolo_dir(
-        exp_dir=YOLO_EXP_DIR,
-        dataset_dir=DATASET_DIR,
-        exp_name="yolov5l_notemp",
-        tl_type="no_skip",
-    )
-    runner.run(
-        table_mode=TABLE_MODE,
-        table_decimals=TABLE_DECIMALS,
-        video_name_limit=VIDEO_NAME_LIMIT,
-    )
+        exp.run_exp()
 
 
 if __name__ == "__main__":
-    # Uncomment the test you want to run:
-
-    # --- Original Paper2Exp from custom dir ---
-    # demo_paper2exp_from_custom()
-
-    # --- External experiment: firenet classification model ---
-    # test_external_firenet()
-
-    # --- External experiment: YOLO object-detection model ---
-    # test_external_yolo()
-
     # --- Generate performance reports for all custom experiments in the parent directory ---
-    gen_perf_report_custom_exps()
+    test_paper2exp_firenet()
+    # test_paper2exp_yolo()
+    # gen_perf_report_custom_exps()

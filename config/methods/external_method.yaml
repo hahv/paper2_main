@@ -1,0 +1,2 @@
+extra_cfgs:
+  tl_type: no_skip   # used by TlReportGen to determine timeline comparison type

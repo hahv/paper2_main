@@ -1,2 +1,0 @@
-experiment;dataset;metric_accuracy;metric_f1_score;metric_precision;metric_recall (TPR);metric_FPR (False Alarm Rate);metric_FPS
-firenet;UFireIndoorFull;0.6333333333333333;0.56;0.7;0.4666666666666667;0.2;47.3071926939782

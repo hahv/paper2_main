@@ -83,13 +83,15 @@ class BaseCSVConverter(ABC):
                 converter.valid_in_lbs,
                 context=f"{converter_type} valid-in:{target_col}",
             )
-            converted_array = converter.convert_col(rs_df, target_col, extra_dict)
+            # Call do_convert (not convert_col) so that subclass overrides like
+            # TorchMetricsConverter.do_convert (which applies per-video groupby-max)
+            # are respected when extra_dict contains 'metric_mode'.
+            rs_df = converter.do_convert(rs_df, [target_col], inplace=True, extra_dict=extra_dict)
             converter.do_validate_lbs(
-                converted_array,
+                rs_df[target_col].to_numpy(),
                 converter.valid_out_lbs,
                 context=f"{converter_type} valid-out:{target_col}",
             )
-            rs_df[target_col] = converted_array
             if context:
                 console.rule(
                     f"Converted column '{target_col}' using {converter.__class__.__name__}"

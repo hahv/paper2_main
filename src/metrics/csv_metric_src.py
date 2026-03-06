@@ -90,7 +90,7 @@ class CsvMetricSrc(BaseMetricSrc):
                 inplace=True,
                 extra_dict={"metric_mode": mode},
             )
-            csvfile.fn_display_df(converted_df.head(10))
+            # csvfile.fn_display_df(converted_df.head(10))
             if metric == "FPS":
                 # we need to skip first frame for FPS calculation
                 converted_df = converted_df.iloc[self.SKIP_FRAME_FOR_FPS :].reset_index(

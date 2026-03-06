@@ -1,0 +1,40 @@
+general:
+  seed: 1
+  skip_exp_if_exists: false
+  is_optim_mode: false
+  project_dir: /mnt/e/SyncData/paper2_main
+  outdir: zout/zruns
+  computer_name: null
+  time_stamp: null
+  log_cfg:
+    wandb_cfg: null
+dbset_selector:
+  list_dbsets: []
+  selected_dbset: UFireIndoorFull
+metric_selector:
+  list_metrics: []
+  selected_metric: per_frame_metric
+method_selector:
+  list_methods: []
+  selected_method: external_method
+modelCfg:
+  base_model: dummy
+  model_path: dummy
+  input_size: [360, 640]
+  class_names: [Fire, None, SmokeOnly]
+inferCfg:
+  do_infer: true
+  num_infer_workers: 1
+  skip_if_exists: false
+  limit: -1
+  save_video_results: false
+  save_csv_results: false     # ExternalMethod writes _results.csv directly, not via CsvRsProc
+  csv_infer_pattern: "_results"
+  csv_columns:
+    - pred_label
+  calc_metrics: true
+  log_transforms: false
+  use_profiler: false
+  save_timeline_vis: true
+  timeline_table_mode: p
+  verbose: false

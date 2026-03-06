@@ -220,8 +220,18 @@ class TlReportGen:
         for d_path in dirs_to_process:
             short_name = exp_name_shorten_func(d_path.name)
 
-            # Determine Timeline Type
-            if GlobalConst.NOTEMP_MT_PATTERN in d_path.name:
+            # Determine Timeline Type:
+            # 1. Explicit tl_type stored in methodCfg.extra_cfgs (e.g. external experiments)
+            # 2. Fallback: infer from directory name convention
+            explicit_tl_type = None
+            try:
+                explicit_tl_type = (exp_cfg.methodCfg.extra_cfgs or {}).get("tl_type")
+            except Exception:
+                pass
+
+            if explicit_tl_type:
+                t_type = explicit_tl_type
+            elif GlobalConst.NOTEMP_MT_PATTERN in d_path.name:
                 t_type = GlobalConst.TL_TYPE_NO_SKIP
             else:
                 t_type = GlobalConst.TL_TYPE_SKIP

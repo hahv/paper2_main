@@ -44,7 +44,7 @@ class Paper2Exp(BaseExp):
         config = Config.from_custom_yaml_file(placeholder_cfg_file)
 
         # Update the experiment directory in the config
-        config.update_custom_exp_dir(exp_dir_path)
+        config.update_custom_exp(exp_dir_path)
 
         # Create and return a new instance of Paper2Exp with the updated config
         return cls(config, from_custom_exp=True)
@@ -124,7 +124,8 @@ class Paper2Exp(BaseExp):
                 extra_data = None
                 if self.full_cfg.methodCfg.extra_cfgs is not None:
                     extra_data_orig = self.full_cfg.methodCfg.extra_cfgs.copy()
-                    del extra_data_orig["result_proc"]
+                    if "result_proc" in extra_data_orig:
+                        del extra_data_orig["result_proc"]
                     extra_data = DictUtils.flatten(extra_data_orig)
                     # with ConsoleLog("Extra data"):
                     #     pprint(extra_data)
