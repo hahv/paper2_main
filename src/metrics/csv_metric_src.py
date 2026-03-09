@@ -11,6 +11,7 @@ from src.utils import get_cls_in_pkg
 from src.metrics.base_metric_src import BaseMetricSrc
 from src.metrics.loaders.base_csv_loader import BaseRawCsvLoader
 from src.metrics.base_csv_converter import *
+from src.common import GlobalConst
 
 
 class CsvMetricSrc(BaseMetricSrc):
@@ -18,7 +19,6 @@ class CsvMetricSrc(BaseMetricSrc):
     Concrete data source that delegates dataset-specific parsing to an Adapter.
     """
 
-    SKIP_FRAME_FOR_FPS = 3  # skip first frame for FPS calculation
     UNIFED_CSV_FILE = "pred_vs_gt.csv"
 
     def __init__(self, cfg: Config):
@@ -95,7 +95,7 @@ class CsvMetricSrc(BaseMetricSrc):
             )
             if metric == "FPS":
                 # ! we need to skip some first frames for FPS calculation, since the infer times for these first frames are usually an outlier (initialization overhead)
-                converted_df = converted_df.iloc[self.SKIP_FRAME_FOR_FPS :].reset_index(
+                converted_df = converted_df.iloc[GlobalConst.NO_FRAMES_SKIP_IN_FPS_CALC:].reset_index(
                     drop=True
                 )
             list_of_converted_dfs.append(converted_df)

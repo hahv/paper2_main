@@ -1,4 +1,4 @@
-custom-exp-dir: ./test/custom_exp/firenet
+custom-exp-dir: /mnt/e/SyncData/paper2_main/test/custom_exp/firenet
 dbset-selector:
   dbset-used:
     dir-path: datasets/UFireIndoorFull
@@ -70,7 +70,7 @@ general:
   project-dir: /mnt/e/SyncData/paper2_main/test/custom_exp
   seed: 1
   skip-exp-if-exists: false
-  time-stamp: '20260306.194727'
+  time-stamp: '20260309.135241'
 infer-cfg:
   calc-metrics: true
   csv-columns:

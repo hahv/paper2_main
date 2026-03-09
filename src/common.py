@@ -27,6 +27,7 @@ class GlobalConst:
     # metrics
     METRIC_PER_FRAME = "per_frame"
     METRIC_PER_VIDEO = "per_video"
+    NO_FRAMES_SKIP_IN_FPS_CALC = 3  # Number of initial frames to skip for FPS calculation, due to initialization overhead
 
     # general
     # ! do not access directly, use proj_root() instead

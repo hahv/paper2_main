@@ -5,7 +5,7 @@
         "**/.hg": true,
         "**/.DS_Store": true,
         "**/Thumbs.db": true,
-        ".vscode": false,
+        ".vscode": true,
         "*.aux": true,
         "*.bbl": true,
         "*.blg": true,
@@ -25,7 +25,7 @@
         "**/CVS": true,
         "**/.venv": true,
         "**/__pycache__": true,
-        "**/.vscode": true,
+        "**/.vscode": false,
         "~$zzpaper2.xlsx": true,
         "zreport/~$available_dataset.xlsx": true,
         "**/.ruff_cache": true,
@@ -40,5 +40,5 @@
     "python.languageServer": "None",
     "[python]": {
         "editor.defaultFormatter": "charliermarsh.ruff"
-    }
+    },
 }

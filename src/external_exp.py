@@ -21,15 +21,13 @@ from halib import *
 
 from src.common import GlobalConst
 from src.metrics.base_csv_converter import FireSmokeLabelConverter
-
-# Number of leading frames to skip per video when computing FPS
-# (consistent with CsvMetricSrc's SKIP_N_FRAMES convention)
-_SKIP_N_FRAMES_FPS = 3
-
+from src.metrics.loaders.yolo_csv_loader import YoloExternalLoader
+from src.metrics.loaders.cls_csv_loader import ClsModelExternalLoader
 
 # ---------------------------------------------------------------------------
 # Internal helpers
 # ---------------------------------------------------------------------------
+
 
 def _to_binary(series: pd.Series) -> np.ndarray:
     """Convert a normalized label series (firesmoke / none) to 1 / 0."""
@@ -45,7 +43,9 @@ def _compute_binary_metrics(gt: np.ndarray, pred: np.ndarray) -> Dict[str, float
     total = tp + tn + fp + fn
     return {
         "metric_accuracy": (tp + tn) / total if total > 0 else 0.0,
-        "metric_f1_score": 2 * tp / (2 * tp + fp + fn) if (2 * tp + fp + fn) > 0 else 0.0,
+        "metric_f1_score": 2 * tp / (2 * tp + fp + fn)
+        if (2 * tp + fp + fn) > 0
+        else 0.0,
         "metric_precision": tp / (tp + fp) if (tp + fp) > 0 else 0.0,
         "metric_recall (TPR)": tp / (tp + fn) if (tp + fn) > 0 else 0.0,
         "metric_FPR (False Alarm Rate)": fp / (fp + tn) if (fp + tn) > 0 else 0.0,
@@ -53,14 +53,15 @@ def _compute_binary_metrics(gt: np.ndarray, pred: np.ndarray) -> Dict[str, float
 
 
 def _compute_fps(all_dfs: Dict[str, pd.DataFrame]) -> float:
-    """Frame-level FPS, skipping the first _SKIP_N_FRAMES_FPS frames of each video
+    """Frame-level FPS, skipping the first NO_FRAMES_SKIP_IN_FPS_CALC frames of each video
     and ignoring any frames where elapsed_time == 0."""
     total_elapsed = 0.0
     total_frames = 0
+    num_skipped_frames = GlobalConst.NO_FRAMES_SKIP_IN_FPS_CALC
     for df in all_dfs.values():
         elapsed = df[GlobalConst.COL_ELAPSED_TIME].values
-        if len(elapsed) > _SKIP_N_FRAMES_FPS:
-            elapsed = elapsed[_SKIP_N_FRAMES_FPS:]
+        if len(elapsed) > num_skipped_frames:
+            elapsed = elapsed[num_skipped_frames:]
             elapsed = elapsed[elapsed != 0.0]
             total_elapsed += float(elapsed.sum())
             total_frames += len(elapsed)
@@ -76,15 +77,15 @@ class ExternalExpRunner:
     Runs the full evaluation pipeline for a pre-existing external experiment
     directory (firenet, YOLO OD, etc.) that was NOT produced by Paper2Exp.
 
-    Instantiate via the class methods:
-        ExternalExpRunner.from_firenet_dir(...)
-        ExternalExpRunner.from_yolo_dir(...)
-
-    Or directly by passing a loader instance:
-        loader = FirenetExternalLoader(exp_dir)
-        runner = ExternalExpRunner(exp_dir, dataset_dir, loader)
-        runner.run()
+    Instantiate via:
+        + cls method
+            ExternalExpRunner.from_dir(exp_dir, dataset_dir, exp_name=None, **kwargs)
+        + Directly via the constructor if you want to provide a custom loader:
+            loader = FirenetExternalLoader(exp_dir)
+            runner = ExternalExpRunner(exp_dir, dataset_dir, loader)
+            runner.run()
     """
+
     def __init__(
         self,
         exp_dir: Union[str, Path],
@@ -187,9 +188,7 @@ class ExternalExpRunner:
             video_preds.append(
                 int((df[GlobalConst.COL_PRED] == GlobalConst.FIRESMOKE_LABEL).any())
             )
-        metrics = _compute_binary_metrics(
-            np.array(video_gts), np.array(video_preds)
-        )
+        metrics = _compute_binary_metrics(np.array(video_gts), np.array(video_preds))
         # FPS is always frame-level (same for both modes)
         metrics["metric_FPS"] = _compute_fps(all_dfs)
         return metrics
@@ -269,48 +268,6 @@ class ExternalExpRunner:
         )
         console.print(f"[green]Timeline report: {report_path}[/green]")
 
-    # ------------------------------------------------------------------
-    # Convenience constructors
-    # ------------------------------------------------------------------
-
-    @classmethod
-    def from_cls_model_dir(
-        cls,
-        exp_dir: Union[str, Path],
-        dataset_dir: Union[str, Path],
-        exp_name: Optional[str] = None,
-        **kwargs,
-    ) -> "ExternalExpRunner":
-        """Create a runner for a cls model-style _pred.csv experiment directory."""
-        from src.metrics.loaders.cls_csv_loader import ClsModelExternalLoader
-
-        loader = ClsModelExternalLoader(str(exp_dir))
-        return cls(
-            exp_dir, dataset_dir, loader,
-            exp_name=exp_name,
-            tl_type=GlobalConst.TL_TYPE_NO_SKIP,
-            **kwargs,
-        )
-
-    @classmethod
-    def from_yolo_dir(
-        cls,
-        exp_dir: Union[str, Path],
-        dataset_dir: Union[str, Path],
-        exp_name: Optional[str] = None,
-        **kwargs,
-    ) -> "ExternalExpRunner":
-        """Create a runner for a YOLO OD _od.csv experiment directory."""
-        from src.metrics.loaders.yolo_csv_loader import YoloExternalLoader
-
-        loader = YoloExternalLoader(str(exp_dir))
-        return cls(
-            exp_dir, dataset_dir, loader,
-            exp_name=exp_name,
-            tl_type=GlobalConst.TL_TYPE_NO_SKIP,
-            **kwargs,
-        )
-
     @classmethod
     def from_dir(
         cls,
@@ -327,6 +284,22 @@ class ExternalExpRunner:
         """
         dir_name = Path(exp_dir).name.lower()
         if "yolo" in dir_name:
-            return cls.from_yolo_dir(exp_dir, dataset_dir, exp_name=exp_name, **kwargs)
+            loader = YoloExternalLoader(str(exp_dir))
+            return cls(
+                exp_dir,
+                dataset_dir,
+                loader,
+                exp_name=exp_name,
+                tl_type=GlobalConst.TL_TYPE_NO_SKIP,
+                **kwargs,
+            )
         else:
-            return cls.from_cls_model_dir(exp_dir, dataset_dir, exp_name=exp_name, **kwargs)
+            loader = ClsModelExternalLoader(str(exp_dir))
+            return cls(
+                exp_dir,
+                dataset_dir,
+                loader,
+                exp_name=exp_name,
+                tl_type=GlobalConst.TL_TYPE_NO_SKIP,
+                **kwargs,
+            )

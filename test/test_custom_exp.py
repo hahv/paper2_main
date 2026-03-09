@@ -4,10 +4,16 @@ import sys
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(current_dir))  # Add parent directory to sys.path
 
+from pathlib import Path
+
+import pandas as pd
 from halib import *
 from tap import *
+
 from src.config import *
 from src.exp import Paper2Exp
+from src.external_exp import ExternalExpRunner
+
 # ---------------------------------------------------------------------------
 # Paths — adjust to your local setup
 # ---------------------------------------------------------------------------
@@ -22,8 +28,10 @@ VIDEO_NAME_LIMIT = 40
 DATASET_DIR = "./datasets/UFireIndoorFull"
 EXTERNAL_CFG = "config/zruns/run_external.yaml"
 
+
 class CustomArgs(Tap):
     parent_dir: str = r"./zout/zruns/_baseline/UFireIndoorFull"
+
 
 # ---------------------------------------------------------------------------
 # Approach 2 (new): Paper2Exp.from_custom_exp with placeholder config
@@ -31,26 +39,123 @@ class CustomArgs(Tap):
 # tl_type is always no_skip (set in config/methods/external_method.yaml).
 # ---------------------------------------------------------------------------
 
+
 def _external_cfg_fn(exp_dir_path: str) -> str:
     return EXTERNAL_CFG
 
 
-def test_paper2exp_firenet():
+def test_exp_from_custom_dir(custom_exp_dir: str = FIRENET_EXP_DIR):
     """Run the full Paper2Exp pipeline for a firenet external experiment."""
     exp = Paper2Exp.from_custom_exp(
-        exp_dir_path=FIRENET_EXP_DIR,
+        exp_dir_path=custom_exp_dir,
         expDir_to_cfgFile_fn=_external_cfg_fn,
     )
     exp.run_exp()
 
 
-def test_paper2exp_yolo():
-    """Run the full Paper2Exp pipeline for a YOLO OD external experiment."""
+def test_exp_vs_external_exp():
+    """
+    Cross-check Paper2Exp.from_custom_exp against ExternalExpRunner on the same
+    experiment directory.  Both pipelines must yield identical per-frame and
+    per-video metric values (within floating-point tolerance).
+
+    ExternalExpRunner computes metrics directly with numpy; Paper2Exp goes
+    through TorchMetricsBackend via the full run_exp() pipeline.  The
+    comparison covers accuracy, F1, precision, recall (TPR) and FPR.
+    FPS is intentionally excluded because wall-clock elapsed time may
+    differ by small amounts between runs.
+    """
+    exp_dir = Path(FIRENET_EXP_DIR).resolve()
+    cfg_name = exp_dir.name  # "firenet"
+
+    metric_cols = [
+        "metric_accuracy",
+        "metric_f1_score",
+        "metric_precision",
+        "metric_recall (TPR)",
+        "metric_FPR (False Alarm Rate)",
+    ]
+
+    # ------------------------------------------------------------------
+    # Step 1 — ExternalExpRunner: reference metrics (computed in-memory,
+    #           _results.csv files are also written as a side-effect so that
+    #           Paper2Exp can read them next).
+    # ------------------------------------------------------------------
+    runner = ExternalExpRunner.from_dir(
+        exp_dir=str(exp_dir),
+        dataset_dir=DATASET_DIR,
+    )
+    all_dfs = runner._load_and_write_normalized_csvs()
+    ref_pf = runner._compute_per_frame_metrics(all_dfs)
+    ref_pv = runner._compute_per_video_metrics(all_dfs)
+
+    # ------------------------------------------------------------------
+    # Step 2 — Paper2Exp.from_custom_exp: run full pipeline, which writes
+    #   _{cfg_name}__per_frame.csv  and  _{cfg_name}__per_video.csv
+    #   into exp_dir.
+    # ------------------------------------------------------------------
     exp = Paper2Exp.from_custom_exp(
-        exp_dir_path=YOLO_EXP_DIR,
+        exp_dir_path=str(exp_dir),
         expDir_to_cfgFile_fn=_external_cfg_fn,
     )
     exp.run_exp()
+
+    # halib's save_results_to_csv strips ".csv" and appends "__perf.csv"
+    # so the actual files are  _firenet__per_frame__perf.csv  (not  _firenet__per_frame.csv)
+    p2_pf_csv = exp_dir / f"_{cfg_name}__per_frame__perf.csv"
+    p2_pv_csv = exp_dir / f"_{cfg_name}__per_video__perf.csv"
+    assert p2_pf_csv.exists(), f"Paper2Exp did not write expected CSV: {p2_pf_csv}"
+    assert p2_pv_csv.exists(), f"Paper2Exp did not write expected CSV: {p2_pv_csv}"
+
+    p2_pf_df = pd.read_csv(str(p2_pf_csv), sep=";")
+    p2_pv_df = pd.read_csv(str(p2_pv_csv), sep=";")
+
+    # ------------------------------------------------------------------
+    # Step 3 — Compare metric columns
+    # ------------------------------------------------------------------
+    tol = 1e-4
+    fps_tol = 10.0  # FPS can vary with system load; allow ±10 FPS
+    console.rule("[bold]Metric comparison — per_frame[/bold]")
+    for col in metric_cols:
+        ref_val = ref_pf[col]
+        p2_val = float(p2_pf_df.iloc[0][col])
+        console.print(f"  {col}:  ref={ref_val:.6f}  paper2={p2_val:.6f}")
+        assert abs(ref_val - p2_val) < tol, (
+            f"per_frame '{col}' mismatch: "
+            f"ExternalExpRunner={ref_val:.6f}  Paper2Exp={p2_val:.6f}"
+        )
+    ref_fps_pf = ref_pf["metric_FPS"]
+    p2_fps_pf = float(p2_pf_df.iloc[0]["metric_FPS"])
+    console.print(
+        f"  metric_FPS:  ref={ref_fps_pf:.2f}  paper2={p2_fps_pf:.2f}  (tol=±{fps_tol})"
+    )
+    assert abs(ref_fps_pf - p2_fps_pf) < fps_tol, (
+        f"per_frame 'metric_FPS' mismatch: "
+        f"ExternalExpRunner={ref_fps_pf:.2f}  Paper2Exp={p2_fps_pf:.2f}"
+    )
+
+    console.rule("[bold]Metric comparison — per_video[/bold]")
+    for col in metric_cols:
+        ref_val = ref_pv[col]
+        p2_val = float(p2_pv_df.iloc[0][col])
+        console.print(f"  {col}:  ref={ref_val:.6f}  paper2={p2_val:.6f}")
+        assert abs(ref_val - p2_val) < tol, (
+            f"per_video '{col}' mismatch: "
+            f"ExternalExpRunner={ref_val:.6f}  Paper2Exp={p2_val:.6f}"
+        )
+    ref_fps_pv = ref_pv["metric_FPS"]
+    p2_fps_pv = float(p2_pv_df.iloc[0]["metric_FPS"])
+    console.print(
+        f"  metric_FPS:  ref={ref_fps_pv:.2f}  paper2={p2_fps_pv:.2f}  (tol=±{fps_tol})"
+    )
+    assert abs(ref_fps_pv - p2_fps_pv) < fps_tol, (
+        f"per_video 'metric_FPS' mismatch: "
+        f"ExternalExpRunner={ref_fps_pv:.2f}  Paper2Exp={p2_fps_pv:.2f}"
+    )
+
+    console.rule(
+        "[bold green]✓ Paper2Exp.from_custom_exp and ExternalExpRunner are consistent[/bold green]"
+    )
 
 
 def gen_perf_report_custom_exps():
@@ -59,7 +164,7 @@ def gen_perf_report_custom_exps():
     custom_exp_dirs = fs.list_dirs(args.parent_dir)
     for exp_dir in tqdm(custom_exp_dirs):
         exp_dir_name = fs.get_dir_name(exp_dir)
-        console.rule(f'Gen report for exp <<{exp_dir_name}>>')
+        console.rule(f"Gen report for exp <<{exp_dir_name}>>")
         exp = Paper2Exp.from_custom_exp(
             exp_dir_path=exp_dir,
             expDir_to_cfgFile_fn=_external_cfg_fn,
@@ -68,7 +173,11 @@ def gen_perf_report_custom_exps():
 
 
 if __name__ == "__main__":
-    # --- Generate performance reports for all custom experiments in the parent directory ---
-    test_paper2exp_firenet()
-    # test_paper2exp_yolo()
-    # gen_perf_report_custom_exps()
+    # test if Paper2Exp.from_custom_exp can successfully run an external experiment end-to-end and write results to CSV
+    test_exp_from_custom_dir()
+
+    # test if the metrics computed by Paper2Exp.from_custom_exp match those computed by ExternalExpRunner on the same experiment directory (cross-checking the two implementations)
+    test_exp_vs_external_exp()
+
+    # Optional: batch generate performance reports for all custom experiments under a parent directory
+    gen_perf_report_custom_exps()

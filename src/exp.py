@@ -96,6 +96,11 @@ class Paper2Exp(BaseExp):
         exp_rs = eval_data_dict, extra_data
         return exp_rs
 
+    def reset_metric_backend(self):
+        if self.metric_backend is not None:
+            for metric_instance in self.metric_backend.metric_info.values():
+                metric_instance.reset()
+
     def run_exp(self, should_calc_metrics=True, reload_env=False, *args, **kwargs):
         if self.full_cfg.shouldSkipExp:
             return
@@ -116,6 +121,8 @@ class Paper2Exp(BaseExp):
             mode_metrics_data_dict, _ = results
             for mode in mode_metrics_data_dict:
                 console.rule(f"Calculating metrics for mode: {mode}")
+                # !Fix bug: [Important] Make sure to reset the metric backend before calculating metrics for each mode (per-frame or per-video), otherwise the metric values will accumulate and be incorrect across modes.
+                self.reset_metric_backend()
                 metrics_data = mode_metrics_data_dict[mode]
                 outfile = (
                     self.full_cfg.get_outdir()
