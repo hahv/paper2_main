@@ -18,8 +18,8 @@ from src.external_exp import ExternalExpRunner
 # Paths — adjust to your local setup
 # ---------------------------------------------------------------------------
 
-FIRENET_EXP_DIR = "./test/custom_exp/firenet"
-YOLO_EXP_DIR = "./test/custom_exp/yolov5l_notemp"
+TEST_EXP_DIR_FIRENET = "./test/custom_exp/firenet"
+TEST_EXP_DIR_YOLO = "./test/custom_exp/yolov5l_notemp"
 
 TABLE_MODE = "pfc"
 TABLE_DECIMALS = 2
@@ -44,7 +44,7 @@ def _external_cfg_fn(exp_dir_path: str) -> str:
     return EXTERNAL_CFG
 
 
-def test_exp_from_custom_dir(custom_exp_dir: str = FIRENET_EXP_DIR):
+def test_exp_from_custom_dir(custom_exp_dir: str = TEST_EXP_DIR_FIRENET):
     """Run the full Paper2Exp pipeline for a firenet external experiment."""
     exp = Paper2Exp.from_custom_exp(
         exp_dir_path=custom_exp_dir,
@@ -53,7 +53,7 @@ def test_exp_from_custom_dir(custom_exp_dir: str = FIRENET_EXP_DIR):
     exp.run_exp()
 
 
-def test_exp_vs_external_exp():
+def test_exp_vs_external_exp(test_dir=TEST_EXP_DIR_FIRENET):
     """
     Cross-check Paper2Exp.from_custom_exp against ExternalExpRunner on the same
     experiment directory.  Both pipelines must yield identical per-frame and
@@ -65,7 +65,7 @@ def test_exp_vs_external_exp():
     FPS is intentionally excluded because wall-clock elapsed time may
     differ by small amounts between runs.
     """
-    exp_dir = Path(FIRENET_EXP_DIR).resolve()
+    exp_dir = Path(test_dir).resolve()
     cfg_name = exp_dir.name  # "firenet"
 
     metric_cols = [
@@ -174,10 +174,10 @@ def gen_perf_report_custom_exps():
 
 if __name__ == "__main__":
     # test if Paper2Exp.from_custom_exp can successfully run an external experiment end-to-end and write results to CSV
-    test_exp_from_custom_dir()
+    # test_exp_from_custom_dir()
 
     # test if the metrics computed by Paper2Exp.from_custom_exp match those computed by ExternalExpRunner on the same experiment directory (cross-checking the two implementations)
-    test_exp_vs_external_exp()
+    test_exp_vs_external_exp(test_dir=TEST_EXP_DIR_FIRENET)
 
     # Optional: batch generate performance reports for all custom experiments under a parent directory
-    gen_perf_report_custom_exps()
+    # gen_perf_report_custom_exps()
