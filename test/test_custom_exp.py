@@ -74,6 +74,7 @@ def test_exp_vs_external_exp(test_dir=TEST_EXP_DIR_FIRENET):
         "metric_precision",
         "metric_recall (TPR)",
         "metric_FPR (False Alarm Rate)",
+        "metric_FPS"
     ]
 
     # ------------------------------------------------------------------
@@ -81,6 +82,7 @@ def test_exp_vs_external_exp(test_dir=TEST_EXP_DIR_FIRENET):
     #           _results.csv files are also written as a side-effect so that
     #           Paper2Exp can read them next).
     # ------------------------------------------------------------------
+    console.rule("[bold]ExternalExpRunner — ref metrics[/bold]")
     runner = ExternalExpRunner.from_dir(
         exp_dir=str(exp_dir),
         dataset_dir=DATASET_DIR,
@@ -94,6 +96,7 @@ def test_exp_vs_external_exp(test_dir=TEST_EXP_DIR_FIRENET):
     #   _{cfg_name}__per_frame.csv  and  _{cfg_name}__per_video.csv
     #   into exp_dir.
     # ------------------------------------------------------------------
+    console.rule("[bold]Paper2Exp — run full pipeline[/bold]")
     exp = Paper2Exp.from_custom_exp(
         exp_dir_path=str(exp_dir),
         expDir_to_cfgFile_fn=_external_cfg_fn,
@@ -114,7 +117,6 @@ def test_exp_vs_external_exp(test_dir=TEST_EXP_DIR_FIRENET):
     # Step 3 — Compare metric columns
     # ------------------------------------------------------------------
     tol = 1e-4
-    fps_tol = 10.0  # FPS can vary with system load; allow ±10 FPS
     console.rule("[bold]Metric comparison — per_frame[/bold]")
     for col in metric_cols:
         ref_val = ref_pf[col]
@@ -124,15 +126,6 @@ def test_exp_vs_external_exp(test_dir=TEST_EXP_DIR_FIRENET):
             f"per_frame '{col}' mismatch: "
             f"ExternalExpRunner={ref_val:.6f}  Paper2Exp={p2_val:.6f}"
         )
-    ref_fps_pf = ref_pf["metric_FPS"]
-    p2_fps_pf = float(p2_pf_df.iloc[0]["metric_FPS"])
-    console.print(
-        f"  metric_FPS:  ref={ref_fps_pf:.2f}  paper2={p2_fps_pf:.2f}  (tol=±{fps_tol})"
-    )
-    assert abs(ref_fps_pf - p2_fps_pf) < fps_tol, (
-        f"per_frame 'metric_FPS' mismatch: "
-        f"ExternalExpRunner={ref_fps_pf:.2f}  Paper2Exp={p2_fps_pf:.2f}"
-    )
 
     console.rule("[bold]Metric comparison — per_video[/bold]")
     for col in metric_cols:
@@ -143,20 +136,9 @@ def test_exp_vs_external_exp(test_dir=TEST_EXP_DIR_FIRENET):
             f"per_video '{col}' mismatch: "
             f"ExternalExpRunner={ref_val:.6f}  Paper2Exp={p2_val:.6f}"
         )
-    ref_fps_pv = ref_pv["metric_FPS"]
-    p2_fps_pv = float(p2_pv_df.iloc[0]["metric_FPS"])
-    console.print(
-        f"  metric_FPS:  ref={ref_fps_pv:.2f}  paper2={p2_fps_pv:.2f}  (tol=±{fps_tol})"
-    )
-    assert abs(ref_fps_pv - p2_fps_pv) < fps_tol, (
-        f"per_video 'metric_FPS' mismatch: "
-        f"ExternalExpRunner={ref_fps_pv:.2f}  Paper2Exp={p2_fps_pv:.2f}"
-    )
-
     console.rule(
         "[bold green]✓ Paper2Exp.from_custom_exp and ExternalExpRunner are consistent[/bold green]"
     )
-
 
 def gen_perf_report_custom_exps():
     """Batch: run Paper2Exp.from_custom_exp for every directory under parent_dir."""
@@ -177,7 +159,7 @@ if __name__ == "__main__":
     # test_exp_from_custom_dir()
 
     # test if the metrics computed by Paper2Exp.from_custom_exp match those computed by ExternalExpRunner on the same experiment directory (cross-checking the two implementations)
-    test_exp_vs_external_exp(test_dir=TEST_EXP_DIR_FIRENET)
+    test_exp_vs_external_exp(test_dir=TEST_EXP_DIR_YOLO)
 
     # Optional: batch generate performance reports for all custom experiments under a parent directory
     # gen_perf_report_custom_exps()

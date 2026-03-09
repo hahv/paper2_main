@@ -112,6 +112,6 @@ class ExternalMethod(BaseMethod):
             df[[c for c in cols_to_write if c in df.columns]].to_csv(
                 str(out_csv), sep=";", index=False, encoding="utf-8"
             )
-            console.print(f"[green]  Written:[/green] {out_csv.name}")
+            print(f"Written <*_results.csv>: {out_csv.name}", end="\r")
 
         self.after_infer_video_dir(video_dir)
