@@ -27,10 +27,20 @@ VIDEO_NAME_LIMIT = 40
 
 DATASET_DIR = "./datasets/UFireIndoorFull"
 EXTERNAL_CFG = "config/zruns/run_external.yaml"
+EXTERNAL_CFG_MINI = (
+    "config/zruns/run_external_mini.yaml"  # for quick testing with fewer frames/videos
+)
 
 
 class CustomArgs(Tap):
     parent_dir: str = r"./zout/zruns/_baseline/UFireIndoorFull"
+    test_mini: bool = False  # If True, use EXTERNAL_CFG_MINI which runs on a smaller subset of frames/videos for faster testing.
+    test_yolo: bool = False  # If True, test on the YOLOv5l_notemp experiment instead of the FireNet experiment.
+
+    def configure(self):
+        self.add_argument("-indir", "--parent_dir")
+        self.add_argument("-m", "--test_mini")
+        self.add_argument("-y", "--test_yolo")
 
 
 # ---------------------------------------------------------------------------
@@ -44,16 +54,24 @@ def _external_cfg_fn(exp_dir_path: str) -> str:
     return EXTERNAL_CFG
 
 
-def test_exp_from_custom_dir(custom_exp_dir: str = TEST_EXP_DIR_FIRENET):
+def _external_cfg_mini_fn(exp_dir_path: str) -> str:
+    return EXTERNAL_CFG_MINI
+
+
+def test_exp_from_custom_dir(
+    custom_exp_dir: str = TEST_EXP_DIR_FIRENET, cfg_find_fn=_external_cfg_fn
+):
     """Run the full Paper2Exp pipeline for a firenet external experiment."""
     exp = Paper2Exp.from_custom_exp(
         exp_dir_path=custom_exp_dir,
-        expDir_to_cfgFile_fn=_external_cfg_fn,
+        expDir_to_cfgFile_fn=cfg_find_fn,
     )
     exp.run_exp()
 
 
-def test_exp_vs_external_exp(test_dir=TEST_EXP_DIR_FIRENET):
+def test_exp_vs_external_exp(
+    test_dir=TEST_EXP_DIR_FIRENET, cfg_find_fn=_external_cfg_fn, dataset_dir=DATASET_DIR
+):
     """
     Cross-check Paper2Exp.from_custom_exp against ExternalExpRunner on the same
     experiment directory.  Both pipelines must yield identical per-frame and
@@ -74,7 +92,7 @@ def test_exp_vs_external_exp(test_dir=TEST_EXP_DIR_FIRENET):
         "metric_precision",
         "metric_recall (TPR)",
         "metric_FPR (False Alarm Rate)",
-        "metric_FPS"
+        "metric_FPS",
     ]
 
     # ------------------------------------------------------------------
@@ -85,7 +103,7 @@ def test_exp_vs_external_exp(test_dir=TEST_EXP_DIR_FIRENET):
     console.rule("[bold]ExternalExpRunner — ref metrics[/bold]")
     runner = ExternalExpRunner.from_dir(
         exp_dir=str(exp_dir),
-        dataset_dir=DATASET_DIR,
+        dataset_dir=dataset_dir,
     )
     all_dfs = runner._load_and_write_normalized_csvs()
     ref_pf = runner._compute_per_frame_metrics(all_dfs)
@@ -99,7 +117,7 @@ def test_exp_vs_external_exp(test_dir=TEST_EXP_DIR_FIRENET):
     console.rule("[bold]Paper2Exp — run full pipeline[/bold]")
     exp = Paper2Exp.from_custom_exp(
         exp_dir_path=str(exp_dir),
-        expDir_to_cfgFile_fn=_external_cfg_fn,
+        expDir_to_cfgFile_fn=cfg_find_fn,
     )
     exp.run_exp()
 
@@ -140,6 +158,7 @@ def test_exp_vs_external_exp(test_dir=TEST_EXP_DIR_FIRENET):
         "[bold green]✓ Paper2Exp.from_custom_exp and ExternalExpRunner are consistent[/bold green]"
     )
 
+
 def gen_perf_report_custom_exps():
     """Batch: run Paper2Exp.from_custom_exp for every directory under parent_dir."""
     args = CustomArgs().parse_args()
@@ -155,11 +174,24 @@ def gen_perf_report_custom_exps():
 
 
 if __name__ == "__main__":
+    args = CustomArgs().parse_args()
+
+    if args.test_mini:
+        test_dir = "./test/custom_exp/firenet_mini" if not args.test_yolo else "./test/custom_exp/yolov5l_notemp_mini"
+        dataset_dir = "./datasets/UFireIndoor2"
+        cfg_fn = _external_cfg_mini_fn
+    else:
+        test_dir =  TEST_EXP_DIR_FIRENET if not args.test_yolo else TEST_EXP_DIR_YOLO
+        dataset_dir = DATASET_DIR
+        cfg_fn = _external_cfg_fn
+
+    pprint_box(f"{test_dir=}, {dataset_dir=}")
+
     # test if Paper2Exp.from_custom_exp can successfully run an external experiment end-to-end and write results to CSV
     # test_exp_from_custom_dir()
 
     # test if the metrics computed by Paper2Exp.from_custom_exp match those computed by ExternalExpRunner on the same experiment directory (cross-checking the two implementations)
-    test_exp_vs_external_exp(test_dir=TEST_EXP_DIR_YOLO)
+    test_exp_vs_external_exp(test_dir=test_dir, cfg_find_fn=cfg_fn, dataset_dir=dataset_dir)
 
     # Optional: batch generate performance reports for all custom experiments under a parent directory
     # gen_perf_report_custom_exps()

@@ -129,7 +129,7 @@ class ExternalExpRunner:
             try:
                 df = self.loader.load_video_gt_pred_df(video_path)
             except FileNotFoundError as e:
-                print(f"[Warning] Skipping '{stem}': {e}")
+                print(f"[Warning] Skipping '{stem}' - file={video_path}: {e}")
                 continue
 
             # Normalize GT and pred labels to "firesmoke" / "none"

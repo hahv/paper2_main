@@ -1,0 +1,6 @@
+frame_idx;video_path;gt_label;video;pred_label;elapsed_time;correct
+1;/mnt/e/SyncData/paper2_main/datasets/UFireIndoor2/firesmoke/aihub__lb_fire__1163.mp4;1;aihub__lb_fire__1163.mp4;1;0.0583233833312988;True
+1;/mnt/e/SyncData/paper2_main/datasets/UFireIndoor2/none/aihub__lb_none__0175.mp4;0;aihub__lb_none__0175.mp4;0;0.0334029197692871;True
+1;/mnt/e/SyncData/paper2_main/datasets/UFireIndoor2/none/aihub__lb_none__3298.mp4;0;aihub__lb_none__3298.mp4;0;0.0495264530181884;True
+1;/mnt/e/SyncData/paper2_main/datasets/UFireIndoor2/firesmoke/aihub__lb_fire__0182.mp4;1;aihub__lb_fire__0182.mp4;0;0.0492324829101562;False
+1;/mnt/e/SyncData/paper2_main/datasets/UFireIndoor2/firesmoke/aihub__lb_smoke__0264.mp4;1;aihub__lb_smoke__0264.mp4;0;0.0433807373046875;False
