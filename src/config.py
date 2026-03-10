@@ -255,7 +255,7 @@ class Config(ExpBaseCfg):
         if not self.custom_exp_dir:
             time_stamp_info = self.general.time_stamp
             mt_cfg_hash = DictUtils.get_unique_hash(
-                self.method_selector.method_used.extra_cfgs  # ty:ignore[possibly-missing-attribute]
+                self.method_selector.method_used.extra_cfgs  # ty:ignore[unresolved-attribute]
             )
             extra_info = f"{mt_cfg_hash}{sep}{time_stamp_info}"
             return super().get_cfg_name(sep, extra=extra_info, *args, **kwargs)
@@ -400,7 +400,7 @@ class Config(ExpBaseCfg):
             # folder: e.g., config/datasets, config/trains
             folder_name = f"{file_suffix}s"
             attr_folder = os.path.join(
-                instance.general.project_dir,  # ty:ignore[possibly-missing-attribute]
+                instance.general.project_dir,  # ty:ignore[unresolved-attribute]
                 f"config/{folder_name}",
             )
 
@@ -431,7 +431,7 @@ class Config(ExpBaseCfg):
                 print(f"Warning: Config folder not found: {attr_folder}")
 
         # 3. Finalize (Link strings to objects)
-        instance.finalize_config()  # ty:ignore[possibly-missing-attribute]
+        instance.finalize_config()  # ty:ignore[unresolved-attribute]
         return instance  # ty:ignore[invalid-return-type]
 
     @classmethod

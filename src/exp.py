@@ -12,6 +12,8 @@ from collections import OrderedDict
 from src.common import GlobalConst
 from typing import Callable
 
+from pathlib import Path
+
 
 class Paper2Exp(BaseExp):
     """
@@ -34,6 +36,39 @@ class Paper2Exp(BaseExp):
         return f"./config/zruns/run_base.yaml"
 
     # ! add a function to allow dynmmically load with baseline method (not Paper2Exp class) by creating a custom Config
+    @classmethod
+    def from_standard_exp(cls, exp_dir_path: str) -> "Paper2Exp":
+        """
+        Reload a previously-completed standard experiment from its output directory.
+        Reconstructs the Config from the saved __config.yaml (original-yaml-str),
+        skips video inference (reuses existing CSVs), and forces metric recalculation.
+        """
+        exp_dir = Path(exp_dir_path)
+        assert exp_dir.is_dir(), f"Provided path is not a directory: {exp_dir_path}"
+        config_file = exp_dir / "__config.yaml"
+        assert config_file.exists(), (
+            f"Config file not found in experiment directory: {config_file}\n"
+            f"Only standard experiments (produced by Paper2Exp) are supported."
+        )
+        cfg_data = yamlfile.load_yaml(str(config_file), to_dict=True)
+        original_yaml_str = cfg_data.get("original-yaml-str")
+        assert original_yaml_str, (
+            f"'original-yaml-str' key missing in {config_file}. "
+            f"The experiment may have been created without saving the original YAML string."
+        )
+        exp_cfg = Config.from_custom_yaml_file_or_str(original_yaml_str)
+
+        # ! Allow run_exp to proceed — we want metrics recalculated, not skipped
+        exp_cfg.general.skip_exp_if_exists = False
+
+        # ! force timestamp restored from the original config, so that we can match the output perf CSVs
+        exp_cfg.general.time_stamp = cfg_data["general"]["time-stamp"]
+        exp_cfg.general.computer_name = cfg_data["general"]["computer-name"]
+
+        # Skip per-video inference if result CSVs already exist — reuse them
+        exp_cfg.inferCfg.skip_if_exists = True
+        return cls(exp_cfg)
+
     @classmethod
     def from_custom_exp(
         cls,
@@ -102,7 +137,7 @@ class Paper2Exp(BaseExp):
 
     def reset_metric_backend(self):
         if self.metric_backend is not None:
-            for metric_instance in self.metric_backend.metric_info.values():  # ty:ignore[possibly-missing-attribute]
+            for metric_instance in self.metric_backend.metric_info.values():  # ty:ignore[unresolved-attribute]
                 metric_instance.reset()
 
     def run_exp(self, should_calc_metrics=True, reload_env=False, *args, **kwargs):
