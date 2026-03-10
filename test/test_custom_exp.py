@@ -19,8 +19,8 @@ from src.common import GlobalConst
 # Paths — adjust to your local setup
 # ---------------------------------------------------------------------------
 
-TEST_EXP_DIR_FIRENET = "./test/custom_exp/firenet"
-TEST_EXP_DIR_YOLO = "./test/custom_exp/yolov5l_notemp"
+TEST_EXP_DIR_FIRENET = "./test/data/custom_exp/firenet"
+TEST_EXP_DIR_YOLO = "./test/data/custom_exp/yolov5l_notemp"
 
 TABLE_MODE = "pfc"
 TABLE_DECIMALS = 2
@@ -177,9 +177,9 @@ if __name__ == "__main__":
 
     if args.test_mini:
         test_dir = (
-            "./test/custom_exp/firenet_mini"
+            "./test/data/custom_exp/firenet_mini"
             if not args.test_yolo
-            else "./test/custom_exp/yolov5l_notemp_mini"
+            else "./test/data/custom_exp/yolov5l_notemp_mini"
         )
         dataset_dir = "./datasets/UFireIndoor2"
         cfg_fn = _external_cfg_mini_fn

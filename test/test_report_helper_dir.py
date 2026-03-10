@@ -5,7 +5,7 @@ sys.path.append("/mnt/e/SyncData/paper2_main")
 from halib import *
 from src.results.timeline.tl_report import TlReportGen
 
-TEST_DIR = "./zout/test"
+TEST_DIR = "./zout/test_data"
 SINGLE_EXP_DIR = f"{TEST_DIR}/test_single_exp/MainPC__ds_UFireIndoor2__mt_no_temp_method__af4b0d32a3d2__20260211.104731"
 MULTIPLE_EXPS_DIR = f"{TEST_DIR}/test_exp_vs_baseline"
 TEST_COMPARE_DIR = f"{TEST_DIR}/test_prof_old_model_vs_new_model_vs_newest"
