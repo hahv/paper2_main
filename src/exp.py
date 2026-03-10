@@ -36,11 +36,15 @@ class Paper2Exp(BaseExp):
     # ! add a function to allow dynmmically load with baseline method (not Paper2Exp class) by creating a custom Config
     @classmethod
     def from_custom_exp(
-        cls, exp_dir_path: str, expDir_to_cfgFile_fn: Callable[[str], str] = default_expDir_to_cfgFile_fn
+        cls,
+        exp_dir_path: str,
+        find_cfgFile_func: Callable[[str], str] = default_expDir_to_cfgFile_fn,
     ):  # noqa: F811
         # Load the configuration from the provided file path
-        placeholder_cfg_file = expDir_to_cfgFile_fn(exp_dir_path)
-        console.print(f'[bold green]Loading config from file: {placeholder_cfg_file}[/bold green]')
+        placeholder_cfg_file = find_cfgFile_func(exp_dir_path)
+        console.print(
+            f"[bold green]Loading config from file: {placeholder_cfg_file}[/bold green]"
+        )
         config = Config.from_custom_yaml_file(placeholder_cfg_file)
 
         # Update the experiment directory in the config
@@ -98,7 +102,7 @@ class Paper2Exp(BaseExp):
 
     def reset_metric_backend(self):
         if self.metric_backend is not None:
-            for metric_instance in self.metric_backend.metric_info.values():
+            for metric_instance in self.metric_backend.metric_info.values():  # ty:ignore[possibly-missing-attribute]
                 metric_instance.reset()
 
     def run_exp(self, should_calc_metrics=True, reload_env=False, *args, **kwargs):

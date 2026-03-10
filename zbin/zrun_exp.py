@@ -9,7 +9,7 @@ from halib.filetype.yamlfile import *
 
 
 class CustomArgs(Tap):
-    run_cfg_yaml: str = "scripts/zrun_cfg.yaml"
+    run_cfg_yaml: str = "zbin/zrun_cfg.yaml"
     base_cfg_pattern: str = ""
     sweep_cfg_pattern: str = ""
     use_line_profiler: bool = False

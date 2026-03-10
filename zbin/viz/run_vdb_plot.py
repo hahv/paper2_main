@@ -1,14 +1,15 @@
 import sys
+
 sys.path.append("E:/Dev/__halib")
 
 from halib import *
 from halib.exp.viz.plot import PlotHelper as plth
+
 BASE_DIR = r"E:/SyncData/paper2_main/zout/reports/viz/vdb_screenshots"
-df = plth.get_img_grid_df(
-    f"{BASE_DIR}/src"
-)
-df.columns = [f'sample_{i}' for i in range(len(df.columns))]
+df = plth.get_img_grid_df(f"{BASE_DIR}/src")
+df.columns = [f"sample_{i}" for i in range(len(df.columns))]
 df.to_csv(f"{BASE_DIR}/vdb_grid_input.csv", index=False, encoding="utf-8", sep=";")
+
 
 def fmt_row_label_func(x):
     x = x.replace("row_", "").upper()
@@ -16,10 +17,13 @@ def fmt_row_label_func(x):
         return "FIRE or SMOKE"
     else:
         return x
+
+
 def fmt_col_label_func(x):
     return ""
 
-target_fmt = ['png', 'pdf']
+
+target_fmt = ["png", "pdf"]
 for fmt in tqdm(target_fmt):
     console.rule(f"Exporting {fmt} ...")
     outfile = f"{BASE_DIR}/vdb_grid_plot.{fmt}"
@@ -45,4 +49,3 @@ for fmt in tqdm(target_fmt):
         show=False,
     )
     pprint_local_path(outfile, get_wins_path=True)
-

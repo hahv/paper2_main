@@ -31,7 +31,9 @@ class ExternalMethod(BaseMethod):
     Drop-in replacement for NoTempMethod / TempMethod in from_custom_exp flows.
     """
 
-    def __init__(self, cfg: Config, rs_handlers: Optional[list[BaseRsProc]] = None, **kwargs):
+    def __init__(
+        self, cfg: Config, rs_handlers: Optional[list[BaseRsProc]] = None, **kwargs
+    ):
         super().__init__(cfg, rs_handlers)
 
     # ------------------------------------------------------------------
@@ -63,12 +65,16 @@ class ExternalMethod(BaseMethod):
         dir_name = Path(self.cfg.get_outdir()).name.lower()
         if "yolo" in dir_name:
             from src.metrics.loaders.yolo_csv_loader import YoloExternalLoader
+
             return YoloExternalLoader(self.cfg.get_outdir())
         else:
             from src.metrics.loaders.cls_csv_loader import ClsModelExternalLoader
+
             return ClsModelExternalLoader(self.cfg.get_outdir())
 
-    def infer_video_dir(self, video_dir: str, recursive: bool = True, max_workers: int = 0):
+    def infer_video_dir(
+        self, video_dir: str, recursive: bool = True, max_workers: int = 0
+    ):
         """
         For every video in video_dir:
           1. Load pre-existing CSV via the auto-detected loader

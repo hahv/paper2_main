@@ -6,11 +6,14 @@ from halib import *  # noqa: F403
 from tap import *
 from halib.exp.perf.profiler import zProfiler
 
+
 class RunIdeaArgs(Tap):
     video: str = r"./datasets/UFireIndoor/firesmoke/aihub__lb_fire_0178.mp4"  # Path to input video file
     block_size: int = 32  # Size of blocks to analyze
 
+
 # !Paper: Flame Detection for Video-based Early Fire Warning Systems and 3D Visualization of Fire Propagation
+
 
 class BlockAnalyzer:
     def __init__(self, history_len=30):
@@ -187,7 +190,9 @@ def process_video(input_path, output_path, block_size=32):
                         # If > 20% of block is moving, process it
                         if motion_ratio > 0.2:
                             # Draw Motion Box (Yellow)
-                            cv2.rectangle(vis_frame, (x1, y1), (x2, y2), (0, 255, 255), 1)
+                            cv2.rectangle(
+                                vis_frame, (x1, y1), (x2, y2), (0, 255, 255), 1
+                            )
 
                             block_id = (r, c)
                             is_fire = False
@@ -241,7 +246,7 @@ def process_video(input_path, output_path, block_size=32):
         # cv2.destroyAllWindows()
         print(f"Processing complete. Saved to {output_path}")
         pprint_local_path(output_path, get_wins_path=True)
-        profiler.report_and_plot(".", tag='z_runIdea1')
+        profiler.report_and_plot(".", tag="z_runIdea1")
 
 
 def main():
@@ -251,6 +256,7 @@ def main():
     block_size = args.block_size
     output_path = "./z_run1_output.mp4"
     process_video(video_path, output_path, block_size=block_size)
+
 
 if __name__ == "__main__":
     main()

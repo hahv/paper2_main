@@ -13,18 +13,18 @@ from halib.exp.viz.plot import PlotHelper as plth
 class PlotVideoArgs(Tap):
     in_dir: str = "./zout/reports/viz/vdb_screenshots"  # Input dir
     seed: int = 1  # Random seed for reproducibility
-    num_frame_per_cate: int = 5  # Number of frames to sample from each category for visualization
+    num_frame_per_cate: int = (
+        5  # Number of frames to sample from each category for visualization
+    )
+
 
 RAW_SRC_IMG_DIR = "raw"
-SOURCE_CATE = ['fire', 'smoke', 'none']
-TARGET_CATE = ['firesmoke', 'none']
-mapping_src_to_tgt = {
-    'fire': 'firesmoke',
-    'smoke': 'firesmoke',
-    'none': 'none'
-}
+SOURCE_CATE = ["fire", "smoke", "none"]
+TARGET_CATE = ["firesmoke", "none"]
+mapping_src_to_tgt = {"fire": "firesmoke", "smoke": "firesmoke", "none": "none"}
 FILE_NAME_SEP = "__"
 TEMP_SRC_DIR = "src"
+
 
 @log_func(log_time=True)
 def mk_grid_plot(in_dir, num_frame_per_cate):
@@ -59,11 +59,13 @@ def mk_grid_plot(in_dir, num_frame_per_cate):
         if not os.path.isdir(os.path.join(raw_dir, raw_cate_dir)):
             continue
         src_cate = raw_cate_dir_to_src_cate(raw_cate_dir)
-        assert src_cate is not None, f"src_cate not found in directory name: {raw_cate_dir}"
+        assert src_cate is not None, (
+            f"src_cate not found in directory name: {raw_cate_dir}"
+        )
         tgt_cate = mapping_src_to_tgt[src_cate]
         full_cate_dir = os.path.join(raw_dir, raw_cate_dir)
         for fname in sorted(os.listdir(full_cate_dir)):
-            if not fname.lower().endswith(('.jpg', '.jpeg', '.png')):
+            if not fname.lower().endswith((".jpg", ".jpeg", ".png")):
                 continue
             # Parse data_source from the first segment of the filename
             parts = fname.split(FILE_NAME_SEP)
@@ -128,7 +130,7 @@ def mk_grid_plot(in_dir, num_frame_per_cate):
         new_subdir = os.path.join(src_dir, f"row_{tgt_cate}")
         os.rename(src_subdir, new_subdir)
 
-    # !! WE DO NOT RUN STEP 5, since there are some unusual problems with the generated outputs (png, jpg, pdf, etc.) of plotly (using kaleido as backend). It works fine in Windows, but in Linux the generated images have wrong layouts (with wrong spacing -- too much space between images). 
+    # !! WE DO NOT RUN STEP 5, since there are some unusual problems with the generated outputs (png, jpg, pdf, etc.) of plotly (using kaleido as backend). It works fine in Windows, but in Linux the generated images have wrong layouts (with wrong spacing -- too much space between images).
     # ! To fix this, we instead run the .bat file to generate the grid plot in Windows: `scripts/run_vdb_plot.bat`
     # # ── Step 5: Build grid figure ──
     # outfile = os.path.join(in_dir, "vdb_grid_plot.pdf")
@@ -162,13 +164,15 @@ def mk_grid_plot(in_dir, num_frame_per_cate):
     # return outfile
     return src_dir  # return the src_dir for downstream plotting
 
+
 def main():
     args = PlotVideoArgs().parse_args()
     seed_everything(args.seed)
     outdir = mk_grid_plot(args.in_dir, args.num_frame_per_cate)
-    with ConsoleLog('VDB Grid Plot Src'):
+    with ConsoleLog("VDB Grid Plot Src"):
         pprint(f"Saved all selected frames to dir ⏬")
         pprint_local_path(outdir, get_wins_path=True)
+
 
 if __name__ == "__main__":
     main()

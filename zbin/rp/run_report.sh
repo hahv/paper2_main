@@ -1,0 +1,1 @@
+python zbin/rp/run_report.py -i ./zout/reports/perf -o ./zout/reports/perf

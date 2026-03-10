@@ -59,8 +59,10 @@ def verify_csv_video(methods, indir, videodir):
         # ! if no vis files, use video files as placeholders
         if len(vis_files) == 0:
             vis_files = video_files.copy()
+
         def sort_key(x):
             return os.path.basename(x).split("_")[0]
+
         video_files, gt_files, csv_files, vis_files = map(
             lambda x: sorted(x, key=sort_key),
             [video_files, gt_files, csv_files, vis_files],

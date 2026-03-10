@@ -11,7 +11,9 @@ _FIRE_SMOKE_KEYWORDS = ("fire", "smoke")
 
 
 def _any_fire_smoke(cls_series: pd.Series) -> bool:
-    return cls_series.apply(lambda x: any(kw in str(x).lower() for kw in _FIRE_SMOKE_KEYWORDS)).any()
+    return cls_series.apply(
+        lambda x: any(kw in str(x).lower() for kw in _FIRE_SMOKE_KEYWORDS)
+    ).any()
 
 
 class YoloExternalLoader:

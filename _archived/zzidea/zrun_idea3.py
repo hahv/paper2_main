@@ -276,7 +276,7 @@ def process_video(input_path, output_path, block_size=32, scale_factor=1.0):
     cap.release()
     out.release()
     print(f"\nSaved to {output_path}")
-    profiler.report_and_plot(".", tag='z_runIdea3')
+    profiler.report_and_plot(".", tag="z_runIdea3")
 
 
 def main():

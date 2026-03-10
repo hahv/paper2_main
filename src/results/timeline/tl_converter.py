@@ -16,7 +16,7 @@ class TlConfig:
     """Singleton-like config manager."""
 
     _config: Optional[Dict] = None
-    DEFAULT_TIMELINE_CFG = f"{GlobalConst.proj_root()}/config/mics/timeline_cfg.yaml"
+    DEFAULT_TIMELINE_CFG = f"{GlobalConst.proj_root()}/config/misc/timeline_cfg.yaml"
 
     @classmethod
     def load(cls, path: Optional[str] = None) -> Dict:

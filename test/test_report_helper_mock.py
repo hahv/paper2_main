@@ -15,10 +15,13 @@ from src.results.timeline.tl_report import TlReportGen
 # ==========================================
 # 1. SETUP MOCK CONFIGURATION (Same as test_data_parser.py)
 # ==========================================
-MOCK_YAML_CONTENT = yamlfile.load_yaml("/mnt/e/SyncData/paper2_main/config/mics/timeline_cfg.yaml")
+MOCK_YAML_CONTENT = yamlfile.load_yaml(
+    "/mnt/e/SyncData/paper2_main/config/misc/timeline_cfg.yaml"
+)
 # ==========================================
 # 2. DYNAMIC MOCK DATA GENERATION
 # ==========================================
+
 
 def get_labels_for_type(timeline_type):
     """Retrieve label keys from the local MOCK config."""
@@ -34,27 +37,28 @@ def get_labels_for_type(timeline_type):
         return list(tl_section["labels_colors"].keys())
     return list(type_cfg.get("labels_colors", {}).keys())
 
+
 def rand_mock_data_column(total_frames, timeline_type) -> list:
     """Generates a random sequence of labels logic."""
     label_options = get_labels_for_type(timeline_type)
     if not label_options:
-         # Fallback if type not found or just mapped logic labels
-         # But wait, 'rand_mock_data_by_timeline_type' in timeline.py produces OUTPUT labels.
-         # The 'TimelineProcessor' expects RAW method output, and then parses it.
-         # However, 'TLParser' logic IS what parses raw -> final.
+        # Fallback if type not found or just mapped logic labels
+        # But wait, 'rand_mock_data_by_timeline_type' in timeline.py produces OUTPUT labels.
+        # The 'TimelineProcessor' expects RAW method output, and then parses it.
+        # However, 'TLParser' logic IS what parses raw -> final.
 
-         # Wait, looking at test_data_parser.py logic:
-         # 'algo_v3' (Skip) has raw values: 'Skipped', 'Processed'
-         # 'baseline' (NoSkip) has raw values: 'Fire', 'None' (Predictions)
-         # 'gt_label' (GT) has raw values: 'Fire', 'None'
+        # Wait, looking at test_data_parser.py logic:
+        # 'algo_v3' (Skip) has raw values: 'Skipped', 'Processed'
+        # 'baseline' (NoSkip) has raw values: 'Fire', 'None' (Predictions)
+        # 'gt_label' (GT) has raw values: 'Fire', 'None'
 
-         # So we need to generate RAW method outputs, not the final labels.
-         pass
+        # So we need to generate RAW method outputs, not the final labels.
+        pass
 
     # We need to simulate RAW outputs appropriate for the logic:
     if timeline_type == "gt":
         # GT Raw: "Fire", "Smoke", "None"
-        options = ["Fire", "None", "None", "None"] # bias towards None
+        options = ["Fire", "None", "None", "None"]  # bias towards None
     elif timeline_type == "skip":
         # Skip Raw: "Skipped", "Processed"
         options = ["Skipped", "Processed"]
@@ -79,6 +83,7 @@ def rand_mock_data_column(total_frames, timeline_type) -> list:
 
     return all_labels
 
+
 def gen_random_video_df(video_name, total_frames, cols_map):
     """Generates a DataFrame for a single video with all required columns."""
     data = {
@@ -95,27 +100,33 @@ def gen_random_video_df(video_name, total_frames, cols_map):
 
     return pd.DataFrame(data)
 
+
 def generate_multi_video_mock_data(cols_map, num_videos=3):
     frames_list = []
     for i in range(num_videos):
         # vary frame counts
         count = np.random.randint(50, 200)
-        vid_name = f"video_{i+1:02d}"
+        vid_name = f"video_{i + 1:02d}"
         df = gen_random_video_df(vid_name, count, cols_map)
         frames_list.append(df)
 
     return pd.concat(frames_list, ignore_index=True)
 
+
 NUM_VIDEOS = 5
+
 
 def main():
     # 1. Define Mapping
     from collections import OrderedDict
-    cols_to_timeline_types = OrderedDict({
-        "gt_label": "gt",
-        "algo_v3": "skip",
-        "baseline": "no_skip",
-    })
+
+    cols_to_timeline_types = OrderedDict(
+        {
+            "gt_label": "gt",
+            "algo_v3": "skip",
+            "baseline": "no_skip",
+        }
+    )
     output_html = "./zout/reports/test_timeline_report_dynamic.html"
     print(f"[INFO] Generating report to {output_html}...")
 
@@ -124,12 +135,18 @@ def main():
         # 3. Generate Dynamic Mock Data
         # We must generate data inside the patch context if we used config-dependent generation,
         # but our generic generation above uses MOCK_YAML_CONTENT directly.
-        df = generate_multi_video_mock_data(cols_to_timeline_types, num_videos=NUM_VIDEOS)
+        df = generate_multi_video_mock_data(
+            cols_to_timeline_types, num_videos=NUM_VIDEOS
+        )
 
-        print(f"[INFO] Generated DataFrame with {len(df)} rows across {df['video'].nunique()} videos.")
+        print(
+            f"[INFO] Generated DataFrame with {len(df)} rows across {df['video'].nunique()} videos."
+        )
 
         generator = TlReportGen(cols_to_timeline_types)
-        generator._generate(df, output_html, title="Dynamic Timeline Report v2", table_mode="p")
+        generator._generate(
+            df, output_html, title="Dynamic Timeline Report v2", table_mode="p"
+        )
 
     print("[SUCCESS] Report generated.")
 
@@ -138,6 +155,7 @@ def main():
         pprint_local_path(output_html, get_wins_path=True)
     else:
         print(f"[ERROR] File {output_html} was not created.")
+
 
 if __name__ == "__main__":
     main()

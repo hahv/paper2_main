@@ -86,7 +86,9 @@ class BaseCSVConverter(ABC):
             # Call do_convert (not convert_col) so that subclass overrides like
             # TorchMetricsConverter.do_convert (which applies per-video groupby-max)
             # are respected when extra_dict contains 'metric_mode'.
-            rs_df = converter.do_convert(rs_df, [target_col], inplace=True, extra_dict=extra_dict)
+            rs_df = converter.do_convert(
+                rs_df, [target_col], inplace=True, extra_dict=extra_dict
+            )
             converter.do_validate_lbs(
                 rs_df[target_col].to_numpy(),
                 converter.valid_out_lbs,
@@ -204,7 +206,9 @@ class TorchMetricsConverter(BaseCSVConverter):
     def convert_col(
         self, df: pd.DataFrame, target_col: str, extra_dict: Optional[dict] = None
     ) -> np.ndarray:
-        metric_mode = (extra_dict or {}).get("metric_mode", GlobalConst.METRIC_PER_FRAME)
+        metric_mode = (extra_dict or {}).get(
+            "metric_mode", GlobalConst.METRIC_PER_FRAME
+        )
         mapped = df[target_col].apply(lambda x: self.LABEL_NUM_MAPPING[x])
         if metric_mode == GlobalConst.METRIC_PER_VIDEO:
             # Per-video: propagate max (OR logic) — if any frame in a video is firesmoke (1),

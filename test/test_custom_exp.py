@@ -13,6 +13,7 @@ from tap import *
 from src.config import *
 from src.exp import Paper2Exp
 from src.external_exp import ExternalExpRunner
+from src.common import GlobalConst
 
 # ---------------------------------------------------------------------------
 # Paths — adjust to your local setup
@@ -26,7 +27,7 @@ TABLE_DECIMALS = 2
 VIDEO_NAME_LIMIT = 40
 
 DATASET_DIR = "./datasets/UFireIndoorFull"
-EXTERNAL_CFG = "config/zruns/run_external.yaml"
+# EXTERNAL_CFG = "config/zruns/run_external.yaml"
 EXTERNAL_CFG_MINI = (
     "config/zruns/run_external_mini.yaml"  # for quick testing with fewer frames/videos
 )
@@ -51,7 +52,7 @@ class CustomArgs(Tap):
 
 
 def _external_cfg_fn(exp_dir_path: str) -> str:
-    return EXTERNAL_CFG
+    return GlobalConst.EXTERNAL_CFG
 
 
 def _external_cfg_mini_fn(exp_dir_path: str) -> str:
@@ -64,7 +65,7 @@ def test_exp_from_custom_dir(
     """Run the full Paper2Exp pipeline for a firenet external experiment."""
     exp = Paper2Exp.from_custom_exp(
         exp_dir_path=custom_exp_dir,
-        expDir_to_cfgFile_fn=cfg_find_fn,
+        find_cfgFile_func=cfg_find_fn,
     )
     exp.run_exp()
 
@@ -80,8 +81,6 @@ def test_exp_vs_external_exp(
     ExternalExpRunner computes metrics directly with numpy; Paper2Exp goes
     through TorchMetricsBackend via the full run_exp() pipeline.  The
     comparison covers accuracy, F1, precision, recall (TPR) and FPR.
-    FPS is intentionally excluded because wall-clock elapsed time may
-    differ by small amounts between runs.
     """
     exp_dir = Path(test_dir).resolve()
     cfg_name = exp_dir.name  # "firenet"
@@ -117,7 +116,7 @@ def test_exp_vs_external_exp(
     console.rule("[bold]Paper2Exp — run full pipeline[/bold]")
     exp = Paper2Exp.from_custom_exp(
         exp_dir_path=str(exp_dir),
-        expDir_to_cfgFile_fn=cfg_find_fn,
+        find_cfgFile_func=cfg_find_fn,
     )
     exp.run_exp()
 
@@ -168,7 +167,7 @@ def gen_perf_report_custom_exps():
         console.rule(f"Gen report for exp <<{exp_dir_name}>>")
         exp = Paper2Exp.from_custom_exp(
             exp_dir_path=exp_dir,
-            expDir_to_cfgFile_fn=_external_cfg_fn,
+            find_cfgFile_func=_external_cfg_fn,
         )
         exp.run_exp()
 
@@ -177,11 +176,15 @@ if __name__ == "__main__":
     args = CustomArgs().parse_args()
 
     if args.test_mini:
-        test_dir = "./test/custom_exp/firenet_mini" if not args.test_yolo else "./test/custom_exp/yolov5l_notemp_mini"
+        test_dir = (
+            "./test/custom_exp/firenet_mini"
+            if not args.test_yolo
+            else "./test/custom_exp/yolov5l_notemp_mini"
+        )
         dataset_dir = "./datasets/UFireIndoor2"
         cfg_fn = _external_cfg_mini_fn
     else:
-        test_dir =  TEST_EXP_DIR_FIRENET if not args.test_yolo else TEST_EXP_DIR_YOLO
+        test_dir = TEST_EXP_DIR_FIRENET if not args.test_yolo else TEST_EXP_DIR_YOLO
         dataset_dir = DATASET_DIR
         cfg_fn = _external_cfg_fn
 
@@ -191,7 +194,9 @@ if __name__ == "__main__":
     # test_exp_from_custom_dir()
 
     # test if the metrics computed by Paper2Exp.from_custom_exp match those computed by ExternalExpRunner on the same experiment directory (cross-checking the two implementations)
-    test_exp_vs_external_exp(test_dir=test_dir, cfg_find_fn=cfg_fn, dataset_dir=dataset_dir)
+    test_exp_vs_external_exp(
+        test_dir=test_dir, cfg_find_fn=cfg_fn, dataset_dir=dataset_dir
+    )
 
     # Optional: batch generate performance reports for all custom experiments under a parent directory
     # gen_perf_report_custom_exps()

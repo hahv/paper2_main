@@ -58,6 +58,8 @@ class GlobalConst:
     TL_SKIP_FALSE_SKIP = "False Skip"  # fire/smoke but incorrectly skipped
     TL_SKIP_WASTED_INFER = "Wasted Infer."  # incorrectly proc (wasted resources)
 
+    EXTERNAL_CFG = "config/zruns/run_external.yaml"
+
     @staticmethod
     def proj_root() -> str:
         return normalize_paths(GlobalConst.__PROJECT_ROOT)

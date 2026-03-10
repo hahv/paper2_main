@@ -95,9 +95,9 @@ class CsvMetricSrc(BaseMetricSrc):
             )
             if metric == "FPS":
                 # ! we need to skip some first frames for FPS calculation, since the infer times for these first frames are usually an outlier (initialization overhead)
-                converted_df = converted_df.iloc[GlobalConst.NO_FRAMES_SKIP_IN_FPS_CALC:].reset_index(
-                    drop=True
-                )
+                converted_df = converted_df.iloc[
+                    GlobalConst.NO_FRAMES_SKIP_IN_FPS_CALC :
+                ].reset_index(drop=True)
             list_of_converted_dfs.append(converted_df)
         all_videos_df = pd.concat(list_of_converted_dfs, ignore_index=True)
         cache_key = self.metric_mode_to_cache_key(mode, metric)
