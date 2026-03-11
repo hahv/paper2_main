@@ -65,14 +65,21 @@ skip:
   meta:
     legend_title: "3. SKIP (Proposed Method)"
 
+  # | Metric        | Raw Count    | Denominator | %     | Standard Name      |
+  # |---------------|------------- |-------------|-------|--------------------|
+  # | Correct Infer | # Pos passed | Pos frames  | 99.4% | True Positive Rate |
+  # | Correct Skip  | # Neg skipped| Neg frames  | 2.7%  | True Negative Rate |
+  # | False Skip    | # Pos skipped| Pos frames  | 0.6%  | False Negative Rate|
+  # | Wasted Infer  | # Neg passed | Neg frames  | 97.3% | False Positive Rate|
+
   timeline:
     labels:
       Correct Infer.:
         color: "#0060BD"
-        additional_note: "Valid inference on target (TP). Normalized by total frames."
+        additional_note: "Valid inference on target (TP). Normalized by actual positive frames."
       Correct Skip:
         color: "#68B8F7"
-        additional_note: "Valid computational bypass (TN). Normalized by total frames."
+        additional_note: "Valid computational bypass (TN). Normalized by actual negative frames."
       False Skip:
         color: "#cf2b2b"
         additional_note: "Missed target due to unsafe skip (FN). Normalized by actual positive frames."
