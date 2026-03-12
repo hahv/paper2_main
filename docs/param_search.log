@@ -1,9 +1,9 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.7.18)  12 MAR 2026 15:34
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.7.18)  12 MAR 2026 15:37
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**temp.tex
-(./temp.tex
+**param_search.tex
+(./param_search.tex
 LaTeX2e <2022-06-01> patch level 5
 L3 programming layer <2022-07-15>
 (d:/Program Files/texlive/2022/texmf-dist/tex/latex/base/article.cls
@@ -190,8 +190,8 @@ def
 File: l3backend-pdftex.def 2022-07-01 L3 backend support: PDF output (pdfTeX)
 \l__color_backend_stack_int=\count284
 \l__pdf_internal_box=\box55
-) (./temp.aux)
-\openout1 = `temp.aux'.
+) (./param_search.aux)
+\openout1 = `param_search.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 13.
 LaTeX Font Info:    ... okay on input line 13.
@@ -253,34 +253,34 @@ r/m/n/10 (\OML/cmm/m/it/10 ^^R\OT1/cmr/m/n/10 ) \OMS/cmsy/m/n/10 ^^U \OML/cmm/m
 [1
 
 {d:/Program Files/texlive/2022/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [
-2] [3] (./temp.aux) ) 
+2] [3] (./param_search.aux) ) 
 Here is how much of TeX's memory you used:
  3331 strings out of 478023
- 50703 string characters out of 5835647
- 353133 words of memory out of 5000000
+ 50791 string characters out of 5835647
+ 353149 words of memory out of 5000000
  21763 multiletter control sequences out of 15000+600000
  476815 words of font info for 58 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 55i,15n,62p,648b,293s stack positions out of 10000i,1000n,20000p,200000b,200000s
-<d:/Program Files/texlive/2022/texmf-dist/fonts/type1/publ
-ic/amsfonts/cm/cmbx10.pfb><d:/Program Files/texlive/2022/texmf-dist/fonts/type1
-/public/amsfonts/cm/cmbx12.pfb><d:/Program Files/texlive/2022/texmf-dist/fonts/
-type1/public/amsfonts/cm/cmex10.pfb><d:/Program Files/texlive/2022/texmf-dist/f
-onts/type1/public/amsfonts/cm/cmmi10.pfb><d:/Program Files/texlive/2022/texmf-d
-ist/fonts/type1/public/amsfonts/cm/cmmi5.pfb><d:/Program Files/texlive/2022/tex
-mf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb><d:/Program Files/texlive/2022
-/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb><d:/Program Files/texlive/
-2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb><d:/Program Files/texl
-ive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb><d:/Program Files/
-texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmr5.pfb><d:/Program Fil
-es/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb><d:/Program 
-Files/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb><d:/Progr
-am Files/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb><d:/
-Program Files/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb>
-<d:/Program Files/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/symbols/m
-sam10.pfb><d:/Program Files/texlive/2022/texmf-dist/fonts/type1/public/amsfonts
-/symbols/msbm10.pfb>
-Output written on temp.pdf (3 pages, 169689 bytes).
+ 55i,15n,62p,656b,293s stack positions out of 10000i,1000n,20000p,200000b,200000s
+<d:/Program Files/texlive/2022/texmf-dist/fonts/ty
+pe1/public/amsfonts/cm/cmbx10.pfb><d:/Program Files/texlive/2022/texmf-dist/fon
+ts/type1/public/amsfonts/cm/cmbx12.pfb><d:/Program Files/texlive/2022/texmf-dis
+t/fonts/type1/public/amsfonts/cm/cmex10.pfb><d:/Program Files/texlive/2022/texm
+f-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb><d:/Program Files/texlive/2022
+/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb><d:/Program Files/texlive/
+2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb><d:/Program Files/texl
+ive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb><d:/Program Files/
+texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb><d:/Program Fi
+les/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb><d:/Progra
+m Files/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmr5.pfb><d:/Pro
+gram Files/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb><d:/
+Program Files/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb><
+d:/Program Files/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.
+pfb><d:/Program Files/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cm
+sy7.pfb><d:/Program Files/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/s
+ymbols/msam10.pfb><d:/Program Files/texlive/2022/texmf-dist/fonts/type1/public/
+amsfonts/symbols/msbm10.pfb>
+Output written on param_search.pdf (3 pages, 169689 bytes).
 PDF statistics:
  94 PDF objects out of 1000 (max. 8388607)
  56 compressed objects within 1 object stream

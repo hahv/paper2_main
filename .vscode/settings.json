@@ -32,7 +32,8 @@
         "uv.lock": true,
         "**/.python-version": true,
         "**/wandb": true,
-        "**/~$_issue_track.xlsx": true
+        "**/~$_issue_track.xlsx": true,
+        "**/*.gz": true
     },
     "explorerExclude.backup": {},
     "notebook.formatOnSave.enabled": true,

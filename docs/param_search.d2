@@ -1,0 +1,75 @@
+# Skip Module Hyperparameter Search Workflow (Basic Shapes Only)
+
+validation: {
+  shape: rectangle
+  label: "Validation Set"
+}
+
+baseline_dl: {
+  shape: rectangle
+  label: "No Skip -> DL"
+}
+
+r_base: {
+  shape: rectangle
+  label: "R_base, FAR_base"
+}
+
+grid: {
+  shape: parallelogram
+  label: "Grid Theta"
+}
+
+theta_pipeline: {
+  shape: rectangle
+  label: "Read -> Skip(θ) -> DL"
+}
+
+metrics: {
+  shape: rectangle
+  label: "R(θ), FAR(θ), S(θ)"
+}
+
+safety_check: {
+  shape: diamond
+  label: "R(θ) >= R_base - δ?"
+}
+
+feasible: {
+  shape: circle
+  label: "Feasible Set"
+}
+
+score_calc: {
+  shape: rectangle
+  label: "α S(θ) + (1-α) ΔFAR_norm"
+}
+
+theta_star: {
+  shape: cylinder
+  label: "θ* (Optimal)"
+}
+
+discard: {
+  shape: rectangle
+  label: "Discard"
+}
+
+validation -> baseline_dl
+baseline_dl -> r_base
+
+grid -> theta_pipeline
+theta_pipeline -> metrics
+metrics -> safety_check
+
+safety_check -> feasible {
+  label: "YES"
+}
+safety_check -> discard {
+  label: "NO"
+}
+
+feasible -> score_calc
+score_calc -> theta_star
+
+direction: right
