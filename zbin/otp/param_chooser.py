@@ -4,11 +4,12 @@ from typing import Dict, Any, Optional
 
 
 class ParamChooser(ABC):
+
     def __init__(
-        self, df: pd.DataFrame, predefined_params: Optional[Dict[str, Any]] = None
+        self, df: pd.DataFrame, context: Optional[Dict[str, Any]] = None
     ):
         self.df = df
-        self.predefined_params = predefined_params
+        self.context = context
         assert self.validate_dataframe(), (
             "DataFrame validation failed. Please ensure it contains the required columns and data types."
         )
@@ -18,29 +19,30 @@ class ParamChooser(ABC):
 
     @abstractmethod
     def choose_params(self) -> pd.DataFrame:
-        """Implement the parameter selection logic based on the DataFrame and predefined parameters.
+        """Implement the parameter selection logic based on the DataFrame and context.
         Return a DataFrame with the chosen parameters and their corresponding metrics Score (e.g: Combined Score like in `docs/param_search.tex`)"""
         pass
 
 
 class WeightedScoreParamChooser(ParamChooser):
+    # ! Context bundles scoring weights plus baseline-derived metrics/precomputes needed by the chooser.
     def __init__(
         self,
         df: pd.DataFrame,
-        predefined_params: Optional[Dict[str, Any]] = None,
+        context: Optional[Dict[str, Any]] = None,
     ):
-        super().__init__(df, predefined_params)
-        self.parse_predefined_params()
+        super().__init__(df, context)
+        self.parse_context()
 
-    def parse_predefined_params(self):
-        assert self.predefined_params is not None, (
-            "Predefined parameters must be provided."
+    def parse_context(self):
+        assert self.context is not None, (
+            "Context must be provided."
         )
-        self.w_s = self.predefined_params.get("w_s", 0.60)
-        self.w_f = self.predefined_params.get("w_f", 0.20)
-        self.w_r = self.predefined_params.get("w_r", 0.20)
-        self.delta_r = self.predefined_params.get("delta_r", 0.01)
-        baseline = self.predefined_params.get("baseline", {})
+        self.w_s = self.context.get("w_s", 0.60)
+        self.w_f = self.context.get("w_f", 0.20)
+        self.w_r = self.context.get("w_r", 0.20)
+        self.delta_r = self.context.get("delta_r", 0.01)
+        baseline = self.context.get("baseline", {})
         self.r_base = baseline["recall"]
         self.far_base = baseline["far"]
 
@@ -53,6 +55,18 @@ class WeightedScoreParamChooser(ParamChooser):
         return True
 
     def choose_params(self) -> pd.DataFrame:
+        """Implement Algorithm 1 (docs/param_search.tex) using weighted scores."""
+
+        # Mapping to Algorithm 1 symbols:
+        # +----------------------+-----------------------------------+
+        # | Symbol (Alg. 1)      | Code reference                    |
+        # +----------------------+-----------------------------------+
+        # | w_S, w_F, w_R        | self.w_s, self.w_f, self.w_r      |
+        # | R_base, FAR_base     | self.r_base, self.far_base        |
+        # | δ_R                  | self.delta_r                      |
+        # | S(θ), R(θ), FAR(θ)   | df["skip_ratio", "recall", "far"] |
+        # +----------------------+-----------------------------------+
+
         # Ensure weights sum to 1
         total_weight = self.w_s + self.w_f + self.w_r
         if abs(total_weight - 1.0) > 1e-9:
@@ -60,7 +74,7 @@ class WeightedScoreParamChooser(ParamChooser):
 
         df = self.df.copy()
 
-        # Compute derived metrics from raw recall/far
+        # Compute derived metrics (exact equations from docs/param_search.tex)
         # R̃(θ) = 1 − (R_base − R(θ)) / δ_R
         df["recall_retention"] = 1.0 - (self.r_base - df["recall"]) / self.delta_r
 
