@@ -6,7 +6,7 @@ sys.path.append(os.path.dirname(current_dir))
 
 import pytest
 from halib import *
-from zbin.otp.param_chooser import WeightedScoreParamChooser
+from zbin.otp.param_chooser import WeightedSelect
 
 
 # ---------------------------------------------------------------------------
@@ -73,44 +73,44 @@ def dummy_df():
 
 class TestWeightedScoreParamChooserBasic:
     def test_returns_dataframe(self, dummy_df, default_context):
-        chooser = WeightedScoreParamChooser(dummy_df, default_context)
+        chooser = WeightedSelect(dummy_df, default_context)
         result = chooser.choose_params()
         assert isinstance(result, pd.DataFrame)
 
     def test_infeasible_row_excluded(self, dummy_df, default_context):
         """theta_C violates recall constraint and must not appear in results."""
-        chooser = WeightedScoreParamChooser(dummy_df, default_context)
+        chooser = WeightedSelect(dummy_df, default_context)
         result = chooser.choose_params()
         # theta_C has recall = R_BASE - 0.015; all rows in result must satisfy constraint
         assert (result["recall"] >= R_BASE - DELTA_R - 1e-9).all()
         assert len(result) == 2  # only theta_A and theta_B
 
     def test_combined_score_column_exists(self, dummy_df, default_context):
-        chooser = WeightedScoreParamChooser(dummy_df, default_context)
+        chooser = WeightedSelect(dummy_df, default_context)
         result = chooser.choose_params()
         assert "Combined_Score" in result.columns
 
     def test_sorted_descending_by_combined_score(self, dummy_df, default_context):
-        chooser = WeightedScoreParamChooser(dummy_df, default_context)
+        chooser = WeightedSelect(dummy_df, default_context)
         result = chooser.choose_params()
         scores = result["Combined_Score"].tolist()
         assert scores == sorted(scores, reverse=True)
 
     def test_best_candidate_is_theta_a(self, dummy_df, default_context):
         """theta_A has the highest skip_ratio among feasible candidates."""
-        chooser = WeightedScoreParamChooser(dummy_df, default_context)
+        chooser = WeightedSelect(dummy_df, default_context)
         result = chooser.choose_params()
         assert result.iloc[0]["skip_ratio"] == pytest.approx(0.873)
 
     def test_does_not_mutate_input_df(self, dummy_df, default_context):
         original_cols = set(dummy_df.columns)
-        chooser = WeightedScoreParamChooser(dummy_df, default_context)
+        chooser = WeightedSelect(dummy_df, default_context)
         chooser.choose_params()
         assert set(dummy_df.columns) == original_cols
 
     def test_derived_recall_retention_formula(self, dummy_df, default_context):
         """R̃(θ) = 1 - (R_base - R(θ)) / δ_R"""
-        chooser = WeightedScoreParamChooser(dummy_df, default_context)
+        chooser = WeightedSelect(dummy_df, default_context)
         result = chooser.choose_params()
         for _, row in result.iterrows():
             expected = 1.0 - (R_BASE - row["recall"]) / DELTA_R
@@ -118,7 +118,7 @@ class TestWeightedScoreParamChooserBasic:
 
     def test_derived_far_reduction_norm_formula(self, dummy_df, default_context):
         """ΔFAR̃(θ) = max(0, (FAR_base - FAR(θ)) / FAR_base)"""
-        chooser = WeightedScoreParamChooser(dummy_df, default_context)
+        chooser = WeightedSelect(dummy_df, default_context)
         result = chooser.choose_params()
         for _, row in result.iterrows():
             expected = max(0.0, (FAR_BASE - row["far"]) / FAR_BASE)
@@ -127,7 +127,7 @@ class TestWeightedScoreParamChooserBasic:
     def test_combined_score_formula(self, dummy_df, default_context):
         """score = w_R·R̃ + w_S·S + w_F·ΔFAR̃"""
         params = default_context
-        chooser = WeightedScoreParamChooser(dummy_df, params)
+        chooser = WeightedSelect(dummy_df, params)
         result = chooser.choose_params()
         for _, row in result.iterrows():
             expected = (
@@ -147,7 +147,7 @@ class TestWeightedScoreParamChooserEdgeCases:
                 ("theta_E", R_BASE - 0.05, 0.04, 0.85),
             ]
         )
-        chooser = WeightedScoreParamChooser(df, default_context)
+        chooser = WeightedSelect(df, default_context)
         result = chooser.choose_params()
         assert len(result) == 0
 
@@ -155,21 +155,21 @@ class TestWeightedScoreParamChooserEdgeCases:
         """When FAR_base=0, far_reduction_norm must be 0.0 for all rows."""
         params = make_context(far_base=0.0)
         df = make_df([("theta_A", R_BASE - 0.005, 0.0, 0.80)])
-        chooser = WeightedScoreParamChooser(df, params)
+        chooser = WeightedSelect(df, params)
         result = chooser.choose_params()
         assert result.iloc[0]["far_reduction_norm"] == pytest.approx(0.0)
 
     def test_exact_recall_boundary_is_feasible(self, default_context):
         """A candidate at exactly R_base - δ_R should pass the constraint (R̃=0)."""
         df = make_df([("theta_A", R_BASE - DELTA_R, 0.08, 0.70)])
-        chooser = WeightedScoreParamChooser(df, default_context)
+        chooser = WeightedSelect(df, default_context)
         result = chooser.choose_params()
         assert len(result) == 1
         assert result.iloc[0]["recall_retention"] == pytest.approx(0.0, abs=1e-9)
 
     def test_weights_not_summing_to_one_raises(self, dummy_df):
         params = make_context(w_s=0.50, w_f=0.30, w_r=0.30)  # sum = 1.10
-        chooser = WeightedScoreParamChooser(dummy_df, params)
+        chooser = WeightedSelect(dummy_df, params)
         with pytest.raises(ValueError, match="Weights must sum to 1"):
             chooser.choose_params()
 
@@ -177,24 +177,24 @@ class TestWeightedScoreParamChooserEdgeCases:
         df = pd.DataFrame({"exp": ["theta_A"], "recall": [0.88], "skip_ratio": [0.80]})  # missing "far"
         params = make_context()
         with pytest.raises(AssertionError):
-            WeightedScoreParamChooser(df, params)
+            WeightedSelect(df, params)
 
     def test_no_context_raises(self, dummy_df):
         with pytest.raises(
             AssertionError, match="Context must be provided"
         ):
-            WeightedScoreParamChooser(dummy_df, context=None)
+            WeightedSelect(dummy_df, context=None)
 
     def test_single_feasible_row(self, default_context):
         df = make_df([("theta_A", R_BASE - 0.005, 0.08, 0.75)])
-        chooser = WeightedScoreParamChooser(df, default_context)
+        chooser = WeightedSelect(df, default_context)
         result = chooser.choose_params()
         assert len(result) == 1
 
     def test_far_worse_than_baseline_clipped_to_zero(self, default_context):
         """FAR > FAR_base should yield far_reduction_norm=0, not negative."""
         df = make_df([("theta_A", R_BASE - 0.005, FAR_BASE + 0.05, 0.70)])
-        chooser = WeightedScoreParamChooser(df, default_context)
+        chooser = WeightedSelect(df, default_context)
         result = chooser.choose_params()
         assert result.iloc[0]["far_reduction_norm"] == pytest.approx(0.0, abs=1e-9)
 

@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, Any, Optional
 
 
-class ParamChooser(ABC):
+class ParamSelect(ABC):
 
     def __init__(
         self, df: pd.DataFrame, context: Optional[Dict[str, Any]] = None
@@ -24,7 +24,7 @@ class ParamChooser(ABC):
         pass
 
 
-class WeightedScoreParamChooser(ParamChooser):
+class WeightedSelect(ParamSelect):
     # ! Context bundles scoring weights plus baseline-derived metrics/precomputes needed by the chooser.
     def __init__(
         self,
