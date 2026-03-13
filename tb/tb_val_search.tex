@@ -1,0 +1,26 @@
+\begin{table}[ht]
+    \caption{Hyperparameter search space and selected settings for both skip-module variants.}
+    \label{tb:val_results}
+    \csvreader[separator=semicolon,
+        no head,
+        range=2-,
+        centered tabularray = {
+        % width = \columnwidth,
+        colspec = {llccl},       % <-- 2. CHANGED 'X' TO 'l' (or use 'c')
+        % colspec = {llccX},
+        colsep = {4pt},
+        hlines,
+        vlines,
+        cells = {font = \scriptsize, halign = c, valign = m},
+        cell{1}{1} = {halign = l},
+        cell{1}{2} = {halign = l},
+        row{1} = {font = \bfseries\scriptsize},
+    },
+    ]{tb_val_search.csv}{}{%
+    \csvexpval\csvcolii &
+    \csvexpval\csvcoliii &
+    \csvexpval\csvcoliv &
+    \csvexpval\csvcolv &
+    \csvexpval\csvcolvi
+    }
+\end{table}

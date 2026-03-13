@@ -1,0 +1,86 @@
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+
+\begin{document}
+
+	\title{Compact Validation Tables}
+	\author{}
+	\date{}
+	\maketitle
+
+	\section*{Validation Tables}
+
+	\begin{table}[ht]
+		\centering
+		\caption{Search space and selected settings on the validation set.}
+		\label{tab:hyperparam_search}
+		\scriptsize
+		\setlength{\tabcolsep}{4pt}
+		\begin{tabularx}{\columnwidth}{l l c c X}
+			\toprule
+			\textbf{Param} & \textbf{Candidates} & \textbf{A1} & \textbf{A2} & \textbf{Note} \\
+			\midrule
+			Grid size ($N \times N$) & \{8, 16, 32\} & 16$\times$16 & 16$\times$16 & Good tradeoff between spatial detail and runtime. \\
+			Motion thresh. (\%) & \{1.0, 1.5, 2.0, 5.0\} & 2.0 & 1.5 & Lower threshold helps capture subtle smoke motion. \\
+			Fire color rule & tuned range & N/A & used & Helps detect bright flame-like regions. \\
+			Smoke grayness & candidate intervals & N/A & [0.7, 0.95] & Captures low-saturation semi-transparent smoke. \\
+			Temporal window & \{3, 5\} / minimal & minimal & 5 & Improves stability and suppresses noise. \\
+			\bottomrule
+		\end{tabularx}
+	\end{table}
+
+	\begin{table}[ht]
+		\centering
+		\caption{Search space and selected settings on the validation set.}
+		\label{tab:hyperparam_search}
+		\scriptsize
+		\setlength{\tabcolsep}{4pt}
+		\begin{tabularx}{\columnwidth}{l l c c X}
+			\toprule
+			\textbf{Group} & \textbf{Parameter} & \textbf{A1} & \textbf{A2} & \textbf{Note} \\
+			\midrule
+			Shared & Grid size ($N \times N$) & 16$\times$16 & 16$\times$16 & Good tradeoff between detail and runtime. \\
+			Shared & Motion threshold (\%) & 2.0 & 1.5 & Lower threshold helps capture subtle smoke motion. \\
+			\midrule
+			Fire color rule & Red threshold & N/A & selected & Detects bright flame-like red regions. \\
+			& Saturation threshold & N/A & selected & Helps reject non-fire bright objects. \\
+			& Intensity threshold & N/A & selected & Keeps flame response focused on strong regions. \\
+			\midrule
+			Smoke grayness rule & Grayness range & N/A & [0.7, 0.95] & Captures low-saturation smoke appearance. \\
+			& Texture consistency & N/A & selected & Helps distinguish smoke from random motion. \\
+			\midrule
+			Temporal rule & Window size & minimal & 5 & Improves stability and suppresses noise. \\
+			\bottomrule
+		\end{tabularx}
+	\end{table}
+
+
+	\begin{table}[ht]
+		\centering
+		\caption{Validation results under the Recall(Anomaly) $\geq$ 99\% safety constraint.}
+		\label{tab:val_selection}
+		\scriptsize
+		\setlength{\tabcolsep}{3pt}
+		\begin{tabularx}{\columnwidth}{l c c c c X}
+			\toprule
+			\textbf{Config} & \textbf{Rec.} & \textbf{Filt.} & \textbf{Score} & \textbf{Safe?} & \textbf{Role} \\
+			\midrule
+			A1: 16$\times$16, 2.0\%, motion only & 97.2\% & 65.0\% & N/A & No & Motion-only baseline; fails safety target. \\
+			A2: 16$\times$16, 1.5\%, smoke rules & 99.1\% & 72.1\% & 0.714 & Yes & \textbf{Selected final configuration}. \\
+			A2: 16$\times$16, 2.0\%, smoke rules & 99.0\% & 68.3\% & 0.676 & Yes & Safe, but less efficient. \\
+			A2: 32$\times$32, 1.0\%, smoke rules & 99.2\% & 65.7\% & 0.652 & Yes & Slightly higher recall, lower efficiency. \\
+			\bottomrule
+		\end{tabularx}
+	\end{table}
+
+	\vspace{2mm}
+	\noindent\footnotesize\textit{Note:} Approach 1 (A1) is included as a simple motion-only baseline. Its best configuration remains below the 99\% recall target, so it is not selected for final deployment.
+
+\end{document}

@@ -1,0 +1,26 @@
+\begin{table*}[hbtp]
+    \caption{Validation-set performance under the hard safety constraint Recall(Anomaly). Final model selected by maximizing SkipScore among feasible configurations.}
+    \label{tb:val_results}
+    \csvreader[separator=semicolon,
+    no head,
+    range=2-,
+    centered tabularray = {
+    width = \columnwidth,
+    colspec = {llcccX},
+    colsep = {3pt},
+    hlines,
+    vlines,
+    cells = {font = \scriptsize, halign = c, valign = m},
+    cell{1}{1} = {halign = l},
+    cell{1}{2} = {halign = l},
+    row{1} = {font = \bfseries\scriptsize},
+    },
+    ]{tb_val_results.csv}{}{
+    \csvexpval\csvcolii &
+    \csvexpval\csvcoliii &
+    \csvexpval\csvcoliv &
+    \csvexpval\csvcolv &
+    \csvexpval\csvcolvi &
+    \csvexpval\csvcolvii
+    }
+\end{table*}

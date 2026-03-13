@@ -1,0 +1,21 @@
+\begin{table*}[hbtp]
+    \caption{Compare our BIG MODEL (no skip module) performance against other lightweight DL classifier or Object Detectors.}
+    \label{tb:tb_no_skip_perf}
+    \csvreader[separator=semicolon,
+        no head,
+        range=2-,
+        centered tabularray = {
+        colspec = {llll},
+        colsep = {4pt},
+        hlines,
+        vlines,
+        cells = {font = \scriptsize, halign = c, valign = m},
+        row{1} = {font = \bfseries\scriptsize},
+    },
+    ]{tb_no_skip_perf.csv}{}{
+        \csvexpval\csvcolii &
+        \csvexpval\csvcoliii &
+        \csvexpval\csvcoliv &
+        \csvexpval\csvcolv
+    }
+\end{table*}

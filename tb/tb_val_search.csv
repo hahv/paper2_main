@@ -1,0 +1,10 @@
+1;2;3;4;5;
+2;Group;Parameter;A1 (Baseline);A2 (Proposed);Note
+3;Shared;Grid size ($N \times N$);16$\times$16;16$\times$16;Balances spatial sensitivity and runtime cost.
+4;Shared;Motion threshold;2.0;1.5;Lower threshold helps capture subtle smoke motion.
+5;Fire color rule;Red threshold;N/A;selected;Detects bright flame-like red regions.
+6;;Saturation threshold;N/A;selected;Helps reject non-fire bright objects.
+7;;Intensity threshold;N/A;selected;Focuses on strong flame responses.
+8;Smoke grayness rule;Grayness range;N/A;{[0.7, 0.95]};Captures low-saturation semi-transparent smoke.
+9;;Texture consistency;N/A;selected;Helps distinguish smoke from random motion.
+10;Temporal rule;Window size (frames);minimal;5;Suppresses transient noise and improves stability.

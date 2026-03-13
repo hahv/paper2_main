@@ -1,0 +1,7 @@
+1;2;6;4;;;5
+2;Config;Recall;False Alarm Rate;Accuracy;Skip Rate;FPS
+3;BIG MODEL only;98.5\%;50.0ms;312;0\%;20
+4;M1;76.0\%;15.0ms;123123;70\%;66
+5;M2;81.5\%;22.0ms;123123;56\%;45
+6;Ours (Appr. 1 + BIG);98.3\%;18.3ms;123;63\%;54
+7;Ours (Appr. 2 + BIG);98.5\%;16.5ms;3123123;67\%;60

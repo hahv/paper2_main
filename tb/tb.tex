@@ -1,0 +1,81 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[a4paper,margin=0.5cm]{geometry}
+
+\usepackage{orcidlink}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{csvsimple-l3}
+\usepackage{etoolbox}
+\usepackage{caption,setspace}
+\usepackage{subcaption}
+\usepackage{tabularray}
+\usepackage{fontawesome}
+\usepackage{float}
+\usepackage{lipsum}
+\usepackage{xurl}
+\usepackage{ifthen}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{gensymb}
+\usepackage[flushleft]{threeparttable}
+\usepackage{bm}
+%for rotating cell in tblr table
+\usepackage{rotating}   % needed
+\usepackage{makecell}   % needed
+\usepackage{soul}
+\setulcolor{red}
+\sethlcolor{white}
+\usepackage{dutchcal} % https://tex.stackexchange.com/a/641540
+% START add page number
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\setlength{\footskip}{10pt} % Adjusts the space between text and footer (reduce if needed)
+\setlength{\textheight}{\dimexpr\textheight+\footskip\relax}  % Increase text area to match reduced footskip
+\pagestyle{fancy}
+\fancyhf{}
+\cfoot{\thepage}
+\rfoot{}
+\lfoot{}
+\renewcommand{\headrulewidth}{0pt}  % Remove the header line
+\renewcommand{\footrulewidth}{0pt}  % Remove the footer line
+% END add page number
+% \usepackage{algorithm}
+% \usepackage{algpseudocode}
+\usepackage{algorithmicx}
+\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+
+
+% for algorithm indent
+\algdef{SE}[SUBALG]{Indent}{EndIndent}{}{\algorithmicend\ }%
+\algtext*{Indent}
+\algtext*{EndIndent}
+\begin{document}
+
+\title{Summary of Validation and Performance Experiments}
+\author{hahv}
+\date{March 2026}
+\maketitle
+
+\noindent This section presents a comprehensive evaluation of the proposed skip-module architectures ($A_1$, $A_2$). We compare our frame-level skipping approach against standard lightweight alternatives ($M_1$, $M_2$) and the heavy baseline detector.
+
+\section{Component-Level Performance (Baselines)}
+\noindent Table~\ref{tb:tb_no_skip_perf} assesses the intrinsic recall and filtering capability of each method as a standalone component.
+\input{tb_no_skip_perf.tex}
+
+\section{Hyperparameter Optimization (Validation Set)}
+\noindent Table~\ref{tb:val_search} specifies the search space for the rule-based skip-module parameters. The ranking and selection of the optimal configuration ($\theta^*$) based on the validation set results are detailed in Table~\ref{tb:val_results}.
+\input{tb_val_search.tex}
+\input{tb_val_results.tex}
+
+\section{End-to-End System Performance (Test Set)}
+\noindent The overall impact of integrating the skip modules into the full detection pipeline is quantified in Table~\ref{tb:e2e_perf} (frame-level accuracy/latency), also comparing against the baseline system without skipping.
+\input{tb_e2e_perf.tex}
+
+\section{Comparison with Other Temporal Methods}
+
+\noindent Finally, Table~\ref{tb:cmp_base_temp} compares our method against other temporal processing techniques, evaluating both detection performance and computational efficiency.
+
+\input{tb_cmp_base_temp.tex}
+
+\end{document}

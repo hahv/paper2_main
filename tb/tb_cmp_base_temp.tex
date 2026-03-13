@@ -1,0 +1,25 @@
+\begin{table*}[ht]
+    \caption{Comparison of Video-level performance metrics, measuring the delay and initial detection speed.}
+    \label{tb:cmp_base_temp}
+    \csvreader[separator=semicolon,
+        no head,
+        range=2-,
+        centered tabularray = {
+        colspec = {llllllll},
+        colsep = {4pt},
+        hlines,
+        vlines,
+        cells = {font = \scriptsize, halign = c, valign = m},
+        row{1} = {font = \bfseries\scriptsize},
+    },
+    ]{tb_cmp_base_temp.csv}{}{
+        \csvexpval\csvcolii &
+        \csvexpval\csvcoliii &
+        \csvexpval\csvcoliv &
+        \csvexpval\csvcolv &
+        \csvexpval\csvcolvi &
+        \csvexpval\csvcolvii &
+        \csvexpval\csvcolviii &
+        \csvexpval\csvcolix
+    }
+\end{table*}

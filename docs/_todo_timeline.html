@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>_todo_timeline.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="to-do-workflow">To-do workflow</h1>
+<pre class="hljs"><code><div>+----------------------------------------------------------------------------------+
+|                    🚀 STORY-DRIVEN EXPERIMENT WORKFLOW / TIMELINE                |
++----------------------------------------------------------------------------------+
+Note:
+0️⃣ Our (no-skip) = A heavy classifier trained with million images (&quot;heavy but safe&quot;)
+1️⃣ M1 = A lightweight image classifier (&quot;fast but unsafe&quot;)
+2️⃣ M2 = A lightweight object detector;  (&quot;fast but unsafe&quot;)
+3️⃣ M3 = A temporal voting method (video-level baseline) (&quot;accurate but delay to detection&quot;)
+
+The emojis make it instantly scannable: 🚦 for decisions, ✅/❌ for pass/fail, 🎯 for recall/safety, ⚡ for speed, etc.—while preserving the exact sequential dependencies from the table and paper outline
+
+🔍 [^0] DATASET CHECK ✅
+    |
+    |-- Verify split and balance:
+    |      Train/Val = 90 videos 📊
+    |      Test      = 60 videos 📊
+    |      Classes   = FireSmoke / Safe
+    |
+    v
+⚡ [^1] TEST-SET BASELINES FIRST 🏁
+    |
+    |-- Run BIG MODEL (no skip) on TEST
+    |      -&gt; get reference accuracy / recall / latency ⏱️
+    |
+    |-- Run M1 on TEST
+    |      -&gt; get lightweight speed / recall tradeoff ⚖️
+    |
+    |-- Run M2 on TEST
+    |      -&gt; get lightweight speed / recall tradeoff ⚖️
+    |
+    +--&gt; 🚦 Decision A:
+         &quot;Do we clearly see:
+          BIG MODEL = accurate but slow 🐌,
+          M1/M2 = faster but miss anomalies ❌?&quot;
+               |
+               +-- ❌ NO --&gt; 🔧 re-check data / labels / eval pipeline
+               |
+               +-- ✅ YES --&gt; continue
+                              |
+                              v
+📊 [^2] DEFINE METRICS + SAFETY RULE 🛡️
+    |
+    |-- Recall(Anomaly) 🎯
+    |-- Filter Rate on Safe frames 🚫
+    |-- System FAR
+    |-- Safety constraint: Recall &gt;= 99%
+    |
+    v
+🔧 [^3] VALIDATION-SET TUNING 🎛️
+    |
+    |-- Approach 1: naive motion 🏃
+    |-- Approach 2: motion + color + texture 🎨🔥💨
+    |-- Grid search on VAL only
+    |
+    +--&gt; 🚦 Decision B:
+         &quot;Is there a config satisfying Recall &gt;= 99%? 🛡️&quot;
+               |
+               +-- ❌ NO --&gt; 🔧 revise thresholds / rules
+               |
+               +-- ✅ YES --&gt; choose best config by SkipScore ⭐
+                              |
+                              v
+✅ [^4] COMPONENT TEST ON TEST SET 🧪
+    |
+    |-- Run final Approach 1 alone
+    |-- Run final Approach 2 alone
+    |
+    |-- Measure:
+    |      Recall(Anomaly) 🎯
+    |      Filter Rate (Safe) 🚫
+    |      Overhead (ms) ⏱️
+    |
+    +--&gt; 🚦 Decision C:
+         &quot;Does Approach 2 behave like a safe gatekeeper? 🛡️&quot;
+               |
+               +-- ❌ NO --&gt; go back to [^3] 🔄
+               |
+               +-- ✅ YES --&gt; continue
+                              |
+                              v
+🚀 [^5] FULL PIPELINE TEST ON TEST SET 💥
+    |
+    |-- Approach 1 + BIG MODEL
+    |-- Approach 2 + BIG MODEL
+    |-- Compare against:
+    |      BIG MODEL only
+    |      M1
+    |      M2
+    |
+    |-- Measure:
+    |      system recall / F1 🎯
+    |      latency ⏱️
+    |      FPS ⚡
+    |      compute reduction 📉
+    |
+    +--&gt; 🎯 Core Claim Check:
+         &quot;Does Approach 2 + BIG keep BIG MODEL accuracy
+          while reducing compute and latency? ⚖️&quot;
+               |
+               +-- ❌ NO --&gt; go back to [^3] or [^4] 🔄
+               |
+               +-- ✅ YES --&gt; continue
+                              |
+                              v
+⏱️ [^6] TEMPORAL BASELINE COMPARISON 🥇
+    |
+    |-- Compare against M3
+    |-- Measure:
+    |      time-to-first-alarm 🏃‍♂️
+    |      video-level recall
+    |      false alarm rate
+    |
+    v
+🔬 [^7] ABLATION + QUALITATIVE EVIDENCE 📸
+    |
+    |-- motion only
+    |-- + fire rules 🔥
+    |-- + smoke rules 💨
+    |-- full rules
+    |
+    |-- collect edge cases:
+    |      smoke missed by Appr.1 ❌
+    |      safe motion falsely triggered by Appr.1 🚫
+    |
+    v
+⚠️ [^8] LIMITATION CHECK 🧪
+    |
+    |-- low light / IR 🌙
+    |-- fog / weather 🌫️
+    |-- unusual lighting
+    |
+    v
+🏆 +----------------------------------------------------------------------------------+
+| FINAL STORY: redundancy is the bottleneck; a safe skip module lets BIG MODEL    |
+| run much faster without losing safety-critical recall. 🎯⚡                       |
++----------------------------------------------------------------------------------+
+</div></code></pre>
+<h2 id="compact-paper-version-with-emojis">Compact paper version (with emojis)</h2>
+<p>Perfect for pasting into manuscripts or presentations:</p>
+<pre class="hljs"><code><div>+----------------------------------------------------------------------------------+
+|                    🚀 PAPER2 TARGET TABLES WORKFLOW (All-in-One)                 |
++----------------------------------------------------------------------------------+
+
+🔍 [Baselines + Component Test] → Table 1 ✅
+    |
+    +-- Table 1: Standalone Recall and Filtering Performance
+    |     | Method                        | Overhead | Recall | Filter Rate |
+    |     |-------------------------------|----------|--------|-------------|
+    |     | M1 (MobileNetV2 Classifier)   | 15.0ms   | 85.3%  | N/A         |
+    |     | M2 (YOLOv8-Nano Detector)     | 22.0ms   | 88.2%  | N/A         |
+    |     | Appr.1 (Naive Motion)         | 1.2ms    | 97.2%  | 65.0%       |
+    |     | Appr.2 (Rule-Based)           | 2.5ms    | 99.1%  | 72.1%       |
+    |
+    v
+🎛️ [VAL Grid Search] → Tables 5&amp;6 ⭐
+    |
+    +-- Table 5: Hyperparam Search Space (Target: 16x16, 1.5%, smoke rules)
+    |     | Param                       | Appr.1 | Appr.2  |
+    |     |-----------------------------|--------|---------|
+    |     | Grid Size (NxN)             | 16x16  | 16x16   |
+    |     | Motion Threshold            | 2%     | 1.5%    |
+    |     | Grayness Threshold (Smoke)  | N/A    | [0.7,0.95]|
+    |
+    +-- Table 6: Top 3 Configs (Val Set)
+    |     | Rank | Config                     | Recall | Filter | SkipScore |
+    |     |------|----------------------------|--------|--------|-----------|
+    |     | 1    | 16x16,1.5%,Smoke Rules     | 99.1%  | 72.1%  | 0.714     | ✅ Appr.2
+    |     | 2    | 16x16,2.0%,Smoke Rules     | 99.0%  | 68.3%  | 0.676     | ❌
+    |     | 3    | 32x32,1.0%,Smoke Rules     | 99.2%  | 65.7%  | 0.652     | ❌
+    |
+    v
+💥 [Full Pipeline Test] → Table 2 🚀
+    |
+    +-- Table 2: End-to-End System Performance
+    |     | Config                      | Latency | FPS  | Recall | Cost Red. |
+    |     |-----------------------------|---------|------|--------|-----------|
+    |     | BIG MODEL only              | 50.0ms  | 20   | 98.5%  | 0%        |
+    |     | M1                          | 15.0ms  | 66   | 76.0%  | 70%       |
+    |     | M2                          | 22.0ms  | 45   | 81.5%  | 56%       |
+    |     | Ours (Appr.1 + BIG)         | 18.3ms  | 54   | 98.3%  | 63%       |
+    |     | Ours (Appr.2 + BIG)         | 16.5ms  | 60   | 98.5%  | 67%       | ✅
+    |
+    v
+🥇 [vs M3 Temporal] → Tables 3&amp;4 ⏱️
+    |
+    +-- Table 3: Time-to-Alarm Analysis (*M3 using BIG Model*)
+    |     | Method             | Scope      | Delay   | Min Latency | First Alarm |
+    |     |--------------------|------------|---------|-------------|-------------|
+    |     | M3 Temporal Voting | Video(30f) | 25ms/f  | 30 Frames   | &gt;750ms      |
+    |     | Ours (Appr.2+BIG)  | Frame-level| 16.5ms/f| 1 Frame     | ~52.5ms     | ✅
+    |
+    +-- Table 4: Video-Level Metrics
+    |     | Method             | Video Recall| False Alarm | Compute/Sec |
+    |     |--------------------|-------------|-------------|-------------|
+    |     | M3 Temporal Voting | 97.5%       | 1.2%        | 750ms       |
+    |     | Ours (Appr.2+BIG)  | 98.4%       | 1.5%        | 495ms       | ✅
+    |
+    v
+📸 [Ablation + Limits] → Qualitative Figure 4 🔬⚠️
+
+🏆 STORY: BIG MODEL accuracy ⚡ 3x faster with safe skip module!
++----------------------------------------------------------------------------------+
+
+</div></code></pre>
+
+</body>
+</html>

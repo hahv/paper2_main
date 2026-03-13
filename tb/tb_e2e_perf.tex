@@ -1,0 +1,23 @@
+\begin{table}[ht]
+    \caption{End-to-End System Performance Comparison on Test Set.}
+    \label{tb:e2e_perf}
+    \csvreader[separator=semicolon,
+        no head,
+        range=2-,
+        centered tabularray = {
+        colspec = {lllll},
+        colsep = {4pt},
+        hlines,
+        vlines,
+        cells = {font = \scriptsize, halign = c, valign = m},
+        row{1} = {font = \bfseries\scriptsize},
+    },
+    ]{tb_e2e_perf.csv}{}{%
+    \csvexpval\csvcolii &
+    \csvexpval\csvcoliii &
+    \csvexpval\csvcoliv &
+    \csvexpval\csvcolv &
+    \csvexpval\csvcolvi &
+    \csvexpval\csvcolvii
+    }
+\end{table}

@@ -1,0 +1,5 @@
+1;2;3;4;5
+2;Method;Recall;False Alarm Rate;FPS
+3;\textbf{M1} (MobileNetV2 Classifier);80.0\%;10.0\%;30
+4;M2 (YOLOv8-Nano Detector);85.0\%;8.0\%;45
+5;\textbf{BIG model};90.0\%;5.0\%;60
