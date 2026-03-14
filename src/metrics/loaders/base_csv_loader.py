@@ -67,8 +67,10 @@ class BaseRawCsvLoader(ABC):
         Helper to read a CSV file, standardizes columns (renaming label -> gt_label),
         and adds metadata columns (video, video_path, frame_idx).
         """
-        assert os.path.exists(csv_path), f"CSV file {csv_path} does not exist"
-
+        # !debug start
+        # pprint(f"Reading CSV: {csv_path} (is_gt={is_gt})")
+        # !debug end
+        assert os.path.exists(csv_path), f"CSV file does not exist (path = {csv_path!r}) for video = {video_path!r}"
         # Prepare read_csv options
         if is_gt:
             dtype_map = {GlobalConst.COL_GT: str}
@@ -86,7 +88,7 @@ class BaseRawCsvLoader(ABC):
             encoding="utf-8",
             dtype=dtype_map,
             keep_default_na=False,
-        )
+        )  # ty:ignore[no-matching-overload]
 
         # Standardize GT label column
         if is_gt and "label" in df.columns and GlobalConst.COL_GT not in df.columns:
@@ -133,17 +135,6 @@ class BaseRawCsvLoader(ABC):
             gt_df, pred_df, on=BaseRawCsvLoader.RAW_FIXED_COLS, how="inner"
         )
         return merged_df
-
-    @staticmethod
-    def load_gt_pred_df_from_files(
-        video_path: str, gt_csv_path: str, pred_csv_path: str
-    ) -> pd.DataFrame:
-        """
-        Loads and merges GT and Pred DataFrames from explicit file paths.
-        """
-        gt_df = BaseRawCsvLoader._read_raw_csv(gt_csv_path, video_path, is_gt=True)
-        pred_df = BaseRawCsvLoader._read_raw_csv(pred_csv_path, video_path, is_gt=False)
-        return BaseRawCsvLoader._merge_gt_pred_dfs(gt_df, pred_df, video_path)
 
     @staticmethod
     def load_csv_by_pattern(
