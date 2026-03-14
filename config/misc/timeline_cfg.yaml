@@ -27,13 +27,16 @@ no_skip:
     legend_title: "2. NO SKIP (Baseline)"
 
   timeline:
-    combine_rules:
-      Correct: ["Correct Pos.", "Correct Neg."]
+    # combine_rules:
+    #   Correct: ["Correct Pos.", "Correct Neg."]
 
     labels:
-      Correct:
+      Recall:
         color: "#2b8a3e"
-        additional_note: "Accurate predictions (TP/TN). Normalized by total frames."
+        additional_note: "True Positive (TP). Normalized by actual positive frames."
+      True Negative:
+        color: "#69db7c"
+        additional_note: "True Negative (TN). Normalized by actual negative frames."
       False Alarm:
         color: "#ebd91a"
         additional_note: "False Positive (FP). Normalized by actual negative frames."

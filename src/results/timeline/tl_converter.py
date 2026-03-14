@@ -345,10 +345,20 @@ class TlProcessor:
             # console.rule(f"_get_row_total {method_col=}, {label=},{tl_type=}")
             # !debug end
 
-            if tl_type == GlobalConst.TL_TYPE_GT or "Correct" in label:
-                # ! In this case, we want to calculate the total frames for the entire row (video) as the denominator, since GT distribution is what matters for both Fire and None, and for "Correct" we want overall accuracy.
+            if tl_type == GlobalConst.TL_TYPE_GT:
+                # ! Use total video frames as the denominator for 'gt' type:
+                # We want the overall distribution of fire vs non-fire frames in the whole video.
                 row_total = counts_df.sum(axis=1).replace(0, 1)
             else:
+                # ! For specific error metrics, we calculate percentages against their actual Ground Truth distributions:
+                #
+                # no_skip:
+                #   - "Recall" (TP) / "Miss" (FN) -> Divided by ACTUAL positives (Total GT Fire frames)
+                #   - "True Negative" (TN) / "False Alarm" (FP) -> Divided by ACTUAL negatives (Total GT None frames)
+                #
+                # skip:
+                #   - "Correct Infer." (TP) / "False Skip" (FN) -> Divided by Total GT Fire frames.
+                #   - "Correct Skip" (TN) / "Wasted Infer." (FP) -> Divided by Total GT None frames.
                 converter = TLConverterFactory.create(tl_type)
                 total_labels = (
                     converter.pos_labels

@@ -6,6 +6,6 @@ metric_names:
   - recall (TPR)
   - FPR (False Alarm Rate) # False Positive Rate
   - FPS # Frames Per Second
-  - Skip Rate # Skip Rate = (Number of Skipped Frames) / (Total Number of Safe Frames)
+  # - Skip Rate # Skip Rate = (Number of Skipped Frames) / (Total Number of Safe Frames)
 extra_cfgs:
   mode: [per_video, per_frame] # per_video, per_frame

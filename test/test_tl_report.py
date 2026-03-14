@@ -76,10 +76,10 @@ if __name__ == "__main__":
     # test_gen_single_dir()
 
     # 2. Batch Processing (Individual Reports)
-    # test_gen_multiple_dirs()
+    test_gen_multiple_dirs()
 
     # 3. CSV Reconstruction
     # test_gen_from_csv()
 
     # 4. Comparison Report (New)
-    test_gen_compare_exps()
+    # test_gen_compare_exps()
