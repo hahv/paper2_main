@@ -36,5 +36,5 @@ inferCfg:
   log_transforms: false
   use_profiler: false
   save_timeline_vis: true
-  timeline_table_mode: p
+  timeline_table_mode: pfc
   verbose: false

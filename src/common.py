@@ -46,9 +46,9 @@ class GlobalConst:
     TL_GT_NONE = "None"
 
     # timeline labels for baseline methods (no-skip)
-    TL_NOSKIP_CORRECT_POS = "Correct Pos."  # TP
-    TL_NOSKIP_CORRECT_NEG = "Correct Neg."  # TN
-    TL_NOSKIP_CORRECT = "Correct"  # TP+TN (combined for reporting)
+    TL_NOSKIP_CORRECT_POS = "Recall"  # TP
+    TL_NOSKIP_CORRECT_NEG = "True Negative"  # TN
+    # TL_NOSKIP_CORRECT = "Correct"  # TP+TN (combined for reporting)
     TL_NOSKIP_FALSE_ALARM_FP = "False Alarm"  # FP
     TL_NOSKIP_MISS_FN = "Miss"  # FN
 
