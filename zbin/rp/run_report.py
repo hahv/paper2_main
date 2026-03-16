@@ -1,3 +1,4 @@
+from joblib.externals.loky.backend.spawn import prepare
 import os
 import sys
 
@@ -8,6 +9,7 @@ sys.path.append(project_dir)  # Add project directory to sys.path
 
 from halib import *  # noqa: F403
 from halib.exp.perf.perfcalc import PerfCalc, PerfTB
+from halib.filetype import yamlfile
 from tap import *
 from loguru import logger as llogger
 from src.exp import Paper2Exp
@@ -16,15 +18,21 @@ from src.common import GlobalConst
 
 class ReportArgs(Tap):
     indir: str = "./zout/zruns"  # output dir of runs
-    metricDir: str = "config/metrics"  # metric config directory
+    metric_cfg_file: str = (
+        "config/metrics/per_frame_metric.yaml"  # metric config directory
+    )  # metric config directory
     outdir: str = "./zout/reports"  # report output directory
     now: bool = False  # whether to use current timestamp for report dir
+    skip_plot: bool = False # whether to skip plotting the performance report (only save CSV)
+    is_optim_report: bool = False # whether this report is for optimization (affects how the report is generated)
 
     def configure(self):
         self.add_argument("-i", "--indir")
-        self.add_argument("-m", "--metricDir")
+        self.add_argument("-m", "--metric_cfg_file")
         self.add_argument("-o", "--outdir")
         self.add_argument("-now", "--now", action="store_true")
+        self.add_argument("-noplot","--skip_plot", action="store_true")
+        self.add_argument("-opt","--is_optim_report", action="store_true")
 
 
 def default_exp_csv_filter_fn(exp_file_name: str) -> bool:
@@ -96,21 +104,24 @@ def prepare_exp_dir(in_dir: str):
                     with ConsoleLog(f"Error details for {exp_dir}"):
                         pprint_stack_trace()
 
-def report_perf(indir: str, metric_dir: str, report_dir: str):
-    metric_files = fs.filter_files_by_extension(metric_dir, ".yaml")
-    assert metric_files, f"No metric files found in {metric_dir}"
-    metricSet_names = [
-        fs.get_file_name(f, split_file_ext=True)[0].replace("_metric", "")
-        for f in metric_files
-    ]
+def report_perf(indir: str, metric_cfg_file: str, report_dir: str, skip_plot: bool = False):
+    assert os.path.exists(metric_cfg_file), f"No metric files found in {metric_cfg_file}"
+    metric_cfg_dict = yamlfile.load_yaml(metric_cfg_file, to_dict=True)
+    metricSet_names = metric_cfg_dict["extra_cfgs"]["mode"]
     SEP = "__"
     box_info = {
         "Input Directory": indir,
-        "Metric Directory": metric_dir,
+        "Metric Directory": metric_cfg_file,
         "Report Directory": report_dir,
         "Metric Set Names": metricSet_names,
     }
     pprint_box(box_info, title="Report Generation Parameters")
+
+    os.makedirs(report_dir, exist_ok=True)
+
+    # !First prepare the experiment directories by generating performance CSV files if they don't exist.
+    prepare_exp_dir(indir)
+
     for metricSet_name in metricSet_names:
         pattern = f"{metricSet_name}{SEP}perf"
         pprint(f" Find {pattern} in {indir}")
@@ -130,26 +141,27 @@ def report_perf(indir: str, metric_dir: str, report_dir: str):
             get_wins_path=True,
             tag_or_box_title="Save perfTb to ⏬:",
         )
-        perfTb_by_metric.plot(
-            save_path=os.path.join(report_dir, f"perf_report__{metricSet_name}.svg")
-        )
+        if not skip_plot:
+            perfTb_by_metric.plot(
+                save_path=os.path.join(report_dir, f"perf_report__{metricSet_name}.svg")
+            )
+        return perfTb_by_metric.to_dataframe()
+    
 
 
 def main():
     args = ReportArgs().parse_args()
     indir = args.indir
-    metric_dir = args.metricDir
+    metric_dir = args.metric_cfg_file
     report_dir = args.outdir
 
     if args.now:
         report_dir = os.path.join(report_dir, now_str())
-    os.makedirs(report_dir, exist_ok=True)
 
-    # First prepare the experiment directories by generating performance CSV files if they don't exist.
-    prepare_exp_dir(indir)
+
 
     # Then generate the performance report.
-    report_perf(indir, metric_dir, report_dir)
+    report_perf(indir, metric_dir, report_dir, skip_plot=args.skip_plot)
 
 
 if __name__ == "__main__":

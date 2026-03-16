@@ -23,7 +23,10 @@ class RunOptimArgs(Tap):
     base_yaml: str = r"./config/zruns/run_base.yaml"
     sweep_yaml: str = r"./config/zruns/run_multi.yaml"
     clean_slack: bool = False
+    is_optim_mode: bool = False
 
+    def configure(self):
+        self.add_argument("-opt", "--is_optim_mode", action="store_true", help="Whether to run in optimization mode, which will look for optimization configs for each method and run multiple configs accordingly.")
 
 def get_opt_cfg(method_name: str):
     BASE_CFG_OPTIM = "config/zruns/optim"
@@ -78,13 +81,14 @@ def main():
         method_name = cfg_item.methodCfg.name
 
         opt_cfg_path = None
-        if cfg_item.general.is_optim_mode:
+        use_optim_mode = args.is_optim_mode or cfg_item.general.is_optim_mode
+        if args.is_optim_mode:
             opt_cfg_path = get_opt_cfg(method_name)  # ty:ignore[invalid-argument-type]
 
         if method_name not in cfg_stats:
             cfg_stats[method_name] = 0
         if opt_cfg_path is None:
-            if cfg_item.general.is_optim_mode:
+            if use_optim_mode:
                 console.log(
                     f"[yellow]No optimization config found for method {method_name}, skipping hyper-parameter optimization.[/yellow]"
                 )
@@ -105,6 +109,12 @@ def main():
                 # ! only update the content of extra_cfgs
                 optim_params = optim_param_set["extra_cfgs"]
                 base_cfg.update_optim_params(optim_params)
+
+                # ! force base_cfg to be in optimization mode
+                base_cfg.general.is_optim_mode = use_optim_mode
+                # ! also modifed the output dir to be under optim dir (if in optim mode)
+                if use_optim_mode:
+                    base_cfg.update_for_optim_mode()
                 all_optim_run_cfgs.append(base_cfg)
             cfg_stats[method_name] += len(optim_cfgs)
 

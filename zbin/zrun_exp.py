@@ -13,12 +13,14 @@ class CustomArgs(Tap):
     base_cfg_pattern: str = ""
     sweep_cfg_pattern: str = ""
     use_line_profiler: bool = False
+    is_optim_mode: bool = False
 
     def configure(self):
         self.add_argument("-r", "--run_cfg_yaml")
         self.add_argument("-b", "--base_cfg_pattern")
         self.add_argument("-s", "--sweep_cfg_pattern")
         self.add_argument("-p", "--use_line_profiler")
+        self.add_argument("-opt", "--is_optim_mode", action="store_true", help="Whether to run in optimization mode")
 
 
 def main():
@@ -45,7 +47,11 @@ def main():
         if not should_run:
             continue
         cmd_str_run = cmd_str.format(base_yaml=base_yaml, sweep_yaml=sweep_yaml)
+        if args.is_optim_mode:
+            cmd_str_run += " --is_optim_mode"
         console.rule(f"Running command: {cmd_str_run}")
+        with ConsoleLog("Run command", characters="▶"):
+            pprint(cmd_str_run)
         pprint_box(run_cfg, title="Run Config")
         if args.use_line_profiler:
             cmd_str_run = f"python -m kernprof -l {cmd_str_run}"

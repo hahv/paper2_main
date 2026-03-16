@@ -93,7 +93,8 @@ class InferConfig(YAMLWizard):
         "p"  # options: p (percent), fc (frame count), both (pfc)
     )
     csv_infer_pattern: Optional[str] = GlobalConst.INFER_FILE_PATTERN
-
+    timeline_video_name_limit: Optional[int] = 40
+    timeline_table_decimals: Optional[int] = 4
 
 @dataclass
 class ModelConfig(YAMLWizard):
@@ -476,3 +477,11 @@ class Config(ExpBaseCfg):
         self.general.project_dir = str(exp_path.parent)
         self.general.outdir = ""
         self.cfg_name = exp_path.name
+
+    def update_for_optim_mode(self):
+        """
+        When in optimization mode, we want to save all runs under a common directory for easier comparison.
+        This function modifies the general.project_dir and general.outdir to achieve that.
+        """
+        optim_dir_name = "optim_runs"
+        self.general.outdir = os.path.join(self.general.outdir, optim_dir_name)
