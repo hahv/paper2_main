@@ -6,7 +6,7 @@ sys.path.append(os.path.dirname(current_dir))
 
 import pytest
 from halib import *
-from zbin.otp.param_chooser import WeightedSelect
+from src.param_select import WeightedSelect
 
 
 # ---------------------------------------------------------------------------

@@ -6,7 +6,7 @@ metric_selector:
   selected_metric: ["per_frame_metric"]
 method_selector:
   selected_method:
-    # - no_temp_method
+    - no_temp_method
     # - temp_baseline_Tpt_method
-    - temp_method_motion_block
+    # - temp_method_motion_block
     # - temp_method_rule_block

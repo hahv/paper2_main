@@ -125,7 +125,7 @@ def main():
             exclude_dims=["Name"],
             exp_id_formatter=exp_id_formatter_func,
             color="acc",  # renamed from metric_accuracy
-            outdir="zout/reports",
+            outdir="zout/_reports",
             outfile=f"parallel_plot_{mode}.html",
             title=f"Parallel Plot (Mode={mode})",
             plot_width=1500,

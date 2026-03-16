@@ -37,7 +37,8 @@
         "**/*.aux": true,
         "**/*.out": true,
         "tb/*.log": true,
-        "**/*.log": true
+        "**/*.log": true,
+        "**/.pytest_cache": true
     },
     "explorerExclude.backup": {},
     "notebook.formatOnSave.enabled": true,

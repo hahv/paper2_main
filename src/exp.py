@@ -61,9 +61,8 @@ class Paper2Exp(BaseExp):
         # ! Allow run_exp to proceed — we want metrics recalculated, not skipped
         exp_cfg.general.skip_exp_if_exists = False
 
-        # ! force timestamp restored from the original config, so that we can match the output perf CSVs
-        exp_cfg.general.time_stamp = cfg_data["general"]["time-stamp"]
-        exp_cfg.general.computer_name = cfg_data["general"]["computer-name"]
+        # update the experiment directory so that it correctly points to the new path (even if moved)
+        exp_cfg.update_custom_exp(str(exp_dir))
 
         # Skip per-video inference if result CSVs already exist — reuse them
         exp_cfg.inferCfg.skip_if_exists = True
@@ -86,7 +85,7 @@ class Paper2Exp(BaseExp):
         config.update_custom_exp(exp_dir_path)
 
         # Create and return a new instance of Paper2Exp with the updated config
-        return cls(config, from_custom_exp=True)
+        return cls(config)
 
     def init_general(self, general_cfg: GeneralCfg):
         console.rule("General initialization")
