@@ -146,7 +146,7 @@ class MethodCfg(AutoNamedCfg):
     def get_skip_method_name(self) -> str:
         skip_name = "Unknown"
         try:
-            skip_name = self.extra_cfgs.get("skip_proc").get("name", "Unknown")  # ty:ignore[possibly-missing-attribute]
+            skip_name = self.extra_cfgs.get("skip_proc").get("name", "Unknown")  # type: ignore[union-attr]
         except Exception:
             pass
         return skip_name
@@ -483,5 +483,5 @@ class Config(ExpBaseCfg):
         When in optimization mode, we want to save all runs under a common directory for easier comparison.
         This function modifies the general.project_dir and general.outdir to achieve that.
         """
-        optim_dir_name = "optim_runs"
-        self.general.outdir = os.path.join(self.general.outdir, optim_dir_name)
+        # ! Force to "zout/zoptim" for optimization runs, to make it easy to find and compare results
+        self.general.outdir = GlobalConst.OPTIM_INDIR

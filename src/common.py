@@ -58,7 +58,25 @@ class GlobalConst:
     TL_SKIP_FALSE_SKIP = "False Skip"  # fire/smoke but incorrectly skipped
     TL_SKIP_WASTED_INFER = "Wasted Infer."  # incorrectly proc (wasted resources)
 
+    TL_CSV_FILE_NAME = "_timeline_report.csv"
+
     EXTERNAL_CFG = "config/zruns/run_external.yaml"
+
+    # Config related
+    OPTIM_INDIR = "zout/zoptim"
+
+    # Optim
+    METHOD_NAME = "method_name"
+    COL_PARAM_SKIP_RATE = "skip_rate"
+    COL_PARAM_RECALL = "metric_recall (tpr)"
+    COL_PARAM_FAR = "metric_fpr (false alarm rate)"
+    COL_PARAM_COMBINED_SCORE = "Combined_Score"
+    COL_PARAM_W_S = "w_S"
+    COL_PARAM_W_F = "w_F"
+    COL_PARAM_W_R = "w_R"
+    COL_PARAM_DELTA_R = "delta_R"
+    COL_PARAM_RECALL_RET = "recall_retention"
+    COL_PARAM_FAR_REDUC_NORM = "far_reduction_norm"
 
     @staticmethod
     def proj_root() -> str:
