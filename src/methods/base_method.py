@@ -106,6 +106,12 @@ class BaseMethod(ABC):
         self.result_handlers = rs_handlers if rs_handlers is not None else []
         self.num_infer_workers = self.cfg.inferCfg.num_infer_workers
 
+        self.precomputed_rs_proc = None
+        if getattr(self.cfg.inferCfg, "pre_computed_no_skip_dir", None):
+            from src.methods.precomputed import PrecomputedRsProc
+
+            self.precomputed_rs_proc = PrecomputedRsProc(self.cfg)
+
     @abstractmethod
     def infer_frame(self, frame, frame_idx: int) -> dict:
         """
@@ -328,6 +334,13 @@ class BaseMethod(ABC):
         SKIP_INFER = csv_handler.outfile_exists
         frame_idx = 0
         limit = self.cfg.inferCfg.limit if self.cfg.inferCfg.limit > 0 else total_frames
+
+        if (
+            hasattr(self, "precomputed_rs_proc")
+            and self.precomputed_rs_proc is not None
+        ):
+            self.precomputed_rs_proc.load_video_data(video_path)
+
         if not SKIP_INFER:
             try:
                 while cap.isOpened():
@@ -341,7 +354,9 @@ class BaseMethod(ABC):
                     self._log_progress(frame_idx, total_frames)
 
                     start_time = time.perf_counter()
+
                     infer_rs = self.infer_frame(frame_bgr, frame_idx)
+
                     if not all(key in infer_rs for key in BaseMethod.REQUIRED_INFER_RS):
                         raise ValueError(
                             f"Missing required inference results: {BaseMethod.REQUIRED_INFER_RS}"

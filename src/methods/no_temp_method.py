@@ -44,6 +44,15 @@ class NoTempMethod(BaseMethod):
 
     def infer_frame(self, frame, frame_idx: int) -> dict:
         """Perform inference on the pre-processed frame."""
+        # 0. Check if we have precomputed results for this frame to bypass the heavy model
+        if (
+            hasattr(self, "precomputed_rs_proc")
+            and self.precomputed_rs_proc is not None
+        ):
+            precomputed_rs = self.precomputed_rs_proc.get_frame_data(frame_idx)
+            if precomputed_rs is not None:
+                return precomputed_rs
+
         assert self.model is not None, "Model is not loaded."
         with torch.no_grad():
             frame = self._pre_process_frame(frame)

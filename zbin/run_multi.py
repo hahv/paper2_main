@@ -24,9 +24,21 @@ class RunOptimArgs(Tap):
     sweep_yaml: str = r"./config/zruns/run_multi.yaml"
     clean_slack: bool = False
     is_optim_mode: bool = False
+    pre_computed_no_skip_dir: str = ""
 
     def configure(self):
-        self.add_argument("-opt", "--is_optim_mode", action="store_true", help="Whether to run in optimization mode, which will look for optimization configs for each method and run multiple configs accordingly.")
+        self.add_argument(
+            "-opt",
+            "--is_optim_mode",
+            action="store_true",
+            help="Whether to run in optimization mode",
+        )
+        self.add_argument(
+            "-pc",
+            "--pre_computed_no_skip_dir",
+            help="Path to precomputed inferences to skip actual model execution",
+        )
+
 
 def get_opt_cfg(method_name: str):
     BASE_CFG_OPTIM = "config/zruns/optim"
@@ -139,6 +151,13 @@ def main():
 
     for idx, config in tqdm(enumerate(all_optim_run_cfgs)):
         current_cfg: Config = config
+        if args.pre_computed_no_skip_dir:
+            current_cfg.inferCfg.pre_computed_no_skip_dir = (
+                args.pre_computed_no_skip_dir
+            )
+            with ConsoleLog("Using pre-computed inferences", characters="⏩"):
+                pprint(f"Pre-computed no-skip dir: {args.pre_computed_no_skip_dir}")
+
         cfg_name = current_cfg.get_cfg_name()
         cfg_wandb_logger: WandbLogger = current_cfg.get_wandb_logger(name=cfg_name)
 

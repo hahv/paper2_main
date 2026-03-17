@@ -95,6 +95,7 @@ class InferConfig(YAMLWizard):
     csv_infer_pattern: Optional[str] = GlobalConst.INFER_FILE_PATTERN
     timeline_video_name_limit: Optional[int] = 40
     timeline_table_decimals: Optional[int] = 4
+    pre_computed_no_skip_dir: Optional[str] = None
 
 @dataclass
 class ModelConfig(YAMLWizard):
