@@ -355,15 +355,7 @@ class BaseMethod(ABC):
 
                     start_time = time.perf_counter()
 
-                    infer_rs = None
-                    if (
-                        hasattr(self, "precomputed_rs_proc")
-                        and self.precomputed_rs_proc is not None
-                    ):
-                        infer_rs = self.precomputed_rs_proc.get_frame_data(frame_idx)
-
-                    if infer_rs is None:
-                        infer_rs = self.infer_frame(frame_bgr, frame_idx)
+                    infer_rs = self.infer_frame(frame_bgr, frame_idx)
 
                     if not all(key in infer_rs for key in BaseMethod.REQUIRED_INFER_RS):
                         raise ValueError(
