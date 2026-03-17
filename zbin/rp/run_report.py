@@ -15,6 +15,8 @@ from src.exp import Paper2Exp
 from src.common import GlobalConst
 from src.param_select import WeightedSelect
 
+from typing import Union
+
 
 class ReportArgs(Tap):
     indir: str = "./zout/zruns"  # output dir of runs
@@ -245,6 +247,7 @@ def norm_optim_df(df: pd.DataFrame) -> pd.DataFrame:
     )
     return df
 
+
 def prepare_optim_df(
     indir: str, metric_cfg_file: str, report_dir: str, selected_metricSet="per_frame"
 ):
@@ -308,9 +311,9 @@ def prepare_optim_df(
             GlobalConst.COL_PARAM_SKIP_RATE, 0.0
         )
         # set GlobalConst.SKIP_RATE col as type float
-        exp_perf_df[GlobalConst.COL_PARAM_SKIP_RATE] = exp_perf_df[GlobalConst.COL_PARAM_SKIP_RATE].astype(
-            float
-        )
+        exp_perf_df[GlobalConst.COL_PARAM_SKIP_RATE] = exp_perf_df[
+            GlobalConst.COL_PARAM_SKIP_RATE
+        ].astype(float)
         ls_df.append(exp_perf_df)
 
     extra_data_df = pd.concat(ls_df, ignore_index=True) if ls_df else None
@@ -340,7 +343,9 @@ def prepare_optim_df(
         ).filter(regex="^(?!.*___DROP___).*$")
 
     final_df = norm_optim_df(final_df)
-    final_outfile = os.path.join(report_dir, f"___raw_rp_optim__{selected_metricSet}.csv")
+    final_outfile = os.path.join(
+        report_dir, f"___raw_rp_optim__{selected_metricSet}.csv"
+    )
     final_df.to_csv(final_outfile, sep=";", encoding="utf-8", index=False)
     pprint_local_path(
         final_outfile,
@@ -349,6 +354,20 @@ def prepare_optim_df(
     )
     return final_df
 
+
+def report_optim_by_csv(
+    optim_csv_path: Union[str, pd.DataFrame],
+    param_select_cfg=r"config/zruns/optim/__param_select.yaml",
+    shorten=True,
+):
+    if isinstance(optim_csv_path, str):
+        optim_df = pd.read_csv(optim_csv_path, sep=";", encoding="utf-8")
+    else:
+        optim_df = optim_csv_path.copy()
+    param_select_dict = yamlfile.load_yaml(param_select_cfg, to_dict=True)
+    weighted_select = WeightedSelect(optim_df, context=param_select_dict)
+    chosen_param_df = weighted_select.choose_params()
+    return chosen_param_df
 
 def report_optim(
     indir: str,
@@ -359,18 +378,23 @@ def report_optim(
     shorten=True,
 ):
     optim_df = prepare_optim_df(indir, metric_cfg_file, report_dir, selected_metricSet)
-    param_select_dict = yamlfile.load_yaml(param_select_cfg, to_dict=True)
-    weighted_select = WeightedSelect(optim_df, context=param_select_dict)
-    chosen_param_df = weighted_select.choose_params()
+    chosen_param_df = report_optim_by_csv(
+        optim_df,
+        param_select_cfg=param_select_cfg,
+        shorten=shorten,
+    )
     chosen_param_outfile = os.path.join(
         report_dir, f"___chosen_rp_optim__{selected_metricSet}.csv"
     )
     chosen_param_df.to_csv(chosen_param_outfile, sep=";", encoding="utf-8", index=False)
-    pprint_local_path(
-        chosen_param_outfile,
-        get_wins_path=True,
-        tag_or_box_title="Save chosen parameters for optimization to ⏬:",
-    )
+    # pprint_local_path(
+    #     chosen_param_outfile,
+    #     get_wins_path=True,
+    #     tag_or_box_title="Save chosen parameters for optimization to ⏬:",
+    # )
+    return chosen_param_df
+
+
 def main():
     args = ReportArgs().parse_args()
     indir = args.indir
