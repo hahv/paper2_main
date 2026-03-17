@@ -27,7 +27,7 @@ class TempMethod(NoTempMethod):
         assert self.profiler.enabled, "Profiler is not enabled."
         with self.profiler.measure("infer_wrapper") as ctx:
             mt_cfg_dict = {
-                "mt_cfg": self.cfg.methodCfg.extra_cfgs.get("skip_proc", {}).copy()  # ty:ignore[possibly-missing-attribute]
+                "mt_cfg": self.cfg.methodCfg.extra_cfgs.get("skip_proc", {}).copy()  # ty:ignore[unresolved-attribute]
             }
             meta_data = None
             infer_result = {}
