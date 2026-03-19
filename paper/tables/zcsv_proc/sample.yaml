@@ -1,0 +1,73 @@
+input: raw/users.csv
+output: output/
+sep: ";"
+
+steps:
+  # ── 1. SHAPE THE SCHEMA ───────────────────────────────────
+  - type: rename
+    mapping:
+      user_id: id
+      full_name: name
+      e_mail: email
+
+  - type: drop
+    columns: [internal_notes, debug_flag]
+
+  # ── 2. FIX VALUES ─────────────────────────────────────────
+  - type: fillna
+    mapping:
+      status: "unknown"
+      age: 0
+
+  - type: cast
+    mapping:
+      age: int
+      score: float
+      created_at: datetime
+      is_active: bool
+
+  - type: str_op
+    ops:
+      - { column: name,   op: strip }
+      - { column: email,  op: lower }
+      - { column: status, op: upper }
+      - { column: phone,  op: replace, search: "-", replace-with: "" }
+
+  # ── 3. FILTER ROWS ────────────────────────────────────────
+  - type: filter
+    conditions:
+      - { column: status,  op: "==", value: "ACTIVE" }
+      - { column: age,     op: ">=", value: 18 }
+      - { column: country, op: "in", value: ["KR", "JP", "US"] }
+
+  - type: dedupe
+    subset: [email]
+    keep: first
+
+  # ── 4. NEW COLUMNS ────────────────────────────────────────
+  - type: add_column
+    cols:
+      - name: full_label
+        expr: "df['name'] + ' (' + df['email'] + ')'"
+      - name: is_senior
+        expr: "df['age'] >= 60"
+
+  # ── 5. SELECT & REORDER ───────────────────────────────────
+  - type: select
+    columns: [name, email, age, status, country, full_label, is_senior]
+
+  # ── 6. SORT & LIMIT ───────────────────────────────────────
+  - type: sort
+    by: [status, name]
+    ascending: [true, true]
+
+  - type: limit
+    n: 100
+
+  # ── 7. MISCELLANEOUS ───────────────────────────────────────
+  - type: sort
+    by: [age]
+    ascending: [false]
+
+  - type: drop
+    columns: [is_senior]

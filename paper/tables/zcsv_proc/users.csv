@@ -1,0 +1,16 @@
+user_id;full_name;e_mail;age;status;country;score;created_at;is_active;phone;internal_notes;debug_flag
+U001;  Kim Jisoo;jisoo@gmail.com;25;active;KR;88.5;2024-03-01;1;010-1234-5678;do not call;0
+U002;Park Minho;MINHO@naver.com;17;inactive;US;72;2023-11-15;0;010-2345-6789;;1
+U003;Lee Soyeon  ;soyeon@kakao.com;32;active;JP;91.3;2024-01-20;1;010-3456-7890;vip;0
+U004;Choi Junho;junho@gmail.com;;active;KR;65.8;2024-06-10;1;010-4567-8901;follow up;0
+U005;Jung Haerin;haerin@naver.com;28;inactive;CN;78.4;2023-08-05;0;010-5678-9012;;1
+U006;Yoon Taehyun;taehyun@gmail.com;45;active;KR;95.1;2024-02-14;1;010-6789-0123;do not call;0
+U007;  Han Sujin;SUJIN@kakao.com;67;active;JP;83.7;2023-12-01;1;010-7890-1234;vip;0
+U008;Lim Donghyuk;donghyuk@naver.com;19;inactive;US;60.2;2024-07-22;0;010-8901-2345;;1
+U009;Shin Areum  ;areum@gmail.com;38;active;MX;77.9;2024-04-18;1;010-9012-3456;follow up;0
+U010;Oh Seungwon;seungwon@kakao.com;;active;KR;89;2023-09-30;1;010-0123-4567;do not call;0
+U011;Kim Jisoo;jisoo@gmail.com;22;active;KR;88.5;2024-03-01;1;010-1234-5678;duplicate;0
+U012;Bae Jiyeon;jiyeon@naver.com;55;inactive;CN;74.6;2024-05-11;0;010-2222-3333;;1
+U013;  Na Woojin;WOOJIN@gmail.com;16;active;KR;55.3;2023-10-07;1;010-3333-4444;underage;0
+U014;Kang Minji;minji@kakao.com;41;active;JP;92.8;2024-08-03;1;010-4444-5555;vip;0
+U015;Song Hyunwoo;hyunwoo@naver.com;30;inactive;;81.1;2023-07-19;0;010-5555-6666;;1

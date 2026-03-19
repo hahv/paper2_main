@@ -5,24 +5,48 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0"  # To make sure it work in muti-gpu env
 from halib import *
 from tap import *
 from halib.exp.core.param_gen import ParamGen
-from halib.filetype.yamlfile import *
+
+"""
+Usage examples:
+    # Run everything (default)
+    python zbin/zrun_exp.py
+
+    # Filter by model name (e.g., YOLO)
+    python zbin/zrun_exp.py -f yolo
+
+    # Filter by sweep parameter (e.g., specific learning rate)
+    python zbin/zrun_exp.py -f lr_01
+
+    # Dry run to see which commands would execute
+    python zbin/zrun_exp.py -f yolo -d
+
+    # Run with line profiler and precomputed inferences
+    python zbin/zrun_exp.py -p -pc /path/to/inferences
+"""
 
 
 class CustomArgs(Tap):
     run_cfg_yaml: str = "zbin/zrun_cfg.yaml"
-    base_cfg_pattern: str = ""
-    sweep_cfg_pattern: str = ""
+    filter: str = ""  # Replaced base/sweep patterns with a single filter
     use_line_profiler: bool = False
     is_optim_mode: bool = False
     pre_computed_no_skip_dir: str = ""
+    dry_run: bool = False
 
     def configure(self):
         self.add_argument("-r", "--run_cfg_yaml")
-        self.add_argument("-b", "--base_cfg_pattern")
-        self.add_argument("-s", "--sweep_cfg_pattern")
+        self.add_argument(
+            "-f", "--filter", help="Substring filter for the command line"
+        )
         self.add_argument("-p", "--use_line_profiler")
-        self.add_argument("-opt", "--is_optim_mode", action="store_true", help="Whether to run in optimization mode")
-        self.add_argument("-pc", "--pre_computed_no_skip_dir", help="Path to precomputed inferences to skip actual model execution")
+        self.add_argument("-opt", "--is_optim_mode", action="store_true")
+        self.add_argument("-pc", "--pre_computed_no_skip_dir")
+        self.add_argument(
+            "-d",
+            "--dry_run",
+            action="store_true",
+            help="Print commands without running",
+        )
 
 
 def main():
@@ -34,25 +58,18 @@ def main():
     for run_cfg in run_cfgs:
         base_yaml = run_cfg["base_yaml"]
         sweep_yaml = run_cfg["sweep_yaml"]
-        base_yaml_fname = fs.get_file_name(base_yaml)
-        sweep_yaml_fname = fs.get_file_name(sweep_yaml)
 
-        match_base = (not args.base_cfg_pattern) or (
-            args.base_cfg_pattern in base_yaml_fname
-        )
-        match_sweep = (not args.sweep_cfg_pattern) or (
-            args.sweep_cfg_pattern in sweep_yaml_fname
-        )
-
-        should_run = match_base and match_sweep
-
-        if not should_run:
-            continue
         cmd_str_run = cmd_str.format(base_yaml=base_yaml, sweep_yaml=sweep_yaml)
+
+        if args.filter and (args.filter not in cmd_str_run):
+            continue
+
         if args.is_optim_mode:
             cmd_str_run += " --is_optim_mode"
         if args.pre_computed_no_skip_dir:
-            cmd_str_run += f" --pre_computed_no_skip_dir {args.pre_computed_no_skip_dir}"
+            cmd_str_run += (
+                f" --pre_computed_no_skip_dir {args.pre_computed_no_skip_dir}"
+            )
         console.rule(f"Running command: {cmd_str_run}")
         with ConsoleLog("Run command", characters="▶"):
             pprint(cmd_str_run)
@@ -61,6 +78,11 @@ def main():
             cmd_str_run = f"python -m kernprof -l {cmd_str_run}"
         else:
             cmd_str_run = f"python {cmd_str_run}"
+
+        if args.dry_run:
+            console.log(f"[yellow]DRY RUN:[/yellow] {cmd_str_run}")
+            continue
+
         os.system(cmd_str_run)
 
 

@@ -57,13 +57,16 @@
 \date{March 2026}
 \maketitle
 
-\noindent This section presents a comprehensive evaluation of the proposed skip-module architectures ($A_1$, $A_2$). We compare our frame-level skipping approach against standard lightweight alternatives ($M_1$, $M_2$) and the heavy baseline detector.
 
 \section{Component-Level Performance (Baselines)}
+
+\noindent This section presents a comprehensive evaluation of the proposed skip-module architectures ($A_1$, $A_2$). We compare our frame-level skipping approach against standard lightweight alternatives ($M_1$, $M_2$) and the heavy baseline detector.
+
 \noindent Table~\ref{tb:tb_no_skip_perf} assesses the intrinsic recall and filtering capability of each method as a standalone component.
 \input{tb_no_skip_perf.tex}
 
 \section{Hyperparameter Optimization (Validation Set)}
+
 \noindent Table~\ref{tb:val_search} specifies the search space for the rule-based skip-module parameters. The ranking and selection of the optimal configuration ($\theta^*$) based on the validation set results are detailed in Table~\ref{tb:val_results}.
 \input{tb_val_search.tex}
 \input{tb_val_results.tex}
