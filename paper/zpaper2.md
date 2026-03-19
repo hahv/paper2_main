@@ -52,6 +52,10 @@ Due to the lack of public high-resolution datasets specifically designed for sta
 
 The 150 videos were randomly split into Training/Validation (60%, n=90: 30 Fire, 30 Smoke, 30 Safe) for hyperparameter tuning and hyperparameter selection, and Test (40%, n=60: 20 per class) for unbiased final performance evaluation. Stratified sampling ensured balance across classes and environments.
 
+```{=latex}
+ \input{./4.table/tb_ufireindoor.tex}
+```
+
 **Video Dataset Image Samples:**
 
 ```

@@ -26,6 +26,7 @@ pandoc "%FILE_NAME%" -o "out\%FILE_BASE%.pdf" --include-in-header="preamble.tex"
 if %errorlevel%==0 (
     echo.
     echo [OK] PDF generated: %FILE_DIR%out\%FILE_BASE%.pdf
+    start "" "%FILE_DIR%out\%FILE_BASE%.pdf"
 ) else (
     echo.
     echo [ERROR] Pandoc failed. Check the output above.
