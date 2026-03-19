@@ -1,0 +1,217 @@
+\documentclass[tikz,border=2mm]{standalone}
+\usepackage{gensymb}
+\usepackage{fontawesome5}
+\usetikzlibrary{calc}
+\usepackage{xcolor}
+
+\tikzset{grid/.style={gray,very thin,opacity=1}}
+
+\usetikzlibrary{shapes.geometric, arrows}
+\usetikzlibrary{math}
+\tikzset{
+    mylabel/.style = {
+        black,
+        anchor=south
+    },
+    boxstage/.style={
+        rectangle, draw, fill=blue!80, rounded corners, align=center, anchor=south, font=\bfseries\huge, text=white, inner sep=0.2cm
+    },
+    procstep/.style={
+        rectangle, draw, fill=orange!50, rounded corners, align=center, minimum width=2cm, minimum height = 2cm, anchor=south west, text=black
+    },
+    procarrow/.style={
+        green!70, -latex, line width=0.2cm, label={[mylabel]above}
+    },
+    inblockarr/.style={
+        gray!70, -latex, line width=0.1cm, label={[mylabel]above}
+    },
+    problock/.style={
+        rectangle, draw, blue, thick, line width=2pt, rounded corners, align=center, anchor=south west
+    },
+    fill fraction/.style n args={2}{path picture={
+    \fill[#1] (path picture bounding box.south west) rectangle
+        ($(path picture bounding box.north west)!#2!(path picture bounding box.north east)$);}},
+}
+
+\tikzmath{\preproX=-4.55; \boxStageY=-2.6; \posefrwkW=4; \instart=-21.5; \baseline=-1; \subfigw=4; \deepsubfigw=6; \extractboxw=13.5; \recboxw=4.5; \marginExtractRec=1.6; \mainprocbox=20.6; \inputskeW=8.5;} 
+
+% \def\COORDENABLED{1}
+
+\begin{document}
+    \begin{tikzpicture}[-latex]
+        \tikzstyle{every node}=[font=\huge]
+
+        \ifdefined\COORDENABLED
+            \coordinate (O) at (0,0);
+            \draw[step=10mm,gray,very thin] (-25,-15) grid (25,15);
+            \draw[->] (-25.5,0) -- (25.5,0) node[right] {$x$};
+            \draw[->] (0,-15.5) -- (0,15.5) node[above] {$y$};
+            \foreach \x in {-25,-20,...,25}
+            \draw (\x,-1mm) -- (\x,1mm) node[anchor=north] {$\x$};
+            \foreach \y in {-15,-10,...,15}
+            \draw (-1mm,\y) -- (1mm,\y) node[anchor=east] {$\y$};
+        \fi
+
+        % input image
+        \node[anchor=south east, label={[align=center]above:\textbf{Input Video}}] (inputImg) at (\instart,\baseline) {\includegraphics[width= \inputskeW cm]{input.pdf}};
+
+        % pose framework dashed box
+        \node[problock, anchor=west, minimum width=4.5cm, minimum height=7.9cm, label={[label distance=0.1cm] above: \textbf{Pose Framework}}] (posefrwkBox) at ([xshift=1 cm]inputImg.east|-, 52|-inputImg.east) {};
+
+        \node[anchor=south] (dotetc) at ([yshift=0.03cm]posefrwkBox.south) {$\cdots$};
+
+        \node[anchor=south, line width=1mm, semitransparent,
+        inner sep=0.5\pgflinewidth, draw=gray] (openpose) at ([yshift=0.6cm]posefrwkBox.south) {\includegraphics[width=\posefrwkW cm]{raw/plopenpose.png}};
+
+        \node[anchor=south, line width=1mm, semitransparent,
+        inner sep=0.5\pgflinewidth, draw=gray] (alphapose) at ([yshift=0.1cm]openpose.north) {\includegraphics[width=\posefrwkW cm]{raw/plalphapose.jpg}};
+
+        % skeleton image
+        \node[anchor=south west, label={[align=center]above:\textbf{Skeleton data}}] (skedata) at ([xshift=1 cm]posefrwkBox.east|-,\baseline) {\includegraphics[width= \inputskeW cm]{skedata.pdf}};
+
+
+
+        % arrow from input to skeleton data
+        \draw[procarrow] (inputImg.east) -- (posefrwkBox.west);
+
+        \draw[procarrow] (posefrwkBox.east) -- (skedata.west);
+
+
+        %preprocessing dashed box
+        \node[problock, minimum width=4cm, minimum height=11.5cm] (preprocessBox) at (-5.0,-1) {};
+
+        % data clearning
+        \node[procstep, text width =3cm] (dataCleaning) at (\preproX,-0.5) {Data cleaning};
+        % data normalization
+        \node[procstep, text width =3cm] (dataNorm) at (\preproX,3) {Data normalization};
+        % sample selection
+        \node[procstep, text width =3cm] (sampleSelection) at (\preproX,6.5) {Sample selection \& labeling};
+
+        % arrow from skeleton data to data cleaning
+
+        \draw[procarrow] (skedata.east) -- ++(0.7, 0) |- (dataCleaning.west);
+
+        \draw[procarrow] (dataCleaning) -- (dataNorm);
+        \draw[procarrow] (dataNorm) -- (sampleSelection);
+
+
+        % \node[procstep, text width =3cm] (dataLabel) at (\preproX, 11.5) {Sample Label};
+
+        %================= start stage line =================
+        % step box: Input
+        \node[boxstage] at (inputImg.south|-,\boxStageY) {Input};
+
+        % step box: Pose Estimation Framework
+        \node[boxstage] at (posefrwkBox.south|-, \boxStageY) {Keypoint Extraction};
+
+        % step box: data pre-processings
+        \node[boxstage] at (dataCleaning.south|-, \boxStageY) {Data preprocessing};
+
+        % \node[anchor=south west] (mainProcBox) at ([xshift=3cm]sampleSelection.east) {};
+
+        \node[problock, minimum width=\mainprocbox cm, minimum height=16cm] (mainProcessBox) at (0,-1) {};
+
+        %======= Handcrafted feature======
+        \node[problock, dashed, cyan, minimum width=\extractboxw cm, minimum height=4cm, label={[label distance=0.1cm]above: \textbf{Handcrafted Feat.s}}] (handcrafted) at ([xshift=0.5cm]mainProcessBox.west|-,10) {};
+        
+        %---- image source: Automatic Fall Risk Detection Based on Imbalanced Data ----
+        \node[anchor=west, label={[align=center]below: width-to-height\\ ratio}] (hcft1) at ([xshift=1.2cm, yshift=0.7cm]handcrafted.west) {\includegraphics[width=\subfigw cm]{raw/ft_hw.png}};
+
+        \node[anchor=west, label={below: angle feat.}] (hcft2) at ([xshift=1cm]hcft1.east) {\includegraphics[width=\subfigw cm]{raw/ft_spineangle.png}};
+
+        \node[anchor=west, label={[align=center]: Other\\feat.s}] (hcft3) at ([xshift=1.35cm, yshift=-1.5cm]hcft2.east) {};
+
+        % rule-based
+        \node[problock, dashed, olive, minimum width=\recboxw cm, minimum height=4cm, label={[xshift=-0.3cm,label distance=0.1cm]above: \textbf{Rule-Based Rec.}}] (rulebased) at ([xshift=\marginExtractRec cm]handcrafted.south east) {};
+
+        \node[anchor=center] (flowchart) at (rulebased.center) {\includegraphics[width=3cm]{flowchart.pdf}};
+
+        %======= Deep feature======
+        \node[problock, dashed, violet, minimum width=\extractboxw cm, minimum height=9cm, label={[label distance=0.3cm]above: \textbf{Deep Feat.s}}] (deepfeature) at ([xshift=0.5cm]mainProcessBox.west|-,-0.5) {};
+
+        \node[anchor=north west, label={below: RNN/LSTM/GRU}] (rnn) at ([xshift=0.5cm, yshift=-0.2cm]deepfeature.north west) {\includegraphics[width= \deepsubfigw cm]{rnn.pdf}};
+
+        \node[anchor=north, label={below:Deep neural Network}] (rnn) at ([yshift=-1.5cm]rnn.south) {\includegraphics[width=\deepsubfigw cm]{neural_network.pdf}};
+
+        \node[anchor=north west, label={below:Transformer}] (transformer) at ([xshift=-4.8cm, yshift=0.0cm]deepfeature.north east) {\includegraphics[width=2.5 cm]{transformer.pdf}};
+
+        % crop from image in this paper: https://ieeexplore.ieee.org/abstract/document/9420299
+        \node[anchor=north, label={below: GNN}] (gcn) at ([xshift=0.0cm,yshift=-1.0cm]transformer.south) {\includegraphics[width= \deepsubfigw cm]{gnn.pdf}};
+
+        % ml-based
+        \node[problock, dashed, teal, minimum width=\recboxw cm, minimum height=3.5cm,align=center,label={[xshift=-0.3 cm, label distance=0.2cm]above: \textbf{ML-Based Rec.}}, anchor=north west] (mlbased) at ([xshift=\marginExtractRec cm, yshift=-0.3cm]deepfeature.north east) {
+            
+            \begin{tabular}{c}
+              KNN \\
+              SVM \\
+              DT\\
+              RF
+            \end{tabular}
+        };
+
+        % softmax-based
+        \node[problock, dashed, magenta, minimum width=\recboxw cm, minimum height=2.2cm, label={[label distance=0.1cm]above: \textbf{Out.Layer}}, anchor=south west] (softmax) at ([xshift=\marginExtractRec cm, yshift=1.0cm]deepfeature.south east) {$SoftMax$};
+
+    
+
+        % arrow: preprocess box to main process box
+        \draw[procarrow] (sampleSelection.east) -- (mainProcessBox.west|-, 52|-sampleSelection.east);
+
+        % step box: main process
+        \node[boxstage] at (mainProcessBox.south|-, \boxStageY) {Feature Extraction and Recognition};
+
+        \node[boxstage] at ([xshift=3cm]mainProcessBox.east|-, \boxStageY) {Output};
+        %================= end stage line =================
+
+        % data split
+        \node[anchor=south, label={above: \textbf{Data split}}] (datasplit) at ([xshift=-0.2 cm, yshift=0.5cm]preprocessBox.north) {\includegraphics[width= \deepsubfigw cm]{piechart.pdf}};
+
+
+        %================= classification results =================
+        \node[draw, rectangle, fill fraction={green!10}{0.7}, minimum width=2cm, minimum height = 1cm, anchor=south west, label={above: \textbf{Results}}] (classFall) at ([xshift=1.3cm]mainProcessBox.east|-, 4) {\textbf{Fall}};
+
+        \node[draw, rectangle, fill fraction={red!10}{0.3}, minimum width=2cm, minimum height = 1cm, anchor=south west] (classNonFall) at ([yshift=-1.5cm]classFall.west) {Not-fall};
+
+
+        %================= Metrics=================
+        \node[anchor=south west, draw, rectangle, label={above: \textbf{Metrics}}] (metrics) at ([yshift=2cm]classFall.north west) {
+            \begin{tabular}{c}
+              Accuracy \\\hline
+              Sensitivity \\\hline
+              Specificity\\\hline
+              F1-Score 
+            \end{tabular}
+          };
+        \draw[procarrow] (mainProcessBox.east|-, 52|-classFall.south west)--(classFall.south west) ;
+
+        % datasplit -- evaluate
+        \draw[->, -latex, ultra thick] ([yshift=0.75 cm]datasplit.north) -- ++(0, 1)  -|node[above, pos=0.25]{\textbf{Evaluation}} ([yshift=0.75 cm]metrics.north) ;
+
+
+        %draw bouding box for deep feature learning with softmax
+        %node deepfeature, softmax
+        \tikzmath{\dlMargin=0.15; \dlMarginNeg=-0.15;};
+        \draw[->,-, ultra thick, gray, rounded corners] %
+        ([xshift= \dlMarginNeg cm, yshift= \dlMarginNeg cm]deepfeature.south west) -- %
+        ([xshift= \dlMarginNeg cm, yshift= \dlMargin cm]deepfeature.north west) -- %
+        ([xshift= \dlMargin cm, yshift= \dlMargin cm]deepfeature.north east) -- %
+        ([xshift= -1.45cm, yshift =\dlMargin cm]softmax.north west) -- %
+        ([xshift= \dlMargin cm, yshift= \dlMargin cm] softmax.north east) -- %
+        ([xshift= \dlMargin cm, yshift= \dlMarginNeg cm] softmax.south east) --
+        ([xshift= -1.45cm, yshift= \dlMarginNeg cm] softmax.south west) --
+        ([xshift= \dlMargin cm, yshift= \dlMarginNeg cm]deepfeature.south east) -- cycle;
+
+        %draw arrow from deep feature to softmax
+        \draw[inblockarr] ([xshift=-1.5cm]softmax.west) -- (softmax.west);
+
+        \draw[inblockarr] (handcrafted.east) -- (rulebased.west);
+
+        \draw[inblockarr] ([xshift=0.38 cm] handcrafted.east) -- ([xshift=-1.2 cm]mlbased.west) -- (mlbased.west);
+
+
+
+
+
+
+    \end{tikzpicture}
+\end{document}

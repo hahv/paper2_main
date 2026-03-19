@@ -1,0 +1,8 @@
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.6\linewidth,keepaspectratio, scale=0.3]{./3.fig/fig1.jpg}
+  \caption{Variants of You Only Look Once (YOLO) versions (v5, v8, v10) compared by number of model
+  parameters, Giga Floating Point Operations (GFLOPs), and mean average precision (mAP) at Intersection over Union (IoU) Thresholds of 0.50 to 0.95 (mAP50-95) on the Common Objects in Context (COCO)
+  dataset \citeproc{ref-lin2014microsoft}{{[}-99{]}}. The size of
+  each dot on the chart indicates the model's GFLOPs as an indicator of its computational complexity. One aspect of this study investigates whether the performance of YOLOv8 and YOLOv10 on the D-Fire dataset \citeproc{ref-dfiredataset}{{[}-99{]}} is consistent with their performance on the COCO dataset.}\label{fig:yolococo}
+\end{figure}
