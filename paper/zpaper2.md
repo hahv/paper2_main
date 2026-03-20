@@ -7,11 +7,21 @@ fontsize: 10pt
 geometry:
   - a4paper
   - margin=0.5cm
+link-citations: true
 ---
 
 # *Efficient Real-Time Fire Surveillance: A Lightweight Motion-Heuristic Skip Module for Accelerated Inference*
 
 ## 1. Introduction
+
+<!-- !TEST CITE -->
+Fires and wildfires, if not detected and controlled in their early stages, can quickly escalate—especially under dry and windy conditions—resulting in catastrophic consequences such as loss of life, destruction of property, and damage to natural forests. For example, in 2017, fires in urban areas and wildfires in California (USA) caused an estimated loss of 10 billion USD [@californiafire:online]. More recently, in 2025, a forest fire in Gyeongsang Province, South Korea, burned approximately 90,000 acres, resulting in at least 27 deaths and forcing nearly 40,000 people to evacuate [@southkoreafire:online]. Automated early fire and smoke detection systems can play a crucial role in identifying fires at their initial stages, enabling a prompt response to extinguish the fire and minimize damage.
+
+
+Numerous fire and smoke detection methods, particularly those leveraging deep learning (DL), have been proposed in recent years [@cheng2024visual; @gragnaniello2024fire]. In practical deployments, these systems are often applied to video streams from CCTV cameras, where DL-based classifiers or object detectors are executed on each frame individually. Although this frame-wise approach is straightforward and easy to implement, it exhibits several limitations.
+<!-- ! END TEST CITE -->
+
+
 
 - **Hook:** Static surveillance cameras produce massive data redundancy. In typical operational environments, over 99% of frames consist of purely background information with no anomalies present.[[isabelleliu630.github](https://isabelleliu630.github.io/files/litedge_PPT.pdf)]
 - **Problem:** State-of-the-art (SOTA) deep learning models (the "BIG MODEL") are highly accurate but computationally heavy ($\sim$50ms per frame), making them prohibitive for real-time processing on bandwidth- and resource-constrained edge devices.[[pioneersecurity](https://www.pioneersecurity.com/edge-computing-in-surveillance/)]
@@ -321,3 +331,5 @@ The empirical results demonstrate that the bottleneck in high-accuracy continuou
 
 *(Focus on the "What" and "Next")*
 We proposed a lightweight, plug-and-play skip module designed to accelerate real-time fire and smoke detection in static surveillance systems. By combining block-based motion analysis with targeted color and texture heuristics, our module safely filters out up to 72% of irrelevant background frames without compromising safety. Extensive evaluations demonstrate that our approach achieves a 3$\times$ system speedup and a 67% reduction in computational cost, while fully preserving the near-perfect accuracy (98.5% F1-Score) of heavy deep learning models. Future work will focus on integrating adaptive, unsupervised thresholding to dynamically adjust heuristic rules based on real-time environmental lighting and weather shifts.
+
+# References {label="bibliography"}

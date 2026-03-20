@@ -120,9 +120,9 @@
       at ([yshift=-0.25cm]framediff.south) {Generate\\ROI};
 
 % annotation dashed pointer lines
-\node[anchor=west, font=\small] (lbl1) at (-2.5,  5.0) {active motion block};
-\node[anchor=west, font=\small] (lbl2) at (-2.5,  3.8) {active fire/smoke block};
-\node[anchor=west, font=\small] (lbl3) at (-2.5,  2.5) {Region of Interest (ROI) for BIG model};
+\node[anchor=west, font=\small] (lbl1) at (-4.0,  5.3) {active motion block};
+\node[anchor=west, font=\small] (lbl2) at (-4.0,  4.3) {active fire/smoke block};
+\node[anchor=west, font=\small] (lbl3) at (-4.0,  3.0) {Region of Interest (ROI) for BIG model};
 \draw[dashed, green!70!black,  -latex, thin]
       ([xshift=0.15cm]framediff.north east) -- (lbl1.west);
 \draw[dashed, green!70!black,  -latex, thin]
@@ -138,12 +138,12 @@
 
 % ---- Active motion block batch ----
 \node[draw=green!60!black, line width=1.5pt, anchor=center]
-      (blk1) at (\blkX, 2.3)
+      (blk1) at (\blkX, 4.2)
       {\includegraphics[width=\blkImgW cm]{./pipeline/block_crop1.png}};
 \node[draw=green!60!black, line width=1.5pt, anchor=center]
-      (blk2) at (\blkX, 0.7)
+      (blk2) at (\blkX, 2.6)
       {\includegraphics[width=\blkImgW cm]{./pipeline/block_crop2.png}};
-\node[font=\small, anchor=north, align=center] at (\blkX, 0.0)
+\node[font=\small, anchor=north, align=center] (blkText) at (\blkX, 1.5)
       {active motion\\block batch};
 
 % ---- TINY model ----

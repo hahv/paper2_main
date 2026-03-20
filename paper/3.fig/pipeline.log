@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.7.18)  19 MAR 2026 18:40
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.7.18)  19 MAR 2026 18:59
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -508,10 +508,10 @@ Package pdftex.def Info: ./pipeline/block_crop2.png  used on input line 145.
 _mask.png> <./pipeline/block_crop1.png> <./pipeline/block_crop2.png>]
 (./pipeline.aux) ) 
 Here is how much of TeX's memory you used:
- 14407 strings out of 478023
- 310202 string characters out of 5835647
- 602566 words of memory out of 5000000
- 32627 multiletter control sequences out of 15000+600000
+ 14414 strings out of 478023
+ 310325 string characters out of 5835647
+ 602711 words of memory out of 5000000
+ 32634 multiletter control sequences out of 15000+600000
  471422 words of font info for 35 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  115i,7n,118p,412b,786s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -521,7 +521,7 @@ blic/amsfonts/cm/cmbx12.pfb><d:/Program Files/texlive/2022/texmf-dist/fonts/typ
 e1/public/amsfonts/cm/cmr12.pfb><d:/Program Files/texlive/2022/texmf-dist/fonts
 /type1/public/amsfonts/cm/cmr9.pfb><d:/Program Files/texlive/2022/texmf-dist/fo
 nts/type1/public/amsfonts/cm/cmti9.pfb>
-Output written on pipeline.pdf (1 page, 129958 bytes).
+Output written on pipeline.pdf (1 page, 129972 bytes).
 PDF statistics:
  47 PDF objects out of 1000 (max. 8388607)
  23 compressed objects within 1 object stream

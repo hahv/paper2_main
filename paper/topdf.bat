@@ -20,8 +20,15 @@ cd /d "%FILE_DIR%"
 :: Create out\ subdir if it doesn't exist
 if not exist "out\" mkdir "out"
 
-:: Run pandoc — output goes to <input_dir>\out\<name>.pdf
-pandoc "%FILE_NAME%" -o "out\%FILE_BASE%.pdf" --include-in-header="preamble.tex" --pdf-engine=xelatex
+:: Build pandoc command
+set "PANDOC_CMD=pandoc "%FILE_NAME%" -o "out\%FILE_BASE%.pdf" --include-in-header="0.tex\preamble.tex" --pdf-engine=xelatex --metadata link-citations=true -V colorlinks=true"
+
+:: Auto-detect optional files in 2.ref\ subfolder
+if exist "2.ref\refs.bib"  set "PANDOC_CMD=%PANDOC_CMD% --citeproc --bibliography="2.ref\refs.bib""
+if exist "2.ref\style.csl" set "PANDOC_CMD=%PANDOC_CMD% --csl="2.ref\style.csl""
+
+:: Run pandoc
+%PANDOC_CMD%
 
 if %errorlevel%==0 (
     echo.
