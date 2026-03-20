@@ -24,6 +24,7 @@ sync:
         - 'out/'
         - '__zotero_paper2.url'
         - 'topdf.bat'
+        - 'zpdf.bat'
         - 'mutagen.yml'
         - 'mutagen.yml.lock'
         - 'zpaper2.md'
