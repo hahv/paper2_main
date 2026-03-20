@@ -20,6 +20,7 @@ sync:
       vcs: true
       paths:
         - '_archived/'
+        - '.vscode/'
         - '0.tex/'
         - 'out/'
         - '__zotero_paper2.url'
