@@ -1,1 +1,0 @@
-sync_blocks.bat ./zpaper2.md
