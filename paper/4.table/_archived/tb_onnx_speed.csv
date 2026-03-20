@@ -1,0 +1,5 @@
+﻿Model;mAP50 \textsuperscript{a};FPS \textsuperscript{b};GPU Memory Usage;ONNX Model Size
+YOLOv8s;79.53;68.38 (67.95 - 68.82);865;43.67
+YOLOv8l;80.48;46.23 (46.06 - 46.40);1379;170.58
+YOLOv10s;79.27;69.11 (68.67 - 69.55);613;28.43
+YOLOv10l;79.83;48.48 (48.30 - 48.66);871;95.25

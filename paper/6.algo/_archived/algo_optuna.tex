@@ -1,0 +1,36 @@
+\begin{algorithm}[H]
+  \caption{Optuna-Based Hyperparameter Optimization for each YOLO Model} \label{alg:tune}
+      \begin{algorithmic}
+      \State \textbf{Define fixed parameters:}
+          \Indent
+              \State image size ($imgsz$): $640 \times 640$
+              \State optimizer ($optim$): SGD (Stochastic Gradient Descent)
+              \State number of epochs ($epoch$): 200 (with early stopping patience of 40)
+          \EndIndent
+      \State \textbf{Define hyperparameters to optimize and their search spaces:}
+          \Indent
+              \State Learning rate ($lr \in [1e^{-3}, 1e^{-1}]$), log space sampling
+              \State optimizer momentum ($mon \in [0.9, 0.99]$)
+              \State optimizer weight decay ($wd \in [1e^{-5}, 1e^{-1}]$), log space sampling
+              \State batch size ($bsz \in \{16, 32, 64\}$)
+          \EndIndent
+
+      \State \textbf{Define the objective function:}
+          \Indent
+              \State For each fold in the 5-fold cross-validation (CV):
+              \Indent
+                  \State Train the YOLO model on the training set using fixed and to-be-optimized hyperparameters above, then calculate the mAP50 on the validation set.
+              \EndIndent
+              \State Compute the average mAP50 across all folds.
+          \EndIndent
+      \State \textbf{Run the Optuna optimization trials:}
+          \Indent
+              \State Use TPE sampler with $\mathcal{T}$ trials.
+          \EndIndent
+
+      \State \textbf{Retrieve the best hyperparameters:}
+          \Indent
+              \State Select the hyperparameters that yield the highest average mAP50 in 5-fold CV.
+          \EndIndent
+      \end{algorithmic}
+  \end{algorithm}

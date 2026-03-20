@@ -1,0 +1,9 @@
+hyper_param	search space
+imgsz	640
+epochs	200
+optimizer	SGD
+batch_size	16, 32, 64
+optimizer	SGD
+lr	1e-4, 1e-1
+momentum	0.9, 0.99
+weight_decay	1e-15, 1e-1

@@ -1,0 +1,7 @@
+﻿Metrics;Description;Formular
+Accuracy;The percentage of correct predictons over all prediction;$ Acc=\frac{TP+TN}{TP+TN+FN+FP}$
+F1-Score;The F1 score converts precision and recall into a single metric by calculating their harmonic mean. This approach ensures that both metrics are considered equally, and it emphasizes the importance of a balance between precision (how many predicted positives are correct) and recall (how many actual positives are captured). Precision indicate the proportion of actauly positive out of all positive predictions.;$F1-Score = \frac{precision * recall}{precision + recall}$ where $precison = \frac{TP}{TP + FP}$.
+True Positive Rate ($TPR$), \newline also known as Recall;TPR represents the proportion of correctly predicted fire videos out of all actual fire videos.;$TPR = \frac{TP}{TP + FN}$
+False Positive Rate ($FPR$), \newline also know as Fall Alarm Rate;FPR represents the proportion of non-fire videos incorrectly classified as fire, relative to the total number of actual non-fire videos.;$FPR = \frac{FP}{FP + TN}$
+False Negative Rate ($FNR$);FNR represents the proportion of actual fire videos incorrectly classified as non-fire, relative to the total number of actual fire videos;$FNR = \frac{FN}{FN + TP}$
+True Negative Rate ($TNR$);represents the proportion of non-fire videos that are correctly classified as non-fire, relative to the total number of actual non-fire videos.;$TNR = \frac{TN}{TN + FP}$

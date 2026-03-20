@@ -1,0 +1,60 @@
+\begin{algorithm}[H]
+\label{alg:skipmodule}
+\caption{Frame Inference with Motion-based Skipping}
+\KwIn{Input Frames}
+\KwOut{SKIP\_frame, ROI\_rect}
+
+%--------------------%
+\textbf{Step 1: Pre-process Frame} \\
+\Indp
+Scale frame down by \textcolor{red}{scale\_factor} (e.g., 50\%) \\
+Pad frame to be divisible by \textcolor{red}{block\_size} (64) \\
+\Indm
+
+%--------------------%
+\textbf{Step 2: Detect Motion} \\
+\Indp
+Compute foreground mask using \textbf{FrameDifference} \\
+Divide mask into grid of blocks (\textcolor{red}{block\_size}) \\
+Identify active blocks where \#foreground pixels $>$ \textcolor{red}{block\_active\_threshold} (e.g., 0.05) \\
+\Indm
+
+%--------------------%
+\textbf{Decision: Motion Activity} \\
+
+\If{\% active blocks == 0}{
+    Set \textbf{SKIP\_frame} $\leftarrow$ True \\
+    Set \textbf{ROI\_rect} $\leftarrow$ None \\
+    \textbf{Return:} (SKIP\_frame, ROI\_rect)
+} \ElseIf{\% active blocks >= frame\_active\_threshold (e.g., 0.5)}{
+    Set \textbf{SKIP\_frame} $\leftarrow$ False \\
+    Set \textbf{ROI\_rect} $\leftarrow$ Whole\_Frame \\
+    \textbf{Return:} (SKIP\_frame, ROI\_rect)
+}
+\Else{
+    %----- YES PATH -----
+    \textbf{YES: Motion detected (not excessive)} \\
+    \Indp
+    \textbf{--Classify Motion--} \\
+    Extract active blocks from scaled frame \\
+    Feed active blocks to \textbf{TINY model} \\
+    Get predictions (fire/smoke vs not) \\[3pt]
+
+    \textbf{--Define ROI--} \\
+    Identify fire/smoke blocks using \textcolor{red}{firesmoke\_classification\_threshold} (e.g., 0.5) \\
+    \If{no fire/smoke blocks}{
+        Set \textbf{SKIP\_frame} $\leftarrow$ True \\
+        Set \textbf{ROI\_rect} $\leftarrow$ None \\
+        \textbf{Return:} (SKIP\_frame, ROI\_rect) \\[3pt]
+    }
+    Set \textbf{SKIP\_frame} $\leftarrow$ False \\
+    Compute bounding box around detected fire/smoke blocks \\
+    Expand bounding box if area $<$ \textcolor{red}{min\_ROI\_of\_frame\_size} (e.g., 0.7) \\
+    Set \textbf{ROI\_rect} $\leftarrow$ expanded bounding box \\
+    \Indm
+}
+
+%--------------------%
+\textbf{Return:} (SKIP\_frame, ROI\_rect) \\[3pt]
+
+\end{algorithm}

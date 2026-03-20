@@ -1,0 +1,45 @@
+\begin{table*}[hbtp]
+    \caption{
+      Performance comparison of the proposed Consecutive Frame (CF) method on video datasets based on YOLOv8(s/l) detection resultsl, compared with other temporal methods, specifically TPT and AVT, as described by Pedrovin et al. (2023) \citeproc{ref-pedrovin2023HybridMethodFire}{{[}25{]}}. Non-temporal methods, including FireNet \citeproc{ref-jadon2019firenet}{{[}47{]}} and MobileNet \citeproc{ref-mukhopadhyay2019fpga}{{[}48{]}},  are also included for comprehensive evaluation.
+    }
+
+    \label{tb:video_results}
+    \csvreader[
+      separator=semicolon,
+      no head,
+      late after line=\\,
+      late after last line=\\\hline,
+      tabularray={
+        width=1.0\textwidth,
+        colspec={|X[c]|X[2,c]|X[c]|X[c]|X[c]|X[c]|X[c]|X[c]|X[c]|},
+        colsep = {0.15pt},
+        hlines,
+        vlines,
+        cell{1}{1} = {r = 1}{valign = m}, % Dataset
+        cell{1}{2} = {r = 1}{valign = m}, % Method
+        cell{1}{3} = {r = 1}{valign = m}, % Accuracy
+        cell{1}{4} = {r = 1}{valign = m}, % F1-score
+        cell{1}{5} = {r = 1}{valign = m}, % TPR
+        cell{1}{6} = {r = 1}{valign = m}, % FPR
+        cell{1}{7} = {r = 1}{valign = m}, % FNR
+        cell{1}{8} = {r = 1}{valign = m}, % TNR
+        cell{1}{9} = {r = 1}{valign = m}, % ! skip FPS (since baseline use different hardware)
+        cells = {font = \footnotesize, halign = c, valign = m},
+        row{1} = {font = \bfseries\footnotesize},
+        % Same Dfire dataset rows should be merged: col1: row2 to row12
+        cell{2}{1} = {r = 14}{c = 1}{},
+        % % Same FireNet dataset rows should be merged: col1: row13 to row24
+        cell{16}{1} = {r = 14}{c = 1}{},
+      }
+    ]{4.table/tb_video_results.csv}{}{
+      \csvcoli & % Dataset
+      \csvcolii & % Method
+      \csvcoliii & % Accuracy
+      \csvcoliv & % F1-score
+      \csvcolv & % TPR
+      \csvcolvi & % FPR
+      \csvcolvii & % FNR
+      \csvcolviii & % TNR
+      \csvcolix % FPS
+    }
+  \end{table*}

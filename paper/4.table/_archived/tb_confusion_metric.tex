@@ -1,0 +1,25 @@
+\begin{table*}[hbtp]
+  \centering
+    \caption{Video Prediction Categories. Abbreviations:  $\mathcal{pred}$ = prediction;  $\mathcal{gt}$ = ground truth; $\mathcal{fire}$ = having fire OR smoke; $\mathcal{non\textnormal{-}fire}$ = NOT $\mathcal{fire}$.}
+    \label{tb:confusion_metric}
+    \csvreader[
+      separator=semicolon,
+      no head,
+      late after line=\\,
+      late after last line=\\\hline,
+      tabularray={
+        width=0.7\textwidth,
+        colspec={|X[c]|X[c]|},
+        colsep = {0.15pt},
+        hlines,
+        vlines,
+        cell{1}{1} = {r = 1}{valign = m}, % Category
+        cell{1}{2} = {r = 1}{valign = m}, % Description
+        cells = {font = \footnotesize, halign = c, valign = m},
+        row{1} = {font = \bfseries\footnotesize},
+      }
+    ]{4.table/tb_confusion_metric.csv}{}{
+      \csvcoli & % Category
+      \csvcolii % Description
+    }
+  \end{table*}

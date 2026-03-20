@@ -1,0 +1,5 @@
+﻿Category;Description
+True Positive ($TP$);($pred$ = $fire$) AND ($gt$ = $fire$)
+True Negative ($TN$);($pred$= $non-fire$) AND ($gt$ = $non-fire$)
+False Positive ($FP$);($pred$= $fire$) AND ($gt$ = $non-fire$)
+False Negative ($FN$);($pred$= $non-fire$) AND ($gt$ = $fire$)

@@ -1,0 +1,5 @@
+Network;Learning rate;Batch size;Momentum;Weight decay;avg mAP;
+YOLOv8s \citeproc{ref-JocherUltralyticsYOLOv82023}{{[}19{]}};0.006948;16;0.928685;0.000379;78.59;
+YOLOv8l \citeproc{ref-JocherUltralyticsYOLOv82023}{{[}19{]}};0.001032;16;0.960639;0.008724;79.91;
+YOLOv10s \citeproc{ref-wang2024yolov10}{{[}21{]}};0.001117;16;0.940489;0.001015;78.24;
+YOLOv10l \citeproc{ref-wang2024yolov10}{{[}21{]}};0.002797;64;0.923013;0.000102;79.07;

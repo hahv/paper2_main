@@ -14,18 +14,46 @@ link-citations: true
 
 ## 1. Introduction
 
-<!-- !TEST CITE -->
-Fires and wildfires, if not detected and controlled in their early stages, can quickly escalate—especially under dry and windy conditions—resulting in catastrophic consequences such as loss of life, destruction of property, and damage to natural forests. For example, in 2017, fires in urban areas and wildfires in California (USA) caused an estimated loss of 10 billion USD [@californiafire:online]. More recently, in 2025, a forest fire in Gyeongsang Province, South Korea, burned approximately 90,000 acres, resulting in at least 27 deaths and forcing nearly 40,000 people to evacuate [@southkoreafire:online]. Automated early fire and smoke detection systems can play a crucial role in identifying fires at their initial stages, enabling a prompt response to extinguish the fire and minimize damage.
+<!-- !START_SYNC_BLOCK -->
+<!-- TARGET_PROJECT: G:\My Drive\1_PhD\Obsidian\Home\3. Writing\paperfire2 -->
+<!-- SYNC_TARGET_FILE: 01_Introduction.md-->
+<!-- BLOCK_ID: intro -->
 
-
-Numerous fire and smoke detection methods, particularly those leveraging deep learning (DL), have been proposed in recent years [@cheng2024visual; @gragnaniello2024fire]. In practical deployments, these systems are often applied to video streams from CCTV cameras, where DL-based classifiers or object detectors are executed on each frame individually. Although this frame-wise approach is straightforward and easy to implement, it exhibits several limitations.
-<!-- ! END TEST CITE -->
-
-
+This is the content of the block that will be synchronized to the target file. You can include any markdown content here, such as headings, lists, code snippets, etc. When you update this block, the changes will be reflected in the specified target file.
 
 - **Hook:** Static surveillance cameras produce massive data redundancy. In typical operational environments, over 99% of frames consist of purely background information with no anomalies present.[[isabelleliu630.github](https://isabelleliu630.github.io/files/litedge_PPT.pdf)]
 - **Problem:** State-of-the-art (SOTA) deep learning models (the "BIG MODEL") are highly accurate but computationally heavy ($\sim$50ms per frame), making them prohibitive for real-time processing on bandwidth- and resource-constrained edge devices.[[pioneersecurity](https://www.pioneersecurity.com/edge-computing-in-surveillance/)]
 - **Proposal:** Rather than replacing the heavy model with a smaller, less accurate one, we propose a lightweight "gatekeeper" module to filter out irrelevant frames locally and only pass suspicious frames to the expert model.
+
+
+<!--!---------------------------- SOURCE: 1.intro.md ------------------------------>
+Fires and wildfires, if not detected and controlled in their early stages, can quickly escalate—especially under dry and windy conditions—resulting in catastrophic consequences such as loss of life, destruction of property, and damage to natural forests. For example, in 2017, fires in urban areas and wildfires in California (USA) caused an estimated loss of 10 billion USD [@californiafire:online]. More recently, in 2025, a forest fire in Gyeongsang Province, South Korea, burned approximately 90,000 acres, resulting in at least 27 deaths and forcing nearly 40,000 people to evacuate [@southkoreafire:online]. Automated early fire and smoke detection systems can play a crucial role in identifying fires at their initial stages, enabling a prompt response to extinguish the fire and minimize damage.
+
+
+Numerous fire and smoke detection methods, particularly those leveraging deep learning (DL), have been proposed in recent years [@cheng2024visual; @gragnaniello2024fire]. In practical deployments, these systems are often applied to video streams from CCTV cameras, where DL-based classifiers or object detectors are executed on each frame individually. Although this frame-wise approach is straightforward and easy to implement, it exhibits several limitations.
+
+
+First, it relies solely on spatial (visual) information within individual frames while neglecting temporal cues, such as motion, that are inherent in video data. Second, in many CCTV scenarios—especially in indoor environments—the scene often remains static with minimal variation between consecutive frames. In such cases, applying a DL model to every frame is computationally redundant and inefficient, leading to increased processing cost and latency without improving detection performance. This inefficiency is further compounded by the inherent trade-off between model accuracy and computational efficiency: highly accurate DL models are typically more complex and resource-intensive, resulting in longer inference times. Consequently, redundant frame processing amplifies these computational demands, making it difficult to achieve real-time performance in fire and smoke detection systems.
+
+
+To address these challenges, this study proposes a novel fire and smoke detection framework that leverages both spatial and temporal information in video streams to improve detection accuracy while reducing computational cost and latency by skipping redundant static frames.
+
+<!-- ```{=latex}
+    \input{./3.fig/fig1.tex}
+``` -->
+
+In particular, our main contributions are summarized as follows:
+
++ **Skip-Module Mechanism**: We propose a novel skip-module that exploits motion information in video streams to detect static scenes and bypass redundant frame processing, thereby reducing computational cost and latency.
+
++ **Large-Scale Fire and Smoke Dataset and BIG Model**: We construct a large-scale fire and smoke image dataset by combining the D-Fire dataset [#CITE_NEEDED] with self-collected images from the internet. Using this dataset, we train a highly accurate classifier, referred to as the **BIG model**, and evaluate its performance on two video datasets—the D-Fire video dataset [#CITE_NEEDED] and our self-collected video dataset. Experimental results demonstrate that the BIG model outperforms  recent object detection models (YOLOv8 [#CITE_NEEDED] and YOLOv10 [#CITE_NEEDED]) in terms of accuracy, precision, recall, and F1-score on both datasets.
+
++ **Integration and Evaluation**: We integrate the proposed skip-module with the BIG model and assess its performance on the two video datasets. The results show that the skip-module significantly improves processing speed (measured in frames per second, FPS) while maintaining or enhancing detection performance across all evaluation metrics.
+
+The rest of this paper is organized as follows: Section [@sec:relatedwork] provides an overview of existing fire and smoke detection methods in videos, as well as commonly used motion detection techniques, particularly background subtraction and frame differencing. Section [@sec:method] outlines the overall workflow of the proposed fire and smoke detection system, detailing the design of the skip module and its integration with the BIG model for video stream processing. Section [@sec:results] presents the experimental setup, evaluation metrics, and performance results of both the BIG model and the skip module on two video datasets. Finally, Section [@sec:conclusion] summarizes the key findings, discusses the limitations of this study, and suggests directions for future research.
+
+<!-- !END_SYNC_BLOCK -->
+
 
 ## 2. Related Work
 

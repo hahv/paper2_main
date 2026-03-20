@@ -1,0 +1,38 @@
+\begin{table*}[hbtp]
+  \caption{Optimal hyperparameters identified and the mAP value for each YOLO model after comprehensive Optuna tuning. The $mAP$ values are presented as \(\mu \pm \sigma\), where $\mu$ represents the mean and $\sigma$ represents the standard deviation across the 5-fold validation sets of D-Fire image dataset.}
+  \label{tb:tune_results}
+  \csvreader[
+    separator=semicolon,
+    no head,
+    late after line=\\,
+    late after last line=\\\hline,
+    tabularray={
+      width=\textwidth,
+      colspec={|X[1.5,c]|X[c]|X[c]|X[c]|X[c]|X[c]|X[3.0,c]|},
+      colsep = {0.15pt},
+      hlines,
+      vlines,
+      cell{1}{1} = {r = 1}{valign = m}, % Network
+      cell{1}{2} = {r = 1}{valign = m}, % Epochs
+      cell{1}{3} = {r = 1}{valign = m}, % Learning rate
+      cell{1}{4} = {r = 1}{valign = m}, % Batch size
+      cell{1}{5} = {r = 1}{valign = m}, % Momentum
+      cell{1}{6} = {r = 1}{valign = m}, % Weight decay
+      cells = {font = \footnotesize, halign = c, valign = m},
+      row{1} = {font = \bfseries\footnotesize},
+      row{1} = {blue!50!gray!25, font = \bfseries\footnotesize},
+      row{odd} = {blue!85!gray!7},
+    }
+  ]{4.table/tb_tune_results.csv}{}{
+    \csvexpval\csvcoli & % Network
+    \csvexpval\csvcolii & % Learning rate
+    \csvexpval\csvcoliii & %Batch size
+    \csvexpval\csvcoliv & % Momentum
+    \csvexpval\csvcolv & % Weight decay
+    \csvexpval\csvcolvi % avg. mAP
+  }
+\end{table*}
+
+% Footnote text for the table
+% \footnotetext[1]{The $mAP$ values are presented as \(\mu \pm \sigma\), where $\mu$ represents the mean and $\sigma$ represents the standard deviation across the 5-fold validation sets.}
+

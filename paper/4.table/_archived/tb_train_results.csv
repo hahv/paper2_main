@@ -1,0 +1,14 @@
+﻿Network;mAP50;$AP_{fire}$;$AP_{smoke}$;Precision;Recall;F1-score;GFLOPs
+YOLOv5s \citeproc{ref-padilla2020mAPMetrics}{{[}16{]}};78.15;72.45;83.85;-;-;0.76;15.08
+YOLOv5l \citeproc{ref-JocherYOLOv5byUltralytics2020}{{[}16{]}};79.1;72.32;85.88;-;-;0.78;107.8
+GTP-YOLO \citeproc{ref-kim2024domain}{{[}56{]}};78.2;72.6;83.7;-;-;-;19.1
+ESFD-YOLOv8n \citeproc{ref-mamadaliev2024esfd}{{[}36{]}};79.4;-;-;80.1;72.7;-;10.8
+YOLOv8s (MS) \citeproc{ref-gonccalves2024yolo}{{[}57{]}};78.7;72.5;84.9;-;-;-;28.4
+YOLOv8s (UD);79.27;72.78;85.75;79.03;74.01;0.764;28.4
+YOLOv8s (BT) \citeproc{ref-JocherUltralyticsYOLOv82023}{{[}19{]}};79.53;73.18;85.89;78.29;74.33;0.762;28.4
+YOLOv8l (UD);79.64;73.33;85.96;79.99;74.71;0.772;164.8
+YOLOv8l (BT) \citeproc{ref-JocherUltralyticsYOLOv82023}{{[}19{]}};80.48;74.66;86.3;80.25;74.32;0.772;164.8
+YOLOv10s (UD);79.06;72.79;85.32;80.11;72.97;0.763;24.4
+YOLOv10s (BT) \citeproc{ref-wang2024yolov10}{{[}21{]}};79.27;72.94;85.61;79.94;73.39;0.765;24.4
+YOLOv10l (UD);79.2;72.79;85.61;80.47;73.28;0.767;126.3
+YOLOv10l (BT)\citeproc{ref-wang2024yolov10}{{[}21{]}};79.83;73.2;86.47;79.61;75.03;0.772;126.3

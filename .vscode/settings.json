@@ -38,7 +38,8 @@
         "**/*.out": true,
         "tb/*.log": true,
         "**/*.log": true,
-        "**/.pytest_cache": true
+        "**/.pytest_cache": true,
+        "**/mutagen.yml.lock": true
     },
     "explorerExclude.backup": {},
     "notebook.formatOnSave.enabled": true,

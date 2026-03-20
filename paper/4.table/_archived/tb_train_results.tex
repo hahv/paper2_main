@@ -1,0 +1,23 @@
+\begin{table*}[hbtp]
+  \caption{Performance metrics of selected YOLO models with varying hyperparameter selection strategies on the D-Fire image dataset test set, compared with results from other studies. Each metric represents the mean performance of models derived from five training iterations. Abbreviations for hyperparameter selection methods: Grid Search (GS), Manual Selection (MS), Ultralytics Default (UD), and Bayesian Tuning (BT) = our proposed method.}\label{tb:train_results}
+  \centering
+  \resizebox{\textwidth}{!}{%
+  \csvreader[
+          separator=semicolon,
+          tabular=ccccccc,
+          no head,
+          table head = \toprule,
+          late after first line=\\\midrule,
+          late after last line=\\\bottomrule
+        ]{./4.table/tb_train_results.csv}{}{%
+        \csvexpval\csvcoli & % Network
+        \csvexpval\csvcolii & % mAP (%)
+        \csvexpval\csvcoliii & % APsmoke (%)
+        \csvexpval\csvcoliv & % APfire (%)
+        \csvexpval\csvcolv & % Precison
+        \csvexpval\csvcolvi & % Recall
+        \csvexpval\csvcolvii% F1
+        }
+  }
+\newline{\footnotesize{\textsuperscript{a} This work used 10\% of the D-Fire dataset through an arbitrary split, while other methods utilized the official test set, which constitutes 20\% of the dataset.}}
+\end{table*}

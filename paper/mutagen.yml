@@ -1,0 +1,29 @@
+# Mutagen YAML configuration file (https://github.com/mutagen-io/mutagen)
+# That specifies synchronization settings for the project
+sync:
+  my-sync:
+    # main folder
+    alpha: 'E:/SyncData/paper2_main/paper'
+    # target folder
+    beta: 'G:/My Drive/1_PhD/Obsidian/Home/3. Writing/paperfire2'
+    mode: one-way-safe
+    # +-------------------+----------------------------------+
+    # | Mode              | Meaning                          |
+    # +-------------------+----------------------------------+
+    # | two-way-safe      | 2-way sync, stop on conflict     |
+    # | two-way-resolved  | 2-way sync, alpha wins conflict  |
+    # | one-way-safe      | alpha -> beta, safer behavior    |
+    # | one-way-replica   | beta becomes copy of alpha       |
+    # +-------------------+----------------------------------+
+
+    ignore:
+      vcs: true
+      paths:
+        - '_archived/'
+        - '0.tex/'
+        - 'out/'
+        - '__zotero_paper2.url'
+        - 'topdf.bat'
+        - 'mutagen.yml'
+        - 'mutagen.yml.lock'
+        - 'zpaper2.md'

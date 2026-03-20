@@ -1,0 +1,13 @@
+﻿1;2;3;4;5;6;7;8;9;10;11;12;13;14;15;16
+2;Method;year;cite;citeproc;citeproc_text;DFire \citeproc{ref-dfiredataset}{{[}xx{]}};DFire;DFire;DFire;DFire;Self-collected;Self-collected;Self-collected;Self-collected;Self-collected
+3;Method;year;cite;citeproc;citeproc_text;Acc;F1;TPR;FAR;FPS;Acc;F1;TPR;FAR;FPS
+4;YOLOv5s;2022;dfiredataset;ref-dfiredataset;-1;68.57;0.76;97.14;60;-;-;-;-;-;-
+5;YOLOv5s+TPT;2022;dfiredataset;ref-dfiredataset;-1;71.43;0.76;91.43;48.57;-;-;-;-;-;-
+6;YOLOv5s+AVT;2022;dfiredataset;ref-dfiredataset;-1;72.86;0.78;97.14;51.43;-;-;-;-;-;-
+7;YOLOv5l;2022;dfiredataset;ref-dfiredataset;-1;60;0.71;100;80;-;-;-;-;-;-
+8;YOLOv5l+TPT;2022;dfiredataset;ref-dfiredataset;-1;71.43;0.77;97.14;54.29;-;-;-;-;-;-
+9;YOLOv5l+AVT;2022;dfiredataset;ref-dfiredataset;-1;65.71;0.75;100;68.57;-;-;-;-;-;-
+10;FireNet;2019;jadon2019firenet;ref-jadon2019firenet;-1;54;0.5;46;38;-;-;-;-;-;-
+11;MobileNet;2019;mukhopadhyay2019fpga;ref-mukhopadhyay2019fpga;-1;35;0;0;30;-;-;-;-;-;-
+12;Our method (BIG model);2025;;;;-;-;-;-;-;-;-;-;-;-
+13;Our method (BIG model + Skip Module);2025;;;;-;-;-;-;-;-;-;-;-;-

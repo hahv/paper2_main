@@ -1,0 +1,45 @@
+% ! This solution does not require any extra packages like etoolbox or xstring.
+
+\begin{table*}[hbtp]
+  \caption{Performance comparison of our proposed method with other fire/smoke detection methods on D-Fire \citeproc{ref-dfiredataset}{{[}xx{]}} and our self-collected dataset.}
+  \label{tb:perf_results}
+  \csvreader[separator=semicolon,
+    no head,
+    range=2-,
+    centered tabularray = {
+        width = 0.9\textwidth,
+        colspec = {ccccccccccc},
+        colsep = {5pt},
+        hlines,
+        vlines,
+        cell{1}{1} = {r=2}{halign=c},
+        cell{1}{2} = {c=5}{halign=c},
+        cell{1}{7} = {c=5}{halign=c},
+        cells = {font = \footnotesize, halign = c, valign = m},
+        row{1} = {font = \bfseries\footnotesize},
+        row{2} = {font = \bfseries\itshape\footnotesize},
+    },
+  ]{4.table/tb_perf_results.csv}{}{
+    % Method (col1) + citation (col3)
+    \ifcsvfirstrow
+      {\csvexpval\csvcolii} % Header row: just the name
+      { % Data rows: use \ifx for the most reliable empty check
+        \ifx\csvcolv\empty
+          {\csvexpval\csvcolii} % If \csvcolv is identical to \empty, print only the name
+        \else
+          {\csvexpval\csvcolii~\csvexpnot\citeproc{\csvexpval\csvcolv}{{[}\csvexpval\csvcolvi{]}}} % Otherwise, print the name + citation
+        \fi
+      } &
+    % Other columns
+    \csvexpval\csvcolvii &
+    \csvexpval\csvcolviii &
+    \csvexpval\csvcolix &
+    \csvexpval\csvcolx &
+    \csvexpval\csvcolxi &
+    \csvexpval\csvcolxii &
+    \csvexpval\csvcolxiii &
+    \csvexpval\csvcolxiv &
+    \csvexpval\csvcolxv &
+    \csvexpval\csvcolxvi
+  }
+\end{table*}
