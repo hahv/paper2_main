@@ -1,0 +1,60 @@
+input: raw/users.csv
+output: output/
+sep: ";"
+
+steps:
+  # ── 1. SHAPE THE SCHEMA ───────────────────────────────────
+  - type: rename
+    mapping:
+      Metric: Model
+
+  - type: str_op
+    ops:
+      - {
+          column: Model,
+          op: replace,
+          search: "4GPU_SV__ds_UFireIndoorTest__mt_no_temp_method__af4b0d32a3d2__20260303.180228_per_frame",
+          replace-with: "Our Big Model",
+        }
+      - {
+          column: Model,
+          op: replace,
+          search: "firenet_per_frame",
+          replace-with: "FireNet",
+        }
+      - {
+          column: Model,
+          op: replace,
+          search: "mobilenet_per_frame",
+          replace-with: "MobileNet",
+        }
+      - {
+          column: Model,
+          op: replace,
+          search: "yolov5s_notemp_per_frame",
+          replace-with: "YOLOv5s",
+        }
+
+  # ── 3. FILTER ROWS ────────────────────────────────────────
+  - type: filter
+    conditions:
+      - {
+          column: Model,
+          op: "in",
+          value: ["Our Big Model", "FireNet", "MobileNet", "YOLOv5s"],
+        }
+
+  # ── 6. SORT & LIMIT ───────────────────────────────────────
+  - type: sort
+    by: [metric_recall (tpr), metric_fpr (false alarm rate), metric_fps, metric_accuracy]
+    ascending: [true, true, false, false]
+
+  - type: select
+    columns:
+      - Model
+      - metric_recall (tpr)
+      - metric_fpr (false alarm rate)
+      - metric_fps
+      - metric_accuracy
+      - metric_f1_score
+      - metric_precision

@@ -90,7 +90,7 @@ class InferConfig(YAMLWizard):
     verbose: bool
     save_timeline_vis: Optional[bool] = True
     timeline_table_mode: Optional[str] = (
-        "p"  # options: p (percent), fc (frame count), both (pfc)
+        "pfc"  # options: p (percent), fc (frame count), both (pfc)
     )
     csv_infer_pattern: Optional[str] = GlobalConst.INFER_FILE_PATTERN
     timeline_video_name_limit: Optional[int] = 40

@@ -10,7 +10,7 @@ general:
     wandb_cfg: null
 dbset_selector:
   list_dbsets: []
-  selected_dbset: UFireIndoorFull
+  selected_dbset: UFireIndoorTest #UFireIndoorFull
 metric_selector:
   list_metrics: []
   selected_metric: per_frame_metric

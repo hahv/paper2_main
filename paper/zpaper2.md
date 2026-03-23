@@ -6,7 +6,7 @@ documentclass: article
 fontsize: 10pt
 geometry:
   - a4paper
-  - margin=1cm
+  - margin=2cm
 link-citations: true
 secPrefix:
   - "Section"
@@ -64,6 +64,68 @@ Approach 1/2:
 
 ## Dataset Generation and Partitioning
 
+
+### Image Datasets for Model Training
+
+In this study, we trained two classification models: a high-accuracy, complex model (referred to as the BIG model) for fire and smoke detection, and a lightweight model (referred to as the SMALL model) for the skip-module.
+
+For the BIG model, we combined images from the D-Fire dataset [@dfiredataset] with additional fire and smoke images collected from the internet, resulting in a total of 18,000 images (#REVISE_NEEDED). These were divided into training (80%, 14,400 images) and testing (20%, 3,600 images) sets.
+
+For the SMALL model, we randomly extracted 80,000 64×64 patches from datasets A and B (#REVISE_NEEDED). Of these, 80% were used for training, while the remaining 20% were reserved for testing to evaluate model performance.
+
+
+<!-- /mnt/e/SyncData/paper2_main/zreport/available_dataset.xlsx -->
+<!-- ![dataset_list](3.fig/dataset_list.png)
+There is a lack of publicly available datasets for indoor fire/smoke detection with static cameras.
+
+Some existing fire/smoke video datasets but using moving cameras like:
+
+- FireNet [@jadon2019firenet]
+- Firesense [@Firesens4:online]
+- FiSmo [@cazzolato2017fismo]
+- FURG [@steffens2015unconstrained]
+
+Static:
+
+- DFire [@dfiredataset]
+- VisiFire Blinkent [@VisiFireBilkent:online]
+- KMU Fire and Smoke dataset [@KMUFireSmokeDataset]
+- Mivia Fire Dataset [@foggia2015real]
+- Mivia Smoke Dataset [@foggia2015real]
+- USTC Smoke Dataset [@lin2017smoke]
+
+problems:
+
+- mostly outdoor scenes
+- small number of videos
+- low resolution
+- lack of diversity in fire/smoke appearances and environmental conditions
+
+we constructed our own dataset with static cameras in indoor environments to address these limitations.
+
+- combined:
+- fire/smoke videos from existing datasets
+  - Korea AI Fire Dataset [@AIHub87:online]
+  - USTC Smoke Dataset [@lin2017smoke]
+  - VSD3K Dataset [@huang2022fire]
+  - video collected from the internet (Pexels, pixabay, youtube)
+- for non-fire/smoke videos:
+  - some self-collected videos from real CCTV cameras in indoor environments (parking areas)
+  - Safe&Unsafe behavior in workplaces dataset [@onal2024video]
+  - Indoor Action dataset [@deniz2024optimized]
+  - MPII Cooking 2 Dataset [@rohrbach2016recognizing]
+  - USTC Smoke Dataset [@lin2017smoke]
+  - WiseNet dataset [@marroquin2019wisenet]
+
+Statistic of our indoor static video dataset shown in:
+`/mnt/e/SyncData/paper2_main/zreport/my_fire_static_indoor_dataset.csv` -->
+
+### Video Datasets for Hyperparameter Tuning and System Evaluation
+Publicly available video datasets for fire and smoke detection using static cameras remain scarce. While several existing benchmarks address this detection task — including FireNet [@jadon2019firenet], Firesense [@Firesens4:online], FiSmo [@cazzolato2017fismo], and FURG [@steffens2015unconstrained] — these were recorded with moving cameras and are therefore unsuitable for static surveillance scenarios. Static-camera datasets such as DFire [@dfiredataset], VisiFire Bilkent [@VisiFireBilkent:online], KMU Fire and Smoke [@KMUFireSmokeDataset], Mivia Fire and Smoke [@foggia2015real], and USTC Smoke [@lin2017smoke] do exist; however, they collectively suffer from several limitations: a predominance of outdoor scenes, a small number of video samples, low spatial resolution, and insufficient diversity in fire/smoke appearances and environmental conditions.
+
+To address these deficiencies, we constructed a dedicated static indoor video dataset by aggregating clips from multiple heterogeneous sources. Fire and smoke samples were sourced from the Korea AI Fire Dataset [@AIHub87:online], the USTC Smoke Dataset [@lin2017smoke], and the VSD3K Dataset [@huang2022fire], supplemented by videos collected from open online platforms (Pexels, Pixabay, and YouTube). Non-fire/smoke (negative) samples were compiled from self-recorded footage captured by real CCTV cameras in indoor environments (e.g., parking areas), along with the Safe & Unsafe Behavior in Workplaces dataset [@onal2024video], the Indoor Action dataset [@deniz2024optimized], the MPII Cooking 2 Dataset [@rohrbach2016recognizing], and the WiseNet dataset [@marroquin2019wisenet].
+
+
 Due to the lack of public high-resolution datasets specifically designed for static surveillance cameras, we constructed a custom dataset consisting of 150 HD videos (1920$\times$1080 resolution). The dataset is strictly balanced into three categories: Fire (50), Smoke (50), and Safe/Neutral (50). To ensure robust evaluation, the videos capture diverse environments, including forests, warehouses, and urban settings under varying lighting conditions.
 
 The 150 videos were randomly split into Training/Validation (60%, n=90: 30 Fire, 30 Smoke, 30 Safe) for hyperparameter tuning and hyperparameter selection, and Test (40%, n=60: 20 per class) for unbiased final performance evaluation. Stratified sampling ensured balance across classes and environments.
@@ -83,16 +145,40 @@ Figure 2: Representative frames from our custom HD dataset.
 
 ```
 
-## Baseline Models and Context
+## Evaluation Metrics
 
-To validate the effectiveness of the proposed skip module, we compare it against a spectrum of existing solutions ranging from heavy, high-accuracy models to lightweight, real-time approximations:
+Performance is evaluated under both **frame-level** and **video-level** protocols, which are commonly used in fire and smoke video analysis [@steffens2016non; @dfiredataset]. Frame-level evaluation measures detection performance for each individual frame and therefore provides a strict assessment of classification accuracy. In contrast, video-level evaluation aggregates predictions over an entire video sequence, offering a coarser but practically relevant measure for continuous surveillance scenarios.
 
-- **The "Expert" Baseline (BIG MODEL):** A state-of-the-art Deep Learning model (ResNet-50 backbone) trained on a massive proprietary dataset ($>1M$ images). It achieves the highest accuracy but suffers from high latency ($\sim$50ms/frame), making it computationally prohibitive for 24/7 processing on edge devices.
-- **M1 (Lightweight Classifier):** A MobileNetV2-based classifier trained on a smaller subset ($<5k$ images). It represents the standard "efficiency" compromise: low latency ($\sim$15ms) but reduced generalization capability.
-- **M2 (Lightweight Detector):** A YOLOv8-Nano object detector trained on a small dataset ($\sim$2k images). It offers localization but struggles with small or semi-transparent smoke features due to limited training data.
-- **M3 (Temporal Voting Method):** A video-level approach that aggregates inference results over a sliding window of 30 frames to reduce false alarms. While effective for reducing noise, it introduces inherent algorithmic latency.
+The quantitative results are reported using standard classification metrics, including accuracy, recall, false positive rate, precision, F1-score, and frames per second (FPS), as defined below.
 
-All inference latencies were measured on an NVIDIA Jetson Nano / RTX 3060 to simulate edge deployment
+```{=latex}
+\input{./5.eq/eq_metrics.tex}
+```
+
+In addition to these standard metrics, we emphasize a new system-level criteria that are particularly important for the proposed skip-based framework: skip rate ($S$). Skip rate indicates the ratio of correctly skipped negative frames $N_{\mathrm{skip}}^{-}$ to the total number of negative frames $(TN + FP)$, reflecting the efficiency of the skip module in filtering out non-informative frames while preserving safety.
+
+The following definitions apply to both frame-level and video-level evaluations:
+
+- True Positive ($TP$): Correct detection of fire or smoke.
+- True Negative ($TN$): Correct identification of the absence of fire or smoke.
+- False Positive ($FP$): Incorrect detection of fire or smoke when none is present.
+- False Negative ($FN$): Failure to detect fire or smoke when it is present.
+
+Frame-level evaluation computes metrics on a per-frame basis, providing a stricter assessment, while video-level evaluation aggregates metrics in the context of entire video sequences, allowing for a coarser assessment.
+
+## Experimental Setup and Training {#sec:setup label="setup"}
+Due to their distinct computational requirements, the BIG and SMALL
+models were trained on separate hardware configurations. The BIG model
+was trained on a system equipped with an Intel i9-13900K CPU and two
+NVIDIA GeForce RTX 4090 GPUs. Training was conducted over 100 epochs
+using the Stochastic Gradient Descent (SGD) optimizer with the following
+hyperparameters: a batch size of 128, a learning rate of 0.01, momentum
+of 0.9, and weight decay of 0.0001. In contrast, the SMALL model was
+trained on a system with an Intel i9-9900K CPU and a single NVIDIA
+GeForce RTX 3090 GPU. This model employed the Adam optimizer for 50
+epochs with a batch size of 256, a learning rate of 0.001,
+\(\beta_1 = 0.9\), \(\beta_2 = 0.999\), and a weight decay of 0.0001.
+
 
 **TODO**: add hardware and software context here
 
@@ -150,6 +236,18 @@ Disk (C:\): 574.13 GiB / 975.92 GiB (59%) - NTFS
 Disk (D:\): 260.78 GiB / 446.62 GiB (58%) - NTFS
 Disk (E:\): 898.97 GiB / 1.23 TiB (71%) - NTFS
 Local IP (NIC1): 115.145.36.212/24
+
+All inference latencies were measured on an NVIDIA Jetson Nano / RTX 3060 to simulate edge deployment
+
+
+## Baseline Models and Context
+
+To validate the effectiveness of the proposed skip module, we compare it against a spectrum of existing solutions ranging from heavy, high-accuracy models to lightweight, real-time approximations:
+
+- **The "Expert" Baseline (BIG MODEL):** A state-of-the-art Deep Learning model (ResNet-50 backbone) trained on a massive proprietary dataset ($>1M$ images). It achieves the highest accuracy but suffers from high latency ($\sim$50ms/frame), making it computationally prohibitive for 24/7 processing on edge devices.
+- **M1 (Lightweight Classifier) [@jadon2019firenet]:** A MobileNetV2-based classifier trained on a smaller subset ($<5k$ images). It represents the standard "efficiency" compromise: low latency ($\sim$15ms) but reduced generalization capability.
+- **M2 (Lightweight Detector) [@pedrovin2023HybridMethodFire]:** A YOLOv8-Nano object detector trained on a small dataset ($\sim$2k images). It offers localization but struggles with small or semi-transparent smoke features due to limited training data.
+- **M3 (Temporal Voting Method) [@pedrovin2023HybridMethodFire]:** A video-level approach that aggregates inference results over a sliding window of 30 frames to reduce false alarms. While effective for reducing noise, it introduces inherent algorithmic latency.
 
 ## Hyperparameter Selection Strategy {#sec:hyperparam}
 
@@ -239,14 +337,6 @@ Table~\ref{tb:val_search} specifies the search space for the rule-based skip-mod
 ```
 
 This formulation is systematic, interpretable, and aligned with the intended role of the skip module in real-time fire/smoke detection: preserve recall first, then prefer candidates that skip more negative frames while still improving operational false alarm behavior.
-
-## Evaluation Metrics
-
-We evaluate performance across three primary dimensions:
-
-1. **Recall (Safety/Anomaly):** The percentage of anomaly (fire or smoke) frames correctly flagged. In safety-critical surveillance, False Negatives are catastrophic failures.
-2. **Filter Rate (Efficiency):** The percentage of safe/neutral frames successfully skipped by the module without triggering the deep learning model.
-3. **System Latency:** The end-to-end processing time per frame, encompassing both the pre-check module and any subsequent deep learning inference.
 
 ## Component Analysis: Efficacy of the Skip Module {#sec:comp-perf}
 

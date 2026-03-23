@@ -14,7 +14,7 @@ class DFireCsvLoader(BaseRawCsvLoader):
     def get_gt_df(
         self, video_path: str, extra_data: Optional[dict] = None
     ) -> pd.DataFrame:
-        num_frames: int = extra_data.get("num_frames")  # ty:ignore[possibly-missing-attribute, invalid-assignment]
+        num_frames: int = extra_data.get("num_frames")  # ty:ignore[invalid-assignment, unresolved-attribute]
         video_name = Path(video_path).name
         data_dict = {
             GlobalConst.COL_VIDEO: [video_name] * num_frames,

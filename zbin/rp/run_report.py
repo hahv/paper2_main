@@ -27,6 +27,7 @@ class ReportArgs(Tap):
         False  # whether to skip plotting the performance report (only save CSV)
     )
     is_optim_report: bool = False  # whether this report is for optimization (affects how the report is generated)
+    force: bool = False  # whether to force regenerate performance CSV files even if they already exist
 
     def configure(self):
         self.add_argument("-i", "--indir")
@@ -36,7 +37,7 @@ class ReportArgs(Tap):
         self.add_argument("-noplot", "--skip_plot", action="store_true")
         # The line `self.add_argument("-opt", "--is_optim_report", action="store_true")` in the `ReportArgs` class is defining a command-line argument for the script.
         self.add_argument("-opt", "--is_optim_report", action="store_true")
-
+        self.add_argument("-f", "--force", action="store_true")
 
 #! ================= PERFORMANCE REPORT =================
 
@@ -57,7 +58,7 @@ def having_perf_csv(exp_dir: str) -> bool:
     return any(default_exp_csv_filter_fn(csv_file) for csv_file in csv_files)
 
 
-def gen_exp_perf_csv(exp_dir: str):
+def gen_exp_perf_csv(exp_dir: str, force=False) -> bool:
     """
     Generates performance CSV files for the given experiment directory.
     This is a placeholder function and should be implemented with the actual logic to generate CSV files.
@@ -89,7 +90,7 @@ def gen_exp_perf_csv(exp_dir: str):
         return False
 
 
-def prepare_exp_dir(in_dir: str):
+def prepare_exp_dir(in_dir: str, force=False):
     """
     Prepares the experiment directory for reporting.
     Generates performance CSV files if they don't exist.
@@ -100,10 +101,11 @@ def prepare_exp_dir(in_dir: str):
     with ConsoleLog("Preparing exp dirs for reporting..."):
         for exp_dir in tqdm(exp_dirs):
             assert os.path.isdir(exp_dir), f"{exp_dir} is not a directory"
-            if not having_perf_csv(exp_dir):
+            # ! If the performance CSV file does not exist in the experiment directory, generate it. or force regenerate if force=True
+            if not having_perf_csv(exp_dir) or force:
                 llogger.info(f"Generating performance CSV for {exp_dir}...")
                 try:
-                    did_gen = gen_exp_perf_csv(exp_dir)
+                    did_gen = gen_exp_perf_csv(exp_dir, force=force)
                     if not did_gen:
                         raise Exception("CSV generation failed")
                 except Exception as e:
@@ -120,6 +122,7 @@ def report_perf(
     report_dir: str,
     save_csv: bool = True,
     skip_plot: bool = False,
+    force=False,
 ):
     assert os.path.exists(metric_cfg_file), (
         f"No metric files found in {metric_cfg_file}"
@@ -138,7 +141,7 @@ def report_perf(
     os.makedirs(report_dir, exist_ok=True)
 
     # !First prepare the experiment directories by generating performance CSV files if they don't exist.
-    prepare_exp_dir(indir)
+    prepare_exp_dir(indir, force=force)
     metricSet_df_dict = {}
     for metricSet_name in metricSet_names:
         pattern = f"{metricSet_name}{SEP}perf"
@@ -249,11 +252,12 @@ def norm_optim_df(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def prepare_optim_df(
-    indir: str, metric_cfg_file: str, report_dir: str, selected_metricSet="per_frame"
+    indir: str, metric_cfg_file: str, report_dir: str, selected_metricSet="per_frame",
+    force=False,
 ):
     # first get the "per_frame" df
     metricSet_df_dict = report_perf(
-        indir, metric_cfg_file, report_dir, save_csv=True, skip_plot=True
+        indir, metric_cfg_file, report_dir, save_csv=True, skip_plot=True, force=force
     )
     assert selected_metricSet in metricSet_df_dict, (
         f"Selected metric set '{selected_metricSet}' not found in generated metric sets: {list(metricSet_df_dict.keys())}"
@@ -376,8 +380,9 @@ def report_optim(
     selected_metricSet="per_frame",
     param_select_cfg=r"config/zruns/optim/__param_select.yaml",
     shorten=True,
+    force=False,
 ):
-    optim_df = prepare_optim_df(indir, metric_cfg_file, report_dir, selected_metricSet)
+    optim_df = prepare_optim_df(indir, metric_cfg_file, report_dir, selected_metricSet, force=force)
     chosen_param_df = report_optim_by_csv(
         optim_df,
         param_select_cfg=param_select_cfg,
@@ -400,16 +405,17 @@ def main():
     indir = args.indir
     metric_dir = args.metric_cfg_file
     report_dir = args.outdir
+    force = args.force
 
     if args.now:
         report_dir = os.path.join(report_dir, now_str())
 
     if args.is_optim_report:
         # ! If it's an optimization report, we might want to generate a different type of report that focuses on optimization results.
-        report_optim(indir, metric_dir, report_dir)
+        report_optim(indir, metric_dir, report_dir, force=force)
     else:
         # Then generate the performance report.
-        report_perf(indir, metric_dir, report_dir, skip_plot=args.skip_plot)
+        report_perf(indir, metric_dir, report_dir, skip_plot=args.skip_plot, force=force)
 
 
 if __name__ == "__main__":

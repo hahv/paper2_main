@@ -1,8 +1,8 @@
-from halib import *
 import sys
+PROJECT_PATH = "/mnt/e/SyncData/paper2_main"
+sys.path.append(PROJECT_PATH)  # Add project directory to sys.path
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
+from halib import *
 from tap import *
 from src.db_anno.newdb_labeler import *
 

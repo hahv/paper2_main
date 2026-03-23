@@ -107,10 +107,10 @@ class CsvMetricSrc(BaseMetricSrc):
         metric = metric.strip()
         cache_key = self.metric_mode_to_cache_key(mode, metric)
         if cache_key in self.cache_unified_df_dict:
-            print("Using cached unified_df for key:", cache_key)
+            # print("Using cached unified_df for key:", cache_key)
             unified_df = self.cache_unified_df_dict[cache_key]
         else:
-            print("Generating unified_df for key:", cache_key)
+            # print("Generating unified_df for key:", cache_key)
             unified_df, cache_key = self.unify_df_by_mode(mode, metric, **kwargs)
             self.cache_unified_df_dict[cache_key] = unified_df
 

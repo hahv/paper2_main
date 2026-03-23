@@ -95,6 +95,13 @@ class ExternalMethod(BaseMethod):
 
         for video_path in video_files:
             stem = Path(video_path).stem
+            out_csv = outdir / f"{stem}{GlobalConst.INFER_FILE_PATTERN}.csv"
+            if out_csv.exists():
+                console.print(
+                    f"[yellow][Warning] Skipping '{stem}': {out_csv.name} already exists.[/yellow]"
+                )
+                continue
+
             try:
                 df = loader.load_video_gt_pred_df(video_path)
             except FileNotFoundError as e:
@@ -114,7 +121,6 @@ class ExternalMethod(BaseMethod):
                 GlobalConst.COL_PRED,
                 GlobalConst.COL_ELAPSED_TIME,
             ]
-            out_csv = outdir / f"{stem}{GlobalConst.INFER_FILE_PATTERN}.csv"
             df[[c for c in cols_to_write if c in df.columns]].to_csv(
                 str(out_csv), sep=";", index=False, encoding="utf-8"
             )

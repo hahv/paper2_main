@@ -71,7 +71,7 @@ class NewDBLabeler(VideoLabelerBase):
         for idx, video in enumerate(self.video_list):
             all_video_lb = self.get_all_frames_label_func(
                 dataset_name=self.dataset_name, video_path=video
-            )
+            )  # ty:ignore[missing-argument]
             if all_video_lb != self.LABEL_MIXED:
                 self.video_priority_list[idx] = 1
         # Sort videos by priority (non-mixed first)
