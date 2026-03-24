@@ -1,0 +1,14 @@
+1;2;3;4
+2;Model;Year;Cite
+3;VisiFireBilkent (Cetin, 0000);2015;\citeproc{ref-VisiFireBilkent:online}{{[}xx{]}}
+4;D-Fire (de Venancio et al., 2021);2021;\citeproc{ref-dfiredataset}{{[}xx{]}}
+5;KMU (Ko et al., 2011);2011;\citeproc{ref-dfiredataset}{{[}xx{]}}
+6;Mivia FIRE (Borgia et al., 2015);2015;\citeproc{ref-dfiredataset}{{[}xx{]}}
+7;Mivia SMOKE (Borgia et al., 2015);2015;\citeproc{ref-dfiredataset}{{[}xx{]}}
+8;USTC Smoke (in2017smoke);2017;\citeproc{ref-dfiredataset}{{[}xx{]}}
+9;FireNet (Lad et al., 2019);2019;\citeproc{ref-dfiredataset}{{[}xx{]}}
+10;FireSense (Kose et al., 2010);2010;\citeproc{ref-dfiredataset}{{[}xx{]}}
+11;FiSmo (Cazzato et al., 2020);2020;\citeproc{ref-dfiredataset}{{[}xx{]}}
+12;FURG (Steffens et al., 2015);2015;\citeproc{ref-dfiredataset}{{[}xx{]}}
+13;VSD3 (Huang et al., 2022);2022;\citeproc{ref-dfiredataset}{{[}xx{]}}
+14;Ours (2026);2026; - This work

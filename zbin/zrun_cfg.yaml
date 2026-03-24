@@ -3,7 +3,7 @@ base_yaml:
   # - config/zruns/run_model_20260210.yaml
   - config/zruns/run_model_20260224.yaml
 sweep_yaml:
-  # - config/zruns/run_ufire02.yaml
-  - config/zruns/run_ufire_replace.yaml
+  - config/zruns/run_ufire02.yaml
+  # - config/zruns/run_ufire_replace.yaml
   # - config/zruns/run_ufirefull.yaml
   # - config/zruns/run_ufiremiss.yaml

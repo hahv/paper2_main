@@ -1,0 +1,47 @@
+data_source;category;video_path
+MPIICooking2;lb_none;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_none/MPIICooking2__lb_none__s22-d25-cam-002.avi
+MPIICooking2;lb_none;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_none/MPIICooking2__lb_none__s26-d23-cam-002.avi
+PEXELs;lb_fire;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_firesmoke/PEXELs__lb_fire__163395-827856005.mp4
+Prof;lb_none;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_none/Prof__lb_none__parking_underground__00.34.22.564-seg2_clip_4.mp4
+Prof;lb_none;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_none/Prof__lb_none__parking_underground__02.28.18.434-seg4_clip_3.mp4
+Prof;lb_none;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_none/Prof__lb_none__parking_underground__02.51.46.414-seg6_clip_1 - Trim.mp4
+SafeUnsafeBehavior;lb_none;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_none/SafeUnsafeBehavior__lb_none__3_carrying_overload_with_forklift_3_te6.mp4
+VSD3;lb_mixed_firesmoke;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_firesmoke/VSD3__lb_mixed_firesmoke__video1.avi
+VSD3;lb_none;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_none/VSD3__lb_none__video13.avi
+aihub;lb_fire;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_firesmoke/aihub__lb_fire__0016.mp4
+aihub;lb_fire;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_firesmoke/aihub__lb_fire__0035.mp4
+aihub;lb_fire;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_firesmoke/aihub__lb_fire__0983.mp4
+aihub;lb_fire;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_firesmoke/aihub__lb_fire__1144.mp4
+aihub;lb_fire;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_firesmoke/aihub__lb_fire__1169.mp4
+aihub;lb_fire;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_firesmoke/aihub__lb_fire__1193.mp4
+aihub;lb_fire;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_firesmoke/aihub__lb_fire__1235.mp4
+aihub;lb_fire;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_firesmoke/aihub__lb_fire__1285.mp4
+aihub;lb_fire;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_firesmoke/aihub__lb_fire__1305.mp4
+aihub;lb_none;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_none/aihub__lb_none__0175.mp4
+aihub;lb_none;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_none/aihub__lb_none__0203.mp4
+aihub;lb_none;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_none/aihub__lb_none__2080.mp4
+aihub;lb_none;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_none/aihub__lb_none__3264.mp4
+aihub;lb_none;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_none/aihub__lb_none__3268.mp4
+aihub;lb_none;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_none/aihub__lb_none__4019.mp4
+aihub;lb_none;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_none/aihub__lb_none__4021.mp4
+aihub;lb_smoke;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_firesmoke/aihub__lb_smoke__0012.mp4
+aihub;lb_smoke;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_firesmoke/aihub__lb_smoke__0208.mp4
+aihub;lb_smoke;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_firesmoke/aihub__lb_smoke__3042.mp4
+aihub;lb_smoke;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_firesmoke/aihub__lb_smoke__3067.mp4
+aihub;lb_smoke;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_firesmoke/aihub__lb_smoke__5030.mp4
+aihub;lb_smoke;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_firesmoke/aihub__lb_smoke__5966.mp4
+aihub;lb_smoke;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_firesmoke/aihub__lb_smoke__5982.mp4
+indoorActionDataset;lb_none;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_none/indoorActionDataset__lb_none__LivingRoom 2 - S3 sneezing.mp4
+indoorActionDataset;lb_none;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_none/indoorActionDataset__lb_none__S3DinningRoom 2 - S2 eating.mp4
+ustc;lb_mixed_smoke;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_firesmoke/ustc__lb_mixed_smoke__train-11.avi
+ustc;lb_none;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_none/ustc__lb_none__train-12.avi
+ustc;lb_smoke;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_firesmoke/ustc__lb_smoke__test-1.avi
+ustc;lb_smoke;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_firesmoke/ustc__lb_smoke__train-1.avi
+ustc;lb_smoke;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_firesmoke/ustc__lb_smoke__train-7.avi
+wisenet;lb_none;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_none/wisenet__lb_none__set_1_video1_2.avi
+wisenet;lb_none;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_none/wisenet__lb_none__set_2_video2_2.avi
+wisenet;lb_none;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_none/wisenet__lb_none__set_2_video2_4.avi
+wisenet;lb_none;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_none/wisenet__lb_none__set_3_video3_2.avi
+wisenet;lb_none;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_none/wisenet__lb_none__set_3_video3_3.avi
+wisenet;lb_none;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_none/wisenet__lb_none__set_3_video3_5.avi
+youtube;lb_mixed_firesmoke;/mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull/val/val_firesmoke/youtube__lb_mixed_firesmoke__dryer-fire-mp4-[01w0cOzmCvc]-Trim.mp4

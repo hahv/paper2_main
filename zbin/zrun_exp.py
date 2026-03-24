@@ -40,7 +40,7 @@ class CustomArgs(Tap):
         )
         self.add_argument("-p", "--use_line_profiler")
         self.add_argument("-opt", "--is_optim_mode", action="store_true")
-        self.add_argument("-pc", "--pre_computed_no_skip_dir")
+        self.add_argument("-precomputed", "--pre_computed_no_skip_dir")
         self.add_argument(
             "-d",
             "--dry_run",

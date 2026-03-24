@@ -1,0 +1,48 @@
+input: raw/raw_tb_ufireindoor.csv
+output: output/
+sep: ";"
+
+steps:
+  # ── Join cite onto main ────────────────────────────────────
+  - type: join
+    file: raw/_raw_tb_ufireindoor_cite.csv
+    left_on: "3"
+    right_on: "2"
+    how: left
+    suffixes: ["", "_cite"]
+
+  # ── Build new Model ───────────────────────────────────────
+  - type: str_op
+    ops:
+      - { column: "3", op: regex_replace, search: "\\s*\\(.*", replace-with: "", new-col: ModelBase }
+
+  - type: add_column
+    cols:
+      - name: "3"
+        expr: >
+          df['3'].where(
+            df['3_cite'] == 'Year',
+            df['ModelBase'].str.strip() + ' (' + df['3_cite'].astype(str).str.strip() + ') ' + df['4_cite'].astype(str).str.strip()
+          )
+
+  # ── Drop/rename cite helpers, keep Year for sorting ───────
+  - type: drop
+    columns: [ModelBase, "1_cite", "2_cite", "4_cite"]
+
+  - type: rename
+    mapping:                   # ← was "columns:", must be "mapping:"
+      "3_cite": Year
+
+  # ── Sort by Year BEFORE select (Year still available here) ─
+  - type: frame_sort
+    by: [Year]
+    ascending: [true]
+    header_rows: 1
+    header_cols: ["1"]
+
+  # ── Drop Year, restore original columns 1–10 ──────────────
+  - type: drop
+    columns: [Year]
+
+  - type: select
+    columns: ["1","3","2","4","5","6","7","8","9","10"]

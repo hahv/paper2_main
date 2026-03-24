@@ -1,0 +1,14 @@
+1;2;3;4;5;6;7;8;9;10
+2;Category;Model;Videos;Resolution Min;Resolution Max;FireSmoke;Normal;Indoor;Outdoor
+3;Static camera;VisiFireBilkent (Cetin, 0000);39;$320 \times 240$;$720 \times 576$;38;1;6;32
+4;Static camera;D-Fire (de Venancio et al., 2021);100;$1280 \times 720$;$1280 \times 720$;50;50;0;100
+5;Static camera;KMU (Ko et al., 2011);38;$320 \times 240$;$320 \times 240$;28;10;10;28
+6;Static camera;Mivia FIRE (Borgia et al., 2015);31;$320 \times 240$;$800 \times 600$;28;3;4;27
+7;Static camera;Mivia SMOKE (Borgia et al., 2015);149;$292 \times 240$;$292 \times 240$;76;73;0;149
+8;Static camera;USTC Smoke (in2017smoke);30;$1920 \times 1080$;$1920 \times 1080$;22;8;30;0
+9;Moving camera;FireNet (Lad et al., 2019);62;$352 \times 222$;$1920 \times 1080$;46;16;30;32
+10;Moving camera;FireSense (Kose et al., 2010);49;$300 \times 240$;$1600 \times 1200$;24;25;10;39
+11;Moving camera;FiSmo (Cazzato et al., 2020);88;$320 \times 240$;$1920 \times 1080$;80;8;;88
+12;Moving camera;FURG (Steffens et al., 2015);22;$240 \times 344$;$1920 \times 1080$;17;5;;19
+13;Mix camera;VSD3 (Huang et al., 2022);20;$352 \times 288$;$2048 \times 1536$;8;12;6;14
+14;Static camera;Ours (2026);n/a;n/a;n/a;n/a;n/a;n/a;n/a

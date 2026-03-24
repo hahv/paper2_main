@@ -44,7 +44,27 @@ steps:
     subset: [email]
     keep: first
 
-  # ── 4. NEW COLUMNS ────────────────────────────────────────
+  # ── 4. JOIN ───────────────────────────────────────────────
+  # Join orders — different key names
+  - type: join
+    file: test/test_csv_ops/orders.csv
+    left_on: id
+    right_on: user_id
+    how: left
+    suffixes: ["", "_order"]
+
+  # Join payments — same key name
+  - type: join
+    file: test/test_csv_ops/payments.csv
+    key: order_id              # ← was "on:", which YAML 1.1 parses as True
+    how: left
+    suffixes: ["", "_pay"]
+
+  - type: drop
+    columns: [user_id_order, user_id_pay]
+
+
+  # ── 5. NEW COLUMNS ────────────────────────────────────────
   - type: add_column
     cols:
       - name: full_label
@@ -52,22 +72,17 @@ steps:
       - name: is_senior
         expr: "df['age'] >= 60"
 
-  # ── 5. SELECT & REORDER ───────────────────────────────────
+  # ── 6. SELECT & REORDER ───────────────────────────────────
   - type: select
-    columns: [name, email, age, status, country, full_label, is_senior]
+    columns: [id, name, email, age, status, country,
+              order_id, product, amount, order_date,
+              payment_id, method, paid_at, confirmed,
+              full_label, is_senior]
 
-  # ── 6. SORT & LIMIT ───────────────────────────────────────
-  - type: sort
-    by: [status, name]
-    ascending: [true, true]
-
-  - type: limit
-    n: 100
-
-  # ── 7. MISCELLANEOUS ───────────────────────────────────────
+  # ── 7. SORT & LIMIT ───────────────────────────────────────
   - type: sort
     by: [age]
     ascending: [false]
 
-  - type: drop
-    columns: [is_senior]
+  - type: limit
+    n: 100

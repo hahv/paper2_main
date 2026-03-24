@@ -6,7 +6,7 @@ documentclass: article
 fontsize: 10pt
 geometry:
   - a4paper
-  - margin=2cm
+  - margin=1cm
 link-citations: true
 secPrefix:
   - "Section"
@@ -134,15 +134,8 @@ The 150 videos were randomly split into Training/Validation (60%, n=90: 30 Fire,
  \input{./4.table/tb_ufireindoor.tex}
 ```
 
-**Video Dataset Image Samples:**
-
-```
-text...under varying lighting conditions.
-
-[ASCII Dataset Montage #3]
-
-Figure 2: Representative frames from our custom HD dataset.
-
+```{=latex}
+\input{./3.fig/fig_videodb.tex}
 ```
 
 ## Evaluation Metrics
