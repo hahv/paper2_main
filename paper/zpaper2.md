@@ -14,7 +14,6 @@ secPrefix:
 ---
 
 # Introduction {#sec:introduction}
-
 <!-- !START_SYNC_BLOCK -->
 <!-- TARGET_PROJECT: G:\My Drive\1_PhD\Obsidian\Home\3. Writing\paperfire2 -->
 <!-- SYNC_TARGET_FILE: 01_Introduction.md-->
@@ -238,6 +237,10 @@ All inference latencies were measured on an NVIDIA Jetson Nano / RTX 3060 to sim
 To validate the effectiveness of the proposed skip module, we compare it against a spectrum of existing solutions ranging from heavy, high-accuracy models to lightweight, real-time approximations:
 
 - **The "Expert" Baseline (BIG MODEL):** A state-of-the-art Deep Learning model (ResNet-50 backbone) trained on a massive proprietary dataset ($>1M$ images). It achieves the highest accuracy but suffers from high latency ($\sim$50ms/frame), making it computationally prohibitive for 24/7 processing on edge devices.
+
+<!-- !TO EDIT: AI gen -->
+We construct a binary image classification dataset for fire and smoke detection, consisting of two classes: *fire/smoke* and *none*. The dataset contains 18,500 RGB images collected from publicly available sources, including FIRE Dataset and FIRESENSE Dataset, along with additional web-scraped images. The *fire/smoke* class includes images with visible flames or smoke under diverse conditions such as indoor fires, wildfires, and low-visibility environments, while the *none* class contains visually similar non-fire scenes (e.g., fog, clouds, and sunlight glare) to reduce false positives. The images vary in resolution from (480 \times 360) to (1920 \times 1080), and the dataset is split into 70% training, 10% validation, and 20% testing subsets with balanced class distribution. Prior to training, all images are resized to (224 \times 224) and normalized using ImageNet statistics, and data augmentation techniques including random horizontal flipping, rotation (±15°), color jittering, and random cropping are applied to improve robustness to variations in illumination, scale, and viewpoint. The model is implemented using PyTorch and trained on a single NVIDIA RTX 3090 GPU. Optimization is performed using the Adam optimizer with an initial learning rate of (1 \times 10^{-4}) and weight decay of (1 \times 10^{-5}), and the model is trained for 100 epochs with a batch size of 32. A cosine annealing learning rate schedule with a 5-epoch warm-up is employed to stabilize training, and gradient clipping with a maximum norm of 5.0 is applied to prevent instability. The training objective is binary cross-entropy loss, and model selection is based on validation F1-score, with early stopping applied if performance does not improve for 10 consecutive epochs. Final performance is reported on the held-out test set using accuracy, precision, recall, and F1-score.
+
 - **M1 (Lightweight Classifier) [@jadon2019firenet]:** A MobileNetV2-based classifier trained on a smaller subset ($<5k$ images). It represents the standard "efficiency" compromise: low latency ($\sim$15ms) but reduced generalization capability.
 - **M2 (Lightweight Detector) [@pedrovin2023HybridMethodFire]:** A YOLOv8-Nano object detector trained on a small dataset ($\sim$2k images). It offers localization but struggles with small or semi-transparent smoke features due to limited training data.
 - **M3 (Temporal Voting Method) [@pedrovin2023HybridMethodFire]:** A video-level approach that aggregates inference results over a sliding window of 30 frames to reduce false alarms. While effective for reducing noise, it introduces inherent algorithmic latency.

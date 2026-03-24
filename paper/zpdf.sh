@@ -1,0 +1,1 @@
+cd /mnt/e/SyncData/paper2_main/paper && to_pdf ./zpaper2.md
