@@ -14,6 +14,7 @@ from loguru import logger as llogger
 from src.exp import Paper2Exp
 from src.common import GlobalConst
 from src.param_select import WeightedSelect
+from src.utils import copy_to_paper_raw_csv
 
 from typing import Union
 
@@ -354,7 +355,7 @@ def prepare_optim_df(
 
     final_df = norm_optim_df(final_df)
     final_outfile = os.path.join(
-        report_dir, f"___raw_rp_optim__{selected_metricSet}.csv"
+        report_dir, f"{GlobalConst.OPT_ALL_RP_FILE_PREFIX}{selected_metricSet}.csv"
     )
     final_df.to_csv(final_outfile, sep=";", encoding="utf-8", index=False)
     pprint_local_path(
@@ -362,6 +363,8 @@ def prepare_optim_df(
         get_wins_path=True,
         tag_or_box_title="Save optimization report to ⏬:",
     )
+    # ! Copy to csv folder for paper raw table, with prefix "_raw" for further paper processing.
+    copy_to_paper_raw_csv(final_outfile)
     return final_df
 
 
@@ -398,16 +401,17 @@ def report_optim(
         shorten=shorten,
     )
     chosen_param_outfile = os.path.join(
-        report_dir, f"___chosen_rp_optim__{selected_metricSet}.csv"
+        report_dir, f"{GlobalConst.OPT_SELECTED_RP_FILE_SUFFIX}{selected_metricSet}.csv"
     )
     chosen_param_df.to_csv(chosen_param_outfile, sep=";", encoding="utf-8", index=False)
-    # pprint_local_path(
-    #     chosen_param_outfile,
-    #     get_wins_path=True,
-    #     tag_or_box_title="Save chosen parameters for optimization to ⏬:",
-    # )
+    pprint_local_path(
+        chosen_param_outfile,
+        get_wins_path=True,
+        tag_or_box_title="Save chosen parameters for optimization to ⏬:",
+    )
+    # ! Copy to csv folder for paper raw table, with prefix "_raw" for further paper processing.
+    copy_to_paper_raw_csv(chosen_param_outfile)
     return chosen_param_df
-
 
 def main():
     args = ReportArgs().parse_args()

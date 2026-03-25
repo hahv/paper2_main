@@ -1,0 +1,3 @@
+input: raw/_raw_opt_all_rp__per_frame.csv
+output: output/
+sep: ";"

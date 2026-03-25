@@ -1,0 +1,96 @@
+input: raw/_raw_opt_selected_rp__per_frame.csv
+output: output/
+sep: ";"
+
+steps:
+  # ── 1. CLEAN UP COLUMN NAMES ──────────────────────────────
+  - type: rename
+    mapping:
+      "metric_recall (tpr)": "Recall"
+      "metric_fpr (false alarm rate)": "FPR"
+      "metric_accuracy": "Accuracy"
+      "metric_f1_score": "F1_Score"
+      "metric_fps": "FPS"
+      "metric_precision": "Precision"
+      "skip_proc.name": "Method"
+      "w_S": "Weight Skip"
+      "w_F": "Weight FAR"
+      "w_R": "Weight Recall"
+      "delta_R": "Recall Delta"
+      "skip_proc.params.motion.params.diff_frame_th": "Diff_Th"
+      "skip_proc.params.motion.params.impact_plus_one": "Impact"
+      "skip_proc.params.motion.params.mask_th": "Mask_Th"
+      "skip_proc.params.motion.params.max_val": "Max_Val"
+      "skip_proc.params.motion.params.decay": "Decay"
+      "skip_proc.params.scale_factor": "Scale"
+      "skip_proc.params.block_size_orig": "Block_Size"
+      "skip_proc.params.block_ratio_th": "Block_Ratio"
+      "skip_proc.params.min_roi_ratio": "Min_ROI"
+
+  # ── 2. DROP JUNK COLUMNS ──────────────────────────────────
+  - type: drop
+    columns:
+      - skip_proc.params.motion.name # Redundant (always acc_motion_det)
+
+  # ── 4. ROUND METRICS ──────────────────────────────────────
+  # Using add_column to round floats so the CSV is readable
+  - type: add_column
+    cols:
+      - name: Combined_Score
+        expr: "df['Combined_Score'].round(4)"
+      - name: Recall
+        expr: "(df['Recall'] * 100).round(2)" # Convert to percentage
+      - name: FPR
+        expr: "(df['FPR'] * 100).round(2)" # Convert to percentage
+      - name: Accuracy
+        expr: "(df['Accuracy'] * 100).round(2)"
+      - name: F1_Score
+        expr: "(df['F1_Score'] * 100).round(2)"
+      - name: Precision
+        expr: "(df['Precision'] * 100).round(2)"
+      - name: FPS
+        expr: "df['FPS'].round(1)"
+      - name: skip_rate
+        expr: "(df['skip_rate'] * 100).round(2)"
+
+  # ── 5. REORDER & SELECT COLUMNS ───────────────────────────
+  - type: select
+    columns:
+      # Identification
+      - experiment
+      - Method
+
+      # Primary Metrics
+      - Combined_Score
+      - Recall
+      - FPR
+      - FPS
+      - recall_retention
+      - far_reduction_norm
+      - skip_rate
+      - Weight Skip
+      - Weight FAR
+      - Weight Recall
+      - Recall Delta
+
+      # Secondary Metrics
+      - F1_Score
+      - Accuracy
+      - Precision
+
+      # Hyperparameters
+      - Scale
+      - Block_Size
+      - Block_Ratio
+      - Min_ROI
+      - Diff_Th
+      - Impact
+      - Mask_Th
+      - Max_Val
+      - Decay
+
+  # ── 6. SORT ───────────────────────────────────────────────
+  # Sort by highest score first
+  - type: sort
+    by: [Combined_Score]
+    ascending: [false]

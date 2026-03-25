@@ -78,6 +78,10 @@ class GlobalConst:
     COL_PARAM_RECALL_RET = "recall_retention"
     COL_PARAM_FAR_REDUC_NORM = "far_reduction_norm"
 
+    # Optim report file name
+    OPT_ALL_RP_FILE_PREFIX = "_opt_all_rp__"
+    OPT_SELECTED_RP_FILE_SUFFIX = "_opt_selected_rp__"
+
     @staticmethod
     def proj_root() -> str:
         return normalize_paths(GlobalConst.__PROJECT_ROOT)

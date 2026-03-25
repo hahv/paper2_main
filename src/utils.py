@@ -1,3 +1,4 @@
+from ztemp import pprint_local_path
 import re
 import importlib
 from typing import List, Optional, Tuple, Callable
@@ -137,6 +138,38 @@ def get_transform(model_name: str, input_size: Optional[List[int]] = None):
         val_tfm = _remove_color_jitter(val_tfm)
 
         return val_tfm
+
+
+def copy_to_paper_raw_csv(
+    infile: str, outdir: str = r"./paper/4.table/raw", add_prefix="_raw"
+) -> str:
+    os.makedirs(outdir, exist_ok=True)
+    filename = os.path.basename(infile)
+
+    if add_prefix and not filename.startswith(add_prefix):
+        filename = f"{add_prefix}{filename}"
+
+    base_name, ext = os.path.splitext(filename)
+    outfile = os.path.join(outdir, filename)
+
+    counter = 1
+    while os.path.exists(outfile):
+        filename = f"{base_name}_{counter}{ext}"
+        outfile = os.path.join(outdir, filename)
+        counter += 1
+
+    os.system(f"cp {infile} {outfile}")
+    pprint_local_path(outfile, get_wins_path=True, tag_or_box_title="Copied to paper raw csv at ⏬:", using_box=True)
+
+    # Generate YAML ONLY referencing the base, un-numbered file
+    original_base_filename = f"{base_name}{ext}"
+    yaml_outfile = os.path.join(outdir, original_base_filename.replace(".csv", ".yaml"))
+    if not os.path.exists(yaml_outfile):
+        yaml_content = f'input: raw/{original_base_filename}\noutput: output/\nsep: ";"\n'
+        with open(yaml_outfile, "w", encoding="utf-8") as f:
+            f.write(yaml_content)
+
+    return outfile
 
 
 def test():

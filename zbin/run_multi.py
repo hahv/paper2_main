@@ -155,8 +155,8 @@ def main():
             current_cfg.inferCfg.pre_computed_no_skip_dir = (
                 args.pre_computed_no_skip_dir
             )
-            with ConsoleLog("Using pre-computed infer", characters="⏩"):
-                pprint(f"Pre-computed no-skip dir: {args.pre_computed_no_skip_dir}")
+            with ConsoleLog("Using pre-computed", characters="*"):
+                pprint(args.pre_computed_no_skip_dir)
 
         cfg_name = current_cfg.get_cfg_name()
         cfg_wandb_logger: WandbLogger = current_cfg.get_wandb_logger(name=cfg_name)
