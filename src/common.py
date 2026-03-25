@@ -80,7 +80,7 @@ class GlobalConst:
 
     # Optim report file name
     OPT_ALL_RP_FILE_PREFIX = "_opt_all_rp__"
-    OPT_SELECTED_RP_FILE_SUFFIX = "_opt_selected_rp__"
+    OPT_SELECTED_RP_FILE_SUFFIX = "_opt_sel_rp__"
 
     @staticmethod
     def proj_root() -> str:

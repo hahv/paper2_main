@@ -1,0 +1,221 @@
+% !remember to set image path like PATH/TO/video_frame1.png
+\documentclass[tikz,border=2mm]{standalone}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usetikzlibrary{calc}
+\usetikzlibrary{shapes.geometric, arrows}
+\usetikzlibrary{math}
+
+\tikzset{
+  mylabel/.style = {black, anchor=south},
+  problock/.style={
+    rectangle, draw, blue, thick, line width=2pt, rounded corners, align=center, anchor=south west
+  },
+  procstep/.style={
+    rectangle, draw=black, fill=white, rounded corners, align=center,
+    minimum width=2.5cm, minimum height=1cm, anchor=center, text=black
+  },
+  decisionnode/.style={
+    diamond, draw=black, fill=white, align=center, aspect=2, anchor=center
+  },
+  procarrow/.style={black, -latex, line width=0.07cm},
+  bluearrow/.style={blue!70, -latex, line width=0.15cm},
+  skipyes/.style={
+    rectangle, draw=green!50!black, fill=green!60!black, rounded corners,
+    align=center, text=white, minimum width=3.5cm, minimum height=0.9cm,
+    line width=2pt, anchor=center
+  },
+  skipno/.style={
+    rectangle, draw=orange, fill=white, rounded corners,
+    align=center, text=orange!80!black, minimum width=3.5cm, minimum height=0.9cm,
+    line width=2pt, anchor=center
+  },
+  tinymodel/.style={
+    rectangle, draw=red, fill=white, align=center,
+    minimum width=3cm, minimum height=1.8cm, line width=2pt, anchor=center
+  },
+  bigmodel/.style={
+    rectangle, draw=red, dashed, fill=white, align=center,
+    minimum width=3.5cm, minimum height=1.8cm, line width=2pt, anchor=center
+  },
+}
+
+\tikzmath{
+  \vfX    = -17.5;  % Video frames center X
+  \base   =  0;     % baseline Y
+  \skBLX  = -13;    % Skip block anchor X (south west)
+  \skBBY  = -5.5;   % Skip block anchor Y (south west)
+  \fdX    = -8.5;   % FrameDiff center X
+  \fdY    =  3.2;   % FrameDiff center Y
+  \hmX    =  0.5;   % hasMotion diamond X
+  \hmY    =  3.2;   % hasMotion diamond Y
+  \syX    =  6.0;   % SKIP_YES center X
+  \syY    =  4.6;   % SKIP_YES center Y
+  \blkX   =  5.5;   % block batch center X
+  \tmX    =  1.5;   % TINY model center X
+  \tmY    = -1.8;   % TINY model center Y
+  \rlX    = -3.0;   % risk list center X
+  \rlY    = -1.8;   % risk list center Y
+  \elX    = -7.5;   % emptyList center X
+  \elY    = -1.8;   % emptyList center Y
+  \snX    = -7.5;   % SKIP_NO center X
+  \snY    =  2.5;   % SKIP_NO center Y
+  \retX   = 10.5;   % RETURN box center X
+  \retY   =  3.5;   % RETURN box center Y
+  \sdX    = 14.0;   % Skip_frame? diamond X
+  \sdY    =  3.5;   % Skip_frame? diamond Y
+  \biX    = 14.0;   % BIG inference box center X
+  \biY    = -2.0;   % BIG inference box center Y
+  % image widths (in cm) — adjust as needed
+  \vframeW  = 3.5;  % video frame image width
+  \fdImgW   = 5.0;  % FrameDiff image width
+  \blkImgW  = 2.0;  % motion block crop width
+}
+
+% \def\COORDENABLED{1}
+
+\begin{document}
+\begin{tikzpicture}
+\tikzstyle{every node}=[font=\large]
+
+\ifdefined\COORDENABLED
+  \coordinate (O) at (0,0);
+  \draw[step=10mm,gray,very thin] (-22,-9) grid (20,9);
+  \draw[->] (-22.5,0) -- (20.5,0) node[right] {$x$};
+  \draw[->] (0,-9.5)  -- (0,9.5)  node[above] {$y$};
+  \foreach \x in {-22,-20,...,20}
+    \draw (\x,-1mm) -- (\x,1mm) node[anchor=north] {$\x$};
+  \foreach \y in {-8,-6,...,8}
+    \draw (-1mm,\y) -- (1mm,\y) node[anchor=east]  {$\y$};
+\fi
+
+%=================================================================
+% VIDEO FRAMES  (pink/magenta dashed box, left)
+%=================================================================
+\node[draw=magenta, dashed, line width=2pt, rectangle, rounded corners,
+      minimum width=4.5cm, minimum height=6.0cm,
+      label={[font=\large\bfseries, align=center]above:\textbf{Video frames}}]
+      (videoBox) at (\vfX, \base) {};
+
+\node[anchor=center] (vframe1) at (\vfX,  1.0)
+      {\includegraphics[width=\vframeW cm]{./pipeline/video_frame1.png}};
+\node[anchor=center] (vframe2) at (\vfX, -1.0)
+      {\includegraphics[width=\vframeW cm]{./pipeline/video_frame2.png}};
+
+%=================================================================
+% SKIP BLOCK  (large blue dashed box, center)
+%=================================================================
+\node[problock, dashed, minimum width=20.5cm, minimum height=12cm,
+      label={[font=\LARGE\bfseries]above:\textbf{Skip block}}]
+      (skipBlock) at (\skBLX, \skBBY) {};
+
+% ---- FrameDiff image ----
+\node[anchor=center,
+      label={[align=left]above:\textbf{FrameDiff (Foreground Mask)}}]
+      (framediff) at (\fdX, \fdY)
+      {\includegraphics[width=\fdImgW cm]{./pipeline/framediff_mask.png}};
+
+% "Generate ROI" label below FrameDiff
+\node[anchor=north, font=\small, text=orange!80!black, align=center]
+      at ([yshift=-0.25cm]framediff.south) {Generate\\ROI};
+
+% annotation dashed pointer lines
+\node[anchor=west, font=\small] (lbl1) at (-4.0,  5.3) {active motion block};
+\node[anchor=west, font=\small] (lbl2) at (-4.0,  4.3) {active fire/smoke block};
+\node[anchor=west, font=\small] (lbl3) at (-4.0,  3.0) {Region of Interest (ROI) for BIG model};
+\draw[dashed, green!70!black,  -latex, thin]
+      ([xshift=0.15cm]framediff.north east) -- (lbl1.west);
+\draw[dashed, green!70!black,  -latex, thin]
+      ([xshift=0.15cm]framediff.east)       -- (lbl2.west);
+\draw[dashed, orange!80!black, -latex, thin]
+      ([xshift=0.15cm, yshift=-0.6cm]framediff.east) -- (lbl3.west);
+
+% ---- Decision: have active motion block? ----
+\node[decisionnode] (hasMotion) at (\hmX, \hmY) {have active\\motion block?};
+
+% ---- SKIP_Frame = YES ----
+\node[skipyes] (skipYes) at (\syX, \syY) {SKIP\_Frame = YES};
+
+% ---- Active motion block batch ----
+\node[draw=green!60!black, line width=1.5pt, anchor=center]
+      (blk1) at (\blkX, 4.2)
+      {\includegraphics[width=\blkImgW cm]{./pipeline/block_crop1.png}};
+\node[draw=green!60!black, line width=1.5pt, anchor=center]
+      (blk2) at (\blkX, 2.6)
+      {\includegraphics[width=\blkImgW cm]{./pipeline/block_crop2.png}};
+\node[font=\small, anchor=north, align=center] (blkText) at (\blkX, 1.5)
+      {active motion\\block batch};
+
+% ---- TINY model ----
+\node[tinymodel, text width=2.8cm, align=center] (tinyModel) at (\tmX, \tmY)
+      {\textbf{TINY model}\\Fire/smoke\\classifier for blocks};
+
+% ---- List of blocks at risk ----
+\node[procstep, text width=2.5cm, align=center] (riskList) at (\rlX, \rlY)
+      {List of blocks\\at risk of fire\\or smoke.};
+
+% ---- Decision: empty list? ----
+\node[decisionnode] (emptyList) at (\elX, \elY) {empty list?};
+
+% ---- SKIP_Frame = NO ----
+\node[skipno] (skipNo) at (\snX, \snY) {SKIP\_Frame = NO};
+
+%=================================================================
+% ARROWS INSIDE SKIP BLOCK
+%=================================================================
+\draw[bluearrow] (videoBox.east) -- (framediff.west);
+\draw[procarrow] ([xshift=0.15cm]framediff.east) -- (hasMotion.west);
+\draw[procarrow] (hasMotion.north) --
+      node[right, font=\small]{No} ++(0, 0.8) -| (skipYes.west);
+\draw[procarrow] (hasMotion.east) --
+      node[above, font=\small]{Yes} (blk1.west);
+\draw[procarrow] (blk2.south) |- (tinyModel.east);
+\draw[procarrow] (tinyModel.west) -- (riskList.east);
+\draw[procarrow] (riskList.west)  -- (emptyList.east);
+\draw[procarrow] (emptyList.north) --
+      node[right, font=\small]{No} (skipNo.south);
+\draw[procarrow] (emptyList.south) -- ++(0, -1.6)
+      -| node[above, pos=0.25, font=\small]{Yes} (skipYes.south);
+
+%=================================================================
+% RIGHT PANEL
+%=================================================================
+\node[procstep, align=center, text width=2.5cm] (returnBox) at (\retX, \retY)
+      {RETURN:\\Skip\_Frame,\\ROI};
+
+\node[decisionnode] (skipDecision) at (\sdX, \sdY) {Skip\_frame?};
+
+\draw[procarrow] (skipYes.east)  -- ++(0.5, 0) |- (returnBox.west);
+\draw[procarrow] (skipNo.east)   -- ++(1.0, 0) |- (returnBox.west);
+\draw[procarrow] (returnBox.east) -- (skipDecision.west);
+
+%=================================================================
+% TOP FEEDBACK ARROW
+%=================================================================
+\draw[-latex, line width=0.1cm, black]
+      (skipDecision.north) -- ++(0, 3.5)
+      -| node[above, pos=0.25, font=\large]{Yes, process next frame}
+      ([xshift=0.5cm]videoBox.north);
+
+% ---- BIG model inference (green dashed box) ----
+\node[draw=green!50!black, dashed, line width=2pt, rectangle, rounded corners,
+      minimum width=6.0cm, minimum height=7.0cm,
+      label={[font=\normalsize\bfseries]above:\textbf{BIG model inference}}]
+      (bigInfBox) at (\biX, \biY) {};
+
+\node[procstep, text width=2.8cm, align=center] (cropNode) at (\biX, -0.5)
+      {Crop input\\frame\\using ROI};
+
+\node[font=\small\itshape] (inferLabel) at (\biX, -2.2) {inferred using};
+
+\node[bigmodel, text width=3.0cm, align=center] (bigModel) at (\biX, -3.8)
+      {BIG model\\(complex model)};
+
+\draw[procarrow] (skipDecision.south) --
+      node[right, font=\small]{No, do infer}
+      (skipDecision.south |- bigInfBox.north) -- (bigInfBox.north);
+\draw[procarrow] (cropNode.south)  -- (inferLabel.north);
+\draw[procarrow] (inferLabel.south) -- (bigModel.north);
+
+\end{tikzpicture}
+\end{document}
