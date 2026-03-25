@@ -26,7 +26,7 @@ Usage examples:
 
 
 class CustomArgs(Tap):
-    run_cfg_yaml: str = "zbin/zrun_cfg.yaml"
+    run_cfg_yaml: str = "config/zruns/zrun_cfg.yaml"
     filter: str = ""  # Replaced base/sweep patterns with a single filter
     use_line_profiler: bool = False
     is_optim_mode: bool = False

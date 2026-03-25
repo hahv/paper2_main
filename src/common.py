@@ -59,8 +59,8 @@ class GlobalConst:
     TL_SKIP_WASTED_INFER = "Wasted Infer."  # incorrectly proc (wasted resources)
 
     TL_CSV_FILE_NAME = "_timeline_report.csv"
-
-    EXTERNAL_CFG = "config/zruns/run_external.yaml"
+    # This is a template cfg file for external runs (fireNet, mobilenet, yolo)
+    EXTERNAL_CFG = "config/zruns/_run_ext.yaml"
 
     # Config related
     OPTIM_INDIR = "zout/zoptim"

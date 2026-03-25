@@ -23,7 +23,7 @@ method_selector:
   selected_method: no_temp_method # noTemp
 modelCfg:
   base_model: hgnetv2_b5.ssld_stage2_ft_in1k
-  model_path: models/__new2_hgnetv2_b5.ssld_stage2_ft_in1k-20260224-76-98.66.pth
+  model_path: models/_hgnetv2_b5.ssld_stage2_ft_in1k-20251218-93-98.91_2025.12.23.pth
   input_size: [360, 640] # [H, W], for timm models
   class_names: [Fire, None, SmokeOnly]
   # class_names: [FireSmoke, None]

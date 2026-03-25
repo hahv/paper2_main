@@ -1,1 +1,0 @@
-python zbin/zrun_exp.py

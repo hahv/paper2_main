@@ -1,0 +1,3 @@
+__base__: config/zruns/select_opt_methods.yaml
+dbset_selector:
+  selected_dbset: ["UFireIndoorVal"]

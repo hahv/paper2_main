@@ -140,6 +140,16 @@ class Paper2Exp(BaseExp):
                 metric_instance.reset()
 
     def run_exp(self, should_calc_metrics=True, reload_env=False, *args, **kwargs):
+        with ConsoleLog("Exp Info", characters="🔻"):
+            exp_info = {
+                "dataset": self.full_cfg.dbsetCfg.get_name(),
+                "method": self.full_cfg.methodCfg.name,
+                "is_optim_mode": self.full_cfg.general.is_optim_mode,
+            }
+            pprint_box(
+                exp_info, title=f"Running Experiment: {self.full_cfg.get_cfg_name()}"
+            )
+
         if self.full_cfg.shouldSkipExp:
             return
 
