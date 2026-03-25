@@ -9,10 +9,10 @@ from src.methods.skip.motion.base_motion_det import *
 class SkipProcFactory:
     @staticmethod
     def create_skip_proc(config: Config, *args, **kwargs):
-        assert config.methodCfg.name.startswith("temp_method"), (  # ty:ignore[possibly-missing-attribute]
+        assert config.methodCfg.name.startswith("temp_method"), (  # ty:ignore[unresolved-attribute]
             "SkipProcFactory only works with temp_method"
         )
-        temp_method_cfg: dict = config.methodCfg.extra_cfgs.get("skip_proc", {})  # ty:ignore[possibly-missing-attribute]
+        temp_method_cfg: dict = config.methodCfg.extra_cfgs.get("skip_proc", {})  # ty:ignore[unresolved-attribute]
         skip_proc_name: str = temp_method_cfg.get("name")
         assert skip_proc_name is not None and len(skip_proc_name) > 0, (
             "Skip proc name must be specified"
@@ -33,10 +33,10 @@ class BaseSkipProc(ABC):
     def __init__(self, cfg: Config):
         self.cfg = cfg
 
-        skip_proc_dict: dict = self.cfg.methodCfg.extra_cfgs.get("skip_proc", {})  # ty:ignore[possibly-missing-attribute]
+        skip_proc_dict: dict = self.cfg.methodCfg.extra_cfgs.get("skip_proc", {})  # ty:ignore[possibly-missing-attribute, unused-ignore-comment, unresolved-attribute]
         self.name = skip_proc_dict.get("name", "no_skip_proc")
         self.params = skip_proc_dict.get("params")
-        self.motion_det: BaseMotionDet = None
+        self.motion_det: BaseMotionDet = None  # ty:ignore[invalid-assignment]
 
         if "motion" in self.params:
             motion_cfg = self.params.get("motion", {})
