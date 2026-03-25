@@ -28,6 +28,7 @@ class ReportArgs(Tap):
     )
     is_optim_report: bool = False  # whether this report is for optimization (affects how the report is generated)
     force: bool = False  # whether to force regenerate performance CSV files even if they already exist
+    dry_run: bool = False  # dry run without generating anything
 
     def configure(self):
         self.add_argument("-i", "--indir")
@@ -38,6 +39,8 @@ class ReportArgs(Tap):
         # The line `self.add_argument("-opt", "--is_optim_report", action="store_true")` in the `ReportArgs` class is defining a command-line argument for the script.
         self.add_argument("-opt", "--is_optim_report", action="store_true")
         self.add_argument("-f", "--force", action="store_true")
+        self.add_argument("--dry_run", action="store_true")
+
 
 #! ================= PERFORMANCE REPORT =================
 
@@ -252,7 +255,10 @@ def norm_optim_df(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def prepare_optim_df(
-    indir: str, metric_cfg_file: str, report_dir: str, selected_metricSet="per_frame",
+    indir: str,
+    metric_cfg_file: str,
+    report_dir: str,
+    selected_metricSet="per_frame",
     force=False,
 ):
     # first get the "per_frame" df
@@ -373,6 +379,7 @@ def report_optim_by_csv(
     chosen_param_df = weighted_select.choose_params()
     return chosen_param_df
 
+
 def report_optim(
     indir: str,
     metric_cfg_file: str,
@@ -382,7 +389,9 @@ def report_optim(
     shorten=True,
     force=False,
 ):
-    optim_df = prepare_optim_df(indir, metric_cfg_file, report_dir, selected_metricSet, force=force)
+    optim_df = prepare_optim_df(
+        indir, metric_cfg_file, report_dir, selected_metricSet, force=force
+    )
     chosen_param_df = report_optim_by_csv(
         optim_df,
         param_select_cfg=param_select_cfg,
@@ -410,12 +419,26 @@ def main():
     if args.now:
         report_dir = os.path.join(report_dir, now_str())
 
+    info = {
+        "indir": indir,
+        "metric_dir": metric_dir,
+        "report_dir": report_dir,
+        "is_optim_report": args.is_optim_report,
+        "force regen": force,
+    }
+    prefix = "==[DRY RUN]== " if args.dry_run else ""
+    title = f"{prefix}Report Generation Parameters "
+    pprint_box(info, title=title)
+    if args.dry_run:
+        return
     if args.is_optim_report:
         # ! If it's an optimization report, we might want to generate a different type of report that focuses on optimization results.
         report_optim(indir, metric_dir, report_dir, force=force)
     else:
         # Then generate the performance report.
-        report_perf(indir, metric_dir, report_dir, skip_plot=args.skip_plot, force=force)
+        report_perf(
+            indir, metric_dir, report_dir, skip_plot=args.skip_plot, force=force
+        )
 
 
 if __name__ == "__main__":

@@ -1,1 +1,0 @@
-python zbin/rp/run_report.py -i ./zout/zoptim -o ./zout/zoptim -opt

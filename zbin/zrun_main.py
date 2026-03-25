@@ -70,10 +70,9 @@ def main():
             cmd_str_run += (
                 f" --pre_computed_no_skip_dir {args.pre_computed_no_skip_dir}"
             )
-        console.rule(f"Running command: {cmd_str_run}")
-        with ConsoleLog("Run command", characters="▶"):
-            pprint(cmd_str_run)
-        pprint_box(run_cfg, title="Run Config")
+        with ConsoleLog("Meta", characters="*"):
+            pprint_box(cmd_str_run, title="Command to Run")
+            pprint_box(run_cfg, title="Run Config")
         if args.use_line_profiler:
             cmd_str_run = f"python -m kernprof -l {cmd_str_run}"
         else:
