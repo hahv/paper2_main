@@ -362,7 +362,11 @@ class BaseMethod(ABC):
                             f"Missing required inference results: {BaseMethod.REQUIRED_INFER_RS}"
                         )
 
-                    elapsed_time = time.perf_counter() - start_time
+                    # ! If elapsed_time is already in infer_rs (e.g., from precomputed CSV or temp_method), use it!
+                    if "elapsed_time" in infer_rs:
+                        elapsed_time = float(infer_rs["elapsed_time"])
+                    else:
+                        elapsed_time = time.perf_counter() - start_time
 
                     # infer fps
                     fps = 1.0 / elapsed_time if elapsed_time > 0 else 0

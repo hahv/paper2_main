@@ -28,11 +28,13 @@ class PrecomputedRsProc:
             video_path=video_path,
             csv_pattern=self.cfg.inferCfg.csv_infer_pattern,  # ty:ignore[invalid-argument-type]
             is_gt=False,
-            csv_dir=self.precomputed_dir
+            csv_dir=self.precomputed_dir,
         )
 
         if not expected_csv_path or not os.path.exists(expected_csv_path):
-            raise FileNotFoundError(f"Precomputed file not found for video: {video_path}")
+            raise FileNotFoundError(
+                f"Precomputed file not found for video: {video_path}"
+            )
 
         # Load CSV using standard loader handler
         self.precomputes = BaseRawCsvLoader._read_raw_csv(
@@ -83,10 +85,14 @@ class PrecomputedRsProc:
             pred_label = str(row[GlobalConst.COL_PRED])
             pred_label_idx = int(row["pred_label_idx"])
 
+        elapsed_time = float(row.get("elapsed_time", 0.0))
+
+        # for correct timing when using pre-computed results, we must include the elapsed time in the CSV and return it here so that BaseMethod can use it instead of wall-clock time
         return {
             "logits": logits,
             "probs": probs,
             "predLabelIdx": pred_label_idx,
             "predLabel": pred_label,
+            "elapsed_time": elapsed_time,
             "is_precomputed": True,
         }

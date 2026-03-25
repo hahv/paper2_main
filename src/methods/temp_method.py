@@ -1,6 +1,6 @@
 from halib import *
 from typing import Optional
-
+import time
 from src.config import Config
 from src.results.base_rs_proc import BaseRsProc
 from src.methods.no_temp_method import NoTempMethod
@@ -32,10 +32,14 @@ class TempMethod(NoTempMethod):
             meta_data = None
             infer_result = {}
 
+            start_skip_check = time.perf_counter()
+
             # 1. Ask the handler: Should we skip?
             with ctx.step("skip_check"):
                 should_skip, meta_data = self.skip_proc.should_skip(frame_idx, frame)
                 meta_data.update(mt_cfg_dict)
+
+            skip_check_time = time.perf_counter() - start_skip_check
 
             if should_skip:
                 class_names = self.cfg.modelCfg.class_names
@@ -49,6 +53,16 @@ class TempMethod(NoTempMethod):
                 # Note: We pass the *processed* input (e.g. the crop)
                 with ctx.step("heavy_infer"):
                     infer_result = super().infer_frame(model_input, frame_idx)
+
+                # The total time is the skip check + whatever the heavy infer took (either real CNN time or precomputed time)
+                base_time = float(infer_result.get("elapsed_time", 0.0))
+                if base_time == 0.0:
+                    # Fallback if no precomputed time exists and we need to simulate actual CNN run
+                    # Although BaseMethod usually handles real time, we need to inject it here if we want combined accuracy
+                    pass # Handled gracefully by BaseMethod if we don't inject it when None
+
+                if "elapsed_time" in infer_result:
+                    infer_result["elapsed_time"] = skip_check_time + base_time
 
             # 4. Ask the handler: Fix the results (Coordinate mapping)
             # ! Merge meta data (of skip proc) into raw result
