@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.7.18)  25 MAR 2026 20:20
+This is XeTeX, Version 3.141592653-2.6-0.999994 (TeX Live 2022) (preloaded format=xelatex 2022.7.18)  26 MAR 2026 19:27
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -28,11 +28,11 @@ Package: xkeyval 2022/06/16 v2.9 package option processing (HA)
 \XKV@tempa@toks=\toks17
 
 (d:/Program Files/texlive/2022/texmf-dist/tex/generic/xkeyval/keyval.tex))
-\XKV@depth=\count185
+\XKV@depth=\count181
 File: xkeyval.tex 2014/12/03 v2.7a key=value parser (HA)
 ))
-\sa@internal=\count186
-\c@sapage=\count187
+\sa@internal=\count182
+\c@sapage=\count183
 
 (d:/Program Files/texlive/2022/texmf-dist/tex/latex/standalone/standalone.cfg
 File: standalone.cfg 2018/03/26 v1.3a Default configuration file for 'standalon
@@ -43,14 +43,14 @@ Document Class: article 2021/10/04 v1.4n Standard LaTeX document class
 (d:/Program Files/texlive/2022/texmf-dist/tex/latex/base/size10.clo
 File: size10.clo 2021/10/04 v1.4n Standard LaTeX file (size option)
 )
-\c@part=\count188
-\c@section=\count189
-\c@subsection=\count190
-\c@subsubsection=\count191
-\c@paragraph=\count192
-\c@subparagraph=\count193
-\c@figure=\count194
-\c@table=\count195
+\c@part=\count184
+\c@section=\count185
+\c@subsection=\count186
+\c@subsubsection=\count187
+\c@paragraph=\count188
+\c@subparagraph=\count189
+\c@figure=\count190
+\c@table=\count191
 \abovecaptionskip=\skip47
 \belowcaptionskip=\skip48
 \bibindent=\dimen138
@@ -90,10 +90,10 @@ Package: trig 2021/08/11 v1.11 sin cos tan (DPC)
 (d:/Program Files/texlive/2022/texmf-dist/tex/latex/graphics-cfg/graphics.cfg
 File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
 )
-Package graphics Info: Driver file: pdftex.def on input line 107.
+Package graphics Info: Driver file: xetex.def on input line 107.
 
-(d:/Program Files/texlive/2022/texmf-dist/tex/latex/graphics-def/pdftex.def
-File: pdftex.def 2020/10/05 v1.2a Graphics/color driver for pdftex
+(d:/Program Files/texlive/2022/texmf-dist/tex/latex/graphics-def/xetex.def
+File: xetex.def 2022/04/16 v5.0m Graphics/color driver for xetex
 ))
 \Gin@req@height=\dimen141
 \Gin@req@width=\dimen142
@@ -124,33 +124,39 @@ ered.code.tex
 \pgf@yd=\dimen152
 \w@pgf@writea=\write3
 \r@pgf@reada=\read2
-\c@pgf@counta=\count196
-\c@pgf@countb=\count197
-\c@pgf@countc=\count198
-\c@pgf@countd=\count199
+\c@pgf@counta=\count192
+\c@pgf@countb=\count193
+\c@pgf@countc=\count194
+\c@pgf@countd=\count195
 \t@pgf@toka=\toks22
 \t@pgf@tokb=\toks23
 \t@pgf@tokc=\toks24
-\pgf@sys@id@count=\count266
+\pgf@sys@id@count=\count196
 
 (d:/Program Files/texlive/2022/texmf-dist/tex/generic/pgf/systemlayer/pgf.cfg
 File: pgf.cfg 2021/05/15 v3.1.9a (3.1.9a)
 )
-Driver file for pgf: pgfsys-pdftex.def
+Driver file for pgf: pgfsys-xetex.def
 
-(d:/Program Files/texlive/2022/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-pd
-ftex.def
-File: pgfsys-pdftex.def 2021/05/15 v3.1.9a (3.1.9a)
+(d:/Program Files/texlive/2022/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-xe
+tex.def
+File: pgfsys-xetex.def 2021/05/15 v3.1.9a (3.1.9a)
+
+(d:/Program Files/texlive/2022/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-dv
+ipdfmx.def
+File: pgfsys-dvipdfmx.def 2021/05/15 v3.1.9a (3.1.9a)
 
 (d:/Program Files/texlive/2022/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-co
 mmon-pdf.def
 File: pgfsys-common-pdf.def 2021/05/15 v3.1.9a (3.1.9a)
+)
+\pgfsys@objnum=\count197
 )))
 (d:/Program Files/texlive/2022/texmf-dist/tex/generic/pgf/systemlayer/pgfsyssof
 tpath.code.tex
 File: pgfsyssoftpath.code.tex 2021/05/15 v3.1.9a (3.1.9a)
-\pgfsyssoftpath@smallbuffer@items=\count267
-\pgfsyssoftpath@bigbuffer@items=\count268
+\pgfsyssoftpath@smallbuffer@items=\count198
+\pgfsyssoftpath@bigbuffer@items=\count199
 )
 (d:/Program Files/texlive/2022/texmf-dist/tex/generic/pgf/systemlayer/pgfsyspro
 tocol.code.tex
@@ -162,11 +168,10 @@ Package: xcolor 2022/06/12 v2.14 LaTeX color extensions (UK)
 (d:/Program Files/texlive/2022/texmf-dist/tex/latex/graphics-cfg/color.cfg
 File: color.cfg 2016/01/02 v1.6 sample color configuration
 )
-Package xcolor Info: Driver file: pdftex.def on input line 227.
+Package xcolor Info: Driver file: xetex.def on input line 227.
 
 (d:/Program Files/texlive/2022/texmf-dist/tex/latex/graphics/mathcolor.ltx)
 Package xcolor Info: Model `cmy' substituted by `cmy0' on input line 1353.
-Package xcolor Info: Model `hsb' substituted by `rgb' on input line 1357.
 Package xcolor Info: Model `RGB' extended on input line 1369.
 Package xcolor Info: Model `HTML' substituted by `rgb' on input line 1371.
 Package xcolor Info: Model `Hsb' substituted by `hsb' on input line 1372.
@@ -188,7 +193,7 @@ Package: pgfcore 2021/05/15 v3.1.9a (3.1.9a)
 (d:/Program Files/texlive/2022/texmf-dist/tex/generic/pgf/math/pgfmathparser.co
 de.tex
 \pgfmath@dimen=\dimen153
-\pgfmath@count=\count269
+\pgfmath@count=\count266
 \pgfmath@box=\box52
 \pgfmath@toks=\toks25
 \pgfmath@stack@operand=\toks26
@@ -214,7 +219,7 @@ de.tex
 .integerarithmetics.code.tex)))
 (d:/Program Files/texlive/2022/texmf-dist/tex/generic/pgf/math/pgfmathfloat.cod
 e.tex
-\c@pgfmathroundto@lastzeros=\count270
+\c@pgfmathroundto@lastzeros=\count267
 ))
 (d:/Program Files/texlive/2022/texmf-dist/tex/generic/pgf/math/pgfint.code.tex)
 
@@ -254,7 +259,7 @@ File: pgfcorescopes.code.tex 2021/05/15 v3.1.9a (3.1.9a)
 \pgfpic=\box53
 \pgf@hbox=\box54
 \pgf@layerbox@main=\box55
-\pgf@picture@serial@count=\count271
+\pgf@picture@serial@count=\count268
 )
 (d:/Program Files/texlive/2022/texmf-dist/tex/generic/pgf/basiclayer/pgfcoregra
 phicstate.code.tex
@@ -289,8 +294,8 @@ File: pgfcorearrows.code.tex 2021/05/15 v3.1.9a (3.1.9a)
 de.code.tex
 File: pgfcoreshade.code.tex 2021/05/15 v3.1.9a (3.1.9a)
 \pgf@max=\dimen177
-\pgf@sys@shading@range@num=\count272
-\pgf@shadingcount=\count273
+\pgf@sys@shading@range@num=\count269
+\pgf@shadingcount=\count270
 )
 (d:/Program Files/texlive/2022/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreima
 ge.code.tex
@@ -361,7 +366,7 @@ Package: tikz 2021/05/15 v3.1.9a (3.1.9a)
 (d:/Program Files/texlive/2022/texmf-dist/tex/generic/pgf/libraries/pgflibraryp
 lothandlers.code.tex
 File: pgflibraryplothandlers.code.tex 2021/05/15 v3.1.9a (3.1.9a)
-\pgf@plot@mark@count=\count274
+\pgf@plot@mark@count=\count271
 \pgfplotmarksize=\dimen182
 )
 \tikz@lastx=\dimen183
@@ -376,19 +381,19 @@ File: pgflibraryplothandlers.code.tex 2021/05/15 v3.1.9a (3.1.9a)
 \tikz@figbox@bg=\box59
 \tikz@tempbox=\box60
 \tikz@tempbox@bg=\box61
-\tikztreelevel=\count275
-\tikznumberofchildren=\count276
-\tikznumberofcurrentchild=\count277
-\tikz@fig@count=\count278
+\tikztreelevel=\count272
+\tikznumberofchildren=\count273
+\tikznumberofcurrentchild=\count274
+\tikz@fig@count=\count275
 
 (d:/Program Files/texlive/2022/texmf-dist/tex/generic/pgf/modules/pgfmodulematr
 ix.code.tex
 File: pgfmodulematrix.code.tex 2021/05/15 v3.1.9a (3.1.9a)
-\pgfmatrixcurrentrow=\count279
-\pgfmatrixcurrentcolumn=\count280
-\pgf@matrix@numberofcolumns=\count281
+\pgfmatrixcurrentrow=\count276
+\pgfmatrixcurrentcolumn=\count277
+\pgf@matrix@numberofcolumns=\count278
 )
-\tikz@expandcount=\count282
+\tikz@expandcount=\count279
 
 (d:/Program Files/texlive/2022/texmf-dist/tex/generic/pgf/frontendlayer/tikz/li
 braries/tikzlibrarytopaths.code.tex
@@ -443,7 +448,7 @@ braries/tikzlibrarymath.code.tex
 braries/tikzlibraryfpu.code.tex
 (d:/Program Files/texlive/2022/texmf-dist/tex/generic/pgf/libraries/pgflibraryf
 pu.code.tex))
-\tikz@math@for@depth=\count283
+\tikz@math@for@depth=\count280
 \tikz@math@dimen=\dimen196
 \tikz@math@toks=\toks31
 )
@@ -451,91 +456,61 @@ pu.code.tex))
 braries/tikzlibrarypositioning.code.tex
 File: tikzlibrarypositioning.code.tex 2021/05/15 v3.1.9a (3.1.9a)
 )
-(d:/Program Files/texlive/2022/texmf-dist/tex/latex/l3backend/l3backend-pdftex.
-def
-File: l3backend-pdftex.def 2022-07-01 L3 backend support: PDF output (pdfTeX)
-\l__color_backend_stack_int=\count284
+(d:/Program Files/texlive/2022/texmf-dist/tex/latex/l3backend/l3backend-xetex.d
+ef
+File: l3backend-xetex.def 2022-07-01 L3 backend support: XeTeX
+\g__graphics_track_int=\count281
 \l__pdf_internal_box=\box63
+\g__pdf_backend_object_int=\count282
+\g__pdf_backend_annotation_int=\count283
+\g__pdf_backend_link_int=\count284
 ) (./fig_pipeline.aux)
 \openout1 = `fig_pipeline.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 81.
-LaTeX Font Info:    ... okay on input line 81.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 81.
-LaTeX Font Info:    ... okay on input line 81.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 81.
-LaTeX Font Info:    ... okay on input line 81.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 81.
-LaTeX Font Info:    ... okay on input line 81.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 81.
-LaTeX Font Info:    ... okay on input line 81.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 81.
-LaTeX Font Info:    ... okay on input line 81.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 81.
-LaTeX Font Info:    ... okay on input line 81.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 82.
+LaTeX Font Info:    ... okay on input line 82.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 82.
+LaTeX Font Info:    ... okay on input line 82.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 82.
+LaTeX Font Info:    ... okay on input line 82.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 82.
+LaTeX Font Info:    ... okay on input line 82.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 82.
+LaTeX Font Info:    Trying to load font information for TS1+cmr on input line 8
+2.
 
-(d:/Program Files/texlive/2022/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
-[Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count285
-\scratchdimen=\dimen197
-\scratchbox=\box64
-\nofMPsegments=\count286
-\nofMParguments=\count287
-\everyMPshowfont=\toks32
-\MPscratchCnt=\count288
-\MPscratchDim=\dimen198
-\MPnumerator=\count289
-\makeMPintoPDFobject=\count290
-\everyMPtoPDFconversion=\toks33
+(d:/Program Files/texlive/2022/texmf-dist/tex/latex/base/ts1cmr.fd
+File: ts1cmr.fd 2019/12/16 v2.5j Standard LaTeX font definitions
 )
-(d:/Program Files/texlive/2022/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.
-sty
-Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
-Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
-85.
-
-(d:/Program Files/texlive/2022/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cf
-g
-File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
-e
-))
-LaTeX Font Info:    Trying to load font information for U+msa on input line 131
+LaTeX Font Info:    ... okay on input line 82.
+LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 82.
+LaTeX Font Info:    ... okay on input line 82.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 82.
+LaTeX Font Info:    ... okay on input line 82.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 82.
+LaTeX Font Info:    ... okay on input line 82.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 133
 .
- (d:/Program Files/texlive/2022/texmf-dist/tex/latex/amsfonts/umsa.fd
+
+(d:/Program Files/texlive/2022/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 131
+LaTeX Font Info:    Trying to load font information for U+msb on input line 133
 .
 
 (d:/Program Files/texlive/2022/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) [1
 
-{d:/Program Files/texlive/2022/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
+]
 (./fig_pipeline.aux) ) 
 Here is how much of TeX's memory you used:
- 15185 strings out of 478023
- 323834 string characters out of 5835647
- 613989 words of memory out of 5000000
- 33377 multiletter control sequences out of 15000+600000
- 476308 words of font info for 55 fonts, out of 8000000 for 9000
- 1141 hyphenation exceptions out of 8191
- 115i,7n,118p,416b,784s stack positions out of 10000i,1000n,20000p,200000b,200000s
-<d:/Program Files/texlive/2022/texmf-dist/fonts/type1/pub
-lic/amsfonts/cm/cmbx10.pfb><d:/Program Files/texlive/2022/texmf-dist/fonts/type
-1/public/amsfonts/cm/cmbx12.pfb><d:/Program Files/texlive/2022/texmf-dist/fonts
-/type1/public/amsfonts/cm/cmbx9.pfb><d:/Program Files/texlive/2022/texmf-dist/f
-onts/type1/public/amsfonts/cm/cmbxti10.pfb><d:/Program Files/texlive/2022/texmf
--dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb><d:/Program Files/texlive/2022/t
-exmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb><d:/Program Files/texlive/20
-22/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb><d:/Program Files/texlive
-/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb><d:/Program Files/tex
-live/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmti9.pfb><d:/Program Files
-/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb>
-Output written on fig_pipeline.pdf (1 page, 118175 bytes).
-PDF statistics:
- 61 PDF objects out of 1000 (max. 8388607)
- 37 compressed objects within 1 object stream
- 0 named destinations out of 1000 (max. 500000)
- 13 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 14881 strings out of 475865
+ 320800 string characters out of 5799410
+ 630105 words of memory out of 5000000
+ 35685 multiletter control sequences out of 15000+600000
+ 475045 words of font info for 58 fonts, out of 8000000 for 9000
+ 1348 hyphenation exceptions out of 8191
+ 115i,7n,118p,425b,784s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
+Output written on fig_pipeline.pdf (1 page).

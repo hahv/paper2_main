@@ -58,18 +58,19 @@
 
 \tikzmath{
     % X positions
-    \camX   = -13.0;
-    \frameX =  -8.5;
-    \skipX  =  -3.5;
-    \decX   =   2.0;
-    \bigX   =   2.0;
-    \skipOX =   7.5;
+    \txtStart = -15.0;
+    \camX   = -11.0;
+    \frameX =  -6.5;
+    \skipX  =  -2.0;
+    \decX   =   3.0;
+    \bigX   =   3.0;
+    \skipOX =   3.0;
     \alarmX =   7.5;
     \nodetX =   7.5;
     % Y positions — proposed pipeline
     \mainY  =   0.5;
-    \bigY   =  -3.5;
-    \skipOY =   2.5;
+    \bigY   =  -2.5;
+    \skipOY =   3.0;
     \alarmY =  -2.2;
     \nodetY =  -4.8;
     % Y position — baseline pipeline (top row)
@@ -99,15 +100,16 @@
 %=================================================================
 % SECTION LABELS + SEPARATOR
 %=================================================================
-\draw[dashed, gray!50, line width=1.2pt] (-16.5, 4.8) -- (12.5, 4.8);
+% ! #TODO: SEPARATOR
+\draw[dashed, gray!70, line width=1.5pt] (\txtStart, 4.8) -- (10.75, 4.8);
 
-\node[font=\normalsize\bfseries, text=gray!60, anchor=west]
-    at (-16.5, 10.0)
-    {(a) Baseline Pipeline — No Skip Module:};
+\node[font=\normalsize\bfseries, text=gray!90, anchor=west, align=left]
+    at (\txtStart, 10.0)
+    {(a) Baseline Pipeline \\ - No Skip Module:};
 
-\node[font=\normalsize\bfseries, text=gray!60, anchor=west]
-    at (-16.5, 4.3)
-    {(b) Proposed Pipeline — With Skip Module:};
+\node[font=\normalsize\bfseries, text=gray!90, anchor=west, align=left]
+    at (\txtStart, 4.3)
+    {(b) Proposed Pipeline \\ -With Skip Module:};
 
 %=================================================================
 % BASELINE PIPELINE (top row)
@@ -130,19 +132,23 @@
      \textbf{Inference}\\
      \small($\sim$50\,ms/frame)};
 
+\node[decisionnode, opacity=0.75]
+    (detDec_b) at (3.0, \baseY)
+    {Detected?};
+
 \node[alarmbox, opacity=0.75]
-    (alarm_b) at (5.5, \baseY)
+    (alarm_b) at (3.0, \baseY + 2.3)
     {\textbf{ALARM} \Large\textbf{!}\\
      \small Fire / Smoke};
 
 \node[nodetect, minimum width=3.5cm, opacity=0.75]
-    (noDetect_b) at (10.5, \baseY)
+    (noDetect_b) at (8, \baseY)
     {No Detection\\
      \small Continue};
 
 % Baseline latency note
 \node[font=\small\bfseries, text=red!60!black]
-    at (-1.5, \baseY - 1.6)
+    at (-1.5, \baseY - 2.3)
     {50\,ms/frame \textemdash\ 20 FPS (runs on \textit{every} frame)};
 
 %=================================================================
@@ -152,18 +158,32 @@
     (camera_b.east) -- (frameReader_b.west);
 
 \draw[procarrow, opacity=0.75]
-    (frameReader_b.east) -- (bigModel_b.west)
-    node[midway, above, font=\small\itshape, text=gray]{every frame};
+    (frameReader_b.east) -- (bigModel_b.west);
 
-\draw[procarrow, opacity=0.75]
-    (bigModel_b.north east) -- ++(0.4, 0)
-    |- node[above, pos=0.25, font=\small]{Detection}
-    (alarm_b.west);
+% bigModel → diamond (single trunk, no overlap)
+\draw[procarrow] (bigModel_b.east) -- (detDec_b.west);
 
-\draw[procarrow, opacity=0.75]
-    (bigModel_b.south east) -- ++(0.4, 0)
-    |- node[below, pos=0.25, font=\small]{No Detection}
+% YES: diamon -> alarm
+\draw[procarrow]
+    (detDec_b.north) --
+    node[left, font=\small, pos=0.2]{Yes}
+    (alarm_b.south);
+
+% NO: diamond -> no detection
+\draw[procarrow]
+    (detDec_b.east) --
+    node[above, pos=0.2, font=\small]{No}
     (noDetect_b.west);
+
+% add arrow from alarm and no detection back to frame reader
+\draw[-latex, line width=0.10cm, black, opacity=0.75]
+    (alarm_b.north) -- ++(0, 0.65)
+    -| node[below, pos=0.25, font=\normalsize]{Next frame}
+    (frameReader_b.north);
+
+\draw[-latex, line width=0.10cm, black, opacity=0.75]
+(noDetect_b.north) -- ++(0, 3.0)
+-|(frameReader_b.north);
 
 %=================================================================
 % (1) STATIC CAMERA — proposed
@@ -183,7 +203,7 @@
     {\textbf{Frame}\\
      \textbf{Reader}};
 
-\node[annot] at (\frameX, \mainY - 1.1) {Frame $t$};
+% \node[annot] at (\frameX, \mainY - 1.1) {Frame $t$};
 
 %=================================================================
 % (3) LIGHTWEIGHT SKIP MODULE
@@ -218,11 +238,15 @@
      \textbf{Inference}\\
      \small($\sim$50\,ms/frame)};
 
+\node[decisionnode]
+    (detDec) at (7.5, \bigY)
+    {Detected?};
+
 %=================================================================
 % (6a) ALARM
 %=================================================================
 \node[alarmbox]
-    (alarm) at (\alarmX, \alarmY)
+    (alarm) at (7.5, \bigY + 2.0)
     {\textbf{ALARM} \Large\textbf{!}\\
      \small Fire / Smoke};
 
@@ -230,7 +254,7 @@
 % (6b) NO DETECTION
 %=================================================================
 \node[nodetect]
-    (noDetect) at (\alarmX, \nodetY)
+    (noDetect) at (7.5, \bigY - 2.0)
     {No Detection\\
      \small Continue};
 
@@ -251,62 +275,68 @@
 %=================================================================
 \draw[procarrow]
     (skipDec.north) -- ++(0, 0.6)
-    -| node[above, pos=0.25, font=\small\bfseries, text=green!50!black]
+    -| node[right, pos=0.5, font=\small\bfseries, text=green!50!black]
        {Yes ($\sim$72\% frames)}
-    (skipYes.west);
+    (skipYes.south);
 
 %=================================================================
 % ARROW: Skip NO → BIG MODEL
 %=================================================================
 \draw[procarrow]
     (skipDec.south) --
-    node[right, font=\small\bfseries, text=orange]{No ($\sim$28\%)}
-    (\decX, \bigY) -- (bigModel.north);
+    node[right, pos=0.5, font=\small\bfseries, text=orange]{No ($\sim$28\%)}
+    (bigModel.north);
 
 %=================================================================
 % ARROWS: BIG MODEL outputs
 %=================================================================
-\draw[procarrow]
-    (bigModel.north east) -- ++(0.5, 0)
-    |- node[above, pos=0.25, font=\small]{Detection}
-    (alarm.west);
+% bigModel → diamond
+\draw[procarrow] (bigModel.east) -- (detDec.west);
 
+% YES: diamond -> alarm
 \draw[procarrow]
-    (bigModel.south east) -- ++(0.5, 0)
-    |- node[below, pos=0.25, font=\small]{No Detection}
-    (noDetect.west);
+    (detDec.north) --
+    node[left, font=\small, pos=0.2]{Yes}
+    (alarm.south);
+
+% NO: diamond -> no detection
+\draw[procarrow]
+    (detDec.south) --
+    node[left, pos=0.2, font=\small]{No}
+    (noDetect.north);
 
 %=================================================================
 % FEEDBACK: Skip YES → Frame Reader
 %=================================================================
 \draw[-latex, line width=0.10cm, black]
-    (skipYes.west) -- ++(-1.2, 0) -- ++(0, 1.8)
+    (skipYes.north) -- ++(0, 0.5)
     -| node[above, pos=0.25, font=\normalsize]{Next frame}
-    ([xshift=0.4cm] frameReader.north);
+    (frameReader.north);
 
 %=================================================================
-% FEEDBACK: No Detection → Frame Reader
+% FEEDBACK: Alarm and No Detection → Frame Reader
 %=================================================================
 \draw[-latex, line width=0.10cm, black]
-    (noDetect.west) -- ++(-1.2, 0) -- ++(0, -1.8)
-    -| node[below, pos=0.25, font=\normalsize]{Next frame}
-    ([xshift=-0.4cm] frameReader.south);
+    (alarm.east) -- ++(0.5, 0.0) -- ++(0, 4.55)
+    -|(frameReader.north);
+
+\draw[line width=0.10cm, black]
+    (noDetect.east) -- ++(0.525, 0) -- ++(0, 8.55);
 
 %=================================================================
 % LATENCY ANNOTATION BOX
 %=================================================================
 \node[draw=gray!50, fill=gray!8, rounded corners,
-      align=left, font=\small, anchor=north west]
-    at (-16.5, -6.8)
-    {%
-     \textbf{Baseline (no skip):}\quad
-     $50$\,ms/frame ($20$ FPS) — BIG Model runs on \textit{every} frame\\[3pt]
-     \textbf{Proposed (with skip):}\quad
-     $= (0.72 \times 2.5) + (0.28 \times 52.5)
-     \approx \mathbf{16.5}$\,\textbf{ms/frame}
-     ($\approx$\,\textbf{60 FPS})
-     \qquad \textbf{Speedup: $\approx 3\times$}
-    };
-
+align=left, font=\small, anchor=north west]
+at (\txtStart, -5.0)
+{%
+	\textbf{Baseline (no skip):}\quad
+	$50$\,ms/frame ($20$ FPS) — BIG Model runs on \textit{every} frame\\[3pt]
+	\textbf{Proposed (with skip):}\quad
+	$= (0.72 \times 2.5) + (0.28 \times 52.5)
+	\approx \mathbf{16.5}$\,\textbf{ms/frame}
+	($\approx$\,\textbf{60 FPS})
+	\qquad \textbf{Speedup: $\approx 3\times$}
+};
 \end{tikzpicture}
 \end{document}
