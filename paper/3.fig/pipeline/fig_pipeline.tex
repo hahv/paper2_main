@@ -1,0 +1,312 @@
+% !remember to compile with: pdflatex or lualatex
+\documentclass[tikz,border=4mm]{standalone}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usetikzlibrary{calc}
+\usetikzlibrary{shapes.geometric, arrows, arrows.meta}
+\usetikzlibrary{math}
+\usetikzlibrary{positioning}
+
+%=================================================================
+% NODE STYLES
+%=================================================================
+\tikzset{
+    procstep/.style={
+        rectangle, draw=black, fill=white, rounded corners,
+        align=center, minimum width=3.2cm, minimum height=1.1cm,
+        anchor=center, text=black, font=\normalsize
+    },
+    skipmodule/.style={
+        rectangle, draw=blue, dashed, thick, line width=2pt,
+        rounded corners, align=center,
+        minimum width=4.0cm, minimum height=2.2cm,
+        anchor=center, text=blue!80!black, font=\normalsize\bfseries
+    },
+    bigmodel/.style={
+        rectangle, draw=green!50!black, dashed, line width=2pt,
+        rounded corners, align=center,
+        minimum width=4.0cm, minimum height=2.2cm,
+        anchor=center, text=green!40!black, font=\normalsize\bfseries
+    },
+    skipyes/.style={
+        rectangle, draw=green!50!black, fill=green!60!black,
+        rounded corners, align=center, text=white,
+        minimum width=3.5cm, minimum height=1.0cm,
+        line width=2pt, anchor=center, font=\normalsize\bfseries
+    },
+    alarmbox/.style={
+        rectangle, draw=red!80!black, fill=red!70!black,
+        rounded corners, align=center, text=white,
+        minimum width=3.5cm, minimum height=1.0cm,
+        line width=2pt, anchor=center, font=\normalsize\bfseries
+    },
+    nodetect/.style={
+        rectangle, draw=gray!70, fill=gray!20,
+        rounded corners, align=center, text=gray!60!black,
+        minimum width=3.5cm, minimum height=1.0cm,
+        line width=1.5pt, anchor=center, font=\normalsize
+    },
+    decisionnode/.style={
+        diamond, draw=black, fill=white, align=center,
+        aspect=2.2, anchor=center, font=\normalsize
+    },
+    procarrow/.style={black, -latex, line width=0.08cm},
+    bluearrow/.style={blue!70, -latex, line width=0.15cm},
+    annot/.style={font=\small\itshape, text=gray!70!black},
+}
+
+\tikzmath{
+    % X positions
+    \camX   = -13.0;
+    \frameX =  -8.5;
+    \skipX  =  -3.5;
+    \decX   =   2.0;
+    \bigX   =   2.0;
+    \skipOX =   7.5;
+    \alarmX =   7.5;
+    \nodetX =   7.5;
+    % Y positions — proposed pipeline
+    \mainY  =   0.5;
+    \bigY   =  -3.5;
+    \skipOY =   2.5;
+    \alarmY =  -2.2;
+    \nodetY =  -4.8;
+    % Y position — baseline pipeline (top row)
+    \baseY  =   7.5;
+}
+
+% \def\COORDENABLED{1}
+
+\begin{document}
+\begin{tikzpicture}
+\tikzstyle{every node}=[font=\large]
+
+%=================================================================
+% DEBUG: coordinate grid
+%=================================================================
+\ifdefined\COORDENABLED
+    \coordinate (O) at (0,0);
+    \draw[step=10mm,gray,very thin] (-17,-9) grid (13,11);
+    \draw[->] (-17.5,0) -- (13.5,0) node[right] {$x$};
+    \draw[->] (0,-9.5)  -- (0,11.5)  node[above] {$y$};
+    \foreach \x in {-16,-14,...,12}
+        \draw (\x,-1mm) -- (\x,1mm) node[anchor=north] {$\x$};
+    \foreach \y in {-8,-6,...,10}
+        \draw (-1mm,\y) -- (1mm,\y) node[anchor=east] {$\y$};
+\fi
+
+%=================================================================
+% SECTION LABELS + SEPARATOR
+%=================================================================
+\draw[dashed, gray!50, line width=1.2pt] (-16.5, 4.8) -- (12.5, 4.8);
+
+\node[font=\normalsize\bfseries, text=gray!60, anchor=west]
+    at (-16.5, 10.0)
+    {(a) Baseline Pipeline — No Skip Module:};
+
+\node[font=\normalsize\bfseries, text=gray!60, anchor=west]
+    at (-16.5, 4.3)
+    {(b) Proposed Pipeline — With Skip Module:};
+
+%=================================================================
+% BASELINE PIPELINE (top row)
+%=================================================================
+\node[procstep, minimum width=2.8cm, minimum height=1.8cm,
+      draw=magenta, line width=2pt, opacity=0.75]
+    (camera_b) at (\camX, \baseY)
+    {\textbf{Static}\\
+     \textbf{Camera}\\
+     \small(Video Stream)};
+
+\node[procstep, minimum width=3.0cm, opacity=0.75]
+    (frameReader_b) at (\frameX, \baseY)
+    {\textbf{Frame}\\
+     \textbf{Reader}};
+
+\node[bigmodel, opacity=0.75]
+    (bigModel_b) at (-1.5, \baseY)
+    {\textbf{BIG Model}\\
+     \textbf{Inference}\\
+     \small($\sim$50\,ms/frame)};
+
+\node[alarmbox, opacity=0.75]
+    (alarm_b) at (5.5, \baseY)
+    {\textbf{ALARM} \Large\textbf{!}\\
+     \small Fire / Smoke};
+
+\node[nodetect, minimum width=3.5cm, opacity=0.75]
+    (noDetect_b) at (10.5, \baseY)
+    {No Detection\\
+     \small Continue};
+
+% Baseline latency note
+\node[font=\small\bfseries, text=red!60!black]
+    at (-1.5, \baseY - 1.6)
+    {50\,ms/frame \textemdash\ 20 FPS (runs on \textit{every} frame)};
+
+%=================================================================
+% BASELINE ARROWS
+%=================================================================
+\draw[bluearrow, opacity=0.75]
+    (camera_b.east) -- (frameReader_b.west);
+
+\draw[procarrow, opacity=0.75]
+    (frameReader_b.east) -- (bigModel_b.west)
+    node[midway, above, font=\small\itshape, text=gray]{every frame};
+
+\draw[procarrow, opacity=0.75]
+    (bigModel_b.north east) -- ++(0.4, 0)
+    |- node[above, pos=0.25, font=\small]{Detection}
+    (alarm_b.west);
+
+\draw[procarrow, opacity=0.75]
+    (bigModel_b.south east) -- ++(0.4, 0)
+    |- node[below, pos=0.25, font=\small]{No Detection}
+    (noDetect_b.west);
+
+%=================================================================
+% (1) STATIC CAMERA — proposed
+%=================================================================
+\node[procstep, minimum width=2.8cm, minimum height=1.8cm,
+      draw=magenta, line width=2pt]
+    (camera) at (\camX, \mainY)
+    {\textbf{Static}\\
+     \textbf{Camera}\\
+     \small(Video Stream)};
+
+%=================================================================
+% (2) FRAME READER — proposed
+%=================================================================
+\node[procstep, minimum width=3.0cm]
+    (frameReader) at (\frameX, \mainY)
+    {\textbf{Frame}\\
+     \textbf{Reader}};
+
+\node[annot] at (\frameX, \mainY - 1.1) {Frame $t$};
+
+%=================================================================
+% (3) LIGHTWEIGHT SKIP MODULE
+%=================================================================
+\node[skipmodule]
+    (skipMod) at (\skipX, \mainY)
+    {\textbf{Lightweight}\\
+     \textbf{Skip Module}\\
+     \small($\sim$2.5\,ms/frame)};
+
+%=================================================================
+% (4) DECISION: Skip?
+%=================================================================
+\node[decisionnode]
+    (skipDec) at (\decX, \mainY)
+    {Skip\\Frame?};
+
+%=================================================================
+% (5a) SKIP outcome — YES
+%=================================================================
+\node[skipyes]
+    (skipYes) at (\skipOX, \skipOY)
+    {SKIP $\checkmark$\\
+     \small Next Frame};
+
+%=================================================================
+% (5b) BIG MODEL
+%=================================================================
+\node[bigmodel]
+    (bigModel) at (\bigX, \bigY)
+    {\textbf{BIG Model}\\
+     \textbf{Inference}\\
+     \small($\sim$50\,ms/frame)};
+
+%=================================================================
+% (6a) ALARM
+%=================================================================
+\node[alarmbox]
+    (alarm) at (\alarmX, \alarmY)
+    {\textbf{ALARM} \Large\textbf{!}\\
+     \small Fire / Smoke};
+
+%=================================================================
+% (6b) NO DETECTION
+%=================================================================
+\node[nodetect]
+    (noDetect) at (\alarmX, \nodetY)
+    {No Detection\\
+     \small Continue};
+
+%=================================================================
+% ARROWS: Main horizontal flow
+%=================================================================
+\draw[bluearrow]
+    (camera.east) -- (frameReader.west);
+
+\draw[procarrow]
+    (frameReader.east) -- (skipMod.west);
+
+\draw[procarrow]
+    (skipMod.east) -- (skipDec.west);
+
+%=================================================================
+% ARROW: Skip YES
+%=================================================================
+\draw[procarrow]
+    (skipDec.north) -- ++(0, 0.6)
+    -| node[above, pos=0.25, font=\small\bfseries, text=green!50!black]
+       {Yes ($\sim$72\% frames)}
+    (skipYes.west);
+
+%=================================================================
+% ARROW: Skip NO → BIG MODEL
+%=================================================================
+\draw[procarrow]
+    (skipDec.south) --
+    node[right, font=\small\bfseries, text=orange]{No ($\sim$28\%)}
+    (\decX, \bigY) -- (bigModel.north);
+
+%=================================================================
+% ARROWS: BIG MODEL outputs
+%=================================================================
+\draw[procarrow]
+    (bigModel.north east) -- ++(0.5, 0)
+    |- node[above, pos=0.25, font=\small]{Detection}
+    (alarm.west);
+
+\draw[procarrow]
+    (bigModel.south east) -- ++(0.5, 0)
+    |- node[below, pos=0.25, font=\small]{No Detection}
+    (noDetect.west);
+
+%=================================================================
+% FEEDBACK: Skip YES → Frame Reader
+%=================================================================
+\draw[-latex, line width=0.10cm, black]
+    (skipYes.west) -- ++(-1.2, 0) -- ++(0, 1.8)
+    -| node[above, pos=0.25, font=\normalsize]{Next frame}
+    ([xshift=0.4cm] frameReader.north);
+
+%=================================================================
+% FEEDBACK: No Detection → Frame Reader
+%=================================================================
+\draw[-latex, line width=0.10cm, black]
+    (noDetect.west) -- ++(-1.2, 0) -- ++(0, -1.8)
+    -| node[below, pos=0.25, font=\normalsize]{Next frame}
+    ([xshift=-0.4cm] frameReader.south);
+
+%=================================================================
+% LATENCY ANNOTATION BOX
+%=================================================================
+\node[draw=gray!50, fill=gray!8, rounded corners,
+      align=left, font=\small, anchor=north west]
+    at (-16.5, -6.8)
+    {%
+     \textbf{Baseline (no skip):}\quad
+     $50$\,ms/frame ($20$ FPS) — BIG Model runs on \textit{every} frame\\[3pt]
+     \textbf{Proposed (with skip):}\quad
+     $= (0.72 \times 2.5) + (0.28 \times 52.5)
+     \approx \mathbf{16.5}$\,\textbf{ms/frame}
+     ($\approx$\,\textbf{60 FPS})
+     \qquad \textbf{Speedup: $\approx 3\times$}
+    };
+
+\end{tikzpicture}
+\end{document}

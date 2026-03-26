@@ -50,6 +50,10 @@ Approach 1/2:
 [ASCII Motion Grid #4]
 ```
 
+```{=latex}
+\input{./3.fig/fig_pipeline.tex}
+```
+
 <!-- !END_SYNC_BLOCK -->
 
 # Experiments and Results {#sec:results label="results"}

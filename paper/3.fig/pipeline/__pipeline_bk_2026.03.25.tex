@@ -1,4 +1,4 @@
-% !remember to set image path like PATH/TO/video_frame1.png
+% !remember to set image path like PATH/TO/video_frame1.jpg
 \documentclass[tikz,border=2mm]{standalone}
 \usepackage{xcolor}
 \usepackage{graphicx}
@@ -98,9 +98,9 @@
       (videoBox) at (\vfX, \base) {};
 
 \node[anchor=center] (vframe1) at (\vfX,  1.0)
-      {\includegraphics[width=\vframeW cm]{./pipeline/video_frame1.png}};
+      {\includegraphics[width=\vframeW cm]{./video_frame1.jpg}};
 \node[anchor=center] (vframe2) at (\vfX, -1.0)
-      {\includegraphics[width=\vframeW cm]{./pipeline/video_frame2.png}};
+      {\includegraphics[width=\vframeW cm]{./video_frame2.jpg}};
 
 %=================================================================
 % SKIP BLOCK  (large blue dashed box, center)
@@ -113,7 +113,7 @@
 \node[anchor=center,
       label={[align=left]above:\textbf{FrameDiff (Foreground Mask)}}]
       (framediff) at (\fdX, \fdY)
-      {\includegraphics[width=\fdImgW cm]{./pipeline/framediff_mask.png}};
+      {\includegraphics[width=\fdImgW cm]{./framediff_mask.jpg}};
 
 % "Generate ROI" label below FrameDiff
 \node[anchor=north, font=\small, text=orange!80!black, align=center]
@@ -139,10 +139,10 @@
 % ---- Active motion block batch ----
 \node[draw=green!60!black, line width=1.5pt, anchor=center]
       (blk1) at (\blkX, 4.2)
-      {\includegraphics[width=\blkImgW cm]{./pipeline/block_crop1.png}};
+      {\includegraphics[width=\blkImgW cm]{./block_crop1.png}};
 \node[draw=green!60!black, line width=1.5pt, anchor=center]
       (blk2) at (\blkX, 2.6)
-      {\includegraphics[width=\blkImgW cm]{./pipeline/block_crop2.png}};
+      {\includegraphics[width=\blkImgW cm]{./block_crop2.png}};
 \node[font=\small, anchor=north, align=center] (blkText) at (\blkX, 1.5)
       {active motion\\block batch};
 
