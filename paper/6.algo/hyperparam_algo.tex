@@ -1,30 +1,42 @@
 \begin{algorithm}[htbp]
 \caption{Skip Module Hyperparameter Selection}
-\begin{algorithmic}[3]
-\Require parameter space $\Theta$, validation set $D_{\text{val}}$, detector $M$, recall tolerance $\delta_R$, weights $w_S,w_F,w_R$
+\begin{algorithmic}[1]
+\Require parameter space $\Theta$,
+         validation set $D_{\text{val}}$,
+         detector $M$,
+         recall tolerance $\delta_R$,
+         time budget $\beta$,
+         weights $w_S, w_F, w_R$
 \Ensure optimal parameters $\theta^*$
 
 \State baseline $\gets$ evaluate\_pipeline($D_{\text{val}}$, skip=None, $M$)
-\State extract $R_{\text{base}}, \mathrm{FAR}_{\text{base}}$ from baseline
+\State extract $R_{\text{base}}$, $\mathrm{FAR}_{\text{base}}$, $T_{\text{DL}}$ from baseline
 \State best\_score $\gets -\infty$
 \State best\_$\theta \gets$ None
 
 \For{$\theta \in \Theta$}
-  \State skip $\gets$ SkipModule($\theta$)
-  \State results $\gets$ evaluate\_pipeline($D_{\text{val}}$, skip, $M$)
-  \State extract $R(\theta)$, $\mathrm{FAR}(\theta)$, $S(\theta)$ from results
-  \If{$R(\theta) \geq R_{\text{base}}-\delta_R$}
-    \State $\Delta \widetilde{\mathrm{FAR}}(\theta)\gets
-      \max\left(0,\frac{\mathrm{FAR}_{\text{base}}-\mathrm{FAR}(\theta)}{\mathrm{FAR}_{\text{base}}}\right)$
-    \State $\widetilde{R}(\theta)\gets
-      1-\frac{R_{\text{base}}-R(\theta)}{\delta_R}$
-    \State score $\gets
-      w_S S(\theta)+w_F \Delta \widetilde{\mathrm{FAR}}(\theta)+w_R \widetilde{R}(\theta)$
-    \If{score $>$ best\_score}
-      \State best\_score $\gets$ score
-      \State best\_$\theta \gets \theta$
+    \State skip $\gets$ SkipModule($\theta$)
+    \State results $\gets$ evaluate\_pipeline($D_{\text{val}}$, skip, $M$)
+    \State extract $R(\theta)$, $\mathrm{FAR}(\theta)$, $S(\theta)$,
+           $T_{\text{skip}}(\theta)$ from results
+    \If{$R(\theta) \geq R_{\text{base}} - \delta_R$
+        \textbf{ and }
+        $T_{\text{skip}}(\theta) \leq \beta \cdot T_{\text{DL}}$}
+        \State $F(\theta) \gets
+               \max\!\left(0,\;
+               \dfrac{\mathrm{FAR}_{\text{base}} - \mathrm{FAR}(\theta)}
+                     {\mathrm{FAR}_{\text{base}}}\right)$
+        \State $\rho(\theta) \gets
+               1 - \dfrac{R_{\text{base}} - R(\theta)}{\delta_R}$
+        \State score $\gets
+               w_S\, S(\theta)
+               + w_F\, F(\theta)
+               + w_R\, \rho(\theta)$
+        \If{score $>$ best\_score}
+            \State best\_score $\gets$ score
+            \State best\_$\theta \gets \theta$
+        \EndIf
     \EndIf
-  \EndIf
 \EndFor
 
 \State \Return best\_$\theta$

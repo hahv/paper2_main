@@ -256,72 +256,104 @@ We construct a binary image classification dataset for fire and smoke detection,
 
 ## Hyperparameter Selection Strategy {#sec:hyperparam}
 
-To select the optimal hyperparameters for the proposed skip module, we employ a constrained multi-objective optimization procedure on the validation set. Let $R_{\text{base}}$ denote the end-to-end recall and $\mathrm{FAR}_{\text{base}}$ denote the false alarm rate of the baseline pipeline without skipping. For each candidate parameter set $\theta \in \Theta$ obtained by grid search, we evaluate the full pipeline $\text{Read} \rightarrow \text{Skip}(\theta) \rightarrow [\text{DL}]$ and compute three metrics: recall $R(\theta)$, false alarm rate $\mathrm{FAR}(\theta)$, and negative-frame skip ratio $S(\theta)$.
+To select the optimal hyperparameters for the proposed skip module, we employ a
+constrained optimization procedure on the validation set. Let $R_{\text{base}}$,
+$\mathrm{FAR}_{\text{base}}$, and $T_{\text{DL}}$ denote the end-to-end recall,
+false alarm rate, and mean per-frame inference time of the baseline pipeline
+(without skipping), respectively. For each candidate parameter set $\theta \in
+\Theta$ obtained by grid search, we evaluate the full pipeline $\text{Read}
+\rightarrow \text{Skip}(\theta) \rightarrow [\text{DL}]$ and compute four
+metrics: recall $R(\theta)$, false alarm rate $\mathrm{FAR}(\theta)$,
+negative-frame skip ratio $S(\theta)$, and mean per-frame skip module time
+$T_{\text{skip}}(\theta)$.
 
 The negative-frame skip ratio is defined as
 
 $$
-S(\theta)=
-\frac{\#\ \text{correctly skipped negative frames}}
-{\#\ \text{total negative frames}}.
+S(\theta) = \frac{\#\ \text{correctly skipped negative frames}}
+                 {\#\ \text{total negative frames}}.
 $$
 
-To combine multiple objectives in a single score, the metrics should be expressed on comparable scales. Accordingly, we define the normalized false alarm reduction as
+The mean per-frame inference times are defined as
 
 $$
-\Delta \widetilde{\mathrm{FAR}}(\theta)=
-\max\left(
-0,\,
-\frac{\mathrm{FAR}_{\text{base}}-\mathrm{FAR}(\theta)}
-{\mathrm{FAR}_{\text{base}}}
-\right),
+T_{\text{DL}} = \frac{1}{|D_{\text{val}}|}
+                \sum_{i=1}^{|D_{\text{val}}|} t_{\text{DL}}(f_i),
+\qquad
+T_{\text{skip}}(\theta) = \frac{1}{|D_{\text{val}}|}
+                          \sum_{i=1}^{|D_{\text{val}}|} t_{\text{skip}}(f_i,\theta),
 $$
 
-which measures the relative reduction in false alarm rate with respect to the baseline system. Under the conservative-gating assumption of the proposed pipeline, $\mathrm{FAR}(\theta)\leq \mathrm{FAR}_{\text{base}}$ should hold theoretically; the $\max(0,\cdot)$ form is retained for robustness and implementation safety.
+where $f_i$ denotes the $i$-th frame in $D_{\text{val}}$, and both averages are
+taken over all frames to reflect the runtime cost on a typical video stream.
 
-To reflect recall preservation in a simpler and more interpretable way, we define the recall-retention term as
-
-$$
-\widetilde{R}(\theta)=
-1-\frac{R_{\text{base}}-R(\theta)}{\delta_R},
-$$
-
-where $\delta_R$ is the maximum allowable absolute recall drop. This term equals $1$ when the candidate matches the baseline recall and equals $0$ when the candidate reaches the lowest acceptable recall level $R_{\text{base}}-\delta_R$.
-
-The optimal parameter set $\theta^*$ is selected as
+**Feasibility constraints.** A candidate $\theta$ is considered feasible only if
+it satisfies two hard constraints:
 
 $$
-\theta^*=
-\arg\max_{\theta \in \Theta}
-\left[
-w_S S(\theta)
-+
-w_F \Delta \widetilde{\mathrm{FAR}}(\theta)
-+
-w_R \widetilde{R}(\theta)
-\right]
-\quad
-\text{subject to}
-\quad
-R(\theta)\geq R_{\text{base}}-\delta_R,
+R(\theta) \geq R_{\text{base}} - \delta_R,
+\qquad
+T_{\text{skip}}(\theta) \leq \beta \cdot T_{\text{DL}},
 $$
 
-where $\delta_R=0.01$ denotes a 1\% absolute recall-drop tolerance and the nonnegative weights satisfy
+where $\delta_R = 0.01$ is the maximum allowable absolute recall drop (1%), and
+$\beta = 0.10$ ensures that the skip module overhead does not exceed 10% of one
+full DL inference. The first constraint prevents unsafe degradation in fire/smoke
+detection. The second ensures the skip module does not negate the efficiency it
+is designed to provide.
 
-$$w_S+w_F+w_R=1.$$
-
-In this work, we set
+**Scoring feasible candidates.** To rank feasible candidates, we define two
+normalized scoring terms. The false alarm reduction term is
 
 $$
-w_S=0.60,\qquad
-w_F=0.20,\qquad
-w_R=0.20,
+F(\theta) = \max\left(0,\;
+            \frac{\mathrm{FAR}_{\text{base}} - \mathrm{FAR}(\theta)}
+                 {\mathrm{FAR}_{\text{base}}}\right),
 $$
 
-so that skip ratio remains the primary efficiency objective, while false alarm reduction and recall retention are treated as secondary but still explicit preferences. This formulation preserves the safety-first role of recall through the hard constraint, while avoiding the drawback of selecting among feasible candidates using skip ratio alone.
+which measures relative FAR improvement with respect to the baseline. The recall
+retention term is
 
-\textbf{Theoretical justification.}
-The skip module acts as a conservative gate: skipped frames are forced to output ``negative,'' while passed frames are processed by the same downstream detector as in the baseline system. Therefore, the false alarms of the skip-enabled system form a subset of those of the baseline system, implying $\mathrm{FAR}(\theta)\leq \mathrm{FAR}_{\text{base}}$ under the assumed architecture. The main safety risk is thus recall degradation due to false skips, which motivates using recall as both a hard feasibility condition and a soft ranking term.
+$$
+\rho(\theta) = 1 - \frac{R_{\text{base}} - R(\theta)}{\delta_R},
+$$
+
+which equals $1$ when the candidate matches baseline recall and $0$ when recall
+reaches the lowest acceptable level $R_{\text{base}} - \delta_R$. Both terms map
+to $[0,1]$ over the feasible region, making them directly comparable to
+$S(\theta)$ in the weighted score.
+
+**Optimal selection.** The optimal parameter set $\theta^*$ is selected as
+
+$$
+\theta^* = \arg\max_{\theta \in \Theta_{\text{feasible}}}
+           \left[ w_S\, S(\theta) + w_F\, F(\theta) + w_R\, \rho(\theta) \right],
+$$
+
+where
+$\Theta_{\text{feasible}} = \{\theta \in \Theta :
+R(\theta) \geq R_{\text{base}} - \delta_R
+\text{ and }
+T_{\text{skip}}(\theta) \leq \beta \cdot T_{\text{DL}}\}$,
+and the nonnegative weights satisfy $w_S + w_F + w_R = 1$. In this work, we set
+
+$$
+w_S = 0.60, \qquad w_F = 0.20, \qquad w_R = 0.20,
+$$
+
+so that skip ratio remains the primary efficiency objective, while false alarm
+reduction and recall retention are treated as secondary but explicitly rewarded
+preferences.
+
+**Theoretical justification.** The skip module acts as a conservative gate:
+skipped frames output "negative" directly, while passed frames are processed by
+the same downstream detector as the baseline. Therefore, every false alarm
+produced by the skip-enabled system is also present in the baseline system,
+implying $\mathrm{FAR}(\theta) \leq \mathrm{FAR}_{\text{base}}$. The main safety
+risk is recall degradation due to incorrectly skipped fire/smoke frames (false
+skips), which motivates enforcing the recall constraint as a hard gate before any
+ranking is performed.
+
 
 ```{=latex}
 \input{./6.algo/hyperparam_algo.tex}
