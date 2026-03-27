@@ -1,6 +1,6 @@
 general:
   seed: 1
-  skip_exp_if_exists: true # ! skip if same experiment with same config existed
+  skip_exp_if_exists: false # ! skip if same experiment with same config existed
   is_optim_mode: false # ! set to true when doing hyper-parameter optimization
   project_dir: /mnt/e/SyncData/paper2_main
   outdir: zout/zruns

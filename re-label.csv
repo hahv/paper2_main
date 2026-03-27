@@ -11,3 +11,4 @@ val;aihub__lb_smoke__3042.mp4;Miss: 19.17% (69);
 val;aihub__lb_smoke__0208 (from val -> test);yes;
 ;aihub__lb_fire__0178 (from test) ->val;;
 ;aihub__lb_none__0175.mp4 (val) -> test;;
+;VSD3__lb_mixed_firesmoke__video1.mp4 (trim to ~1500 frames);;

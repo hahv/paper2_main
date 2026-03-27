@@ -24,15 +24,16 @@ extra_cfgs:
       # - 1.0 (Full Res): The baseline ground truth for accuracy.
       # - 0.5 (Half Res): The target for optimization. 4x speedup, usually retains enough detail.
       # - 0.25 (Quarter Res): Aggressive 16x speedup. Risk: Thin smoke plumes might disappear.
-      scale_factor: [0.5, 1.0]
+      scale_factor: [0.5]
       # Logic:
       # - 32px: High sensitivity. Necessary for detecting early ignition or small distant fires.
       # - 48px: Mid-range balance.
       # - 64px: Coarse. Efficient, but might miss small fires until they grow larger.
-      block_size_orig: [16, 32, 64]
+      block_size_orig: [32, 64]
       # Logic:
       # - 0.02 (2%): Very Sensitive. Catches wispy/transparent smoke edges. Risk: False Positives from leaves/noise.
       # - 0.05 (5%): Balanced. Standard "solid" motion.
       # - 0.10 (10%): Strict. Requires dense/large motion. Risk: Will likely miss early semi-transparent smoke.
       block_ratio_th: [0.05, 0.1] # 0.15
-
+      # --- Fixed Parameters (Classifier Dependent) ---
+      min_roi_ratio: 0.75

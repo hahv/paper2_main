@@ -58,15 +58,6 @@ class BaseSkipProc(ABC):
         """
         pass
 
-    def prepare_infer_input(
-        self, frame: np.ndarray, meta_data: Dict[str, Any]
-    ) -> np.ndarray:
-        """
-        Optional: Transform the frame before inference (e.g., crop to ROI).
-        Defaults to passing the original frame.
-        """
-        return frame
-
     def get_dummy_result(self, class_names) -> dict:
         """Returns a standardized dummy result for skipped frames."""
         num_classes = len(class_names)

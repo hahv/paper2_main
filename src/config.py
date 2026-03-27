@@ -485,4 +485,4 @@ class Config(ExpBaseCfg):
         This function modifies the general.project_dir and general.outdir to achieve that.
         """
         # ! Force to "zout/zoptim" for optimization runs, to make it easy to find and compare results
-        self.general.outdir = GlobalConst.OPTIM_INDIR
+        self.general.outdir = GlobalConst.OPTIM_OUTDIR
