@@ -10,6 +10,10 @@ from src.utils import get_transform, default_fileName_to_clsName
 
 
 class NoTempMethod(BaseMethod):
+    USED_CACHED_PRINTED = (
+        False  # Class variable to track if the warning has been printed
+    )
+
     def _validate_method_name(self):
         method_name: str = default_fileName_to_clsName(self.cfg.methodCfg.name)  # ty:ignore[invalid-argument-type]
         current_class_name = self.__class__.__name__
@@ -51,6 +55,10 @@ class NoTempMethod(BaseMethod):
         ):
             precomputed_rs = self.precomputed_rs_proc.get_frame_data(frame_idx)
             if precomputed_rs is not None:
+                if not NoTempMethod.USED_CACHED_PRINTED:
+                    with ConsoleLog("Important", characters="🐸"):
+                        pprint("Using precomputed results")
+                    NoTempMethod.USED_CACHED_PRINTED = True
                 return precomputed_rs
 
         assert self.model is not None, "Model is not loaded."

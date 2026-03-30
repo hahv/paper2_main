@@ -27,6 +27,7 @@ class Paper2Exp(BaseExp):
         self.metric_backend = None
         self.video_dir_path = None
         self.wandb_logger = None
+        self.exp_time_start = 0
         if "wandb_logger" in kwargs:
             self.wandb_logger = kwargs["wandb_logger"]
 
@@ -152,6 +153,7 @@ class Paper2Exp(BaseExp):
 
         if self.full_cfg.shouldSkipExp:
             return
+        self.exp_time_start = time.perf_counter()
 
         self.init_general(self.config.get_general_cfg())  # ty:ignore[invalid-argument-type]
         self.prepare_dataset(self.config.get_dataset_cfg())  # ty:ignore[invalid-argument-type]
@@ -232,3 +234,11 @@ class Paper2Exp(BaseExp):
                 df.to_csv(outfile, sep=";", encoding="utf-8", index=False)
                 csvfile.fn_display_df(df)
                 pprint_local_path(outfile, get_wins_path=True)  # ty:ignore[invalid-argument-type]
+
+        # ! Final experiment summary with total time
+        with ConsoleLog("Exp end summary", characters="🔺"):
+            exp_time = time.perf_counter() - self.exp_time_start
+            console.print(f"Exp time (Secs): {exp_time:.2f} seconds")
+            # convert to hours, minutes, seconds
+            exp_time_hms = time.strftime("%H:%M:%S", time.gmtime(exp_time))
+            console.print(f"Exp time (h:m:s): {exp_time_hms}")
