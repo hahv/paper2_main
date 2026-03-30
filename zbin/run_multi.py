@@ -18,6 +18,9 @@ from src.utils import clear_slack_channel
 
 from halib.filetype import yamlfile
 
+from halib.system.path import get_PC_abbr_name
+from src.utils import split_task_by_cfg
+
 
 class RunOptimArgs(Tap):
     base_yaml: str = r"./config/zruns/run_base.yaml"
@@ -25,6 +28,7 @@ class RunOptimArgs(Tap):
     clean_slack: bool = False
     is_optim_mode: bool = False
     pre_computed_no_skip_dir: str = ""
+    split_task_by_cfg: bool = False
 
     def configure(self):
         self.add_argument(
@@ -37,6 +41,12 @@ class RunOptimArgs(Tap):
             "-pc",
             "--pre_computed_no_skip_dir",
             help="Path to precomputed inferences to skip actual model execution",
+        )
+        self.add_argument(
+            "-split",
+            "--split_task_by_cfg",
+            action="store_true",
+            help="Split tasks based on the configuration file",
         )
 
 
@@ -89,6 +99,8 @@ def main():
     all_optim_run_cfgs: List[Config] = []
     cfg_stats = {}
 
+    split_task = args.split_task_by_cfg
+
     for idx, cfg_item in enumerate(initial_ls_run_cfgs):
         method_name = cfg_item.methodCfg.name
 
@@ -129,6 +141,20 @@ def main():
                     base_cfg.update_for_optim_mode()
                 all_optim_run_cfgs.append(base_cfg)
             cfg_stats[method_name] += len(optim_cfgs)
+
+    if split_task:
+        with ConsoleLog("Task Split", characters="🔻"):
+            (start_idx, end_idx), split_result = split_task_by_cfg(
+                "./config/zruns/ztask_split.yaml",
+                total_exps=len(all_optim_run_cfgs),
+                pc_name=get_PC_abbr_name(),
+            )
+            total_exps = len(all_optim_run_cfgs)
+            pprint_box(split_result, title="Task Split Result")
+            all_optim_run_cfgs = all_optim_run_cfgs[start_idx:end_idx]
+            console.log(
+                f"Num exp This PC: <<{len(all_optim_run_cfgs)}/ {total_exps}>> with indices [{start_idx}:{end_idx}]"
+            )
 
     num_cfg_str = f"Total {len(all_optim_run_cfgs)} configs to run"
     console.rule(num_cfg_str)

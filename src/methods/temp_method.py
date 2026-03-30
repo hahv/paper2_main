@@ -62,10 +62,6 @@ class TempMethod(NoTempMethod):
 
             else:
                 # ── Step 2: Prepare model input ────────────────────────────────
-                with ctx.step("prep_input"):
-                    model_input = self.skip_proc.prepare_infer_input(frame, meta_data)
-
-                # Wall-clock overhead = skip_check + prep_input (live steps only)
                 overhead_time = time.perf_counter() - overhead_start
                 pre_calc_time = self._resolve_pre_calc_time(frame_idx)
 
@@ -74,7 +70,7 @@ class TempMethod(NoTempMethod):
                 # pre_calc_time=float → inject precomputed value; profiler
                 #                       auto-accumulates into ctx duration ✅
                 with ctx.step("heavy_infer", pre_calc_time=pre_calc_time):
-                    infer_result = super().infer_frame(model_input, frame_idx)
+                    infer_result = super().infer_frame(frame, frame_idx)
 
                 # Propagate overhead into result so downstream consumers
                 # (e.g. base_method.py) see the true combined elapsed cost

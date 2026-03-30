@@ -6,6 +6,7 @@ from halib import *
 from tap import *
 from halib.exp.core.param_gen import ParamGen
 
+
 """
 Usage examples:
     # Run everything (default)
@@ -32,6 +33,7 @@ class CustomArgs(Tap):
     is_optim_mode: bool = False
     pre_computed_no_skip_dir: str = ""
     dry_run: bool = False
+    split_task_by_cfg: bool = False
 
     def configure(self):
         self.add_argument("-r", "--run_cfg_yaml")
@@ -47,6 +49,12 @@ class CustomArgs(Tap):
             action="store_true",
             help="Print commands without running",
         )
+        self.add_argument(
+            "-split",
+            "--split_task_by_cfg",
+            action="store_true",
+            help="Split tasks based on the configuration file",
+        )
 
 
 def main():
@@ -55,6 +63,7 @@ def main():
     run_cfg_yaml = args.run_cfg_yaml
     run_cfgs = ParamGen.from_files(sweep_yaml=run_cfg_yaml).expand()
     cmd_str = "zbin/run_multi.py --base_yaml {base_yaml} --sweep_yaml {sweep_yaml}"
+
     for run_cfg in run_cfgs:
         base_yaml = run_cfg["base_yaml"]
         sweep_yaml = run_cfg["sweep_yaml"]
@@ -77,6 +86,9 @@ def main():
             cmd_str_run = f"python -m kernprof -l {cmd_str_run}"
         else:
             cmd_str_run = f"python {cmd_str_run}"
+
+        if args.split_task_by_cfg:
+            cmd_str_run += " -split"
 
         if args.dry_run:
             console.log(f"[yellow]DRY RUN:[/yellow] {cmd_str_run}")
