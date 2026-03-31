@@ -242,3 +242,8 @@ class Paper2Exp(BaseExp):
             # convert to hours, minutes, seconds
             exp_time_hms = time.strftime("%H:%M:%S", time.gmtime(exp_time))
             console.print(f"Exp time (h:m:s): {exp_time_hms}")
+            # write to file in the output directory
+            exp_end_summary_file = self.full_cfg.get_outdir() + "/__exp_end_summary.txt"
+            with open(exp_end_summary_file, "w") as f:
+                f.write(f"Exp time (Secs): {exp_time:.2f} seconds\n")
+                f.write(f"Exp time (h:m:s): {exp_time_hms}\n")

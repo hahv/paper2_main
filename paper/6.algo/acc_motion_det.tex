@@ -1,0 +1,65 @@
+\noindent
+Let $F_t$ denote the grayscale image at time $t$, and $\mathbf{M}_t \in [0, M_{\max}]$
+the per-pixel \textit{accumulated motion mask}.
+$\symbf{\Delta}_t$ is the \textit{instantaneous delta}, a binary map weighted
+by $\alpha$ that activates at pixels where the inter-frame intensity change exceeds
+sensitivity threshold $\tau_d$.
+$\mathbf{M}_t$ grows by $\alpha$ upon detection and decays by $\delta$ each frame,
+bounded at $M_{\max}$ to prevent indefinite accumulation of stale evidence.
+A pixel is declared active motion only when $\mathbf{M}_t \geq \tau_m$,
+suppressing transient noise and single-frame flicker.
+
+\begin{algorithm}[ht]
+\caption{Accumulation Motion Detector (AccMotionDet)}
+\label{alg:acc_motion_det}
+\begin{algorithmic}[1]
+
+\Require Frames $F_t, F_{t-1}$; accumulated mask $\mathbf{M}_{t-1}$
+\Require $\tau_d$: diff sensitivity,\; $\alpha$: motion increment,\;
+         $\tau_m$: activation threshold,\; $M_{\max}$: accumulation cap,\;
+         $\delta$: decay rate
+\Ensure  $\mathbf{C}_t \in \{0, 255\}$: binary motion mask;\;
+         $\mathbf{M}_t$: updated accumulated mask
+
+\Statex
+
+\If{$F_{t-1} = \varnothing$}
+    \State $F_{t-1} \leftarrow F_t$,\quad $\mathbf{M}_{t-1} \leftarrow \mathbf{0}$
+    \State \Return $\mathbf{0}$
+\EndIf
+
+\Statex
+
+\State $\mathbf{D}_t \leftarrow \left| F_t - F_{t-1} \right|$
+\Comment{Absolute inter-frame difference}
+
+\State $\symbf{\Delta}_t(i,j) \leftarrow
+    \begin{cases}
+        \alpha & \mathbf{D}_t(i,j) > \tau_d \\
+        0      & \text{otherwise}
+    \end{cases}$
+\Comment{Instantaneous delta}
+
+\Statex
+
+\State $\mathbf{A}_t \leftarrow \min\!\left(\mathbf{M}_{t-1} + \symbf{\Delta}_t,\; M_{\max}\right)$
+\Comment{Accumulate and cap}
+
+\State $\mathbf{M}_t \leftarrow \max\!\left(\mathbf{A}_t - \delta,\; 0\right)$
+\Comment{Temporal decay}
+
+\Statex
+
+\State $\mathbf{C}_t(i,j) \leftarrow
+    \begin{cases}
+        255 & \mathbf{M}_t(i,j) \geq \tau_m \\
+        0   & \text{otherwise}
+    \end{cases}$
+\Comment{Threshold to binary mask}
+
+\State $F_{t-1} \leftarrow F_t$
+
+\State \Return $\mathbf{C}_t,\; \mathbf{M}_t$
+
+\end{algorithmic}
+\end{algorithm}

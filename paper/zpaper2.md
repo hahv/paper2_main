@@ -58,6 +58,86 @@ Approach 1/2:
 ```{=latex}
 \input{./3.fig/fig_skipmodule.tex}
 ```
+```{=latex}
+\input{6.algo/frame_diff_det.tex}
+```
+**Frame Diff Parameter Grid Search:**
+
+## Hyperparameter Search Space for the FrameDiffDet Skip Module
+
+To identify an optimal configuration for the `motion_only_block_skip_proc` module
+using `FrameDiffDet` as its motion estimator, we conducted a systematic grid search
+over four parameters: `scale_factor`, `block_size_orig`, `block_ratio_th`, and
+`diff_thresh`. The search space was defined as follows:
+
+```{=latex}
+\begin{table}[h]
+\centering
+\caption{Grid search space for the \texttt{FrameDiffDet} skip module hyperparameters.}
+\label{tb:grid_search_space}
+\begin{tabular}{ll}
+\hline
+\textbf{Parameter} & \textbf{Search Values} \\
+\hline
+\texttt{scale\_factor}   & \{0.5, 1.0\} \\
+\texttt{block\_size\_orig} & \{16, 32\} \\
+\texttt{block\_ratio\_th} & \{0.05, 0.10, 0.15\} \\
+\texttt{diff\_thresh}    & \{3, 5, 7, 10\} \\
+\hline
+\multicolumn{2}{l}{\textit{Total configurations: $2 \times 2 \times 3 \times 4 = 48$}} \\
+\hline
+\end{tabular}
+\end{table}
+```
+
+
+
+To identify an optimal configuration for the `motion_only_block_skip_proc` module
+using `FrameDiffDet` as its motion estimator, we conducted a systematic grid search
+over four hyperparameters: `scale_factor`, `block_size_orig`, `block_ratio_th`, and
+`diff_thresh`. The search space is summarized in Table~\ref{tb:grid_search_space},
+yielding a total of $2 \times 2 \times 3 \times 4 = 48$ configurations.
+
+**`scale_factor ∈ {0.5, 1.0}`.**
+The scale factor controls the spatial resolution at which per-block frame differences
+are computed. Full resolution (`1.0`) preserves fine-grained pixel detail, while half
+resolution (`0.5`) reduces sensitivity to high-frequency pixel noise that may generate
+spurious motion signals unrelated to actual scene changes. Two levels are evaluated to
+quantify the effect of pre-computation downscaling on both detection reliability and
+computational cost.
+
+**`block_size_orig ∈ {16, 32}`.**
+Block size determines the spatial granularity of the motion map, expressed in pixels
+of the original unscaled frame. Fine blocks (16 px) enable detection of localized
+motion from small or nascent fire regions, whereas coarser blocks (32 px) aggregate
+motion evidence over a broader spatial context, offering greater robustness against
+isolated pixel-level disturbances. This range is chosen to span a practically
+meaningful fine-to-coarse spectrum without becoming so coarse that spatially small
+fire events are missed entirely.
+
+**`block_ratio_th ∈ {0.05, 0.10, 0.15}`.**
+This threshold defines the minimum fraction of motion-active blocks required to
+trigger a full inference pass; frames below this threshold are skipped. A low value
+(0.05) corresponds to a conservative policy where even sparse motion activity triggers
+inference, minimizing the risk of missed detections. A higher value (0.15) reflects a
+more aggressive skip policy that demands broader scene-level motion before committing
+to inference. The three values are spaced at a uniform interval of 0.05 to enable a
+systematic and interpretable sweep across this conservative-to-aggressive spectrum.
+
+**`diff_thresh ∈ {3, 5, 7, 10}`.**
+The per-pixel difference threshold determines the minimum absolute intensity change
+required for a pixel to be counted as a motion event within a block. A low threshold
+(3) is highly sensitive and responds to subtle illumination changes, while a high
+threshold (10) responds only to strong, unambiguous motion. The four values are
+selected to span the full sensitivity spectrum — from near-noise-level detection to
+robust large-motion detection — with closer spacing at the lower end (3, 5, 7) to
+provide finer resolution in the sensitivity range most relevant to fire detection,
+where motion tends to be subtle and spatially confined.
+
+
+```{=latex}
+\input{6.algo/acc_motion_det.tex}
+```
 
 <!-- !END_SYNC_BLOCK -->
 
@@ -182,10 +262,11 @@ epochs with a batch size of 256, a learning rate of 0.001,
 
 
 **TODO**: add hardware and software context here
+The experiments were conducted on a workstation running Windows 10 Pro 21H2 (build 19044) equipped with a  Intel Core i9-12900K processor, 64 GB of DDR5 system memory, and an NVIDIA GeForce RTX 3090 GPU (24 GB VRAM). All deep learning inference was performed under CUDA 12.9 with PyTorch 2.7.1.
 
 <!-- !MainPC -->
 
-ha@DESKTOP-JQD9K01
+<!-- ha@DESKTOP-JQD9K01
 OS: Windows 10 Pro (22H2) x86_64
 Kernel: WIN32_NT 10.0.19045.5965
 Uptime: 15 days, 13 hours, 1 min
@@ -200,9 +281,9 @@ Disk (F:\): 66.01 MiB / 10.00 GiB (1%) - NTFS [External]
 Disk (G:\): 783.98 GiB / 931.50 GiB (84%) - FAT32
 Disk (H:\): 783.98 GiB / 931.50 GiB (84%) - FAT32
 Disk (J:\): 729.42 MiB / 3.00 GiB (24%) - NTFS [External]
-Local IP (vEthernet (Internet Switch)): 115.145.67.115/24
+Local IP (vEthernet (Internet Switch)): 115.145.67.115/24 -->
 
-<!-- !1GPU server -->
+<!-- !1GPU server
 
 comeduTa1@DESKTOP-QNS3DNF
 OS: Windows 10 Pro (21H2) x86_64
@@ -217,10 +298,17 @@ Disk (C:\): 1.10 TiB / 1.82 TiB (61%) - NTFS
 Disk (D:\): 1.43 TiB / 1.82 TiB (79%) - NTFS
 Disk (E:\): 1.40 TiB / 7.28 TiB (19%) - NTFS
 Local IP (115.145.36.213/24)
+NVIDIA-SMI 575.51.02              Driver Version: 576.02         CUDA Version: 12.9
+torch 2.7.1+ cu118
+
+
+The experiments were conducted using a Windows 10 Pro 22H2 operating system with 64 GB of
+RAM and two NVIDIA GeForce RTX 3090 GPUs, each with 24 GB of VRAM. The NVIDIA CUDA
+Toolkit version 11.8 was used in conjunction with PyTorch 2.1.0 for training YOLO models. -->
 
 <!-- !4GPU server -->
 
-comeduta5@DESKTOP-Q2IKLC0
+<!-- comeduta5@DESKTOP-Q2IKLC0
 OS: Windows 10 Pro (22H2) x86_64
 Kernel: WIN32_NT 10.0.19045.6456
 Uptime: 92 days, 5 hours, 58 mins
@@ -238,7 +326,7 @@ Disk (D:\): 260.78 GiB / 446.62 GiB (58%) - NTFS
 Disk (E:\): 898.97 GiB / 1.23 TiB (71%) - NTFS
 Local IP (NIC1): 115.145.36.212/24
 
-All inference latencies were measured on an NVIDIA Jetson Nano / RTX 3060 to simulate edge deployment
+All inference latencies were measured on an NVIDIA Jetson Nano / RTX 3060 to simulate edge deployment -->
 
 
 ## Baseline Models and Context

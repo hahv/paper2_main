@@ -126,6 +126,16 @@ def main():
                 sweep_yaml=opt_cfg_path, base_yaml=None
             )
             optim_cfgs = optim_param_gen.expand()
+            # # ! debug
+            # for idx, optim_cfg in enumerate(optim_cfgs):
+            #     pprint_box(
+            #         optim_cfg,
+            #         title=f"Optim Config {idx + 1}/{len(optim_cfgs)} for {method_name}",
+            #     )
+            # assert False, (
+            #     "Debugging: Check the optim configs generated before merging with base config."
+            # )
+
             for optim_param_set in optim_cfgs:
                 base_cfg = Config.from_custom_yaml_file_or_str(
                     cfg_item.original_yaml_str  # ty:ignore[invalid-argument-type]

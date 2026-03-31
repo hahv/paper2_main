@@ -242,22 +242,22 @@
 		%=================================================================
 		% ARROWS: heuristics → heuristic decision  (join)
 		%=================================================================
-		\draw[procarrow] (fireHeur.east)  -- ++(1.2, 0) |- (heurDec.north);
-		\draw[procarrow] (smokeHeur.east) -- ++(1.2, 0) |- (heurDec.south);
+		\draw[procarrow] (fireHeur.east)  -| (heurDec.west);
+		\draw[procarrow] (smokeHeur.east) -| (heurDec.west);
 
 		%=================================================================
 		% ARROWS: heuristic decision → outputs
 		%=================================================================
 		% YES → PASS  (up-right)
 		\draw[procarrow]
-		(heurDec.north) -- ++(0, 0.8) -|
+		(heurDec.north) -- ++(0, 0.5) -|
 		node[above, font=\small\bfseries, text=green!40!black, pos=0.25]{Yes}
 		(passOut.south);
 
 		% NO → SKIP  (down)
 		\draw[procarrow]
-		(heurDec.south) --
-		node[right, font=\small\bfseries, pos=0.4]{No}
+		(heurDec.south) -- ++(0, -0.5) -|
+		node[below, font=\small\bfseries, text=green!40!black, pos=0.25]{No}
 		(skipHeur.north);
 
 
