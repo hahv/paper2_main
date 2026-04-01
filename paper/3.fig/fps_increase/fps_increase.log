@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999994 (TeX Live 2022) (preloaded format=xelatex 2022.7.18)  1 APR 2026 16:59
+This is XeTeX, Version 3.141592653-2.6-0.999994 (TeX Live 2022) (preloaded format=xelatex 2022.7.18)  1 APR 2026 17:14
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -544,56 +544,56 @@ File: l3backend-xetex.def 2022-07-01 L3 backend support: XeTeX
 ) (./fps_increase.aux)
 \openout1 = `fps_increase.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 53.
-LaTeX Font Info:    ... okay on input line 53.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 53.
-LaTeX Font Info:    ... okay on input line 53.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 53.
-LaTeX Font Info:    ... okay on input line 53.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 53.
-LaTeX Font Info:    ... okay on input line 53.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 53.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 54.
 LaTeX Font Info:    Trying to load font information for TS1+cmr on input line 5
-3.
+4.
 
 (d:/Program Files/texlive/2022/texmf-dist/tex/latex/base/ts1cmr.fd
 File: ts1cmr.fd 2019/12/16 v2.5j Standard LaTeX font definitions
 )
-LaTeX Font Info:    ... okay on input line 53.
-LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 53.
-LaTeX Font Info:    ... okay on input line 53.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 53.
-LaTeX Font Info:    ... okay on input line 53.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 53.
-LaTeX Font Info:    ... okay on input line 53.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
 
 Package pgfplots notification 'compat/show suggested version=true': document ha
 s been generated with the most recent feature set (\pgfplotsset{compat=1.18}).
 
-Package pgfplots info on input line 93: Using 'lua backend=false' for axis: x c
+Package pgfplots info on input line 94: Using 'lua backend=false' for axis: x c
 oord trafo unsupported.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <12> on input line 128.
+(Font)              <12> on input line 116.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 128.
+(Font)              <8> on input line 116.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 128.
+(Font)              <6> on input line 116.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 128.
+(Font)              <7> on input line 116.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 128.
+(Font)              <5> on input line 116.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <9> on input line 128.
-Package pgfplots info on input line 159: Using 'lua backend=false' for axis: x 
+(Font)              <9> on input line 116.
+Package pgfplots info on input line 147: Using 'lua backend=false' for axis: x 
 coord trafo unsupported.
 [1
 
 ] (./fps_increase.aux) ) 
 Here is how much of TeX's memory you used:
- 23013 strings out of 475865
- 623999 string characters out of 5799410
- 1044671 words of memory out of 5000000
- 43729 multiletter control sequences out of 15000+600000
+ 23015 strings out of 475865
+ 624033 string characters out of 5799410
+ 1043671 words of memory out of 5000000
+ 43731 multiletter control sequences out of 15000+600000
  472947 words of font info for 45 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
  115i,9n,118p,733b,2361s stack positions out of 10000i,1000n,20000p,200000b,200000s

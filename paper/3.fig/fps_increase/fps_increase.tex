@@ -43,6 +43,7 @@
 
 \pgfmathsetmacro{\timeRatio}{\timeDL / \timeSkipMod}
 \pgfmathsetmacro{\timeRedPct}{100 * (\timeDL - \timeSkipMod) / \timeDL}
+\pgfmathsetmacro{\midY}{\timeDL * 0.6}
 
 % Pre-formatted labels for stacked bar
 \pgfmathprintnumberto[fixed,precision=1]{\timeDL}{\timeDLfmt}
@@ -64,8 +65,8 @@
         bar width        = 1.8cm,
         width            = 7.5cm,
         height           = 7cm,
-        symbolic x coords= {Big Model avg Inference, Skip method avg Proc},
-        xtick            = {Big Model avg Inference, Skip method avg Proc},
+        symbolic x coords= {Big Model Avg. Infer., Skip Module Avg. Proc.},
+        xtick            = {Big Model Avg. Infer., Skip Module Avg. Proc.},
         x tick label style = {
             font       = \small,
             align      = center,
@@ -97,7 +98,7 @@
             nodes near coords align=above,
             every node near coord/.append style={text=black}
         ]
-            coordinates { (Big Model avg Inference, \timeDL) };
+            coordinates { (Big Model Avg. Infer., \timeDL) };
 
         % Right bar: skip module time ONLY
         \addplot[
@@ -105,26 +106,13 @@
             nodes near coords align=above,
             every node near coord/.append style={text=black}
         ]
-            coordinates { (Skip method avg Proc, \timeSkipMod) };
+            coordinates { (Skip Module Avg. Proc., \timeSkipMod) };
 
-        % 1. "x39 cheaper" horizontal link
-        \draw[thick, clrSkipMod]
-            (axis cs:Big Model avg Inference,\timeDL) |-
-            ([yshift=0.8cm] axis cs:Big Model avg Inference,\timeDL) --
-            node[above, font=\normalsize\bfseries, text=clrSkipMod] {$\times \pgfmathprintnumber[fixed,precision=0]{\timeRatio}$ cheaper}
-            ([yshift=0.8cm] axis cs:Skip method avg Proc,\timeDL) -|
-            ([yshift=0.5cm] axis cs:Skip method avg Proc,\timeSkipMod);
-
-        % 2. Downward red arrow on the left bar
-        \draw[stealth-, clrDL, ultra thick]
-            ([{xshift=1.3cm}] axis cs:Big Model avg Inference,\timeSkipMod) --
-            node[right, font=\normalsize\bfseries, text=clrDL] {$-$\pgfmathprintnumber[fixed,precision=1]{\timeRedPct}\% overhead}
-            ([{xshift=1.3cm}] axis cs:Big Model avg Inference,\timeDL);
-
-        % 3. Dashed horizontal line at right bar's height
-        \draw[dashed, clrSkipMod, thick]
-            ([{xshift=-0.9cm}] axis cs:Big Model avg Inference,\timeSkipMod) --
-            ([{xshift=0.9cm}] axis cs:Skip method avg Proc,\timeSkipMod);
+        % "x39 cheaper" downward diagonal arrow
+        \draw[-stealth, very thick, clrSkipMod]
+            ([{xshift=0.9cm}] axis cs:Big Model Avg. Infer.,\timeDL) --
+            node[anchor=south west, font=\normalsize\bfseries, text=clrSkipMod] {$\times \pgfmathprintnumber[fixed,precision=0]{\timeRatio}$ cheaper}
+            ([{xshift=-0.9cm, yshift=0.2cm}] axis cs:Skip Module Avg. Proc.,\timeSkipMod);
     \end{axis}
 
     % ─────────────────────────────────────────
@@ -140,8 +128,8 @@
         bar width        = 1.8cm,
         width            = 7.5cm,
         height           = 7cm,
-        symbolic x coords= {No-Skip, AccMotionDet},
-        xtick            = {No-Skip, AccMotionDet},
+        symbolic x coords= {Without Skip, With Skip},
+        xtick            = {Without Skip, With Skip},
         ymin             = 0,
         ymax             = \ymaxFPS,
         ylabel           = {Frames per Second (FPS)},
@@ -158,26 +146,26 @@
         grid style       = {dashed, gray!30},
     ]
         \addplot[fill=clrBaseline, draw=clrBaseline!80!black]
-            coordinates {(No-Skip, \fpsNoSkip)};
+            coordinates {(Without Skip, \fpsNoSkip)};
 
         \addplot[fill=clrSkip, draw=clrSkip!80!black]
-            coordinates {(AccMotionDet, \fpsSkip)};
+            coordinates {(With Skip, \fpsSkip)};
 
         % Dashed baseline extension
         \draw[dashed, gray, thick]
-            ([{xshift=-0.9cm}] axis cs:No-Skip,\fpsNoSkip) --
-            ([{xshift=0.9cm}] axis cs:AccMotionDet,\fpsNoSkip);
+            ([{xshift=-0.9cm}] axis cs:Without Skip,\fpsNoSkip) --
+            ([{xshift=0.9cm}] axis cs:With Skip,\fpsNoSkip);
 
         % Top boundary line for the arrow
         \draw[dashed, gray, thick]
-            ([{xshift=-2.5cm}] axis cs:AccMotionDet,\fpsSkip) --
-            ([{xshift=-0.9cm}] axis cs:AccMotionDet,\fpsSkip);
+            ([{xshift=-2.5cm}] axis cs:With Skip,\fpsSkip) --
+            ([{xshift=-0.9cm}] axis cs:With Skip,\fpsSkip);
 
         % Speedup upward arrow
         \draw[latex-latex, clrSkipMod, very thick]
-            ([{xshift=-1.4cm}] axis cs:AccMotionDet,\fpsNoSkip) --
+            ([{xshift=-1.4cm}] axis cs:With Skip,\fpsNoSkip) --
             node[left, font=\normalsize\bfseries, text=clrSkip] {$+\pgfmathprintnumber[fixed,precision=1]{\speedupPct}\%$}
-            ([{xshift=-1.4cm}] axis cs:AccMotionDet,\fpsSkip);
+            ([{xshift=-1.4cm}] axis cs:With Skip,\fpsSkip);
     \end{axis}
 
 

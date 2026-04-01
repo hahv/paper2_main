@@ -509,6 +509,13 @@ _(Insert Figure 4 here: 2x2 grid showing a frame with smoke missed by Appr 1 but
 
 As illustrated in Figure 4, Approach 2 successfully captures slow-diffusion smoke events that lack the raw pixel displacement required to trigger Approach 1. Furthermore, in scenes featuring subtle twilight illumination shifts and swaying foliage, Approach 1 frequently generated false positives (unnecessarily passing safe frames to the BIG MODEL). Approach 2 successfully filtered these frames by applying color-channel heuristics, verifying that the moving pixels did not match the chromatic signatures of either fire or smoke.
 
+## Speed of Skip Module
+
+```{=latex}
+\input{./3.fig/fig_fps_increase.tex}
+```
+
+
 <!-- !END_SYNC_BLOCK -->
 
 # Discussion {#sec:discussion label="Discussion"}
