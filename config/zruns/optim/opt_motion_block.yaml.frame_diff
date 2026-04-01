@@ -1,0 +1,38 @@
+extra_cfgs:
+  # result_proc:
+  #   video: [video_block_skip_rs_proc, fgmask_block_skip_rs_proc]
+  skip_proc:
+    name: motion_only_block_skip_proc # no_skip_proc, rand_skip_proc
+    params:
+      scale_factor: [0.5, 1.0]
+      # ! in original frame size (vs block_size: in processed frame size)
+      block_size_orig: [16, 32]
+      block_ratio_th: [0.05, 0.1, 0.15]
+      motion:
+        name: framediff_det.FrameDiffDet
+        params:
+          diff_thresh: [3, 5, 7, 10]
+
+# extra_cfgs:
+#   result_proc:
+#     video: [video_block_skip_rs_proc, fgmask_block_skip_rs_proc]
+#   skip_proc:
+#     name: motion_only_block_skip_proc # no_skip_proc, rand_skip_proc
+#     params:
+#       scale_factor: [0.5] #[0.5, 1.0]
+#        # ! in original frame size (vs block_size: in processed frame size)
+#       block_size_orig: [16] # [16, 32, 64]
+#       block_ratio_th: [0.05, 0.1] # [0.05, 0.1, 0.2]
+#       motion:
+#         name: framediff_det.FrameDiffDet
+#         params:
+#           diff_thresh:
+#             start: 2
+#             stop: 8
+#             step: 1
+#           # diff_thresh:
+#           #   start: 5
+#           #   stop: 20
+#           #   step: 5
+
+
