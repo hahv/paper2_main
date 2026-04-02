@@ -12,6 +12,15 @@ secPrefix:
   - "Section"
   - "Sections"
 ---
+<!-- !START_SYNC_BLOCK -->
+<!-- TARGET_PROJECT: G:\My Drive\1_PhD\Obsidian\Home\3. Writing\paperfire2 -->
+<!-- SYNC_TARGET_FILE: 00_Meta_Abstract.md-->
+<!-- BLOCK_ID: abstract -->
+abstract: "123123 hahaha sync block NEW XXX Efficient real-time fire and smoke detection is critical for early warning systems, yet the computational complexity of deep learning-based classifiers often limits their performance in resource-constrained environments. This study proposes a novel skip-block mechanism that leverages motion detection through background subtraction and frame differencing to bypass redundant processing in deep learning fire-smoke classifiers. By selectively skipping frames with negligible motion, the proposed approach significantly enhances processing speed while maintaining detection accuracy. We evaluated the method on Dataset A, achieving a Metric M1 improvement of X% in frames per second (FPS) and a Metric M2 increase of Y% in computational efficiency compared to baseline models. Additionally, the system demonstrated robust performance across diverse environmental conditions in Dataset B, with a Metric M3 reduction of Z% in false positives. These results highlight the potential of motion-based skip blocks to optimize real-time fire and smoke detection systems, offering a scalable solution for practical deployment."
+
+<!-- !END_SYNC_BLOCK -->
+
+
 
 # Introduction {#sec:introduction}
 <!-- !START_SYNC_BLOCK -->
