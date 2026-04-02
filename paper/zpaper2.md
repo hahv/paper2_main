@@ -16,11 +16,8 @@ secPrefix:
 <!-- TARGET_PROJECT: G:\My Drive\1_PhD\Obsidian\Home\3. Writing\paperfire2 -->
 <!-- SYNC_TARGET_FILE: 00_Meta_Abstract.md-->
 <!-- BLOCK_ID: abstract -->
-abstract: "123123 hahaha sync block NEW XXX Efficient real-time fire and smoke detection is critical for early warning systems, yet the computational complexity of deep learning-based classifiers often limits their performance in resource-constrained environments. This study proposes a novel skip-block mechanism that leverages motion detection through background subtraction and frame differencing to bypass redundant processing in deep learning fire-smoke classifiers. By selectively skipping frames with negligible motion, the proposed approach significantly enhances processing speed while maintaining detection accuracy. We evaluated the method on Dataset A, achieving a Metric M1 improvement of X% in frames per second (FPS) and a Metric M2 increase of Y% in computational efficiency compared to baseline models. Additionally, the system demonstrated robust performance across diverse environmental conditions in Dataset B, with a Metric M3 reduction of Z% in false positives. These results highlight the potential of motion-based skip blocks to optimize real-time fire and smoke detection systems, offering a scalable solution for practical deployment."
-
+abstract: "Conventional deep learning (DL)-based fire and smoke detection systems process every frame of a video stream through a computationally intensive model to classify the presence of fire or smoke. However, in surveillance scenarios — particularly indoor environments — video streams frequently contain static, background-only frames devoid of motion or relevant events, rendering per-frame inference redundant and wasteful of computational resources. To address this limitation, this study proposes a novel skip-module mechanism that leverages motion detection to selectively bypass DL inference on non-informative frames in fire and smoke classification pipelines. Evaluation on a large-scale dataset comprising 150 indoor videos demonstrates that the proposed method substantially improves processing throughput while preserving detection performance. Specifically, the skip module enable the system a 30% increase in frames per second (FPS) with a minimal reduction in recall of only 1% relative to the baseline (recall ≥ 95%), demonstrating the feasibility of plug-and-play inference acceleration for real-time fire and smoke surveillance systems."
 <!-- !END_SYNC_BLOCK -->
-
-
 
 # Introduction {#sec:introduction}
 <!-- !START_SYNC_BLOCK -->
@@ -28,11 +25,113 @@ abstract: "123123 hahaha sync block NEW XXX Efficient real-time fire and smoke d
 <!-- SYNC_TARGET_FILE: 01_Introduction.md-->
 <!-- BLOCK_ID: intro -->
 
-This is the content of the block that will be synchronized to the target file. You can include any markdown content here, such as headings, lists, code snippets, etc. When you update this block, the changes will be reflected in the specified target file.
+<!-- !Why matter -->
+Fires and wildfires, if not detected and controlled in their early stages,
+can quickly escalate --- especially under dry and windy conditions ---
+resulting in catastrophic consequences including loss of life, destruction
+of property, and damage to natural ecosystems. For instance, in 2017,
+urban fires and wildfires in California, USA, caused an estimated economic
+loss of 10 billion USD [@californiafire:online]. More recently, in 2025, a
+forest fire in Gyeongsang Province, South Korea, burned approximately
+90,000 acres, resulting in at least 27 fatalities and the evacuation of
+nearly 40,000 residents [@southkoreafire:online]. Automated early-stage
+fire and smoke detection systems are therefore critical for enabling timely
+intervention and minimizing damage.
 
-- **Hook:** Static surveillance cameras produce massive data redundancy. In typical operational environments, over 99% of frames consist of purely background information with no anomalies present.[[isabelleliu630.github](https://isabelleliu630.github.io/files/litedge_PPT.pdf)]
-- **Problem:** State-of-the-art (SOTA) deep learning models (the "BIG MODEL") are highly accurate but computationally heavy ($\sim$50ms per frame), making them prohibitive for real-time processing on bandwidth- and resource-constrained edge devices.[[pioneersecurity](https://www.pioneersecurity.com/edge-computing-in-surveillance/)]
-- **Proposal:** Rather than replacing the heavy model with a smaller, less accurate one, we propose a lightweight "gatekeeper" module to filter out irrelevant frames locally and only pass suspicious frames to the expert model.
+<!-- !Existing DL approaches -->
+
+Numerous fire and smoke detection methods leveraging deep learning (DL)
+have been proposed in recent years [@cheng2024visual; @gragnaniello2024fire].
+In practical deployments, these systems are commonly applied to CCTV video
+streams, where DL-based classifiers or object detectors perform inference
+on each frame individually. Although this frame-wise paradigm is
+straightforward to implement, it exhibits two key limitations. First, it relies exclusively on spatial information within individual
+frames, neglecting temporal cues --- such as motion --- inherent in video
+data. Second, in surveillance scenarios, particularly in indoor
+environments, consecutive frames often exhibit minimal variation due to
+static scene content. Applying a DL model indiscriminately to every frame
+under such conditions is computationally redundant, increasing processing
+cost and latency without contributing to detection performance. This
+inefficiency is further compounded by the well-known accuracy--efficiency
+trade-off in DL: more accurate models are generally more computationally
+intensive, and redundant frame processing amplifies these demands,
+rendering real-time performance difficult to achieve.
+
+<!-- !What we propose -->
+A common strategy to reduce inference cost is to substitute a heavy,
+high-accuracy DL model with a lighter alternative; however, this typically
+degrades detection reliability --- an unacceptable compromise in
+safety-critical applications such as fire and smoke detection. This study
+takes a complementary approach: rather than replacing the classifier, we
+introduce a lightweight skip-module that acts as a computational gate,
+selectively forwarding only frames with significant scene activity to the
+high-capacity classifier while bypassing static, non-informative frames.
+As illustrated in Fig. \ref{fig:pipeline}, the conventional pipeline
+processes every frame through the classifier, whereas the proposed pipeline
+inserts the skip-module upstream to conditionally suppress redundant
+inference calls.
+
+<!-- !Main Contributions -->
+In particular, our main contributions are summarized as follows:
+
+- **Skip-Module Mechanism:** We propose a lightweight skip-module that
+  exploits motion estimation via frame differencing to identify static
+  scenes and bypass DL inference on non-informative frames, reducing
+  computational cost without modifying the underlying classifier. The
+  module is designed as a plug-and-play component compatible with
+  existing fire and smoke detection pipelines. To identify the optimal
+  operating configuration, we further develop a systematic
+  hyperparameter optimization procedure that maximizes throughput while
+  preserving detection performance.
+
+- **Indoor Fire and Smoke Video Dataset:** We construct an annotated
+  dataset comprising 150 indoor fire and smoke videos --- including
+  fire, smoke, and background-only classes --- captured by static
+  surveillance cameras at resolutions from 720p to 1080p. The dataset
+  covers diverse environments such as warehouses, parking areas, and
+  offices under varying lighting conditions, providing a realistic
+  benchmark for evaluating detection systems in static surveillance
+  scenarios.
+
+- **Comprehensive System Evaluation:** We integrate the skip-module
+  with a high-capacity DL classifier (BIG model) and evaluate the
+  combined system on our video dataset against the baseline (BIG model
+  without skipping) and existing methods. Results demonstrate a 30%
+  improvement in FPS with a recall reduction of less than 1%, alongside
+  an ablation study that provides insights into system performance and
+  limitations.
+
+<!-- !Paper Organization -->
+The rest of this paper is organized as follows:
+[@sec:relatedWork] reviews existing fire and smoke detection methods for
+video and relevant motion detection techniques, contextualizing the need
+for efficient processing in static surveillance scenarios.
+[@sec:method] describes the proposed system architecture, the design of
+the skip-module, its integration with the BIG model, and the
+hyperparameter optimization strategy.
+[@sec:results] presents the experimental setup, evaluation metrics, and performance results on our large-scale indoor video dataset.
+Finally, [@sec:conclusion] summarizes the key findings and discusses
+limitations and future research directions.
+
+<!-- !END_SYNC_BLOCK -->
+
+# Related Work {#sec:relatedWork}
+<!-- !START_SYNC_BLOCK -->
+<!-- TARGET_PROJECT: G:\My Drive\1_PhD\Obsidian\Home\3. Writing\paperfire2 -->
+<!-- SYNC_TARGET_FILE: 02_aRelated_work.md-->
+<!-- BLOCK_ID: related -->
+
+### Fire/smoke detection in images
+
+Tempor quis exercitation irure ipsum aute consectetur qui nisi est. Velit incididunt consectetur irure eiusmod laboris mollit elit sit adipisicing. Et cupidatat non labore cupidatat dolor minim nulla culpa. Magna exercitation pariatur nulla dolore voluptate sit deserunt irure excepteur minim nulla. Dolor sint Lorem reprehenderit tempor eiusmod aute do ullamco quis in.
+
+### Fire/smoke detection in videos
+
+Tempor quis exercitation irure ipsum aute consectetur qui nisi est. Velit incididunt consectetur irure eiusmod laboris mollit elit sit adipisicing. Et cupidatat non labore cupidatat dolor minim nulla culpa. Magna exercitation pariatur nulla dolore voluptate sit deserunt irure excepteur minim nulla. Dolor sint Lorem reprehenderit tempor eiusmod aute do ullamco quis in.
+
+### Motion detection using background subtraction
+
+Enim nisi mollit esse id commodo Lorem magna eu excepteur ut sunt magna sunt id. Enim laboris id est tempor Lorem deserunt eu. Ipsum cupidatat laboris anim sunt. Mollit anim id est voluptate. Laborum dolor velit dolor consectetur deserunt dolor ea cillum id. Proident elit id labore ea exercitation enim ex anim.
 
 <!-- !END_SYNC_BLOCK -->
 
