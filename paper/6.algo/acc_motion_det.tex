@@ -1,65 +1,64 @@
 \noindent
-Let $F_t$ denote the grayscale image at time $t$, and $\mathbf{M}_t \in [0, M_{\max}]$
+Let $F_t$ denote the grayscale frame at time $t$, converted from the
+downsampled input $\tilde{f}_t$, and $\mathbf{K}_t \in [0, K_{\max}]$
 the per-pixel \textit{accumulated motion mask}.
-$\symbf{\Delta}_t$ is the \textit{instantaneous delta}, a binary map weighted
-by $\alpha$ that activates at pixels where the inter-frame intensity change exceeds
-sensitivity threshold $\tau_d$.
-$\mathbf{M}_t$ grows by $\alpha$ upon detection and decays by $\delta$ each frame,
-bounded at $M_{\max}$ to prevent indefinite accumulation of stale evidence.
-A pixel is declared active motion only when $\mathbf{M}_t \geq \tau_m$,
+Upon detection, $\mathbf{K}_t$ is incremented by $\omega$ and decays
+by $\delta$ each frame, bounded at $K_{\max}$ to prevent indefinite
+accumulation of stale evidence.
+A pixel is declared active only when $\mathbf{K}_t \geq \tau_m$,
 suppressing transient noise and single-frame flicker.
+The binary output $\mathbf{M}_t \in \{0, 255\}$ is consistent with
+the interface expected by the skip module $\mathcal{S}$.
 
 \begin{algorithm}[ht]
 \caption{Accumulation Motion Detector (AccMotionDet)}
 \label{alg:acc_motion_det}
 \begin{algorithmic}[1]
 
-\Require Frames $F_t, F_{t-1}$; accumulated mask $\mathbf{M}_{t-1}$
-\Require $\tau_d$: diff sensitivity,\; $\alpha$: motion increment,\;
-         $\tau_m$: activation threshold,\; $M_{\max}$: accumulation cap,\;
+\Require Downsampled frames $\tilde{f}_t,\, f_{\text{prev}}$;
+         accumulated mask $\mathbf{K}_{t-1}$ (initialized to $\mathbf{0}$)
+\Require $\tau_d$: pixel difference sensitivity,\;
+         $\omega$: motion increment,\;
+         $\tau_m$: activation threshold,\;
+         $K_{\max}$: accumulation cap,\;
          $\delta$: decay rate
-\Ensure  $\mathbf{C}_t \in \{0, 255\}$: binary motion mask;\;
-         $\mathbf{M}_t$: updated accumulated mask
+\Ensure $\mathbf{M}_t \in \{0, 255\}$: binary foreground mask;\;
+        $\mathbf{K}_t$: updated accumulated mask
 
 \Statex
 
-\If{$F_{t-1} = \varnothing$}
-    \State $F_{t-1} \leftarrow F_t$,\quad $\mathbf{M}_{t-1} \leftarrow \mathbf{0}$
-    \State \Return $\mathbf{0}$
-\EndIf
+\State Convert $\tilde{f}_t$ and $f_{\text{prev}}$ to grayscale: $F_t,\, F_{\text{prev}}$
 
 \Statex
 
-\State $\mathbf{D}_t \leftarrow \left| F_t - F_{t-1} \right|$
+\State $\mathbf{D}_t \leftarrow \left| F_t - F_{\text{prev}} \right|$
 \Comment{Absolute inter-frame difference}
 
 \State $\symbf{\Delta}_t(i,j) \leftarrow
-    \begin{cases}
-        \alpha & \mathbf{D}_t(i,j) > \tau_d \\
-        0      & \text{otherwise}
-    \end{cases}$
-\Comment{Instantaneous delta}
+\begin{cases}
+\omega & \mathbf{D}_t(i,j) > \tau_d \\
+0      & \text{otherwise}
+\end{cases}$
+\Comment{Instantaneous increment map}
 
 \Statex
 
-\State $\mathbf{A}_t \leftarrow \min\!\left(\mathbf{M}_{t-1} + \symbf{\Delta}_t,\; M_{\max}\right)$
+\State $\mathbf{K}_t \leftarrow \min\!\left(\mathbf{K}_{t-1} + \symbf{\Delta}_t,\; K_{\max}\right)$
 \Comment{Accumulate and cap}
 
-\State $\mathbf{M}_t \leftarrow \max\!\left(\mathbf{A}_t - \delta,\; 0\right)$
+\State $\mathbf{K}_t \leftarrow \max\!\left(\mathbf{K}_t - \delta,\; 0\right)$
 \Comment{Temporal decay}
 
 \Statex
 
-\State $\mathbf{C}_t(i,j) \leftarrow
-    \begin{cases}
-        255 & \mathbf{M}_t(i,j) \geq \tau_m \\
-        0   & \text{otherwise}
-    \end{cases}$
+\State $\mathbf{M}_t(i,j) \leftarrow
+\begin{cases}
+255 & \mathbf{K}_t(i,j) \geq \tau_m \\
+0   & \text{otherwise}
+\end{cases}$
 \Comment{Threshold to binary mask}
 
-\State $F_{t-1} \leftarrow F_t$
-
-\State \Return $\mathbf{C}_t,\; \mathbf{M}_t$
+\State \Return $\mathbf{M}_t,\; \mathbf{K}_t$
 
 \end{algorithmic}
 \end{algorithm}

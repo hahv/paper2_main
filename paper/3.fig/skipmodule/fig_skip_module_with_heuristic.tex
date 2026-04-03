@@ -1,0 +1,287 @@
+% !remember to compile with: pdflatex or lualatex
+\documentclass[tikz,border=4mm]{standalone}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usetikzlibrary{calc}
+\usetikzlibrary{shapes.geometric, arrows, arrows.meta}
+\usetikzlibrary{math}
+\usetikzlibrary{positioning}
+\usetikzlibrary{fit, backgrounds}
+
+%=================================================================
+% NODE STYLES
+%=================================================================
+\tikzset{
+	procstep/.style={
+		rectangle, draw=black, fill=white, rounded corners,
+		align=center, minimum width=3.0cm, minimum height=1.8cm,
+		anchor=center, text=black, font=\normalsize
+	},
+	inputframe/.style={
+		rectangle, draw=gray!60, fill=gray!10, rounded corners,
+		align=center, minimum width=2.6cm, minimum height=0.9cm,
+		anchor=center, text=black, font=\normalsize
+	},
+	heuristic/.style={
+		rectangle, draw=orange!70!black, fill=orange!8,
+		rounded corners, align=center,
+		minimum width=3.6cm, minimum height=2.5cm,
+		anchor=center, text=black, font=\small, line width=1.5pt
+	},
+	passbox/.style={
+		rectangle, draw=green!50!black, fill=green!55!black,
+		rounded corners, align=center, text=white,
+		minimum width=3.0cm, minimum height=1.0cm,
+		line width=2pt, anchor=center, font=\normalsize\bfseries
+	},
+	skipbox/.style={
+		rectangle, draw=green!40!black, fill=green!55!black,
+		rounded corners, align=center, text=white,
+		minimum width=3.0cm, minimum height=1.0cm,
+		line width=2pt, anchor=center, font=\normalsize\bfseries
+	},
+	decisionnode/.style={
+		diamond, draw=black, fill=white, align=center,
+		aspect=2.0, anchor=center, font=\small
+	},
+	procarrow/.style={black, -latex, line width=0.08cm},
+	dasharrow/.style={blue!60, dashed, -latex, line width=0.07cm},
+	annot/.style={font=\small\itshape, text=gray!70!black},
+}
+
+\tikzmath{
+	% X positions (left → right)
+	\frameX    = -17.0;
+	\gridX     = -11.0;
+	\diffX     =  -7.0;
+	\motX      =  -2.0;
+	\actX      =   3.5;
+	\heurX     =   8.5;
+	\hdecX     =  13.5;
+	\outX      =  18.5;
+	% Y positions
+	\mainY     =  0.0;
+	\fireY     =  3.5;
+	\smokeY    = -3.5;
+	\skipMotY  = -6.0;
+	\passOutY  =  3.5;
+	\skipHeurY = -3.5;
+	% helpers — NOTE: letters only, no digits in variable names
+	\forkX     =  \actX + 2.0;
+	\apprNX    =  \motX + 2.2;
+	\apprNY    =  2.8;
+	\apprOneX  =  -18.5;
+	\apprOneY  =  -7.0;
+}
+
+% Uncomment to show coordinate grid for layout tuning
+%\def\COORDENABLED{1}
+
+\begin{document}
+	\begin{tikzpicture}
+		\tikzstyle{every node}=[font=\large]
+
+		%=================================================================
+		% DEBUG: coordinate grid
+		%=================================================================
+		\ifdefined\COORDENABLED
+		\coordinate (O) at (0,0);
+		\draw[step=10mm,gray,very thin] (-18,-9) grid (22,8);
+		\draw[->] (-18.5,0) -- (22.5,0) node[right] {$x$};
+		\draw[->] (0,-9.5)  -- (0,8.5)  node[above] {$y$};
+		\foreach \x in {-18,-16,...,22}
+		\draw (\x,-1mm) -- (\x,1mm) node[anchor=north] {$\x$};
+		\foreach \y in {-8,-6,...,8}
+		\draw (-1mm,\y) -- (1mm,\y) node[anchor=east] {$\y$};
+		\fi
+
+		%=================================================================
+		% (1) INPUT FRAMES
+		%=================================================================
+		\node[inputframe]
+		(frameT) at (\frameX, 1.5)
+		{Frame$(t)$};
+
+		\node[inputframe]
+		(frameTm1) at (\frameX, -1.5)
+		{Frame$(t{-}1)$};
+
+		%=================================================================
+		% (2) GRID DIVISION
+		%=================================================================
+		\node[procstep]
+		(gridDiv) at (\gridX, \mainY)
+		{\textbf{Divide into}\\[2pt]
+			$N \times N$ \textbf{Blocks}\\
+			(Grid)};
+
+		%=================================================================
+		% (3) PIXEL DIFFERENCE
+		%=================================================================
+		\node[procstep]
+		(pixDiff) at (\diffX, \mainY)
+		{\textbf{Per-Block}\\[2pt]
+			Pixel Difference\\
+			(Frame Subtraction)};
+
+		%=================================================================
+		% (4) MOTION THRESHOLD DECISION
+		%=================================================================
+		\node[decisionnode]
+		(motDec) at (\motX, \mainY)
+		{Any Block\\Exceeds\\Motion\\Threshold?};
+
+		%=================================================================
+		% APPROACH 1 ENCAPSULATION  (dashed blue box)
+		%=================================================================
+		\begin{scope}[on background layer]
+			\node[
+			draw=blue!70, dashed, line width=2pt,
+			fill=blue!3, rounded corners=8pt, inner sep=14pt,
+			fit=(gridDiv)(pixDiff)(motDec),
+			label={[font=\small\bfseries, text=blue!70, inner sep=5pt]
+				above:\textbf{Approach 1} \textemdash\ Naive Block Motion}
+			] (appr1box) {};
+		\end{scope}
+
+		%=================================================================
+		% (6) ACTIVE BLOCKS — Approach 2 entry
+		%=================================================================
+		\node[procstep, minimum width=3.2cm, minimum height=2.0cm]
+		(actBlocks) at (\actX, \mainY)
+		{\textbf{Active Block(s)}\\[2pt]
+			Found $\to$ Analyze\\Each Block};
+
+		%=================================================================
+		% (7a) FIRE HEURISTIC
+		%=================================================================
+		\node[heuristic]
+		(fireHeur) at (\heurX, \fireY)
+		{\textbf{Fire Heuristic}\\[5pt]
+			$\bullet$ High Red Channel\\[2pt]
+			$\bullet$ Warm Color Signature};
+
+		%=================================================================
+		% (7b) SMOKE HEURISTIC
+		%=================================================================
+		\node[heuristic]
+		(smokeHeur) at (\heurX, \smokeY)
+		{\textbf{Smoke Heuristic}\\[5pt]
+			$\bullet$ Low Saturation\\
+			{\footnotesize (Grayish Color)}\\[2pt]
+			$\bullet$ Texture Consistency\\
+			{\footnotesize over $T$ frames}};
+
+		%=================================================================
+		% (8) HEURISTIC SIGNAL DECISION
+		%=================================================================
+		\node[decisionnode]
+		(heurDec) at (\hdecX, \mainY)
+		{Any\\Heuristic\\Signal\\Triggered?};
+
+		%=================================================================
+		% (9a) PASS
+		%=================================================================
+		\node[passbox]
+		(passOut) at (\outX, \passOutY)
+		{PASS\\{\small $\to$ BIG MODEL}};
+
+		%=================================================================
+		% (9b) SKIP — no heuristic signal
+		%=================================================================
+		\node[skipbox]
+		(skipHeur) at (\outX, \skipHeurY)
+		{SKIP $\checkmark$\\{\small Next Frame}};
+
+		%=================================================================
+		% APPROACH 2 EXTENSION BOX  (dashed orange)
+		%=================================================================
+		\begin{scope}[on background layer]
+			\node[
+			draw=orange!70!black, dashed, line width=2pt,
+			fill=orange!3, rounded corners=8pt, inner sep=14pt,
+			fit=(actBlocks)(fireHeur)(smokeHeur)(heurDec),
+			label={[font=\small\bfseries, text=orange!80!black, inner sep=5pt]
+				below:\textbf{Approach 2} Extension
+				\textemdash\ Color \& Texture Heuristics}
+			] (appr2box) {};
+		\end{scope}
+
+		%=================================================================
+		% ARROWS: input frames → grid  (merge into single trunk)
+		%=================================================================
+		\coordinate (mergePoint) at (\gridX - 2.2, \mainY);
+		\draw[procarrow] (frameT.east)   -| node[above, pos=0.25, font=\small\bfseries, text=orange!80!black]{Scale down} (mergePoint) --(gridDiv.west);
+		\draw[procarrow] (frameTm1.east) -| node[below, pos=0.25,  font=\small\bfseries, text=orange!80!black]{Scale down} (mergePoint) --(gridDiv.west);
+
+		%=================================================================
+		% ARROWS: main horizontal spine
+		%=================================================================
+		\draw[procarrow] (gridDiv.east) -- (pixDiff.west);
+		\draw[procarrow] (pixDiff.east) -- (motDec.west);
+
+		% YES → Active Blocks
+		\draw[procarrow]
+		(motDec.east) --
+		node[above, font=\small\bfseries, text=orange!80!black]{Yes}
+		(actBlocks.west);
+
+		% NO → SKIP
+		\draw[procarrow]
+		(motDec.south) -- node[left, font=\small\bfseries, pos=0.4]{No} ++(0, -5.0)-|(skipHeur.south);
+
+		%=================================================================
+		% ARROWS: Active Blocks → heuristics  (fork)
+		%=================================================================
+		\coordinate (forkPt) at (\forkX, \mainY);
+		\draw[procarrow] (actBlocks.east) -- (forkPt);
+		\draw[procarrow] (forkPt) |- (fireHeur.west);
+		\draw[procarrow] (forkPt) |- (smokeHeur.west);
+
+		%=================================================================
+		% ARROWS: heuristics → heuristic decision  (join)
+		%=================================================================
+		\draw[procarrow] (fireHeur.east)  -| (heurDec.west);
+		\draw[procarrow] (smokeHeur.east) -| (heurDec.west);
+
+		%=================================================================
+		% ARROWS: heuristic decision → outputs
+		%=================================================================
+		% YES → PASS  (up-right)
+		\draw[procarrow]
+		(heurDec.north) -- ++(0, 0.5) -|
+		node[above, font=\small\bfseries, text=green!40!black, pos=0.25]{Yes}
+		(passOut.south);
+
+		% NO → SKIP  (down)
+		\draw[procarrow]
+		(heurDec.south) -- ++(0, -0.5) -|
+		node[below, font=\small\bfseries, text=green!40!black, pos=0.25]{No}
+		(skipHeur.north);
+
+
+        \draw[procarrow]
+		(motDec.north) -- node[left, font=\small\bfseries]{Yes} ++(0, 4.5)-|(passOut.north);
+
+		%=================================================================
+		% LEGEND BOX
+		%=================================================================
+		\node[draw=gray!50, fill=gray!5, rounded corners,
+		align=left, font=\small, anchor=north west, inner sep=9pt]
+		at (\apprOneX, \apprOneY)
+		{%
+			\textbf{Legend:}\\[4pt]
+			\textcolor{blue!70}{\textbf{- - - Approach 1}}
+			(Naive Block Motion):\quad
+			Grid $\to$ Pixel Diff $\to$ Motion Check
+			$\Rightarrow$ any motion = \textbf{PASS} directly to BIG MODEL\\[4pt]
+			\textcolor{orange!80!black}{\textbf{- - - Approach 2}}
+			(Proposed):\quad
+			Approach~1 \emph{plus} Color \& Texture Heuristics
+			$\Rightarrow$ motion alone insufficient; heuristics decide
+			\textbf{PASS} or \textbf{SKIP}
+		};
+
+	\end{tikzpicture}
+\end{document}

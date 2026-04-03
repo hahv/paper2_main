@@ -1,60 +1,42 @@
-\begin{algorithm}[H]
-\label{alg:skipmodule}
-\caption{Frame Inference with Motion-based Skipping}
-\KwIn{Input Frames}
-\KwOut{SKIP\_frame, ROI\_rect}
+\begin{algorithm}[ht]
+	\caption{Skip Module $\mathcal{S}$: Motion-Based Frame Gating}
+	\label{alg:skipmodule}
+	\begin{algorithmic}[1]
 
-%--------------------%
-\textbf{Step 1: Pre-process Frame} \\
-\Indp
-Scale frame down by \textcolor{red}{scale\_factor} (e.g., 50\%) \\
-Pad frame to be divisible by \textcolor{red}{block\_size} (64) \\
-\Indm
+		\Require Video stream $\{f_1, f_2, \dots\}$, motion detector $\mathcal{D}$,
+		scale factor $\alpha$, block size $B$, block active threshold $\tau$
+		\Ensure Skip decisions $\{s_1, s_2, \dots\}$, where $s_t \in \{0,1\}$
 
-%--------------------%
-\textbf{Step 2: Detect Motion} \\
-\Indp
-Compute foreground mask using \textbf{FrameDifference} \\
-Divide mask into grid of blocks (\textcolor{red}{block\_size}) \\
-Identify active blocks where \#foreground pixels $>$ \textcolor{red}{block\_active\_threshold} (e.g., 0.05) \\
-\Indm
+		\State $f_{\text{prev}} \leftarrow \text{null}$ \Comment{Initialize previous frame}
 
-%--------------------%
-\textbf{Decision: Motion Activity} \\
+		\For{each incoming frame $f_t$}
 
-\If{\% active blocks == 0}{
-    Set \textbf{SKIP\_frame} $\leftarrow$ True \\
-    Set \textbf{ROI\_rect} $\leftarrow$ None \\
-    \textbf{Return:} (SKIP\_frame, ROI\_rect)
-} \ElseIf{\% active blocks >= frame\_active\_threshold (e.g., 0.5)}{
-    Set \textbf{SKIP\_frame} $\leftarrow$ False \\
-    Set \textbf{ROI\_rect} $\leftarrow$ Whole\_Frame \\
-    \textbf{Return:} (SKIP\_frame, ROI\_rect)
-}
-\Else{
-    %----- YES PATH -----
-    \textbf{YES: Motion detected (not excessive)} \\
-    \Indp
-    \textbf{--Classify Motion--} \\
-    Extract active blocks from scaled frame \\
-    Feed active blocks to \textbf{TINY model} \\
-    Get predictions (fire/smoke vs not) \\[3pt]
+		\Statex \hspace{1.5em} \textbf{Step 1: Pre-process}
+		\State Downsample $f_t$ by $\alpha$ to obtain $\tilde{f}_t$
+		\State Let $B_s \leftarrow B \cdot \alpha$ \Comment{Effective block size on downsampled frame}
+		\State Pad $\tilde{f}_t$ to be divisible by $B_s$
 
-    \textbf{--Define ROI--} \\
-    Identify fire/smoke blocks using \textcolor{red}{firesmoke\_classification\_threshold} (e.g., 0.5) \\
-    \If{no fire/smoke blocks}{
-        Set \textbf{SKIP\_frame} $\leftarrow$ True \\
-        Set \textbf{ROI\_rect} $\leftarrow$ None \\
-        \textbf{Return:} (SKIP\_frame, ROI\_rect) \\[3pt]
-    }
-    Set \textbf{SKIP\_frame} $\leftarrow$ False \\
-    Compute bounding box around detected fire/smoke blocks \\
-    Expand bounding box if area $<$ \textcolor{red}{min\_ROI\_of\_frame\_size} (e.g., 0.7) \\
-    Set \textbf{ROI\_rect} $\leftarrow$ expanded bounding box \\
-    \Indm
-}
+		\Statex \hspace{1.5em} \textbf{Step 2: Compute Foreground Mask}
+		\If{$f_{\text{prev}} = \text{null}$} \Comment{No previous frame on first iteration}
+		\State $s_t \leftarrow 1$ \Comment{Run inference on first frame}
+		\State $f_{\text{prev}} \leftarrow \tilde{f}_t$
+		\State \textbf{continue}
+		\EndIf
+		\State $\mathbf{M}_t \leftarrow \mathcal{D}(\tilde{f}_t,\, f_{\text{prev}})$ \Comment{$\mathcal{D}$: e.g., FrameDiff or AccMotionDet}
+		\State Partition $\mathbf{M}_t$ into a grid of non-overlapping blocks of size $B_s$
+		\State Mark a block as \textit{active} if its foreground pixel ratio $> \tau$
 
-%--------------------%
-\textbf{Return:} (SKIP\_frame, ROI\_rect) \\[3pt]
+		\Statex \hspace{1.5em} \textbf{Step 3: Gating Decision}
+		\If{any active block exists}
+		\State $s_t \leftarrow 1$ \Comment{Motion detected, run DL inference}
+		\Else
+		\State $s_t \leftarrow 0$ \Comment{No motion, skip inference}
+		\EndIf
 
+		\State $f_{\text{prev}} \leftarrow \tilde{f}_t$ \Comment{Update previous frame for next iteration}
+		\State \textbf{yield} $s_t$
+
+		\EndFor
+
+	\end{algorithmic}
 \end{algorithm}

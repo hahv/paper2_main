@@ -38,7 +38,7 @@
   \KOMAoptions{parskip=half}}
 \makeatother
 \usepackage{xcolor}
-\usepackage[a4paper,margin=1cm]{geometry}
+\usepackage[a4paper,margin=4cm]{geometry}
 \usepackage{longtable,booktabs,array}
 \usepackage{calc} % for calculating minipage widths
 % Correct order of tables after \paragraph or \subparagraph
@@ -153,13 +153,13 @@
 \title{Efficient Real-Time Fire Surveillance: A Lightweight
 Motion-Heuristic Skip Module for Accelerated Inference}
 \author{Hoang Van-Ha, Jong Weon Lee, Park Chun-Su}
-\date{Apr 2026}
+\date{2026.04.03}
 
 \begin{document}
 \maketitle
 \begin{abstract}
-123 Conventional deep learning (DL)-based fire and smoke detection
-systems process every frame of a video stream through a computationally
+Conventional deep learning (DL)-based fire and smoke detection systems
+process every frame of a video stream through a computationally
 intensive model to classify the presence of fire or smoke. However, in
 surveillance scenarios --- particularly indoor environments --- video
 streams frequently contain static, background-only frames devoid of
@@ -304,8 +304,7 @@ require training the gate jointly with the classifier, whereas your
 skip-module is training-free and plug-and-play for safety-critical fire
 detection
 
-\subsubsection{Motion detection using background
-subtraction}\label{motion-detection-using-background-subtraction}
+\subsubsection{Motion Detection}\label{motion-detection}
 
 Cover the two classical methods your skip-module builds upon:
 
@@ -397,44 +396,395 @@ reliability --- as described in the following section.
 
 \section{The proposed method}\label{sec:method}
 
-\begin{itemize}
-\tightlist
-\item
-  \textbf{System Architecture:} Read Frame \(\rightarrow\) Skip Module
-  \(\rightarrow\) (If active) BIG MODEL \(\rightarrow\) Alarm.
-\item
-  \textbf{Approach 1:} Naive Block Motion Analysis (Baseline filter).
-\item
-  \textbf{Approach 2 (Proposed):} Block Motion combined with Color and
-  Texture Heuristics designed specifically for fire and smoke.
-\item
-  \textbf{The ``Safety'' Constraint:} The module is designed with a
-  strict priority on near-zero False Negatives (maximizing Recall).The
-  module is designed with a strict priority on near-zero False Negatives
-  (maximizing Recall).fsdfsdfsdfljl32432 fdsljsdjlfsdlfsdlfsdlf
-  ljfsdjfsdlfsdfsdlfsdfsdjf
-\end{itemize}
-
-\textbf{Image placeholders for diagrams}:
-
-\begin{verbatim}
-textSystem Architecture:
-[ASCII Workflow Diagram #1]
-
-Approach 1/2:
-[ASCII Block Diagrams #2]
-[ASCII Motion Grid #4]
-\end{verbatim}
+\subsection{System Overview}\label{system-overview}
 
 \input{./3.fig/fig_pipeline.tex}
 
+\subsection{System Overview}\label{system-overview-1}
+
+The proposed system is a fire and smoke detection pipeline that
+processes a continuous video stream and classifies each frame as either
+containing fire/smoke or not. The core idea is to extend the
+conventional pipeline with a lightweight \textbf{skip module}
+\(\mathcal{S}\), which acts as a gating mechanism to suppress
+unnecessary inferences on non-informative frames, thereby improving
+computational efficiency. Formally, let \(f_t\) denote the video frame
+at time step \(t\), \(\mathcal{M}\) the DL classifier, and
+\(\hat{y}_t \in \{0, 1\}\) the predicted label for \(f_t\).
+
+\textbf{Baseline system.} Each frame is directly passed to the
+classifier:
+
+\[\hat{y}_t = \mathcal{M}(f_t)\]
+
+\textbf{Proposed system.} The skip module \(\mathcal{S}\) first
+evaluates \(f_t\) using inter-frame motion cues or other information and
+outputs a binary gate decision \(s_t\). The full system output becomes:
+
+\[\hat{y}_t = \begin{cases} \mathcal{M}(f_t) & \text{if } s_t = 1 \quad
+\text{(run inference)} \\ 0 & \text{if } s_t = 0 \quad \text{(skip, label as
+negative)} \end{cases}\]
+
+In this work, \(\mathcal{S}\) derives \(s_t\) from the motion estimated
+between \(f_t\) and the previous frame \(f_{t-1}\). Frames with little
+or no motion are unlikely to contain fire or smoke, and are therefore
+skipped without invoking \(\mathcal{M}\). The model \(\mathcal{M}\) is
+typically a high-capacity, accurate classifier but is computationally
+expensive. The skip module \(\mathcal{S}\) is intentionally lightweight,
+adding negligible overhead. The goal of \(\mathcal{S}\) is to skip as
+many true-negative frames as possible while minimizing the risk of
+skipping true-positive frames, thus improving overall system throughput
+(FPS) while maintaining high accuracy for fire/smoke detection.
+
+\subsection{Skip Module Design}\label{skip-module-design}
+
 \input{./3.fig/fig_skipmodule.tex}
+
+\input{6.algo/skip_module.tex}
+
+As noted above, \(\mathcal{S}\) can leverage any available information
+--- such as motion, color, or texture --- to compute the skip decision
+\(s_t\). In this work, we focus on motion information derived from
+consecutive frames as the primary cue. Specifically, we design and
+evaluate two motion-based instantiations of \(\mathcal{S}\): (1) a frame
+differencing method, and (2) a motion accumulation method. Both
+approaches are selected for their simplicity and low computational cost,
+making them well-suited for real-time deployment. The overall workflow
+of \(\mathcal{S}\) is illustrated in
+Figure\textasciitilde{}\ref{fig:skipmodule} and the detailed algorithms
+are described in the Algorithm\textasciitilde{}\ref{alg:skipmodule}.
+
+\subsubsection{FrameDiffDet --- Naive Motion
+Detection}\label{framediffdet-naive-motion-detection}
 
 \input{6.algo/frame_diff_det.tex}
 
+\subsubsection{AccMotionDet --- Motion Detection with
+Accumulation}\label{accmotiondet-motion-detection-with-accumulation}
+
+\input{6.algo/acc_motion_det.tex}
+
+\subsection{Skip Module Hyperparameter
+Optimization}\label{sec:hyperparam}
+
+\input{./6.algo/hyperparam_algo.tex}
+
+The skip module \(\mathcal{S}\) contains several hyperparameters (e.g.,
+motion threshold, accumulation window size) that can significantly
+impact the performance of the overall system. To identify the optimal
+configuration, we employ a grid search based hyperparameter optimization
+procedure on a validation set \(D_{\text{val}}\) derived from our video
+dataset with respect to several system-wide metrics defined in
+Section\textasciitilde{}\ref{sec:metrics}. More specifically, to select
+the optimal hyperparameters for the proposed skip module, we employ a
+constrained optimization procedure on the validation set
+\(D_{\text{val}}\). Let \(R_{\text{base}}\),
+\(\mathrm{FAR}_{\text{base}}\), and \(T_{\text{DL}}\) denote the recall,
+false alarm rate, and mean per-frame inference time of the baseline
+pipeline (without skipping), respectively. For each candidate parameter
+set \(\theta \in \Theta\) obtained by grid search, we evaluate the full
+pipeline
+\(\text{Read} \rightarrow \mathcal{S}(\theta) \rightarrow [\mathcal{M}]\)
+and compute four metrics: recall \(R(\theta)\), false alarm rate
+\(\mathrm{FAR}(\theta)\), skip rate \(S_r(\theta)\), and mean per-frame
+skip module time \(T_{\text{skip}}(\theta)\).
+
+The skip rate \(S_r(\theta)\) is computed on \(D_{\text{val}}\)
+following the definition in Section\textasciitilde{}\ref{sec:metrics},
+with \(N_{\text{neg}}\) instantiated as
+\(N_{\text{neg}}^{\text{val}} = |\{f_i \in D_{\text{val}} : y_i = 0\}|\),
+which is fixed by the validation set and independent of \(\theta\).
+
+The mean per-frame inference times are defined as
+
+\[ T_{\text{DL}} = \frac{1}{|D_{\text{val}}|} \sum_{i=1}^{|D_{\text{val}}|}
+t_{\text{DL}}(f_i), \qquad T_{\text{skip}}(\theta) = \frac{1}{|D_{\text{val}}|}
+\sum_{i=1}^{|D_{\text{val}}|} t_{\text{skip}}(f_i, \theta), \]
+
+where \(f_i\) denotes the \(i\)-th frame in \(D_{\text{val}}\), and both
+averages are taken over all frames to reflect the runtime cost on a
+typical video stream.
+
+\textbf{Feasibility constraints.} A candidate \(\theta\) is considered
+feasible only if it satisfies two hard constraints:
+
+\[ R(\theta) \geq R_{\text{base}} - \delta_R, \qquad T_{\text{skip}}(\theta)
+\leq \beta \cdot T_{\text{DL}}, \]
+
+where \(\delta_R > 0\) is the maximum allowable absolute recall drop,
+and \(\beta
+\in (0, 1)\) bounds the skip module overhead as a fraction of one full
+DL inference. For example, setting \(\delta_R = 0.01\) and
+\(\beta = 0.10\) means the system tolerates at most a 1\% recall drop
+and requires the skip module to run within 10\% of the cost of a single
+DL inference.
+
+\textbf{Scoring feasible candidates.} To rank feasible candidates, we
+define two normalized scoring terms. The false alarm reduction term is
+
+\[ F(\theta) = \max\!\left(0,\; \frac{\mathrm{FAR}_{\text{base}} -
+\mathrm{FAR}(\theta)} {\mathrm{FAR}_{\text{base}}}\right), \]
+
+which measures the relative FAR improvement with respect to the
+baseline. The recall retention term is
+
+\[ \rho(\theta) = 1 - \frac{R_{\text{base}} - R(\theta)}{\delta_R}, \]
+
+which equals \(1\) when recall matches the baseline and \(0\) when
+recall reaches the lowest acceptable level
+\(R_{\text{base}} - \delta_R\). Both terms are bounded in \([0, 1]\)
+over the feasible region, making them directly comparable to
+\(S(\theta)\) in the weighted score.
+
+\textbf{Optimal selection.} The optimal parameter set \(\theta^*\) is
+selected as
+
+\[ \theta^* = \arg\max_{\theta \in \Theta_{\text{feasible}}} \left[ w_S\,
+S(\theta) + w_F\, F(\theta) + w_R\, \rho(\theta) \right], \]
+
+where \(\Theta_{\text{feasible}} = \{\theta \in \Theta : R(\theta) \geq
+R_{\text{base}} - \delta_R \text{ and } T_{\text{skip}}(\theta) \leq \beta \cdot
+T_{\text{DL}}\}\), and the nonnegative weights satisfy
+\(w_S + w_F + w_R = 1\).
+
+\textbf{Theoretical justification.} The skip module \(\mathcal{S}\) acts
+as a conservative gate: skipped frames are labeled negative directly,
+while passed frames are processed by the same downstream detector
+\(\mathcal{M}\) as in the baseline. Therefore, every false alarm
+produced by the skip-enabled system is also present in the baseline,
+implying \(\mathrm{FAR}(\theta) \leq
+\mathrm{FAR}_{\text{base}}\). The primary safety risk is recall
+degradation caused by incorrectly skipped fire/smoke frames, which
+motivates enforcing the recall constraint as a hard gate prior to any
+candidate ranking.
+
+\section{Experiments and Results}\label{sec:results}
+
+\subsection{Dataset}\label{dataset}
+
+\subsubsection{Video Datasets for Hyperparameter Tuning and System
+Evaluation}\label{video-datasets-for-hyperparameter-tuning-and-system-evaluation}
+
+\input{./3.fig/fig_videodb.tex}
+
+ \input{./4.table/tb_ufireindoor.tex}
+
+Publicly available video datasets for fire and smoke detection using
+static cameras remain scarce. While several existing benchmarks address
+this detection task --- including FireNet
+\citeproc{ref-jadon2019firenet}{{[}5{]}}, Firesense
+\citeproc{ref-Firesens4:online}{{[}6{]}}, FiSmo
+\citeproc{ref-cazzolato2017fismo}{{[}7{]}}, and FURG
+\citeproc{ref-steffens2015unconstrained}{{[}8{]}} --- these were
+recorded with moving cameras and are therefore unsuitable for static
+surveillance scenarios. Static-camera datasets such as DFire
+\citeproc{ref-dfiredataset}{{[}9{]}}, VisiFire Bilkent
+\citeproc{ref-VisiFireBilkent:online}{{[}10{]}}, KMU Fire and Smoke
+\citeproc{ref-KMUFireSmokeDataset}{{[}11{]}}, Mivia Fire and Smoke
+\citeproc{ref-foggia2015real}{{[}12{]}}, and USTC Smoke
+\citeproc{ref-lin2017smoke}{{[}13{]}} do exist; however, they
+collectively suffer from several limitations: a predominance of outdoor
+scenes, a small number of video samples, low spatial resolution, and
+insufficient diversity in fire/smoke appearances and environmental
+conditions.
+
+To address these deficiencies, we constructed a dedicated static indoor
+video dataset by aggregating clips from multiple heterogeneous sources.
+Fire and smoke samples were sourced from the Korea AI Fire Dataset
+\citeproc{ref-AIHub87:online}{{[}14{]}}, the USTC Smoke Dataset
+\citeproc{ref-lin2017smoke}{{[}13{]}}, and the VSD3K Dataset
+\citeproc{ref-huang2022fire}{{[}15{]}}, supplemented by videos collected
+from open online platforms (Pexels, Pixabay, and YouTube).
+Non-fire/smoke (negative) samples were compiled from self-recorded
+footage captured by real CCTV cameras in indoor environments (e.g.,
+parking areas), along with the Safe \& Unsafe Behavior in Workplaces
+dataset \citeproc{ref-onal2024video}{{[}16{]}}, the Indoor Action
+dataset \citeproc{ref-deniz2024optimized}{{[}17{]}}, the MPII Cooking 2
+Dataset \citeproc{ref-rohrbach2016recognizing}{{[}18{]}}, and the
+WiseNet dataset \citeproc{ref-marroquin2019wisenet}{{[}19{]}}.
+
+Due to the lack of public high-resolution datasets specifically designed
+for static surveillance cameras, we constructed a custom dataset
+consisting of 150 HD videos (1920\$\times\$1080 resolution). The dataset
+is strictly balanced into three categories: Fire (50), Smoke (50), and
+Safe/Neutral (50). To ensure robust evaluation, the videos capture
+diverse environments, including forests, warehouses, and urban settings
+under varying lighting conditions.
+
+The 150 videos were randomly split into Training/Validation (60\%, n=90:
+30 Fire, 30 Smoke, 30 Safe) for hyperparameter tuning and hyperparameter
+selection, and Test (40\%, n=60: 20 per class) for unbiased final
+performance evaluation. Stratified sampling ensured balance across
+classes and environments.
+
+\subsection{Evaluation Metrics}\label{sec:metrics}
+
+Performance is evaluated under both \textbf{frame-level} and
+\textbf{video-level} protocols, which are commonly used in fire and
+smoke video analysis \citeproc{ref-dfiredataset}{{[}9{]}},
+\citeproc{ref-steffens2016non}{{[}20{]}}. Frame-level evaluation
+measures detection performance for each individual frame, providing a
+strict assessment of classification accuracy. Video-level evaluation
+aggregates predictions over entire video sequences, offering a coarser
+but practically relevant measure for continuous surveillance scenarios.
+
+The following label definitions apply to both evaluation protocols:
+
+\begin{itemize}
+\tightlist
+\item
+  True Positive (\(TP\)): Correct detection of fire or smoke.
+\item
+  True Negative (\(TN\)): Correct identification of the absence of fire
+  or smoke.
+\item
+  False Positive (\(FP\)): Incorrect detection of fire or smoke when
+  none is present.
+\item
+  False Negative (\(FN\)): Failure to detect fire or smoke when it is
+  present.
+\end{itemize}
+
+Quantitative results are reported using standard classification metrics
+--- accuracy, recall, false alarm rate (\(\mathrm{FAR}\)), precision,
+F1-score, and frames per second (FPS) --- as defined below.
+
+\input{./5.eq/eq_metrics.tex}
+
+In addition to standard metrics, we report the skip rate \(S_r\), a
+system-level efficiency criterion specific to the proposed skip-based
+framework. Skip rate measures the proportion of ground-truth negative
+frames correctly bypassed by \(\mathcal{S}\), defined as
+
+\[ S_r = \frac{N_{\text{skip}}^{-}}{N_{\text{neg}}}, \]
+
+where \(N_{\text{skip}}^{-}\) is the number of true-negative frames for
+which \(\mathcal{S}\) correctly outputs \(s_t = 0\), and
+\(N_{\text{neg}} = TN + FP\) is the total number of ground-truth
+negative frames in the evaluated set. A higher \(S_r\) indicates greater
+computational savings, while a drop in recall signals unsafe skipping of
+fire/smoke frames.
+
+\subsection{Implementation Details}\label{implementation-details}
+
+Due to their distinct computational requirements, the BIG and SMALL
+models were trained on separate hardware configurations. The BIG model
+was trained on a system equipped with an Intel i9-13900K CPU and two
+NVIDIA GeForce RTX 4090 GPUs. Training was conducted over 100 epochs
+using the Stochastic Gradient Descent (SGD) optimizer with the following
+hyperparameters: a batch size of 128, a learning rate of 0.01, momentum
+of 0.9, and weight decay of 0.0001. In contrast, the SMALL model was
+trained on a system with an Intel i9-9900K CPU and a single NVIDIA
+GeForce RTX 3090 GPU. This model employed the Adam optimizer for 50
+epochs with a batch size of 256, a learning rate of 0.001, (\beta\_1 =
+0.9), (\beta\_2 = 0.999), and a weight decay of 0.0001.
+
+\textbf{TODO}: add hardware and software context here The experiments
+were conducted on a workstation running Windows 10 Pro 21H2 (build
+19044) equipped with a Intel Core i9-12900K processor, 64 GB of DDR5
+system memory, and an NVIDIA GeForce RTX 3090 GPU (24 GB VRAM). All deep
+learning inference was performed under CUDA 12.9 with PyTorch 2.7.1.
+
+\subsection{Baseline Models and
+Context}\label{baseline-models-and-context}
+
+To validate the effectiveness of the proposed skip module, we compare it
+against a spectrum of existing solutions ranging from heavy,
+high-accuracy models to lightweight, real-time approximations:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{The ``Expert'' Baseline (BIG MODEL):} A state-of-the-art Deep
+  Learning model (ResNet-50 backbone) trained on a massive proprietary
+  dataset (\(>1M\) images). It achieves the highest accuracy but suffers
+  from high latency (\$\sim\$50ms/frame), making it computationally
+  prohibitive for 24/7 processing on edge devices. In this study, we
+  trained two classification models: a high-accuracy, complex model
+  (referred to as the BIG model) for fire and smoke detection, and a
+  lightweight model (referred to as the SMALL model) for the
+  skip-module.
+\end{itemize}
+
+For the BIG model, we combined images from the D-Fire dataset
+\citeproc{ref-dfiredataset}{{[}9{]}} with additional fire and smoke
+images collected from the internet, resulting in a total of 18,000
+images (\#REVISE\_NEEDED). These were divided into training (80\%,
+14,400 images) and testing (20\%, 3,600 images) sets.
+
+For the SMALL model, we randomly extracted 80,000 64×64 patches from
+datasets A and B (\#REVISE\_NEEDED). Of these, 80\% were used for
+training, while the remaining 20\% were reserved for testing to evaluate
+model performance.
+
+We construct a binary image classification dataset for fire and smoke
+detection, consisting of two classes: \emph{fire/smoke} and \emph{none}.
+The dataset contains 18,500 RGB images collected from publicly available
+sources, including FIRE Dataset and FIRESENSE Dataset, along with
+additional web-scraped images. The \emph{fire/smoke} class includes
+images with visible flames or smoke under diverse conditions such as
+indoor fires, wildfires, and low-visibility environments, while the
+\emph{none} class contains visually similar non-fire scenes (e.g., fog,
+clouds, and sunlight glare) to reduce false positives. The images vary
+in resolution from (480 \times
+1) to (1920 \times 1080), and the dataset is split into 70\% training,
+10\% validation, and 20\% testing subsets with balanced class
+distribution. Prior to training, all images are resized to (224
+\times 224) and normalized using ImageNet statistics, and data
+augmentation techniques including random horizontal flipping, rotation
+(±15°), color jittering, and random cropping are applied to improve
+robustness to variations in illumination, scale, and viewpoint. The
+model is implemented using PyTorch and trained on a single NVIDIA RTX
+3090 GPU. Optimization is performed using the Adam optimizer with an
+initial learning rate of (1 \times 10\^{}\{-4\}) and weight decay of (1
+\times 10\^{}\{-5\}), and the model is trained for 100 epochs with a
+batch size of 32. A cosine annealing learning rate schedule with a
+5-epoch warm-up is employed to stabilize training, and gradient clipping
+with a maximum norm of 5.0 is applied to prevent instability. The
+training objective is binary cross-entropy loss, and model selection is
+based on validation F1-score, with early stopping applied if performance
+does not improve for 10 consecutive epochs. Final performance is
+reported on the held-out test set using accuracy, precision, recall, and
+F1-score.
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{M1 (Lightweight Classifier)
+  \citeproc{ref-jadon2019firenet}{{[}5{]}}:} A MobileNetV2-based
+  classifier trained on a smaller subset (\(<5k\) images). It represents
+  the standard ``efficiency'' compromise: low latency (\$\sim\$15ms) but
+  reduced generalization capability.
+\item
+  \textbf{M2 (Lightweight Detector)
+  \citeproc{ref-pedrovin2023HybridMethodFire}{{[}21{]}}:} A YOLOv8-Nano
+  object detector trained on a small dataset (\$\sim\$2k images). It
+  offers localization but struggles with small or semi-transparent smoke
+  features due to limited training data.
+\item
+  \textbf{M3 (Temporal Voting Method)
+  \citeproc{ref-pedrovin2023HybridMethodFire}{{[}21{]}}:} A video-level
+  approach that aggregates inference results over a sliding window of 30
+  frames to reduce false alarms. While effective for reducing noise, it
+  introduces inherent algorithmic latency.
+\end{itemize}
+
+\subsection{Results}\label{results}
+
+\subsubsection{Hyperparameter Optimization
+Results}\label{hyperparameter-optimization-results}
+
+In this work, we set
+
+\[ w_S = 0.60, \qquad w_F = 0.20, \qquad w_R = 0.20, \]
+
+so that skip rate remains the primary efficiency objective, while false
+alarm reduction and recall retention are treated as secondary but
+explicitly rewarded preferences.
+
 \textbf{Frame Diff Parameter Grid Search:}
 
-\subsection{Hyperparameter Search Space for the FrameDiffDet Skip
+\paragraph{Hyperparameter Search Space for the FrameDiffDet Skip
 Module}\label{hyperparameter-search-space-for-the-framediffdet-skip-module}
 
 To identify an optimal configuration for the
@@ -469,8 +819,8 @@ grid search over four hyperparameters: \texttt{scale\_factor},
 \texttt{block\_size\_orig}, \texttt{block\_ratio\_th}, and
 \texttt{diff\_thresh}. The search space is summarized in
 Table\textasciitilde{}\ref{tb:grid_search_space}, yielding a total of
-\(2
-\times 2 \times 3 \times 4 = 48\) configurations.
+\(2 \times 2 \times 3
+\times 4 = 48\) configurations.
 
 \textbf{\texttt{scale\_factor\ ∈\ \{0.5,\ 1.0\}}.} The scale factor
 controls the spatial resolution at which per-block frame differences are
@@ -513,316 +863,6 @@ large-motion detection --- with closer spacing at the lower end (3, 5,
 7) to provide finer resolution in the sensitivity range most relevant to
 fire detection, where motion tends to be subtle and spatially confined.
 
-\input{6.algo/acc_motion_det.tex}
-
-\section{Experiments and Results}\label{sec:results}
-
-\subsection{Experimental Setup}\label{experimental-setup}
-
-\subsection{Dataset Generation and
-Partitioning}\label{dataset-generation-and-partitioning}
-
-\subsubsection{Image Datasets for Model
-Training}\label{image-datasets-for-model-training}
-
-In this study, we trained two classification models: a high-accuracy,
-complex model (referred to as the BIG model) for fire and smoke
-detection, and a lightweight model (referred to as the SMALL model) for
-the skip-module.
-
-For the BIG model, we combined images from the D-Fire dataset
-\citeproc{ref-dfiredataset}{{[}5{]}} with additional fire and smoke
-images collected from the internet, resulting in a total of 18,000
-images (\#REVISE\_NEEDED). These were divided into training (80\%,
-14,400 images) and testing (20\%, 3,600 images) sets.
-
-For the SMALL model, we randomly extracted 80,000 64×64 patches from
-datasets A and B (\#REVISE\_NEEDED). Of these, 80\% were used for
-training, while the remaining 20\% were reserved for testing to evaluate
-model performance.
-
-\subsubsection{Video Datasets for Hyperparameter Tuning and System
-Evaluation}\label{video-datasets-for-hyperparameter-tuning-and-system-evaluation}
-
-Publicly available video datasets for fire and smoke detection using
-static cameras remain scarce. While several existing benchmarks address
-this detection task --- including FireNet
-\citeproc{ref-jadon2019firenet}{{[}6{]}}, Firesense
-\citeproc{ref-Firesens4:online}{{[}7{]}}, FiSmo
-\citeproc{ref-cazzolato2017fismo}{{[}8{]}}, and FURG
-\citeproc{ref-steffens2015unconstrained}{{[}9{]}} --- these were
-recorded with moving cameras and are therefore unsuitable for static
-surveillance scenarios. Static-camera datasets such as DFire
-\citeproc{ref-dfiredataset}{{[}5{]}}, VisiFire Bilkent
-\citeproc{ref-VisiFireBilkent:online}{{[}10{]}}, KMU Fire and Smoke
-\citeproc{ref-KMUFireSmokeDataset}{{[}11{]}}, Mivia Fire and Smoke
-\citeproc{ref-foggia2015real}{{[}12{]}}, and USTC Smoke
-\citeproc{ref-lin2017smoke}{{[}13{]}} do exist; however, they
-collectively suffer from several limitations: a predominance of outdoor
-scenes, a small number of video samples, low spatial resolution, and
-insufficient diversity in fire/smoke appearances and environmental
-conditions.
-
-To address these deficiencies, we constructed a dedicated static indoor
-video dataset by aggregating clips from multiple heterogeneous sources.
-Fire and smoke samples were sourced from the Korea AI Fire Dataset
-\citeproc{ref-AIHub87:online}{{[}14{]}}, the USTC Smoke Dataset
-\citeproc{ref-lin2017smoke}{{[}13{]}}, and the VSD3K Dataset
-\citeproc{ref-huang2022fire}{{[}15{]}}, supplemented by videos collected
-from open online platforms (Pexels, Pixabay, and YouTube).
-Non-fire/smoke (negative) samples were compiled from self-recorded
-footage captured by real CCTV cameras in indoor environments (e.g.,
-parking areas), along with the Safe \& Unsafe Behavior in Workplaces
-dataset \citeproc{ref-onal2024video}{{[}16{]}}, the Indoor Action
-dataset \citeproc{ref-deniz2024optimized}{{[}17{]}}, the MPII Cooking 2
-Dataset \citeproc{ref-rohrbach2016recognizing}{{[}18{]}}, and the
-WiseNet dataset \citeproc{ref-marroquin2019wisenet}{{[}19{]}}.
-
-Due to the lack of public high-resolution datasets specifically designed
-for static surveillance cameras, we constructed a custom dataset
-consisting of 150 HD videos (1920\$\times\$1080 resolution). The dataset
-is strictly balanced into three categories: Fire (50), Smoke (50), and
-Safe/Neutral (50). To ensure robust evaluation, the videos capture
-diverse environments, including forests, warehouses, and urban settings
-under varying lighting conditions.
-
-The 150 videos were randomly split into Training/Validation (60\%, n=90:
-30 Fire, 30 Smoke, 30 Safe) for hyperparameter tuning and hyperparameter
-selection, and Test (40\%, n=60: 20 per class) for unbiased final
-performance evaluation. Stratified sampling ensured balance across
-classes and environments.
-
- \input{./4.table/tb_ufireindoor.tex}
-
-\input{./3.fig/fig_videodb.tex}
-
-\subsection{Evaluation Metrics}\label{evaluation-metrics}
-
-Performance is evaluated under both \textbf{frame-level} and
-\textbf{video-level} protocols, which are commonly used in fire and
-smoke video analysis \citeproc{ref-dfiredataset}{{[}5{]}},
-\citeproc{ref-steffens2016non}{{[}20{]}}. Frame-level evaluation
-measures detection performance for each individual frame and therefore
-provides a strict assessment of classification accuracy. In contrast,
-video-level evaluation aggregates predictions over an entire video
-sequence, offering a coarser but practically relevant measure for
-continuous surveillance scenarios.
-
-The quantitative results are reported using standard classification
-metrics, including accuracy, recall, false positive rate, precision,
-F1-score, and frames per second (FPS), as defined below.
-
-\input{./5.eq/eq_metrics.tex}
-
-In addition to these standard metrics, we emphasize a new system-level
-criteria that are particularly important for the proposed skip-based
-framework: skip rate (\(S\)). Skip rate indicates the ratio of correctly
-skipped negative frames \(N_{\mathrm{skip}}^{-}\) to the total number of
-negative frames \((TN + FP)\), reflecting the efficiency of the skip
-module in filtering out non-informative frames while preserving safety.
-
-The following definitions apply to both frame-level and video-level
-evaluations:
-
-\begin{itemize}
-\tightlist
-\item
-  True Positive (\(TP\)): Correct detection of fire or smoke.
-\item
-  True Negative (\(TN\)): Correct identification of the absence of fire
-  or smoke.
-\item
-  False Positive (\(FP\)): Incorrect detection of fire or smoke when
-  none is present.
-\item
-  False Negative (\(FN\)): Failure to detect fire or smoke when it is
-  present.
-\end{itemize}
-
-Frame-level evaluation computes metrics on a per-frame basis, providing
-a stricter assessment, while video-level evaluation aggregates metrics
-in the context of entire video sequences, allowing for a coarser
-assessment.
-
-\subsection{Experimental Setup and Training}\label{sec:setup}
-
-Due to their distinct computational requirements, the BIG and SMALL
-models were trained on separate hardware configurations. The BIG model
-was trained on a system equipped with an Intel i9-13900K CPU and two
-NVIDIA GeForce RTX 4090 GPUs. Training was conducted over 100 epochs
-using the Stochastic Gradient Descent (SGD) optimizer with the following
-hyperparameters: a batch size of 128, a learning rate of 0.01, momentum
-of 0.9, and weight decay of 0.0001. In contrast, the SMALL model was
-trained on a system with an Intel i9-9900K CPU and a single NVIDIA
-GeForce RTX 3090 GPU. This model employed the Adam optimizer for 50
-epochs with a batch size of 256, a learning rate of 0.001, (\beta\_1 =
-0.9), (\beta\_2 = 0.999), and a weight decay of 0.0001.
-
-\textbf{TODO}: add hardware and software context here The experiments
-were conducted on a workstation running Windows 10 Pro 21H2 (build
-19044) equipped with a Intel Core i9-12900K processor, 64 GB of DDR5
-system memory, and an NVIDIA GeForce RTX 3090 GPU (24 GB VRAM). All deep
-learning inference was performed under CUDA 12.9 with PyTorch 2.7.1.
-
-\subsection{Baseline Models and
-Context}\label{baseline-models-and-context}
-
-To validate the effectiveness of the proposed skip module, we compare it
-against a spectrum of existing solutions ranging from heavy,
-high-accuracy models to lightweight, real-time approximations:
-
-\begin{itemize}
-\tightlist
-\item
-  \textbf{The ``Expert'' Baseline (BIG MODEL):} A state-of-the-art Deep
-  Learning model (ResNet-50 backbone) trained on a massive proprietary
-  dataset (\(>1M\) images). It achieves the highest accuracy but suffers
-  from high latency (\$\sim\$50ms/frame), making it computationally
-  prohibitive for 24/7 processing on edge devices.
-\end{itemize}
-
-We construct a binary image classification dataset for fire and smoke
-detection, consisting of two classes: \emph{fire/smoke} and \emph{none}.
-The dataset contains 18,500 RGB images collected from publicly available
-sources, including FIRE Dataset and FIRESENSE Dataset, along with
-additional web-scraped images. The \emph{fire/smoke} class includes
-images with visible flames or smoke under diverse conditions such as
-indoor fires, wildfires, and low-visibility environments, while the
-\emph{none} class contains visually similar non-fire scenes (e.g., fog,
-clouds, and sunlight glare) to reduce false positives. The images vary
-in resolution from (480 \times 360) to (1920 \times 1080), and the
-dataset is split into 70\% training, 10\% validation, and 20\% testing
-subsets with balanced class distribution. Prior to training, all images
-are resized to (224 \times 224) and normalized using ImageNet
-statistics, and data augmentation techniques including random horizontal
-flipping, rotation (±15°), color jittering, and random cropping are
-applied to improve robustness to variations in illumination, scale, and
-viewpoint. The model is implemented using PyTorch and trained on a
-single NVIDIA RTX 3090 GPU. Optimization is performed using the Adam
-optimizer with an initial learning rate of (1 \times 10\^{}\{-4\}) and
-weight decay of (1 \times 10\^{}\{-5\}), and the model is trained for
-100 epochs with a batch size of 32. A cosine annealing learning rate
-schedule with a 5-epoch warm-up is employed to stabilize training, and
-gradient clipping with a maximum norm of 5.0 is applied to prevent
-instability. The training objective is binary cross-entropy loss, and
-model selection is based on validation F1-score, with early stopping
-applied if performance does not improve for 10 consecutive epochs. Final
-performance is reported on the held-out test set using accuracy,
-precision, recall, and F1-score.
-
-\begin{itemize}
-\tightlist
-\item
-  \textbf{M1 (Lightweight Classifier)
-  \citeproc{ref-jadon2019firenet}{{[}6{]}}:} A MobileNetV2-based
-  classifier trained on a smaller subset (\(<5k\) images). It represents
-  the standard ``efficiency'' compromise: low latency (\$\sim\$15ms) but
-  reduced generalization capability.
-\item
-  \textbf{M2 (Lightweight Detector)
-  \citeproc{ref-pedrovin2023HybridMethodFire}{{[}21{]}}:} A YOLOv8-Nano
-  object detector trained on a small dataset (\$\sim\$2k images). It
-  offers localization but struggles with small or semi-transparent smoke
-  features due to limited training data.
-\item
-  \textbf{M3 (Temporal Voting Method)
-  \citeproc{ref-pedrovin2023HybridMethodFire}{{[}21{]}}:} A video-level
-  approach that aggregates inference results over a sliding window of 30
-  frames to reduce false alarms. While effective for reducing noise, it
-  introduces inherent algorithmic latency.
-\end{itemize}
-
-\subsection{Hyperparameter Selection Strategy}\label{sec:hyperparam}
-
-To select the optimal hyperparameters for the proposed skip module, we
-employ a constrained optimization procedure on the validation set. Let
-\(R_{\text{base}}\), \(\mathrm{FAR}_{\text{base}}\), and
-\(T_{\text{DL}}\) denote the end-to-end recall, false alarm rate, and
-mean per-frame inference time of the baseline pipeline (without
-skipping), respectively. For each candidate parameter set
-\(\theta \in \Theta\) obtained by grid search, we evaluate the full
-pipeline \(\text{Read} \rightarrow \text{Skip}(\theta)
-\rightarrow [\text{DL}]\) and compute four metrics: recall
-\(R(\theta)\), false alarm rate \(\mathrm{FAR}(\theta)\), negative-frame
-skip ratio \(S(\theta)\), and mean per-frame skip module time
-\(T_{\text{skip}}(\theta)\).
-
-The negative-frame skip ratio is defined as
-
-\[ S(\theta) = \frac{\#\ \text{correctly skipped negative frames}} {\#\ \text{total
-negative frames}}. \]
-
-The mean per-frame inference times are defined as
-
-\[ T_{\text{DL}} = \frac{1}{|D_{\text{val}}|} \sum_{i=1}^{|D_{\text{val}}|}
-t_{\text{DL}}(f_i), \qquad T_{\text{skip}}(\theta) = \frac{1}{|D_{\text{val}}|}
-                \sum_{i=1}^{|D_{\text{val}}|} t_{\text{skip}}(f_i,\theta), \]
-
-where \(f_i\) denotes the \(i\)-th frame in \(D_{\text{val}}\), and both
-averages are taken over all frames to reflect the runtime cost on a
-typical video stream.
-
-\textbf{Feasibility constraints.} A candidate \(\theta\) is considered
-feasible only if it satisfies two hard constraints:
-
-\[ R(\theta) \geq R_{\text{base}} - \delta_R, \qquad T_{\text{skip}}(\theta) \leq \beta
-\cdot T_{\text{DL}}, \]
-
-where \(\delta_R = 0.01\) is the maximum allowable absolute recall drop
-(1\%), and \(\beta =
-0.10\) ensures that the skip module overhead does not exceed 10\% of one
-full DL inference. The first constraint prevents unsafe degradation in
-fire/smoke detection. The second ensures the skip module does not negate
-the efficiency it is designed to provide.
-
-\textbf{Scoring feasible candidates.} To rank feasible candidates, we
-define two normalized scoring terms. The false alarm reduction term is
-
-\[ F(\theta) = \max\left(0,\; \frac{\mathrm{FAR}_{\text{base}} - \mathrm{FAR}(\theta)}
-{\mathrm{FAR}_{\text{base}}}\right), \]
-
-which measures relative FAR improvement with respect to the baseline.
-The recall retention term is
-
-\[ \rho(\theta) = 1 - \frac{R_{\text{base}} - R(\theta)}{\delta_R}, \]
-
-which equals \(1\) when the candidate matches baseline recall and \(0\)
-when recall reaches the lowest acceptable level
-\(R_{\text{base}} - \delta_R\). Both terms map to \([0,1]\) over the
-feasible region, making them directly comparable to \(S(\theta)\) in the
-weighted score.
-
-\textbf{Optimal selection.} The optimal parameter set \(\theta^*\) is
-selected as
-
-\[ \theta^* = \arg\max_{\theta \in \Theta_{\text{feasible}}} \left[ w_S\, S(\theta) +
-w_F\, F(\theta) + w_R\, \rho(\theta) \right], \]
-
-where
-\(\Theta_{\text{feasible}} = \{\theta \in \Theta : R(\theta) \geq R_{\text{base}} -
-\delta_R \text{ and } T_{\text{skip}}(\theta) \leq \beta \cdot T_{\text{DL}}\}\),
-and the nonnegative weights satisfy \(w_S + w_F + w_R = 1\). In this
-work, we set
-
-\[ w_S = 0.60, \qquad w_F = 0.20, \qquad w_R = 0.20, \]
-
-so that skip ratio remains the primary efficiency objective, while false
-alarm reduction and recall retention are treated as secondary but
-explicitly rewarded preferences.
-
-\textbf{Theoretical justification.} The skip module acts as a
-conservative gate: skipped frames output ``negative'' directly, while
-passed frames are processed by the same downstream detector as the
-baseline. Therefore, every false alarm produced by the skip-enabled
-system is also present in the baseline system, implying
-\(\mathrm{FAR}(\theta) \leq
-\mathrm{FAR}_{\text{base}}\). The main safety risk is recall degradation
-due to incorrectly skipped fire/smoke frames (false skips), which
-motivates enforcing the recall constraint as a hard gate before any
-ranking is performed.
-
-\input{./6.algo/hyperparam_algo.tex}
-
 Table\textasciitilde{}\ref{tb:val_search} specifies the search space for
 the rule-based skip-module parameters. The ranking and selection of the
 optimal configuration (\(\theta^*\)) based on the validation set results
@@ -844,7 +884,59 @@ intended role of the skip module in real-time fire/smoke detection:
 preserve recall first, then prefer candidates that skip more negative
 frames while still improving operational false alarm behavior.
 
-\subsection{Component Analysis: Efficacy of the Skip
+\subsubsection{System-Level Performance: Frame-Based
+Efficiency}\label{sec:e2e-perf}
+
+We subsequently integrated the skip modules into the full inference
+pipeline to measure end-to-end efficiency. System latency for our method
+is calculated as the inherent skip module overhead plus the conditional
+latency of the BIG MODEL applied only to unskipped frames.
+
+The overall impact of integrating the skip modules into the full
+detection pipeline is quantified in Table \ref{tb:e2e_perf} (frame-level
+accuracy/latency), also comparing against the baseline system without
+skipping.
+
+\input{./4.table/tb_e2e_perf.tex}
+
+\emph{Analysis:} Simply replacing the BIG MODEL with lightweight
+alternatives (M1, M2) results in an unacceptable 17-22\% degradation in
+F1-Score. Our proposed pipeline (Approach 2 + BIG MODEL) successfully
+bridges this gap. By filtering 72.1\% of frames at a cost of only 2.5ms
+per frame, the average system latency drops to 16.5ms. This achieves a
+67\% reduction in computational cost, tripling the effective frame rate
+from 20 FPS to 60 FPS while perfectly matching the Baseline's 98.5\%
+F1-Score.
+
+\subsubsection{Comparison with Temporal Methods
+(M3)}\label{sec:cmp-temporal}
+
+A critical distinction in anomaly detection is between frame-level and
+video-level processing. The M3 baseline reduces false alarms by
+executing majority voting across a 30-frame window. While highly
+accurate, this architectural choice introduces significant latency.
+
+Table \ref{tb:cmp_base_temp} compares our method against other temporal
+processing techniques, evaluating both detection performance and
+computational efficiency.
+
+\input{./4.table/tb_cmp_base_temp.tex}
+
+\emph{Analysis:} Because M3 requires a full temporal buffer before
+confirming an event, the system inherently delays the alarm trigger by
+over 750ms. In contrast, our frame-level approach triggers the BIG MODEL
+immediately upon detecting heuristic indicators. This results in a
+time-to-first-alarm of approximately 52.5ms, making our method over 14
+times faster to react than temporal aggregation methods. Even when
+evaluated strictly on video-level metrics, our skip-module approach
+achieves higher recall and requires significantly less aggregate
+computational time per second of video, proving highly competitive in
+false alarm suppression.
+
+\subsubsection{Ablation and Qualitative
+Analysis}\label{ablation-and-qualitative-analysis}
+
+\paragraph{Component Analysis: Efficacy of the Skip
 Module}\label{sec:comp-perf}
 
 First, we evaluate the skip modules in isolation to ensure they function
@@ -873,58 +965,6 @@ semi-transparent smoke. It achieves a near-perfect combined Recall of
 distinguishing true anomaly indicators from environmental noise (e.g.,
 swaying trees).
 
-\subsection{System-Level Performance: Frame-Based
-Efficiency}\label{sec:e2e-perf}
-
-We subsequently integrated the skip modules into the full inference
-pipeline to measure end-to-end efficiency. System latency for our method
-is calculated as the inherent skip module overhead plus the conditional
-latency of the BIG MODEL applied only to unskipped frames.
-
-The overall impact of integrating the skip modules into the full
-detection pipeline is quantified in Table \ref{tb:e2e_perf} (frame-level
-accuracy/latency), also comparing against the baseline system without
-skipping.
-
-\input{./4.table/tb_e2e_perf.tex}
-
-\emph{Analysis:} Simply replacing the BIG MODEL with lightweight
-alternatives (M1, M2) results in an unacceptable 17-22\% degradation in
-F1-Score. Our proposed pipeline (Approach 2 + BIG MODEL) successfully
-bridges this gap. By filtering 72.1\% of frames at a cost of only 2.5ms
-per frame, the average system latency drops to 16.5ms. This achieves a
-67\% reduction in computational cost, tripling the effective frame rate
-from 20 FPS to 60 FPS while perfectly matching the Baseline's 98.5\%
-F1-Score.
-
-\subsection{Comparison with Temporal Methods
-(M3)}\label{sec:cmp-temporal}
-
-A critical distinction in anomaly detection is between frame-level and
-video-level processing. The M3 baseline reduces false alarms by
-executing majority voting across a 30-frame window. While highly
-accurate, this architectural choice introduces significant latency.
-
-Table \ref{tb:cmp_base_temp} compares our method against other temporal
-processing techniques, evaluating both detection performance and
-computational efficiency.
-
-\input{./4.table/tb_cmp_base_temp.tex}
-
-\emph{Analysis:} Because M3 requires a full temporal buffer before
-confirming an event, the system inherently delays the alarm trigger by
-over 750ms. In contrast, our frame-level approach triggers the BIG MODEL
-immediately upon detecting heuristic indicators. This results in a
-time-to-first-alarm of approximately 52.5ms, making our method over 14
-times faster to react than temporal aggregation methods. Even when
-evaluated strictly on video-level metrics, our skip-module approach
-achieves higher recall and requires significantly less aggregate
-computational time per second of video, proving highly competitive in
-false alarm suppression.
-
-\subsection{Ablation and Qualitative
-Analysis}\label{ablation-and-qualitative-analysis}
-
 To isolate the impact of our specific heuristic rules, we conducted an
 ablation study comparing the naive motion baseline (Approach 1) against
 the full rule-based engine (Approach 2). While Approach 1 performed
@@ -952,11 +992,23 @@ MODEL). Approach 2 successfully filtered these frames by applying
 color-channel heuristics, verifying that the moving pixels did not match
 the chromatic signatures of either fire or smoke.
 
-\subsection{Speed of Skip Module}\label{speed-of-skip-module}
+\textbf{Speed of Skip Module}:
 
 \input{./3.fig/fig_fps_increase.tex}
 
-\section{Discussion}\label{sec:discussion}
+\section{Conclusion}\label{sec:conclusion}
+
+We proposed a lightweight, plug-and-play skip module designed to
+accelerate real-time fire and smoke detection in static surveillance
+systems. By combining block-based motion analysis with targeted color
+and texture heuristics, our module safely filters out up to 72\% of
+irrelevant background frames without compromising safety. Extensive
+evaluations demonstrate that our approach achieves a 3\(\times\) system
+speedup and a 67\% reduction in computational cost, while fully
+preserving the near-perfect accuracy (98.5\% F1-Score) of heavy deep
+learning models. Future work will focus on integrating adaptive,
+unsupervised thresholding to dynamically adjust heuristic rules based on
+real-time environmental lighting and weather shifts.
 
 \emph{(Focus on the ``Why'' and the ``Limits'')} The empirical results
 demonstrate that the bottleneck in high-accuracy continuous surveillance
@@ -973,20 +1025,6 @@ detection would fail, requiring a fallback to pure motion or thermal
 thresholds. Furthermore, extreme weather conditions such as heavy,
 moving fog can mimic the grayish diffusion of smoke, occasionally
 leading to false positives that reduce the overall Filter Rate.
-
-\section{Conclusion}\label{sec:conclusion}
-
-We proposed a lightweight, plug-and-play skip module designed to
-accelerate real-time fire and smoke detection in static surveillance
-systems. By combining block-based motion analysis with targeted color
-and texture heuristics, our module safely filters out up to 72\% of
-irrelevant background frames without compromising safety. Extensive
-evaluations demonstrate that our approach achieves a 3\(\times\) system
-speedup and a 67\% reduction in computational cost, while fully
-preserving the near-perfect accuracy (98.5\% F1-Score) of heavy deep
-learning models. Future work will focus on integrating adaptive,
-unsupervised thresholding to dynamically adjust heuristic rules based on
-real-time environmental lighting and weather shifts.
 
 \section*{References}\label{sec:references}
 \addcontentsline{toc}{section}{References}
@@ -1019,39 +1057,39 @@ south korea \textbar{} the guardian.''} Jul. 2025. Available:
 novel taxonomy,''} \emph{Expert Systems with Applications}, vol. 255, p.
 124783, 2024.}
 
-\bibitem[\citeproctext]{ref-dfiredataset}
-\CSLLeftMargin{{[}5{]} }%
-\CSLRightInline{P. V. A. de Venâncio, A. C. Lisboa, and A. V. Barbosa,
-{``An automatic fire detection system based on deep convolutional neural
-networks for low-power, resource-constrained devices,''} \emph{Neural
-Computing and Applications}, vol. 34, no. 18, pp. 15349--15368, 2022.}
-
 \bibitem[\citeproctext]{ref-jadon2019firenet}
-\CSLLeftMargin{{[}6{]} }%
+\CSLLeftMargin{{[}5{]} }%
 \CSLRightInline{A. Jadon, M. Omama, A. Varshney, M. S. Ansari, and R.
 Sharma, {``FireNet: A specialized lightweight fire \& smoke detection
 model for real-time IoT applications,''} \emph{arXiv preprint
 arXiv:1905.11922}, 2019.}
 
 \bibitem[\citeproctext]{ref-Firesens4:online}
-\CSLLeftMargin{{[}7{]} }%
+\CSLLeftMargin{{[}6{]} }%
 \CSLRightInline{{``Firesense.''} Available:
 \url{https://www.firesense.eu/}}
 
 \bibitem[\citeproctext]{ref-cazzolato2017fismo}
-\CSLLeftMargin{{[}8{]} }%
+\CSLLeftMargin{{[}7{]} }%
 \CSLRightInline{M. T. Cazzolato \emph{et al.}, {``Fismo: A compilation
 of datasets from emergency situations for fire and smoke analysis,''} in
 \emph{Brazilian symposium on databases-SBBD}, SBC Uberl{â}ndia, Brazil,
 2017, pp. 213--223.}
 
 \bibitem[\citeproctext]{ref-steffens2015unconstrained}
-\CSLLeftMargin{{[}9{]} }%
+\CSLLeftMargin{{[}8{]} }%
 \CSLRightInline{C. R. Steffens, R. N. Rodrigues, and S. S. da Costa
 Botelho, {``An unconstrained dataset for non-stationary video based fire
 detection,''} in \emph{2015 12th latin american robotics symposium and
 2015 3rd brazilian symposium on robotics (LARS-SBR)}, IEEE, 2015, pp.
 25--30.}
+
+\bibitem[\citeproctext]{ref-dfiredataset}
+\CSLLeftMargin{{[}9{]} }%
+\CSLRightInline{P. V. A. de Venâncio, A. C. Lisboa, and A. V. Barbosa,
+{``An automatic fire detection system based on deep convolutional neural
+networks for low-power, resource-constrained devices,''} \emph{Neural
+Computing and Applications}, vol. 34, no. 18, pp. 15349--15368, 2022.}
 
 \bibitem[\citeproctext]{ref-VisiFireBilkent:online}
 \CSLLeftMargin{{[}10{]} }%

@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999994 (TeX Live 2022) (preloaded format=xelatex 2022.7.18)  31 MAR 2026 11:13
+This is XeTeX, Version 3.141592653-2.6-0.999994 (TeX Live 2022) (preloaded format=xelatex 2022.7.18)  3 APR 2026 15:04
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1199,17 +1199,29 @@ line 12.
 
 (./6.algo/frame_diff_det.tex
 Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on in
-put line 7.
+put line 9.
 LaTeX Font Info:    Font shape `TU/UnBatang.ttf(0)/bx/n' in size <10> not avail
 able
 (Font)              Font shape `TU/UnBatang.ttf(0)/b/n' tried instead on input 
-line 7.
+line 9.
 ) (./6.algo/acc_motion_det.tex
 
 LaTeX Font Warning: Font shape `TU/UnBatang.ttf(0)/m/it' undefined
-(Font)              using `TU/UnBatang.ttf(0)/m/n' instead on input line 3.
+(Font)              using `TU/UnBatang.ttf(0)/m/n' instead on input line 4.
 
-) [1
+LaTeX Font Info:    Trying to load font information for U+dutchcal on input lin
+e 11.
+(d:/Program Files/texlive/2022/texmf-dist/tex/latex/dutchcal/udutchcal.fd
+File: udutchcal.fd 2011/06/16 Fontinst v1.933 font definitions for U/dutchcal.
+)
+LaTeX Font Info:    Font shape `U/dutchcal/m/n' will be
+(Font)              scaled to size 10.0pt on input line 11.
+LaTeX Font Info:    Font shape `U/dutchcal/m/n' will be
+(Font)              scaled to size 7.0pt on input line 11.
+LaTeX Font Info:    Font shape `U/dutchcal/m/n' will be
+(Font)              scaled to size 5.0pt on input line 11.
+)
+(./6.algo/skip_module.tex) [1
 
 ]
 
@@ -1217,7 +1229,13 @@ Package fancyhdr Warning: \footskip is too small (10.0pt):
 (fancyhdr)                Make it at least 12.0pt, for example:
 (fancyhdr)                \setlength{\footskip}{12.0pt}.
 
-[2] (./temp.aux)
+[2]
+
+Package fancyhdr Warning: \footskip is too small (10.0pt): 
+(fancyhdr)                Make it at least 12.0pt, for example:
+(fancyhdr)                \setlength{\footskip}{12.0pt}.
+
+[3] (./temp.aux)
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
@@ -1225,12 +1243,12 @@ Package rerunfilecheck Info: File `temp.out' has not changed.
 (rerunfilecheck)             Checksum: E6F93436FA3A73B5DD03917E5C22888C;88.
  ) 
 Here is how much of TeX's memory you used:
- 33697 strings out of 475865
- 657784 string characters out of 5799410
- 964325 words of memory out of 5000000
- 54181 multiletter control sequences out of 15000+600000
- 485431 words of font info for 120 fonts, out of 8000000 for 9000
+ 33729 strings out of 475865
+ 658417 string characters out of 5799410
+ 969396 words of memory out of 5000000
+ 54206 multiletter control sequences out of 15000+600000
+ 486274 words of font info for 123 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
- 120i,12n,121p,459b,2709s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 120i,13n,121p,459b,2709s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on temp.pdf (2 pages).
+Output written on temp.pdf (3 pages).
