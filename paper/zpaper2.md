@@ -571,7 +571,7 @@ module using `FrameDiffDet` as its motion estimator, we conducted a systematic
 grid search over four parameters: `scale_factor`, `block_size_orig`,
 `block_ratio_th`, and `diff_thresh`. The search space was defined as follows:
 
-```{=latex}
+<!-- ```{=latex}
 \begin{table}[h]
 \centering
 \caption{Grid search space for the \texttt{FrameDiffDet} skip module hyperparameters.}
@@ -589,7 +589,11 @@ grid search over four parameters: `scale_factor`, `block_size_orig`,
 \hline
 \end{tabular}
 \end{table}
+``` -->
+```{=latex}
+\input{./4.table/tb_gridsearch_framediff.tex}
 ```
+
 
 To identify an optimal configuration for the `motion_only_block_skip_proc`
 module using `FrameDiffDet` as its motion estimator, we conducted a systematic
@@ -645,22 +649,26 @@ the recall constraint and achieves the highest composite score by jointly
 balancing skip ratio, false alarm reduction, and recall retention.
 
 ```{=latex}
-\input{./4.table/tb_val_search.tex}
-```
-
-```{=latex}
 \input{./4.table/tb_val_results.tex}
 ```
-
-```{=latex}
-\input{./4.table/tb_hyperparam_example.tex}
-```
-
 This formulation is systematic, interpretable, and aligned with the intended
 role of the skip module in real-time fire/smoke detection: preserve recall
 first, then prefer candidates that skip more negative frames while still
 improving operational false alarm behavior.
 
+
+#### Hyperparameter Search Space for the AccMotionDet Skip Module
+
+```{=latex}
+\input{./4.table/tb_gridsearch_accMotionDet.tex}
+```
+
+<!-- ! Add explanation for each hyperparameter space choice -->
+
+
+```{=latex}
+\input{./4.table/tb_val_results.tex}
+```
 
 ### System-Level Performance: Frame-Based Efficiency {#sec:e2e-perf}
 

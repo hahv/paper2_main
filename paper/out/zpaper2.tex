@@ -746,23 +746,7 @@ grid search over four parameters: \texttt{scale\_factor},
 \texttt{block\_size\_orig}, \texttt{block\_ratio\_th}, and
 \texttt{diff\_thresh}. The search space was defined as follows:
 
-\begin{table}[h]
-\centering
-\caption{Grid search space for the \texttt{FrameDiffDet} skip module hyperparameters.}
-\label{tb:grid_search_space}
-\begin{tabular}{ll}
-\hline
-\textbf{Parameter} & \textbf{Search Values} \\
-\hline
-\texttt{scale\_factor}   & \{0.5, 1.0\} \\
-\texttt{block\_size\_orig} & \{16, 32\} \\
-\texttt{block\_ratio\_th} & \{0.05, 0.10, 0.15\} \\
-\texttt{diff\_thresh}    & \{3, 5, 7, 10\} \\
-\hline
-\multicolumn{2}{l}{\textit{Total configurations: $2 \times 2 \times 3 \times 4 = 48$}} \\
-\hline
-\end{tabular}
-\end{table}
+\input{./4.table/tb_gridsearch_framediff.tex}
 
 To identify an optimal configuration for the
 \texttt{motion\_only\_block\_skip\_proc} module using
@@ -825,16 +809,19 @@ satisfies the recall constraint and achieves the highest composite score
 by jointly balancing skip ratio, false alarm reduction, and recall
 retention.
 
-\input{./4.table/tb_val_search.tex}
-
 \input{./4.table/tb_val_results.tex}
-
-\input{./4.table/tb_hyperparam_example.tex}
 
 This formulation is systematic, interpretable, and aligned with the
 intended role of the skip module in real-time fire/smoke detection:
 preserve recall first, then prefer candidates that skip more negative
 frames while still improving operational false alarm behavior.
+
+\paragraph{Hyperparameter Search Space for the AccMotionDet Skip
+Module}\label{hyperparameter-search-space-for-the-accmotiondet-skip-module}
+
+\input{./4.table/tb_gridsearch_accMotionDet.tex}
+
+\input{./4.table/tb_val_results.tex}
 
 \subsubsection{System-Level Performance: Frame-Based
 Efficiency}\label{sec:e2e-perf}

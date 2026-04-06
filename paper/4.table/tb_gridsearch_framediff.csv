@@ -1,0 +1,6 @@
+1;2;3
+2;Parameter;Search Space
+3;Scale factor $\alpha$;$\{0.5, 1.0\}$
+4;Block size $B$;$\{16, 32\}$
+5;Block active threshold $\tau$;$\{0.05, 0.10, 0.15\}$
+6;Diff threshold $\tau_d$;$\{3, 5, 7, 10\}$

@@ -1,0 +1,20 @@
+\begin{table}[hbtp]
+    \caption{Parameters and search space for Accumulation Motion Detector (AccMotionDet) with a total of 96 configurations.}
+    \label{tb:tb_gridsearch_accMotionDet}
+    \csvreader[separator=semicolon,
+        respect underscore=true,
+        no head,
+        range=2-,
+        centered tabularray = {
+        colspec = {ll},
+        colsep = {4pt},
+        hlines,
+        vlines,
+        cells = {font = \small, halign = c, valign = m},
+        row{1} = {font = \bfseries\small},
+    },
+    ]{./4.table/tb_gridsearch_accMotionDet.csv}{}{
+        \csvexpval\csvcolii &
+        \csvexpval\csvcoliii
+    }
+\end{table}

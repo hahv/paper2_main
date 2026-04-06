@@ -1,0 +1,19 @@
+\begin{table}[hbtp]
+    \caption{Parameters and search space for Frame Difference with a total of 48 configurations.}
+    \label{tb:tb_gridsearch_framediff}
+    \csvreader[separator=semicolon,
+        no head,
+        range=2-,
+        centered tabularray = {
+        colspec = {lll},
+        colsep = {4pt},
+        hlines,
+        vlines,
+        cells = {font = \small, halign = c, valign = m},
+        row{1} = {font = \bfseries\small},
+    },
+    ]{./4.table/tb_gridsearch_framediff.csv}{}{
+        \csvexpval\csvcolii &
+        \csvexpval\csvcoliii
+    }
+\end{table}
