@@ -594,50 +594,56 @@ grid search over four parameters: `scale_factor`, `block_size_orig`,
 \input{./4.table/tb_gridsearch_framediff.tex}
 ```
 
+<!-- ! Add explanation for each hyperparameter space choice -->
 
-To identify an optimal configuration for the `motion_only_block_skip_proc`
-module using `FrameDiffDet` as its motion estimator, we conducted a systematic
-grid search over four hyperparameters: `scale_factor`, `block_size_orig`,
-`block_ratio_th`, and `diff_thresh`. The search space is summarized in
-Table~\ref{tb:grid_search_space}, yielding a total of $2 \times 2 \times 3
-\times 4 = 48$ configurations.
+To identify an optimal configuration for the FrameDiffDet skip module,
+we conducted a systematic grid search over four hyperparameters:
+scale factor $\alpha$, block size $B$, block active threshold $\tau$,
+and diff threshold $\tau_d$. The search space is summarized in
+Table~\ref{tb:grid_search_space}, yielding a total of
+$2 \times 2 \times 3 \times 4 = 48$ configurations.
 
-**`scale_factor ∈ {0.5, 1.0}`.** The scale factor controls the spatial
-resolution at which per-block frame differences are computed. Full resolution
-(`1.0`) preserves fine-grained pixel detail, while half resolution (`0.5`)
-reduces sensitivity to high-frequency pixel noise that may generate spurious
-motion signals unrelated to actual scene changes. Two levels are evaluated to
-quantify the effect of pre-computation downscaling on both detection reliability
+**Scale factor** $\alpha \in \{0.5, 1.0\}$: The scale factor controls
+the spatial resolution at which per-block frame differences are
+computed. Full resolution ($\alpha = 1.0$) preserves fine-grained pixel
+detail, while half resolution ($\alpha = 0.5$) reduces sensitivity to
+high-frequency pixel noise that may generate spurious motion signals
+unrelated to actual scene changes. Two levels are evaluated to quantify
+the effect of pre-computation downscaling on both detection reliability
 and computational cost.
 
-**`block_size_orig ∈ {16, 32}`.** Block size determines the spatial granularity
-of the motion map, expressed in pixels of the original unscaled frame. Fine
-blocks (16 px) enable detection of localized motion from small or nascent fire
-regions, whereas coarser blocks (32 px) aggregate motion evidence over a broader
-spatial context, offering greater robustness against isolated pixel-level
-disturbances. This range is chosen to span a practically meaningful
-fine-to-coarse spectrum without becoming so coarse that spatially small fire
-events are missed entirely.
+**Block size** $B \in \{16, 32\}$: Block size $B$ determines the
+spatial granularity of the motion map, expressed in pixels of the
+original unscaled frame. Fine blocks ($B = 16$ px) enable detection of
+localized motion from small or nascent fire regions, whereas coarser
+blocks ($B = 32$ px) aggregate motion evidence over a broader spatial
+context, offering greater robustness against isolated pixel-level
+disturbances. This range spans a practically meaningful fine-to-coarse
+spectrum without becoming so coarse that spatially small fire events
+are missed entirely.
 
-**`block_ratio_th ∈ {0.05, 0.10, 0.15}`.** This threshold defines the minimum
-fraction of motion-active blocks required to trigger a full inference pass;
-frames below this threshold are skipped. A low value (0.05) corresponds to a
-conservative policy where even sparse motion activity triggers inference,
-minimizing the risk of missed detections. A higher value (0.15) reflects a more
-aggressive skip policy that demands broader scene-level motion before committing
-to inference. The three values are spaced at a uniform interval of 0.05 to
-enable a systematic and interpretable sweep across this
-conservative-to-aggressive spectrum.
+**Block active threshold** $\tau \in \{0.05, 0.10, 0.15\}$: The
+threshold $\tau$ defines the minimum fraction of motion-active blocks
+required to trigger a full inference pass; frames below $\tau$ are
+skipped. A low value ($\tau = 0.05$) corresponds to a conservative
+policy where even sparse motion activity triggers inference, minimizing
+the risk of missed detections. A higher value ($\tau = 0.15$) reflects
+a more aggressive skip policy that demands broader scene-level motion
+before committing to inference. The three values are spaced at a
+uniform interval of 0.05 to enable a systematic and interpretable
+sweep across this conservative-to-aggressive spectrum.
 
-**`diff_thresh ∈ {3, 5, 7, 10}`.** The per-pixel difference threshold determines
-the minimum absolute intensity change required for a pixel to be counted as a
-motion event within a block. A low threshold (3) is highly sensitive and
-responds to subtle illumination changes, while a high threshold (10) responds
-only to strong, unambiguous motion. The four values are selected to span the
-full sensitivity spectrum — from near-noise-level detection to robust
-large-motion detection — with closer spacing at the lower end (3, 5, 7) to
-provide finer resolution in the sensitivity range most relevant to fire
-detection, where motion tends to be subtle and spatially confined.
+**Diff threshold** $\tau_d \in \{3, 5, 7, 10\}$: The per-pixel
+difference threshold $\tau_d$ determines the minimum absolute intensity
+change required for a pixel to be counted as a motion event within a
+block. A low value ($\tau_d = 3$) is highly sensitive and responds to
+subtle illumination changes, while a high value ($\tau_d = 10$)
+responds only to strong, unambiguous motion. The four values span the
+full sensitivity spectrum --- from near-noise-level detection to robust
+large-motion detection --- with closer spacing at the lower end
+(3, 5, 7) to provide finer resolution in the sensitivity range most
+relevant to fire detection, where motion tends to be subtle and
+spatially confined.
 
 
 Table~\ref{tb:val_search} specifies the search space for the rule-based
@@ -665,6 +671,66 @@ improving operational false alarm behavior.
 
 <!-- ! Add explanation for each hyperparameter space choice -->
 
+**Scale factor** $\alpha \in \{0.5, 1.0\}$  Identical rationale to
+FrameDiffDet: full resolution preserves fine-grained pixel detail,
+while half resolution reduces sensitivity to high-frequency noise.
+Since AccMotionDet accumulates differences across multiple frames,
+downscaling also reduces the memory footprint of the accumulated
+motion buffer, making this parameter particularly relevant for
+real-time deployment.
+
+**Block size** $B \in \{16, 32\}$: Same motivation as FrameDiffDet.
+Coarser blocks (32 px) are relatively more important for AccMotionDet
+because accumulation inherently smooths out transient single-pixel
+disturbances --- so fine-grained 16 px blocks are less necessary but
+still evaluated to confirm this expectation.
+
+**Block active threshold** $\tau \in \{0.05, 0.10\}$: Narrower range
+than FrameDiffDet (which goes to 0.15) because AccMotionDet already
+suppresses spurious activations through temporal accumulation. A more
+aggressive threshold of 0.15 would double-penalize noise that
+accumulation already handles, so the upper bound is reduced to 0.10
+to focus the search on the practically useful range.
+
+**Diff threshold** $\tau_d \in \{3, 5\}$: Narrower than
+FrameDiffDet's $\{3, 5, 7, 10\}$. Because accumulated motion sums
+intensity differences across $\omega$ consecutive frames, the effective
+sensitivity is already amplified by the window length. Higher per-pixel
+thresholds (7, 10) would be redundant --- accumulation raises the
+effective signal level so that lower raw thresholds become sufficient.
+
+**Motion increment / accumulation step** $\omega \in \{5\}$: Fixed
+at 5 rather than searched. A step of 5 frames at standard surveillance
+frame rates (15--25 FPS) corresponds to a temporal window of
+200--333 ms --- short enough to detect rapid flame onset yet long
+enough to distinguish sustained motion from single-frame illumination
+flicker. Fixing this reduces the search space while retaining the most
+physically motivated value.
+
+**Activation threshold** $\tau_m \in \{5, 10\}$: This threshold
+operates on the accumulated motion score (sum of per-block differences
+over $\omega$ frames) required to trigger inference. A low value (5)
+triggers on weak but persistent motion --- appropriate for slowly
+spreading smoke. A higher value (10) requires stronger sustained
+activity, suppressing background flicker. Two values are sufficient
+because $\tau_d$ and $\tau$ jointly control sensitivity at the
+frame level.
+
+**Accumulation cap** $K_{\max} \in \{15, 25, 35\}$: Caps the maximum
+accumulated motion score to prevent runaway accumulation during
+prolonged high-motion sequences (e.g., a person walking continuously).
+Without a cap, sustained motion would keep $s_t = 1$ indefinitely even
+after the scene returns to static. Three values span a low-saturation
+(15) to high-saturation (35) range, controlling how quickly the module
+resets after a high-activity period.
+
+**Decay rate** $\delta \in \{1\}$: Fixed at 1, meaning the
+accumulation score decreases by 1 per frame when no motion is detected.
+A decay of 1 provides linear cooldown behavior that is easy to
+interpret and tune. Larger decay values would reset the accumulator too
+aggressively, discarding genuine slow-onset events such as early-stage
+smoke diffusion. This parameter is fixed to isolate the effect of the
+remaining hyperparameters.
 
 ```{=latex}
 \input{./4.table/tb_val_results.tex}
