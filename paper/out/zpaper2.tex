@@ -38,7 +38,7 @@
   \KOMAoptions{parskip=half}}
 \makeatother
 \usepackage{xcolor}
-\usepackage[a4paper,margin=4cm]{geometry}
+\usepackage[a4paper,margin=1cm]{geometry}
 \usepackage{longtable,booktabs,array}
 \usepackage{calc} % for calculating minipage widths
 % Correct order of tables after \paragraph or \subparagraph
@@ -271,136 +271,89 @@ findings and discusses limitations and future research directions.
 
 \section{Related Work}\label{sec:relatedWork}
 
-\subsubsection{Fire/smoke detection in
-images}\label{firesmoke-detection-in-images}
+\textbf{Fire and Smoke Detection in Images and Videos}: Automated fire
+and smoke detection has attracted considerable research interest, with
+deep learning emerging as the dominant paradigm.
+\citeproc{ref-cheng2024visual}{{[}3{]}} provide a comprehensive survey
+of visual fire detection methods, highlighting the rapid adoption of
+DL-based approaches in this domain. The majority of these methods
+formulate the problem as image-level binary classification (fire/smoke
+vs.~none) or object detection, in which a model receives a single RGB
+image and outputs either a class label with confidence score or
+localized bounding boxes \citeproc{ref-geng2024yolofm}{{[}5{]}},
+\citeproc{ref-khan2025optimized}{{[}6{]}}. Research efforts have
+primarily focused on improving model accuracy and inference speed
+through architectural modifications and advanced training strategies. In
+video-based deployments, these image classifiers are applied directly to
+each frame, enabling integration with existing pipelines without
+architectural changes.
 
-Cover image-based DL classifiers and object detectors (CNNs, ViTs, YOLO
-variants). The purpose is to establish what the ``BIG model'' builds
-upon and why spatial-only classifiers are the current standard. End with
-a transition: these methods work well on images but ignore temporal
-context when applied to video.
+Relying exclusively on individual frames, however, discards temporal
+information inherent in video data that is potentially informative for
+detection. \citeproc{ref-khan2025beyond}{{[}7{]}} survey video-based
+fire and smoke detection approaches and highlight the benefit of
+modeling temporal dynamics. Representative methods include the work of
+\citeproc{ref-cao2019attention}{{[}8{]}}, who combine a CNN for spatial
+feature extraction with a bidirectional LSTM for temporal modeling, and
+\citeproc{ref-ali2025toward}{{[}9{]}}, who employ 3D CNNs with attention
+mechanisms to jointly capture spatio-temporal patterns. While these
+approaches demonstrate improved detection performance over purely
+image-based methods, they incur greater computational cost and require
+more laborious dataset construction involving temporal annotation.
+Hybrid methods address this partially by combining image-based
+classifiers with lightweight temporal post-processing --- such as
+temporal voting \citeproc{ref-de2023hybrid}{{[}10{]}} or motion-based
+false positive suppression
+\citeproc{ref-gragnaniello2025flame}{{[}11{]}} --- yet still apply DL
+inference unconditionally to every frame, regardless of scene content.
 
-\subsubsection{Fire/smoke detection in
-videos}\label{firesmoke-detection-in-videos}
+Across both paradigms, the dominant deployment pattern applies DL
+inference to each frame or short clip, without considering whether
+inference is warranted given the frame content. In static surveillance
+scenarios, particularly indoors, video streams frequently consist of
+purely background frames with no motion, in which fire or smoke is a
+priori unlikely. Motivated by this observation, we propose a skip-module
+that filters such low-activity frames prior to DL inference, reducing
+computational cost while preserving detection reliability. The module
+prioritizes retaining positive frames (fire/smoke present) while
+skipping negative frames (background only), functioning as a
+complementary accelerator for any existing frame-wise detection
+pipeline.
 
-Cover video-specific methods: two-stream networks, 3D CNNs, LSTM-based
-temporal modeling. Highlight that most works still apply frame-wise
-inference and rarely address the computational cost in static
-surveillance streams.
+\textbf{Motion Detection and The proposed Skip Module}: The skip
+decision in our module relies on motion estimation, which connects to
+the well-studied problem of background subtraction.
+\citeproc{ref-sobral2014comprehensive}{{[}12{]}} and
+\citeproc{ref-garcia2020background}{{[}13{]}} provide comprehensive
+reviews of background subtraction methods, ranging from simple
+statistical models to deep learning-based approaches. More robust
+methods such as MOG2 and KNN
+\citeproc{ref-zivkovic2006efficient}{{[}14{]}} model the scene
+background statistically and are resilient to gradual illumination
+changes; however, they introduce non-trivial memory overhead and
+initialization latency. As the skip-module is designed primarily as a
+fast, lightweight gate, we instead adopt frame differencing ---
+computing the absolute per-pixel intensity change between consecutive
+frames --- which offers minimal computational overhead and requires no
+background model initialization.
 
-\subsubsection{Efficient Video Inference: Frame Selection and
-Skipping}\label{efficient-video-inference-frame-selection-and-skipping}
-
-This is the most critical subsection --- directly adjacent to your
-contribution. Cover:
-
-Salient frame selection: selecting keyframes based on content importance
-
-Early-exit networks: FrameExit (CVPR 2021), Stop-or-Forward (WACV 2023),
-which use learned gates to skip computation
-
-Gap to fill: all these methods target general action recognition and
-require training the gate jointly with the classifier, whereas your
-skip-module is training-free and plug-and-play for safety-critical fire
-detection
-
-\subsubsection{Motion Detection}\label{motion-detection}
-
-Cover the two classical methods your skip-module builds upon:
-
-Frame differencing: fast, training-free, sensitive to threshold
-
-Background subtraction (MOG2, KNN): more robust to illumination changes
-but higher memory cost
-
-End with a brief justification for your design choice (e.g., why frame
-differencing was chosen over background subtraction for your use case).
-
-\textbf{Fire and Smoke Detection in Images}: Early fire and smoke
-detection methods relied on handcrafted features such as color, texture,
-and shape to identify fire or smoke regions in still images
-\citeproc{ref-cheng2024visual}{{[}3{]}}. With the advent of deep
-learning, convolutional neural networks (CNNs) have largely replaced
-these approaches, offering superior feature extraction and
-generalization across diverse visual conditions
-\citeproc{ref-gragnaniello2024fire}{{[}4{]}}. More recently, object
-detection frameworks such as YOLOv8 and YOLOv10 have been adopted for
-fire and smoke detection, enabling simultaneous localization and
-classification within a single forward pass. While these models achieve
-high accuracy, they are computationally intensive, with inference times
-on the order of tens of milliseconds per frame --- a cost that becomes
-prohibitive when applied naively to continuous video streams.
-
-\textbf{Fire and Smoke Detection in Videos}: To exploit temporal
-information in video, several works have extended image-based approaches
-by incorporating recurrent architectures or two-stream networks that
-process both appearance and motion cues jointly. Video-based methods
-have demonstrated improved robustness by capturing the dynamic
-characteristics of fire and smoke --- such as flickering and spreading
-patterns --- that are not discernible from individual frames alone.
-However, the dominant deployment paradigm in practical surveillance
-systems remains frame-wise inference, in which a DL classifier is
-applied independently to each frame of the video stream without regard
-to inter-frame redundancy. This approach disregards the temporal
-structure of the video and incurs unnecessary computational cost,
-particularly in static indoor scenes where consecutive frames are
-largely identical.
-
-\textbf{Efficient Video Inference}: To reduce inference cost in video
-recognition, several approaches have been proposed that selectively skip
-or early-exit frames based on estimated content complexity. FrameExit
-\citeproc{ref-frameexit2021}{\textbf{frameexit2021?}} introduces a
-conditional early-exit strategy in which a lightweight gating network,
-trained jointly with the main classifier, decides at each frame whether
-to exit early or continue inference. Similarly, the Stop-or-Forward
-framework \citeproc{ref-stoporforward2023}{\textbf{stoporforward2023?}}
-employs dynamic layer skipping during action recognition to reduce
-redundant computation on uninformative frames. While these methods
-demonstrate significant efficiency gains, they share a critical
-limitation: the gating mechanism is coupled to the underlying classifier
-and must be trained jointly, making integration with a pre-trained model
-non-trivial. Furthermore, these methods are designed for general-purpose
-action recognition tasks and have not been evaluated in safety-critical
-scenarios such as fire and smoke detection, where recall requirements
-are stringent.
-
-\textbf{Motion Detection}: Motion detection provides a computationally
-efficient means of identifying temporal activity in video streams
-without requiring deep learning. Frame differencing computes the
-absolute pixel-wise difference between consecutive frames and applies a
-threshold to produce a binary activity map, offering extremely low
-computational overhead at the cost of sensitivity to noise and
-illumination changes \citeproc{ref-framediff}{\textbf{framediff?}}.
-Background subtraction methods such as MOG2 and KNN model the background
-scene statistically and detect foreground objects as deviations from the
-learned background, providing greater robustness to gradual lighting
-changes at the cost of higher memory usage
-\citeproc{ref-backgroundsubtraction}{\textbf{backgroundsubtraction?}}.
-These classical techniques have been widely used as preprocessing steps
-in surveillance pipelines to trigger downstream processing only when
-motion is detected.
-
-\textbf{Summary and Research Gap}: Existing DL-based fire and smoke
-detection systems achieve high accuracy but apply computationally
-intensive inference to every video frame, regardless of scene activity.
-Efficient video inference methods such as FrameExit address redundant
-computation but require joint training of the gate and classifier,
-limiting their applicability as plug-and-play extensions to pre-trained
-models. Classical motion detection techniques, by contrast, are
-lightweight and training-free but have not been systematically exploited
-to gate DL inference in fire and smoke detection pipelines. This study
-addresses this gap by proposing a skip-module that combines lightweight
-motion estimation with a pre-trained high-capacity classifier, enabling
-training-free inference acceleration without sacrificing detection
-reliability --- as described in the following section.
+While classical motion detection provides an efficient means of
+identifying scene activity, it has not been systematically exploited to
+gate DL inference in fire and smoke detection pipelines. Existing
+efficient video inference methods, such as FrameExit
+\citeproc{ref-ghodrati2021frameexit}{{[}15{]}}, address per-frame
+redundancy but require joint training of the gating mechanism and the
+underlying classifier, limiting plug-and-play applicability to
+pre-trained models. This study bridges this gap by integrating
+lightweight frame-differencing-based motion estimation as a
+training-free gate for a high-capacity classifier, as described in
+Section\textasciitilde{}\ref{sec:method}.
 
 \section{The proposed method}\label{sec:method}
 
 \subsection{System Overview}\label{system-overview}
 
 \input{./3.fig/fig_pipeline.tex}
-
-\subsection{System Overview}\label{system-overview-1}
 
 The proposed system is a fire and smoke detection pipeline that
 processes a continuous video stream and classifies each frame as either
@@ -560,10 +513,8 @@ candidate ranking.
 
 \section{Experiments and Results}\label{sec:results}
 
-\subsection{Dataset}\label{dataset}
-
-\subsubsection{Video Datasets for Hyperparameter Tuning and System
-Evaluation}\label{video-datasets-for-hyperparameter-tuning-and-system-evaluation}
+\subsection{Fire and Smoke Indoor Video
+Dataset}\label{fire-and-smoke-indoor-video-dataset}
 
 \input{./3.fig/fig_videodb.tex}
 
@@ -572,17 +523,17 @@ Evaluation}\label{video-datasets-for-hyperparameter-tuning-and-system-evaluation
 Publicly available video datasets for fire and smoke detection using
 static cameras remain scarce. While several existing benchmarks address
 this detection task --- including FireNet
-\citeproc{ref-jadon2019firenet}{{[}5{]}}, Firesense
-\citeproc{ref-Firesens4:online}{{[}6{]}}, FiSmo
-\citeproc{ref-cazzolato2017fismo}{{[}7{]}}, and FURG
-\citeproc{ref-steffens2015unconstrained}{{[}8{]}} --- these were
+\citeproc{ref-jadon2019firenet}{{[}16{]}}, Firesense
+\citeproc{ref-Firesens4:online}{{[}17{]}}, FiSmo
+\citeproc{ref-cazzolato2017fismo}{{[}18{]}}, and FURG
+\citeproc{ref-steffens2015unconstrained}{{[}19{]}} --- these were
 recorded with moving cameras and are therefore unsuitable for static
 surveillance scenarios. Static-camera datasets such as DFire
-\citeproc{ref-dfiredataset}{{[}9{]}}, VisiFire Bilkent
-\citeproc{ref-VisiFireBilkent:online}{{[}10{]}}, KMU Fire and Smoke
-\citeproc{ref-KMUFireSmokeDataset}{{[}11{]}}, Mivia Fire and Smoke
-\citeproc{ref-foggia2015real}{{[}12{]}}, and USTC Smoke
-\citeproc{ref-lin2017smoke}{{[}13{]}} do exist; however, they
+\citeproc{ref-dfiredataset}{{[}20{]}}, VisiFire Bilkent
+\citeproc{ref-VisiFireBilkent:online}{{[}21{]}}, KMU Fire and Smoke
+\citeproc{ref-KMUFireSmokeDataset}{{[}22{]}}, Mivia Fire and Smoke
+\citeproc{ref-foggia2015real}{{[}23{]}}, and USTC Smoke
+\citeproc{ref-lin2017smoke}{{[}24{]}} do exist; however, they
 collectively suffer from several limitations: a predominance of outdoor
 scenes, a small number of video samples, low spatial resolution, and
 insufficient diversity in fire/smoke appearances and environmental
@@ -591,38 +542,39 @@ conditions.
 To address these deficiencies, we constructed a dedicated static indoor
 video dataset by aggregating clips from multiple heterogeneous sources.
 Fire and smoke samples were sourced from the Korea AI Fire Dataset
-\citeproc{ref-AIHub87:online}{{[}14{]}}, the USTC Smoke Dataset
-\citeproc{ref-lin2017smoke}{{[}13{]}}, and the VSD3K Dataset
-\citeproc{ref-huang2022fire}{{[}15{]}}, supplemented by videos collected
+\citeproc{ref-AIHub87:online}{{[}25{]}}, the USTC Smoke Dataset
+\citeproc{ref-lin2017smoke}{{[}24{]}}, and the VSD3K Dataset
+\citeproc{ref-huang2022fire}{{[}26{]}}, supplemented by videos collected
 from open online platforms (Pexels, Pixabay, and YouTube).
 Non-fire/smoke (negative) samples were compiled from self-recorded
-footage captured by real CCTV cameras in indoor environments (e.g.,
-parking areas), along with the Safe \& Unsafe Behavior in Workplaces
-dataset \citeproc{ref-onal2024video}{{[}16{]}}, the Indoor Action
-dataset \citeproc{ref-deniz2024optimized}{{[}17{]}}, the MPII Cooking 2
-Dataset \citeproc{ref-rohrbach2016recognizing}{{[}18{]}}, and the
-WiseNet dataset \citeproc{ref-marroquin2019wisenet}{{[}19{]}}.
+footage captured by real CCTV cameras in various indoor environments
+(e.g., parking areas), along with the Safe \& Unsafe Behavior in
+Workplaces dataset \citeproc{ref-onal2024video}{{[}27{]}}, the Indoor
+Action dataset \citeproc{ref-deniz2024optimized}{{[}28{]}}, the MPII
+Cooking 2 Dataset \citeproc{ref-rohrbach2016recognizing}{{[}29{]}}, and
+the WiseNet dataset \citeproc{ref-marroquin2019wisenet}{{[}30{]}}.
+Table\textasciitilde{}\ref{tb:videodb} summarizes the properties of the
+self-collected video dataset alongside a comparison with existing
+benchmark datasets, and Figure\textasciitilde{}\ref{fig:videodb}
+presents representative sample frames.
 
-Due to the lack of public high-resolution datasets specifically designed
-for static surveillance cameras, we constructed a custom dataset
-consisting of 150 HD videos (1920\$\times\$1080 resolution). The dataset
-is strictly balanced into three categories: Fire (50), Smoke (50), and
-Safe/Neutral (50). To ensure robust evaluation, the videos capture
-diverse environments, including forests, warehouses, and urban settings
-under varying lighting conditions.
-
-The 150 videos were randomly split into Training/Validation (60\%, n=90:
-30 Fire, 30 Smoke, 30 Safe) for hyperparameter tuning and hyperparameter
-selection, and Test (40\%, n=60: 20 per class) for unbiased final
-performance evaluation. Stratified sampling ensured balance across
-classes and environments.
+For the hyperparameter optimization described in
+Section\textasciitilde{}\ref{sec:hyperparam}, the video dataset was
+further partitioned into a validation set, \(D_{\text{val}}\) (46
+videos), used to select the optimal skip-module hyperparameters, and a
+test set, \(D_{\text{test}}\) (104 videos), used for the final
+evaluation of the skip-enabled system against the baseline and existing
+methods. The split followed a 30:70 ratio (validation:test), following
+the protocol of \citeproc{ref-de2023hybrid}{{[}10{]}}, and was performed
+using stratified sampling to preserve balanced class distributions in
+both subsets.
 
 \subsection{Evaluation Metrics}\label{sec:metrics}
 
 Performance is evaluated under both \textbf{frame-level} and
 \textbf{video-level} protocols, which are commonly used in fire and
-smoke video analysis \citeproc{ref-dfiredataset}{{[}9{]}},
-\citeproc{ref-steffens2016non}{{[}20{]}}. Frame-level evaluation
+smoke video analysis \citeproc{ref-dfiredataset}{{[}20{]}},
+\citeproc{ref-steffens2016non}{{[}31{]}}. Frame-level evaluation
 measures detection performance for each individual frame, providing a
 strict assessment of classification accuracy. Video-level evaluation
 aggregates predictions over entire video sequences, offering a coarser
@@ -707,7 +659,7 @@ high-accuracy models to lightweight, real-time approximations:
 \end{itemize}
 
 For the BIG model, we combined images from the D-Fire dataset
-\citeproc{ref-dfiredataset}{{[}9{]}} with additional fire and smoke
+\citeproc{ref-dfiredataset}{{[}20{]}} with additional fire and smoke
 images collected from the internet, resulting in a total of 18,000
 images (\#REVISE\_NEEDED). These were divided into training (80\%,
 14,400 images) and testing (20\%, 3,600 images) sets.
@@ -751,22 +703,22 @@ F1-score.
 \tightlist
 \item
   \textbf{M1 (Lightweight Classifier)
-  \citeproc{ref-jadon2019firenet}{{[}5{]}}:} A MobileNetV2-based
+  \citeproc{ref-jadon2019firenet}{{[}16{]}}:} A MobileNetV2-based
   classifier trained on a smaller subset (\(<5k\) images). It represents
   the standard ``efficiency'' compromise: low latency (\$\sim\$15ms) but
   reduced generalization capability.
 \item
   \textbf{M2 (Lightweight Detector)
-  \citeproc{ref-pedrovin2023HybridMethodFire}{{[}21{]}}:} A YOLOv8-Nano
-  object detector trained on a small dataset (\$\sim\$2k images). It
-  offers localization but struggles with small or semi-transparent smoke
-  features due to limited training data.
+  \citeproc{ref-de2023hybrid}{{[}10{]}}:} A YOLOv8-Nano object detector
+  trained on a small dataset (\$\sim\$2k images). It offers localization
+  but struggles with small or semi-transparent smoke features due to
+  limited training data.
 \item
   \textbf{M3 (Temporal Voting Method)
-  \citeproc{ref-pedrovin2023HybridMethodFire}{{[}21{]}}:} A video-level
-  approach that aggregates inference results over a sliding window of 30
-  frames to reduce false alarms. While effective for reducing noise, it
-  introduces inherent algorithmic latency.
+  \citeproc{ref-de2023hybrid}{{[}10{]}}:} A video-level approach that
+  aggregates inference results over a sliding window of 30 frames to
+  reduce false alarms. While effective for reducing noise, it introduces
+  inherent algorithmic latency.
 \end{itemize}
 
 \subsection{Results}\label{results}
@@ -998,33 +950,33 @@ the chromatic signatures of either fire or smoke.
 
 \section{Conclusion}\label{sec:conclusion}
 
-We proposed a lightweight, plug-and-play skip module designed to
-accelerate real-time fire and smoke detection in static surveillance
-systems. By combining block-based motion analysis with targeted color
-and texture heuristics, our module safely filters out up to 72\% of
-irrelevant background frames without compromising safety. Extensive
-evaluations demonstrate that our approach achieves a 3\(\times\) system
-speedup and a 67\% reduction in computational cost, while fully
-preserving the near-perfect accuracy (98.5\% F1-Score) of heavy deep
-learning models. Future work will focus on integrating adaptive,
-unsupervised thresholding to dynamically adjust heuristic rules based on
-real-time environmental lighting and weather shifts.
+We propose a lightweight, plug-and-play skip module \(\mathcal{S}\)
+designed to accelerate real-time fire and smoke detection in indoor
+surveillance scenarios. Operating at a tiny fraction
+(\({\approx}2.5\%\)) of the computational cost of the DL classifier
+\(\mathcal{M}\), \(\mathcal{S}\) efficiently filters out static
+background frames before they reach \(\mathcal{M}\), reducing
+unnecessary inference overhead. Experiments on a real-world video
+dataset demonstrate that the proposed approach yields a throughput
+improvement of over 30\% in frames per second while maintaining
+detection reliability.
 
-\emph{(Focus on the ``Why'' and the ``Limits'')} The empirical results
-demonstrate that the bottleneck in high-accuracy continuous surveillance
-is the redundancy of the input data, not the deep learning model itself.
-By successfully identifying and dropping non-informative frames at the
-edge, our proposed module enables the deployment of computationally
-heavy, expert-level models on resource-constrained hardware.
+Nevertheless, the proposed approach has several limitations. First,
+\(\mathcal{S}\) relies solely on inter-frame motion cues, which may be
+unsuitable for outdoor surveillance scenarios where persistent motion
+sources --- such as wind, moving vehicles, etc. --- are continuously
+present, potentially causing \(\mathcal{S}\) to pass the majority of
+frames to \(\mathcal{M}\) and negating the efficiency gain. Second, the
+hyperparameters of \(\mathcal{S}\) require dataset-specific tuning prior
+to deployment, incurring additional optimization overhead. Third, the
+overall detection accuracy of the system remains bounded by the capacity
+of \(\mathcal{M}\), which is treated as a fixed component and not
+optimized in this work.
 
-\textbf{Limitations and Generalization:} While Approach 2 proved highly
-robust, the reliance on color heuristics means the system is currently
-constrained to daytime or well-lit surveillance. In zero-light
-environments utilizing IR cameras, the red-channel heuristics for fire
-detection would fail, requiring a fallback to pure motion or thermal
-thresholds. Furthermore, extreme weather conditions such as heavy,
-moving fog can mimic the grayish diffusion of smoke, occasionally
-leading to false positives that reduce the overall Filter Rate.
+Future work may explore alternative skip strategies --- such as
+leveraging color, texture, or learned features as gating cues --- and
+extend the framework to outdoor surveillance scenarios where
+motion-based filtering is less effective.
 
 \section*{References}\label{sec:references}
 \addcontentsline{toc}{section}{References}
@@ -1057,27 +1009,100 @@ south korea \textbar{} the guardian.''} Jul. 2025. Available:
 novel taxonomy,''} \emph{Expert Systems with Applications}, vol. 255, p.
 124783, 2024.}
 
-\bibitem[\citeproctext]{ref-jadon2019firenet}
+\bibitem[\citeproctext]{ref-geng2024yolofm}
 \CSLLeftMargin{{[}5{]} }%
+\CSLRightInline{X. Geng, Y. Su, X. Cao, H. Li, and L. Liu, {``YOLOFM: An
+improved fire and smoke object detection algorithm based on YOLOv5n,''}
+\emph{Scientific Reports}, vol. 14, no. 1, p. 4543, 2024.}
+
+\bibitem[\citeproctext]{ref-khan2025optimized}
+\CSLLeftMargin{{[}6{]} }%
+\CSLRightInline{Z. A. Khan \emph{et al.}, {``Optimized cross-module
+attention network and medium-scale dataset for effective fire
+detection,''} \emph{Pattern Recognition}, vol. 161, p. 111273, 2025.}
+
+\bibitem[\citeproctext]{ref-khan2025beyond}
+\CSLLeftMargin{{[}7{]} }%
+\CSLRightInline{R. A. Khan, U. I. Bajwa, R. H. Raza, and M. W. Anwar,
+{``Beyond boundaries: Advancements in fire and smoke detection for
+indoor and outdoor surveillance feeds,''} \emph{Engineering Applications
+of Artificial Intelligence}, vol. 142, p. 109855, 2025.}
+
+\bibitem[\citeproctext]{ref-cao2019attention}
+\CSLLeftMargin{{[}8{]} }%
+\CSLRightInline{Y. Cao, F. Yang, Q. Tang, and X. Lu, {``An attention
+enhanced bidirectional LSTM for early forest fire smoke recognition,''}
+\emph{IEEE Access}, vol. 7, pp. 154732--154742, 2019.}
+
+\bibitem[\citeproctext]{ref-ali2025toward}
+\CSLLeftMargin{{[}9{]} }%
+\CSLRightInline{M. M. Ali and M. Ghodrat, {``Toward reliable fire
+detection in indoor CCTV footage: Reducing false alarms from benign
+flames using 3D attention CNNs,''} \emph{IEEE Access}, 2025.}
+
+\bibitem[\citeproctext]{ref-de2023hybrid}
+\CSLLeftMargin{{[}10{]} }%
+\CSLRightInline{P. V. A. de Venancio, R. J. Campos, T. M. Rezende, A. C.
+Lisboa, and A. V. Barbosa, {``A hybrid method for fire detection based
+on spatial and temporal patterns,''} \emph{Neural Computing and
+Applications}, vol. 35, no. 13, pp. 9349--9361, 2023.}
+
+\bibitem[\citeproctext]{ref-gragnaniello2025flame}
+\CSLLeftMargin{{[}11{]} }%
+\CSLRightInline{D. Gragnaniello, A. Greco, C. Sansone, and B. Vento,
+{``FLAME: Fire detection in videos combining a deep neural network with
+a model-based motion analysis,''} \emph{Neural Computing and
+Applications}, vol. 37, no. 8, pp. 6181--6197, 2025.}
+
+\bibitem[\citeproctext]{ref-sobral2014comprehensive}
+\CSLLeftMargin{{[}12{]} }%
+\CSLRightInline{A. Sobral and A. Vacavant, {``A comprehensive review of
+background subtraction algorithms evaluated with synthetic and real
+videos,''} \emph{Computer Vision and Image Understanding}, vol. 122, pp.
+4--21, 2014.}
+
+\bibitem[\citeproctext]{ref-garcia2020background}
+\CSLLeftMargin{{[}13{]} }%
+\CSLRightInline{B. Garcia-Garcia, T. Bouwmans, and A. J. R. Silva,
+{``Background subtraction in real applications: Challenges, current
+models and future directions,''} \emph{Computer Science Review}, vol.
+35, p. 100204, 2020.}
+
+\bibitem[\citeproctext]{ref-zivkovic2006efficient}
+\CSLLeftMargin{{[}14{]} }%
+\CSLRightInline{Z. Zivkovic and F. Van Der Heijden, {``Efficient
+adaptive density estimation per image pixel for the task of background
+subtraction,''} \emph{Pattern recognition letters}, vol. 27, no. 7, pp.
+773--780, 2006.}
+
+\bibitem[\citeproctext]{ref-ghodrati2021frameexit}
+\CSLLeftMargin{{[}15{]} }%
+\CSLRightInline{A. Ghodrati, B. E. Bejnordi, and A. Habibian,
+{``Frameexit: Conditional early exiting for efficient video
+recognition,''} in \emph{Proceedings of the IEEE/CVF conference on
+computer vision and pattern recognition}, 2021, pp. 15608--15618.}
+
+\bibitem[\citeproctext]{ref-jadon2019firenet}
+\CSLLeftMargin{{[}16{]} }%
 \CSLRightInline{A. Jadon, M. Omama, A. Varshney, M. S. Ansari, and R.
 Sharma, {``FireNet: A specialized lightweight fire \& smoke detection
 model for real-time IoT applications,''} \emph{arXiv preprint
 arXiv:1905.11922}, 2019.}
 
 \bibitem[\citeproctext]{ref-Firesens4:online}
-\CSLLeftMargin{{[}6{]} }%
+\CSLLeftMargin{{[}17{]} }%
 \CSLRightInline{{``Firesense.''} Available:
 \url{https://www.firesense.eu/}}
 
 \bibitem[\citeproctext]{ref-cazzolato2017fismo}
-\CSLLeftMargin{{[}7{]} }%
+\CSLLeftMargin{{[}18{]} }%
 \CSLRightInline{M. T. Cazzolato \emph{et al.}, {``Fismo: A compilation
 of datasets from emergency situations for fire and smoke analysis,''} in
 \emph{Brazilian symposium on databases-SBBD}, SBC Uberl{â}ndia, Brazil,
 2017, pp. 213--223.}
 
 \bibitem[\citeproctext]{ref-steffens2015unconstrained}
-\CSLLeftMargin{{[}8{]} }%
+\CSLLeftMargin{{[}19{]} }%
 \CSLRightInline{C. R. Steffens, R. N. Rodrigues, and S. S. da Costa
 Botelho, {``An unconstrained dataset for non-stationary video based fire
 detection,''} in \emph{2015 12th latin american robotics symposium and
@@ -1085,27 +1110,27 @@ detection,''} in \emph{2015 12th latin american robotics symposium and
 25--30.}
 
 \bibitem[\citeproctext]{ref-dfiredataset}
-\CSLLeftMargin{{[}9{]} }%
+\CSLLeftMargin{{[}20{]} }%
 \CSLRightInline{P. V. A. de Venâncio, A. C. Lisboa, and A. V. Barbosa,
 {``An automatic fire detection system based on deep convolutional neural
 networks for low-power, resource-constrained devices,''} \emph{Neural
 Computing and Applications}, vol. 34, no. 18, pp. 15349--15368, 2022.}
 
 \bibitem[\citeproctext]{ref-VisiFireBilkent:online}
-\CSLLeftMargin{{[}10{]} }%
+\CSLLeftMargin{{[}21{]} }%
 \CSLRightInline{E. Cetin, {``Computer vision based fire detection
 software.''} 2015. Available:
 \url{http://signal.ee.bilkent.edu.tr/VisiFire/}}
 
 \bibitem[\citeproctext]{ref-KMUFireSmokeDataset}
-\CSLLeftMargin{{[}11{]} }%
+\CSLLeftMargin{{[}22{]} }%
 \CSLRightInline{B. C. Ko, S. J. Ham, and J. Y. Nam, {``Modeling and
 formalization of fuzzy finite automata for detection of irregular fire
 flames,''} \emph{IEEE Transactions on Circuits and Systems for Video
 Technology}, vol. 21, no. 12, pp. 1903--1912, 2011.}
 
 \bibitem[\citeproctext]{ref-foggia2015real}
-\CSLLeftMargin{{[}12{]} }%
+\CSLLeftMargin{{[}23{]} }%
 \CSLRightInline{P. Foggia, A. Saggese, and M. Vento, {``Real-time fire
 detection for video-surveillance applications using a combination of
 experts based on color, shape, and motion,''} \emph{IEEE TRANSACTIONS on
@@ -1113,63 +1138,56 @@ circuits and systems for video technology}, vol. 25, no. 9, pp.
 1545--1556, 2015.}
 
 \bibitem[\citeproctext]{ref-lin2017smoke}
-\CSLLeftMargin{{[}13{]} }%
+\CSLLeftMargin{{[}24{]} }%
 \CSLRightInline{G. Lin, Y. Zhang, Q. Zhang, Y. Jia, G. Xu, and J. Wang,
 {``Smoke detection in video sequences based on dynamic texture using
 volume local binary patterns.''} \emph{KSII Trans. Internet Inf. Syst.},
 vol. 11, no. 11, pp. 5522--5536, 2017.}
 
 \bibitem[\citeproctext]{ref-AIHub87:online}
-\CSLLeftMargin{{[}14{]} }%
+\CSLLeftMargin{{[}25{]} }%
 \CSLRightInline{{``AI-hub.''} Available:
 \url{https://aihub.or.kr/aihubdata/data/view.do?dataSetSn=71751}}
 
 \bibitem[\citeproctext]{ref-huang2022fire}
-\CSLLeftMargin{{[}15{]} }%
+\CSLLeftMargin{{[}26{]} }%
 \CSLRightInline{L. Huang, G. Liu, Y. Wang, H. Yuan, and T. Chen, {``Fire
 detection in video surveillances using convolutional neural networks and
 wavelet transform,''} \emph{Engineering Applications of Artificial
 Intelligence}, vol. 110, p. 104737, 2022.}
 
 \bibitem[\citeproctext]{ref-onal2024video}
-\CSLLeftMargin{{[}16{]} }%
+\CSLLeftMargin{{[}27{]} }%
 \CSLRightInline{O. Önal and E. Dandıl, {``Video dataset for the
 detection of safe and unsafe behaviours in workplaces,''} \emph{Data in
 Brief}, vol. 56, p. 110791, 2024.}
 
 \bibitem[\citeproctext]{ref-deniz2024optimized}
-\CSLLeftMargin{{[}17{]} }%
+\CSLLeftMargin{{[}28{]} }%
 \CSLRightInline{D. Deniz, E. Ros, E. M. Ortigosa, and F. Barranco,
 {``Optimized edge-cloud system for activity monitoring using knowledge
 distillation,''} \emph{Electronics}, vol. 13, no. 23, p. 4786, 2024.}
 
 \bibitem[\citeproctext]{ref-rohrbach2016recognizing}
-\CSLLeftMargin{{[}18{]} }%
+\CSLLeftMargin{{[}29{]} }%
 \CSLRightInline{M. Rohrbach \emph{et al.}, {``Recognizing fine-grained
 and composite activities using hand-centric features and script data,''}
 \emph{International Journal of Computer Vision}, vol. 119, no. 3, pp.
 346--373, 2016.}
 
 \bibitem[\citeproctext]{ref-marroquin2019wisenet}
-\CSLLeftMargin{{[}19{]} }%
+\CSLLeftMargin{{[}30{]} }%
 \CSLRightInline{R. Marroquin, J. Dubois, and C. Nicolle, {``WiseNET: An
 indoor multi-camera multi-space dataset with contextual information and
 annotations for people detection and tracking,''} \emph{Data in brief},
 vol. 27, p. 104654, 2019.}
 
 \bibitem[\citeproctext]{ref-steffens2016non}
-\CSLLeftMargin{{[}20{]} }%
+\CSLLeftMargin{{[}31{]} }%
 \CSLRightInline{C. R. Steffens, R. N. Rodrigues, and S. S. da Costa
 Botelho, {``Non-stationary VFD evaluation kit: Dataset and metrics to
 fuel video-based fire detection development,''} in \emph{Latin american
 robotics symposium}, Springer, 2016, pp. 135--151.}
-
-\bibitem[\citeproctext]{ref-pedrovin2023HybridMethodFire}
-\CSLLeftMargin{{[}21{]} }%
-\CSLRightInline{P. V. A. de Venâncio, R. J. Campos, T. M. Rezende, A. C.
-Lisboa, and A. V. Barbosa, {``A hybrid method for fire detection based
-on spatial and temporal patterns,''} \emph{Neural Computing and
-Applications}, vol. 35, no. 13, pp. 9349--9361, 2023.}
 
 \end{CSLReferences}
 

@@ -8,7 +8,7 @@
 8;Static camera;USTC Smoke (in2017smoke);30;$1920 \times 1080$;$1920 \times 1080$;22;8;30;0
 9;Moving camera;FireNet (Lad et al., 2019);62;$352 \times 222$;$1920 \times 1080$;46;16;30;32
 10;Moving camera;FireSense (Kose et al., 2010);49;$300 \times 240$;$1600 \times 1200$;24;25;10;39
-11;Moving camera;FiSmo (Cazzato et al., 2020);88;$320 \times 240$;$1920 \times 1080$;80;8;;88
-12;Moving camera;FURG (Steffens et al., 2015);22;$240 \times 344$;$1920 \times 1080$;17;5;;19
+11;Moving camera;FiSmo (Cazzato et al., 2020);88;$320 \times 240$;$1920 \times 1080$;80;8;0;88
+12;Moving camera;FURG (Steffens et al., 2015);22;$240 \times 344$;$1920 \times 1080$;17;5;3;19
 13;Mix camera;VSD3 (Huang et al., 2022);20;$352 \times 288$;$2048 \times 1536$;8;12;6;14
-14;Static camera;Ours (2026);n/a;n/a;n/a;n/a;n/a;n/a;n/a
+14;Static camera;Ours (2026);150;$814 \times 720$;$3840 \times 2160$;75;75;150;0

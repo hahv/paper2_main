@@ -1,5 +1,7 @@
 \noindent
-Let $F_t$ denote the grayscale frame at time $t$, converted from the
+The details of the AccMotionDet algorithm are outlined in
+Algorithm~\ref{alg:acc_motion_det}. Let $F_t$ denote the grayscale frame at time
+$t$, converted from the
 downsampled input $\tilde{f}_t$, and $\mathbf{K}_t \in [0, K_{\max}]$
 the per-pixel \textit{accumulated motion mask}.
 Upon detection, $\mathbf{K}_t$ is incremented by $\omega$ and decays

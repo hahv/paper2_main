@@ -3,7 +3,7 @@ Let $F_t$ denote the grayscale frame at time $t$, converted from the
 downsampled input $\tilde{f}_t$.
 $\mathbf{M}_t \in \{0, 255\}$ is the binary foreground mask output,
 where a pixel is declared active if the absolute inter-frame intensity
-change exceeds threshold $\tau_d$.
+change exceeds threshold $\tau_d$. The algorithm is formalized in Algorithm~\ref{alg:framediff_det}.
 
 \begin{algorithm}[ht]
 \caption{Frame Difference Detector (FrameDiffDet)}

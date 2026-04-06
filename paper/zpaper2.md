@@ -29,7 +29,7 @@ documentclass: article
 fontsize: 10pt
 geometry:
   - a4paper
-  - margin=4cm
+  - margin=1cm
 link-citations: true
 secPrefix:
   - Section
@@ -148,113 +148,71 @@ findings and discusses limitations and future research directions.
 <!-- SYNC_TARGET_FILE: 02_aRelated_work.md-->
 <!-- BLOCK_ID: related -->
 
-### Fire/smoke detection in images
-
-Cover image-based DL classifiers and object detectors (CNNs, ViTs, YOLO
-variants). The purpose is to establish what the "BIG model" builds upon and why
-spatial-only classifiers are the current standard. End with a transition: these
-methods work well on images but ignore temporal context when applied to video.
-
-### Fire/smoke detection in videos
-
-Cover video-specific methods: two-stream networks, 3D CNNs, LSTM-based temporal
-modeling. Highlight that most works still apply frame-wise inference and rarely
-address the computational cost in static surveillance streams.
-
-### Efficient Video Inference: Frame Selection and Skipping
-
-This is the most critical subsection — directly adjacent to your contribution.
-Cover:
-
-Salient frame selection: selecting keyframes based on content importance
-
-Early-exit networks: FrameExit (CVPR 2021), Stop-or-Forward (WACV 2023), which
-use learned gates to skip computation
-
-Gap to fill: all these methods target general action recognition and require
-training the gate jointly with the classifier, whereas your skip-module is
-training-free and plug-and-play for safety-critical fire detection
-
-### Motion Detection
-
-Cover the two classical methods your skip-module builds upon:
-
-Frame differencing: fast, training-free, sensitive to threshold
-
-Background subtraction (MOG2, KNN): more robust to illumination changes but
-higher memory cost
-
-End with a brief justification for your design choice (e.g., why frame
-differencing was chosen over background subtraction for your use case).
-
 <!-- !Sample writing -->
 
-**Fire and Smoke Detection in Images**: Early fire and smoke detection methods
-relied on handcrafted features such as color, texture, and shape to identify
-fire or smoke regions in still images [@cheng2024visual]. With the advent of
-deep learning, convolutional neural networks (CNNs) have largely replaced these
-approaches, offering superior feature extraction and generalization across
-diverse visual conditions [@gragnaniello2024fire]. More recently, object
-detection frameworks such as YOLOv8 and YOLOv10 have been adopted for fire and
-smoke detection, enabling simultaneous localization and classification within a
-single forward pass. While these models achieve high accuracy, they are
-computationally intensive, with inference times on the order of tens of
-milliseconds per frame --- a cost that becomes prohibitive when applied naively
-to continuous video streams.
+**Fire and Smoke Detection in Images and Videos**: Automated fire and smoke
+detection has attracted considerable research interest, with deep learning
+emerging as the dominant paradigm. [@cheng2024visual] provide a comprehensive
+survey of visual fire detection methods, highlighting the rapid adoption of
+DL-based approaches in this domain. The majority of these methods formulate the
+problem as image-level binary classification (fire/smoke vs. none) or object
+detection, in which a model receives a single RGB image and outputs either a
+class label with confidence score or localized bounding boxes [@geng2024yolofm;
+@khan2025optimized]. Research efforts have primarily focused on improving model
+accuracy and inference speed through architectural modifications and advanced
+training strategies. In video-based deployments, these image classifiers are
+applied directly to each frame, enabling integration with existing pipelines
+without architectural changes.
 
-**Fire and Smoke Detection in Videos**: To exploit temporal information in
-video, several works have extended image-based approaches by incorporating
-recurrent architectures or two-stream networks that process both appearance and
-motion cues jointly. Video-based methods have demonstrated improved robustness
-by capturing the dynamic characteristics of fire and smoke --- such as
-flickering and spreading patterns --- that are not discernible from individual
-frames alone. However, the dominant deployment paradigm in practical
-surveillance systems remains frame-wise inference, in which a DL classifier is
-applied independently to each frame of the video stream without regard to
-inter-frame redundancy. This approach disregards the temporal structure of the
-video and incurs unnecessary computational cost, particularly in static indoor
-scenes where consecutive frames are largely identical.
+Relying exclusively on individual frames, however, discards temporal information
+inherent in video data that is potentially informative for detection.
+[@khan2025beyond] survey video-based fire and smoke detection approaches and
+highlight the benefit of modeling temporal dynamics. Representative methods
+include the work of [@cao2019attention], who combine a CNN for spatial feature
+extraction with a bidirectional LSTM for temporal modeling, and
+[@ali2025toward], who employ 3D CNNs with attention mechanisms to jointly
+capture spatio-temporal patterns. While these approaches demonstrate improved
+detection performance over purely image-based methods, they incur greater
+computational cost and require more laborious dataset construction involving
+temporal annotation. Hybrid methods address this partially by combining
+image-based classifiers with lightweight temporal post-processing --- such as
+temporal voting [@de2023hybrid] or motion-based false positive suppression
+[@gragnaniello2025flame] --- yet still apply DL inference unconditionally to
+every frame, regardless of scene content.
 
-**Efficient Video Inference**: To reduce inference cost in video recognition,
-several approaches have been proposed that selectively skip or early-exit frames
-based on estimated content complexity. FrameExit [@frameexit2021] introduces a
-conditional early-exit strategy in which a lightweight gating network, trained
-jointly with the main classifier, decides at each frame whether to exit early or
-continue inference. Similarly, the Stop-or-Forward framework
-[@stoporforward2023] employs dynamic layer skipping during action recognition to
-reduce redundant computation on uninformative frames. While these methods
-demonstrate significant efficiency gains, they share a critical limitation: the
-gating mechanism is coupled to the underlying classifier and must be trained
-jointly, making integration with a pre-trained model non-trivial. Furthermore,
-these methods are designed for general-purpose action recognition tasks and have
-not been evaluated in safety-critical scenarios such as fire and smoke
-detection, where recall requirements are stringent.
+Across both paradigms, the dominant deployment pattern applies DL inference to
+each frame or short clip, without considering whether inference is warranted
+given the frame content. In static surveillance scenarios, particularly indoors,
+video streams frequently consist of purely background frames with no motion, in
+which fire or smoke is a priori unlikely. Motivated by this observation, we
+propose a skip-module that filters such low-activity frames prior to DL
+inference, reducing computational cost while preserving detection reliability.
+The module prioritizes retaining positive frames (fire/smoke present) while
+skipping negative frames (background only), functioning as a complementary
+accelerator for any existing frame-wise detection pipeline.
 
-**Motion Detection**: Motion detection provides a computationally efficient
-means of identifying temporal activity in video streams without requiring deep
-learning. Frame differencing computes the absolute pixel-wise difference between
-consecutive frames and applies a threshold to produce a binary activity map,
-offering extremely low computational overhead at the cost of sensitivity to
-noise and illumination changes [@framediff]. Background subtraction methods such
-as MOG2 and KNN model the background scene statistically and detect foreground
-objects as deviations from the learned background, providing greater robustness
-to gradual lighting changes at the cost of higher memory usage
-[@backgroundsubtraction]. These classical techniques have been widely used as
-preprocessing steps in surveillance pipelines to trigger downstream processing
-only when motion is detected.
+**Motion Detection and The proposed Skip Module**: The skip decision in our
+module relies on motion estimation, which connects to the well-studied problem
+of background subtraction. [@sobral2014comprehensive] and
+[@garcia2020background] provide comprehensive reviews of background subtraction
+methods, ranging from simple statistical models to deep learning-based
+approaches. More robust methods such as MOG2 and KNN [@zivkovic2006efficient]
+model the scene background statistically and are resilient to gradual
+illumination changes; however, they introduce non-trivial memory overhead and
+initialization latency. As the skip-module is designed primarily as a fast,
+lightweight gate, we instead adopt frame differencing --- computing the absolute
+per-pixel intensity change between consecutive frames --- which offers minimal
+computational overhead and requires no background model initialization.
 
-**Summary and Research Gap**: Existing DL-based fire and smoke detection systems
-achieve high accuracy but apply computationally intensive inference to every
-video frame, regardless of scene activity. Efficient video inference methods
-such as FrameExit address redundant computation but require joint training of
-the gate and classifier, limiting their applicability as plug-and-play
-extensions to pre-trained models. Classical motion detection techniques, by
-contrast, are lightweight and training-free but have not been systematically
-exploited to gate DL inference in fire and smoke detection pipelines. This study
-addresses this gap by proposing a skip-module that combines lightweight motion
-estimation with a pre-trained high-capacity classifier, enabling training-free
-inference acceleration without sacrificing detection reliability --- as
-described in the following section.
+While classical motion detection provides an efficient means of identifying
+scene activity, it has not been systematically exploited to gate DL inference in
+fire and smoke detection pipelines. Existing efficient video inference methods,
+such as FrameExit [@ghodrati2021frameexit], address per-frame redundancy but
+require joint training of the gating mechanism and the underlying classifier,
+limiting plug-and-play applicability to pre-trained models. This study bridges
+this gap by integrating lightweight frame-differencing-based motion estimation
+as a training-free gate for a high-capacity classifier, as described in
+Section~\ref{sec:method}.
 
 <!-- !END_SYNC_BLOCK -->
 
@@ -265,35 +223,11 @@ described in the following section.
 <!-- SYNC_TARGET_FILE: 02_Method.md-->
 <!-- BLOCK_ID: method -->
 
-<!-- - **System Architecture:** Read Frame $\rightarrow$ Skip Module $\rightarrow$
-  (If active) BIG MODEL $\rightarrow$ Alarm.
-- **Approach 1:** Naive Block Motion Analysis (Baseline filter).
-- **Approach 2 (Proposed):** Block Motion combined with Color and Texture
-  Heuristics designed specifically for fire and smoke.
-- **The "Safety" Constraint:** The module is designed with a strict priority on
-  near-zero False Negatives (maximizing Recall).The module is designed with a
-  strict priority on near-zero False Negatives (maximizing
-  Recall).fsdfsdfsdfljl32432 fdsljsdjlfsdlfsdlfsdlf ljfsdjfsdlfsdfsdlfsdfsdjf -->
-
-
 ## System Overview
 
 ```{=latex}
 \input{./3.fig/fig_pipeline.tex}
 ```
-<!--
-The proposed system basically works as a conventional fire and smoke detection pipeline, reading continous videos frames as input and producing a prediction whether fire or smoke is present in that frame. The key difference is that we insert a lightweight skip module between the video reader and the DL classifier. This skip module will work as a filter gate to supress DL inferences in case of there are likely no motion or clues of fire/smoke in the current frame.  We formalize the system as follows: 
-In normal system, a frame $f_t$ at time $t$ is directly fed into the DL model $\mathcal{M}$ to produce a prediction $\hat{y}_t$. 
-
-In the proposed system, $f_t$ is first processed by the skip module. The skip module work as a filter gate to determine where $f_t$ should be fed into the DL model $\mathcal{M}$ or not. Not lack of the generality, the skip module can be using any information to make the decision, whether in the scence worthing to be processed by the DL model or not. In this work, we use the motion estimation between $f_t$ and the previous frame $f_{t-1}$ as the main cue for the skip module to make the decision.
-If the Skip module decided that should skip the DL inference for $f_t$, the system will directly skip the DL inference and move to the next frame $f_{t+1}$, and the input will be marked as "negative" (no fire/smoke) directly. If the Skip module decided that should not skip the DL inference for $f_t$, the system will feed $f_t$ into the DL model $\mathcal{M}$ to produce a prediction $\hat{y}_t$ as the output for that frame.
-
-In this type of system, the BIG model is typicallly a high-capcity, accurate model that can efficiently detect fire and smoke, but is computationally expensive. The skip module is designed to be lightweight and fast, so that it can quickly filter out non-informative frames without adding significant overhead. The utimlate goal of the skip module is that we can skip as many as negative frames (no fire/smoke) as possible, minimize the case of skipping positive frames (with fire/smoke), thus improving the overall speed of the system (increasing FPS) while maintaining a high recall for fire/smoke detection as much as possible. -->
-
-
-
-## System Overview
-
 The proposed system is a fire and smoke detection pipeline that processes a
 continuous video stream and classifies each frame as either containing
 fire/smoke or not. The core idea is to extend the conventional pipeline with a
@@ -448,9 +382,7 @@ recall constraint as a hard gate prior to any candidate ranking.
 <!-- SYNC_TARGET_FILE: 03_Results.md-->
 <!-- BLOCK_ID: results -->
 
-## Dataset
-
-### Video Datasets for Hyperparameter Tuning and System Evaluation
+## Fire and Smoke Indoor Video Dataset
 
 ```{=latex}
 \input{./3.fig/fig_videodb.tex}
@@ -480,24 +412,21 @@ samples were sourced from the Korea AI Fire Dataset [@AIHub87:online], the USTC
 Smoke Dataset [@lin2017smoke], and the VSD3K Dataset [@huang2022fire],
 supplemented by videos collected from open online platforms (Pexels, Pixabay,
 and YouTube). Non-fire/smoke (negative) samples were compiled from self-recorded
-footage captured by real CCTV cameras in indoor environments (e.g., parking
-areas), along with the Safe & Unsafe Behavior in Workplaces dataset
+footage captured by real CCTV cameras in various indoor environments (e.g.,
+parking areas), along with the Safe & Unsafe Behavior in Workplaces dataset
 [@onal2024video], the Indoor Action dataset [@deniz2024optimized], the MPII
 Cooking 2 Dataset [@rohrbach2016recognizing], and the WiseNet dataset
-[@marroquin2019wisenet].
+[@marroquin2019wisenet]. Table~\ref{tb:videodb} summarizes the properties of the
+self-collected video dataset alongside a comparison with existing benchmark
+datasets, and Figure~\ref{fig:videodb} presents representative sample frames.
 
-Due to the lack of public high-resolution datasets specifically designed for
-static surveillance cameras, we constructed a custom dataset consisting of 150
-HD videos (1920$\times$1080 resolution). The dataset is strictly balanced into
-three categories: Fire (50), Smoke (50), and Safe/Neutral (50). To ensure robust
-evaluation, the videos capture diverse environments, including forests,
-warehouses, and urban settings under varying lighting conditions.
-
-The 150 videos were randomly split into Training/Validation (60%, n=90: 30 Fire,
-30 Smoke, 30 Safe) for hyperparameter tuning and hyperparameter selection, and
-Test (40%, n=60: 20 per class) for unbiased final performance evaluation.
-Stratified sampling ensured balance across classes and environments.
-
+For the hyperparameter optimization described in Section~\ref{sec:hyperparam},
+the video dataset was further partitioned into a validation set,
+$D_{\text{val}}$ (46 videos), used to select the optimal skip-module
+hyperparameters, and a test set, $D_{\text{test}}$ (104 videos), used for the
+final evaluation of the skip-enabled system against the baseline and existing
+methods. The split followed a 30:70 ratio (validation:test), following the protocol of  [@de2023hybrid], and was performed using stratified sampling to
+preserve balanced class distributions in both subsets.
 
 ## Evaluation Metrics {#sec:metrics label="metrics"}
 
@@ -612,14 +541,14 @@ F1-score.
   classifier trained on a smaller subset ($<5k$ images). It represents the
   standard "efficiency" compromise: low latency ($\sim$15ms) but reduced
   generalization capability.
-- **M2 (Lightweight Detector) [@pedrovin2023HybridMethodFire]:** A YOLOv8-Nano
-  object detector trained on a small dataset ($\sim$2k images). It offers
-  localization but struggles with small or semi-transparent smoke features due
-  to limited training data.
-- **M3 (Temporal Voting Method) [@pedrovin2023HybridMethodFire]:** A video-level
-  approach that aggregates inference results over a sliding window of 30 frames
-  to reduce false alarms. While effective for reducing noise, it introduces
-  inherent algorithmic latency.
+- **M2 (Lightweight Detector) [@de2023hybrid]:** A YOLOv8-Nano object detector
+  trained on a small dataset ($\sim$2k images). It offers localization but
+  struggles with small or semi-transparent smoke features due to limited
+  training data.
+- **M3 (Temporal Voting Method) [@de2023hybrid]:** A video-level approach that
+  aggregates inference results over a sliding window of 30 frames to reduce
+  false alarms. While effective for reducing noise, it introduces inherent
+  algorithmic latency.
 
 ## Results
 
@@ -852,16 +781,14 @@ did not match the chromatic signatures of either fire or smoke.
 <!-- SYNC_TARGET_FILE: 04_Conclusion.md-->
 <!-- BLOCK_ID: conclusion -->
 
-We proposed a lightweight, plug-and-play skip module designed to accelerate
-real-time fire and smoke detection in static surveillance systems. By combining
-block-based motion analysis with targeted color and texture heuristics, our
-module safely filters out up to 72% of irrelevant background frames without
-compromising safety. Extensive evaluations demonstrate that our approach
-achieves a 3$\times$ system speedup and a 67% reduction in computational cost,
-while fully preserving the near-perfect accuracy (98.5% F1-Score) of heavy deep
-learning models. Future work will focus on integrating adaptive, unsupervised
-thresholding to dynamically adjust heuristic rules based on real-time
-environmental lighting and weather shifts.
+We propose a lightweight, plug-and-play skip module $\mathcal{S}$ designed to
+accelerate real-time fire and smoke detection in indoor surveillance scenarios.
+Operating at a tiny fraction (${\approx}2.5\%$) of the computational cost of the
+DL classifier $\mathcal{M}$, $\mathcal{S}$ efficiently filters out static
+background frames before they reach $\mathcal{M}$, reducing unnecessary
+inference overhead. Experiments on a real-world video dataset demonstrate that
+the proposed approach yields a throughput improvement of over 30\% in frames per
+second while maintaining detection reliability.
 
 <!-- !END_SYNC_BLOCK -->
 
@@ -870,21 +797,21 @@ environmental lighting and weather shifts.
 <!-- TARGET_PROJECT: G:\My Drive\1_PhD\Obsidian\Home\3. Writing\paperfire2 -->
 <!-- SYNC_TARGET_FILE: 04_Conclusion.md-->
 <!-- BLOCK_ID: discussion -->
+Nevertheless, the proposed approach has several limitations. First,
+$\mathcal{S}$ relies solely on inter-frame motion cues, which may be unsuitable
+for outdoor surveillance scenarios where persistent motion sources — such as
+wind, moving vehicles, etc. — are continuously present, potentially causing
+$\mathcal{S}$ to pass the majority of frames to $\mathcal{M}$ and negating the
+efficiency gain. Second, the hyperparameters of $\mathcal{S}$ require
+dataset-specific tuning prior to deployment, incurring additional optimization
+overhead. Third, the overall detection accuracy of the system remains bounded by
+the capacity of $\mathcal{M}$, which is treated as a fixed component and not
+optimized in this work.
 
-_(Focus on the "Why" and the "Limits")_ The empirical results demonstrate that
-the bottleneck in high-accuracy continuous surveillance is the redundancy of the
-input data, not the deep learning model itself. By successfully identifying and
-dropping non-informative frames at the edge, our proposed module enables the
-deployment of computationally heavy, expert-level models on resource-constrained
-hardware.
+Future work may explore alternative skip strategies — such as leveraging color,
+texture, or learned features as gating cues — and extend the framework to
+outdoor surveillance scenarios where motion-based filtering is less effective.
 
-**Limitations and Generalization:** While Approach 2 proved highly robust, the
-reliance on color heuristics means the system is currently constrained to
-daytime or well-lit surveillance. In zero-light environments utilizing IR
-cameras, the red-channel heuristics for fire detection would fail, requiring a
-fallback to pure motion or thermal thresholds. Furthermore, extreme weather
-conditions such as heavy, moving fog can mimic the grayish diffusion of smoke,
-occasionally leading to false positives that reduce the overall Filter Rate.
 
 <!-- !END_SYNC_BLOCK -->
 

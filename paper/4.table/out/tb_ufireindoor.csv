@@ -5,10 +5,10 @@
 5;VisiFireBilkent (2015) \citeproc{ref-VisiFireBilkent:online}{{[}xx{]}};Static camera;39;$320 \times 240$;$720 \times 576$;38;1;6;32
 6;Mivia FIRE (2015) \citeproc{ref-dfiredataset}{{[}xx{]}};Static camera;31;$320 \times 240$;$800 \times 600$;28;3;4;27
 7;Mivia SMOKE (2015) \citeproc{ref-dfiredataset}{{[}xx{]}};Static camera;149;$292 \times 240$;$292 \times 240$;76;73;0;149
-8;FURG (2015) \citeproc{ref-dfiredataset}{{[}xx{]}};Moving camera;22;$240 \times 344$;$1920 \times 1080$;17;5;;19
+8;FURG (2015) \citeproc{ref-dfiredataset}{{[}xx{]}};Moving camera;22;$240 \times 344$;$1920 \times 1080$;17;5;3;19
 9;USTC Smoke (2017) \citeproc{ref-dfiredataset}{{[}xx{]}};Static camera;30;$1920 \times 1080$;$1920 \times 1080$;22;8;30;0
 10;FireNet (2019) \citeproc{ref-dfiredataset}{{[}xx{]}};Moving camera;62;$352 \times 222$;$1920 \times 1080$;46;16;30;32
-11;FiSmo (2020) \citeproc{ref-dfiredataset}{{[}xx{]}};Moving camera;88;$320 \times 240$;$1920 \times 1080$;80;8;;88
+11;FiSmo (2020) \citeproc{ref-dfiredataset}{{[}xx{]}};Moving camera;88;$320 \times 240$;$1920 \times 1080$;80;8;0;88
 12;D-Fire (2021) \citeproc{ref-dfiredataset}{{[}xx{]}};Static camera;100;$1280 \times 720$;$1280 \times 720$;50;50;0;100
 13;VSD3 (2022) \citeproc{ref-dfiredataset}{{[}xx{]}};Mix camera;20;$352 \times 288$;$2048 \times 1536$;8;12;6;14
-14;Ours (2026) - This work;Static camera;;;;;;;
+14;Ours (2026) - This work;Static camera;150;$814 \times 720$;$3840 \times 2160$;75;75;150;0
