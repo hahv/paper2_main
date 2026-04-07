@@ -467,7 +467,7 @@ total number of ground-truth negative frames in the evaluated set. A higher
 $S_r$ indicates greater computational savings, while a drop in recall signals
 unsafe skipping of fire/smoke frames.
 
-## Baseline Models and and Implementation Details
+## Models and Implementation Details
 
 **Baseline Models**: To demonstrate both the superiority of the high-capacity
 classifier over lightweight alternatives and the effectiveness of the proposed
@@ -489,20 +489,21 @@ models alongside our BIG model:
   larger YOLOv5l architecture, offering higher capacity at increased
   computational cost.
 
-- **BIG Model**: The BIG model is obtained by fine-tuning a pretrained
-  High-Performance GPU Network v2 (HGNetV2), specifically the
-  \texttt{hgnetv2\_b5.ssld\_stage2\_ft\_in1k} checkpoint [@hgnetv2timm:online]
-  from the Timm library [@rw2019timm], which was originally trained using SSLD
-  knowledge distillation [@cui2021beyond]. HGNetV2 [@hgnetv2PaddleCl7:online] is
-  a high-capacity CNN architecture designed to achieve substantially higher
-  accuracy than models of comparable inference speed on NVIDIA GPUs, making it
-  well-suited for deployment in our target environment. \textcolor{red}{For
-  fine-tuning, we compiled a dataset of 1,000,000,000 fire and smoke images collected
-  from internet sources, partitioned into training (80\%) and test (20\%)
-  subsets. The model was optimized using Adam with an initial learning rate of
-  $1 \times 10^{-4}$ and weight decay of $1 \times 10^{-5}$ for 100 epochs with
-  a batch size of 32. On the held-out test set, the final model achieved a
-  recall of xx.xx\% and a false alarm rate of xx.xx\%.}
+**Proposed Classifier (BIG Model - HGNetV2)**: The BIG model is obtained by
+ fine-tuning a pretrained High-Performance GPU Network v2 (HGNetV2),
+  specifically the \texttt{hgnetv2\_b5.ssld\_stage2\_ft\_in1k} checkpoint
+  [@hgnetv2timm:online] from the Timm library [@rw2019timm], which was
+  originally trained using SSLD knowledge distillation [@cui2021beyond]. HGNetV2
+  [@hgnetv2PaddleCl7:online] is a high-capacity CNN architecture designed to
+  achieve substantially higher accuracy than models of comparable inference
+  speed on NVIDIA GPUs, making it well-suited for deployment in our target
+  environment. \textcolor{red}{For fine-tuning, we compiled a dataset of
+  1,000,000 fire and smoke images collected from internet sources, partitioned
+  into training (80\%) and test (20\%) subsets. The model was optimized using
+  Adam with an initial learning rate of $1 \times 10^{-4}$ and weight decay of
+  $1 \times 10^{-5}$ for 100 epochs with a batch size of 32. On the held-out
+  test set, the final model achieved a recall of xx.xx\% and a false alarm rate
+  of xx.xx\%.}
 
 **Implementation Details**: Unless otherwise specified, all experiments were
 conducted on a workstation equipped with an Intel Core i9-12900K CPU, 64 GB DDR5
