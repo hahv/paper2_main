@@ -4,7 +4,7 @@
 <!-- TARGET_PROJECT: G:\My Drive\1_PhD\Obsidian\Home\3. Writing\paperfire2 -->
 <!-- SYNC_TARGET_FILE: 00_Meta_Abstract.md-->
 <!-- BLOCK_ID: abstract -->
-date: 2026.04.03
+date: 2026.04.07
 title: "Efficient Real-Time Fire Surveillance: A Lightweight Motion-Heuristic
 Skip Module for Accelerated Inference"
 abstract: "Conventional deep learning (DL)-based fire and smoke detection systems process
@@ -211,8 +211,8 @@ such as FrameExit [@ghodrati2021frameexit], address per-frame redundancy but
 require joint training of the gating mechanism and the underlying classifier,
 limiting plug-and-play applicability to pre-trained models. This study bridges
 this gap by integrating lightweight frame-differencing-based motion estimation
-as a training-free gate for a high-capacity classifier, as described in
-Section~\ref{sec:method}.
+as a training-free gate for a high-capacity classifier, as described in Section
+\ref{sec:method}.
 
 <!-- !END_SYNC_BLOCK -->
 
@@ -276,8 +276,8 @@ Specifically, we design and evaluate two motion-based instantiations of
 $\mathcal{S}$: (1) a frame differencing method, and (2) a motion accumulation
 method. Both approaches are selected for their simplicity and low computational
 cost, making them well-suited for real-time deployment. The overall workflow of
-$\mathcal{S}$ is illustrated in Figure~\ref{fig:skipmodule} and the detailed
-algorithms are described in the Algorithm~\ref{alg:skipmodule}.
+$\mathcal{S}$ is illustrated in Figure \ref{fig:skipmodule} and the detailed
+algorithms are described in the Algorithm \ref{alg:skipmodule}.
 
 ### FrameDiffDet — Naive Motion Detection
 
@@ -300,7 +300,7 @@ threshold, accumulation window size) that can significantly impact the
 performance of the overall system. To identify the optimal configuration, we
 employ a grid search based hyperparameter optimization procedure on a validation
 set $D_{\text{val}}$ derived from our video dataset with respect to several
-system-wide metrics defined in  Section~\ref{sec:metrics}. More specifically, to
+system-wide metrics defined in  Section \ref{sec:metrics}. More specifically, to
 select the optimal hyperparameters for the proposed skip module, we employ a
 constrained optimization procedure on the validation set $D_{\text{val}}$. Let
 $R_{\text{base}}$, $\mathrm{FAR}_{\text{base}}$, and $T_{\text{DL}}$ denote the
@@ -313,7 +313,7 @@ $\mathrm{FAR}(\theta)$, skip rate $S_r(\theta)$, and mean per-frame skip module
 time $T_{\text{skip}}(\theta)$.
 
 The skip rate $S_r(\theta)$ is computed on $D_{\text{val}}$ following the
-definition in Section~\ref{sec:metrics}, with $N_{\text{neg}}$ instantiated as
+definition in Section \ref{sec:metrics}, with $N_{\text{neg}}$ instantiated as
 $N_{\text{neg}}^{\text{val}} = |\{f_i \in D_{\text{val}} : y_i = 0\}|$, which is
 fixed by the validation set and independent of $\theta$.
 
@@ -416,16 +416,17 @@ footage captured by real CCTV cameras in various indoor environments (e.g.,
 parking areas), along with the Safe & Unsafe Behavior in Workplaces dataset
 [@onal2024video], the Indoor Action dataset [@deniz2024optimized], the MPII
 Cooking 2 Dataset [@rohrbach2016recognizing], and the WiseNet dataset
-[@marroquin2019wisenet]. Table~\ref{tb:videodb} summarizes the properties of the
+[@marroquin2019wisenet]. Table \ref{tb:videodb} summarizes the properties of the
 self-collected video dataset alongside a comparison with existing benchmark
-datasets, and Figure~\ref{fig:videodb} presents representative sample frames.
+datasets, and Figure \ref{fig:videodb} presents representative sample frames.
 
-For the hyperparameter optimization described in Section~\ref{sec:hyperparam},
+For the hyperparameter optimization described in Section \ref{sec:hyperparam},
 the video dataset was further partitioned into a validation set,
 $D_{\text{val}}$ (46 videos), used to select the optimal skip-module
 hyperparameters, and a test set, $D_{\text{test}}$ (104 videos), used for the
 final evaluation of the skip-enabled system against the baseline and existing
-methods. The split followed a 30:70 ratio (validation:test), following the protocol of  [@de2023hybrid], and was performed using stratified sampling to
+methods. The split followed a 30:70 ratio (validation:test), following the
+protocol of  [@de2023hybrid], and was performed using stratified sampling to
 preserve balanced class distributions in both subsets.
 
 ## Evaluation Metrics {#sec:metrics label="metrics"}
@@ -466,89 +467,49 @@ total number of ground-truth negative frames in the evaluated set. A higher
 $S_r$ indicates greater computational savings, while a drop in recall signals
 unsafe skipping of fire/smoke frames.
 
-## Implementation Details
+## Baseline Models and and Implementation Details
 
-Due to their distinct computational requirements, the BIG and SMALL models were
-trained on separate hardware configurations. The BIG model was trained on a
-system equipped with an Intel i9-13900K CPU and two NVIDIA GeForce RTX 4090
-GPUs. Training was conducted over 100 epochs using the Stochastic Gradient
-Descent (SGD) optimizer with the following hyperparameters: a batch size of 128,
-a learning rate of 0.01, momentum of 0.9, and weight decay of 0.0001. In
-contrast, the SMALL model was trained on a system with an Intel i9-9900K CPU and
-a single NVIDIA GeForce RTX 3090 GPU. This model employed the Adam optimizer for
-50 epochs with a batch size of 256, a learning rate of 0.001, \(\beta_1 = 0.9\),
-\(\beta_2 = 0.999\), and a weight decay of 0.0001.
+**Baseline Models**: To demonstrate both the superiority of the high-capacity
+classifier over lightweight alternatives and the effectiveness of the proposed
+skip module in accelerating its inference, we evaluate the following baseline
+models alongside our BIG model:
 
-**TODO**: add hardware and software context here The experiments were conducted
-on a workstation running Windows 10 Pro 21H2 (build 19044) equipped with a Intel
-Core i9-12900K processor, 64 GB of DDR5 system memory, and an NVIDIA GeForce RTX
-3090 GPU (24 GB VRAM). All deep learning inference was performed under CUDA 12.9
-with PyTorch 2.7.1.
+- **FireNet** [@jadon2019firenet]: A lightweight CNN-based image classifier
+  comprising 14 layers, with a model size of 7.5 MB and approximately 650k
+  trainable parameters.
 
-## Baseline Models and Context
+- **MobileNet** [@mukhopadhyay2019fpga]: A modified MobileNet architecture
+  fine-tuned for fire and smoke detection.
 
-To validate the effectiveness of the proposed skip module, we compare it against
-a spectrum of existing solutions ranging from heavy, high-accuracy models to
-lightweight, real-time approximations:
+- **YOLOv5s** [@de2023hybrid]: A lightweight object detector based on YOLOv5
+  [@JocherYOLOv5byUltralytics2020], trained with hyperparameters selected via
+  grid search on the D-Fire dataset [@dfiredataset].
 
-- **The "Expert" Baseline (BIG MODEL):** A state-of-the-art Deep Learning model
-  (ResNet-50 backbone) trained on a massive proprietary dataset ($>1M$ images).
-  It achieves the highest accuracy but suffers from high latency
-  ($\sim$50ms/frame), making it computationally prohibitive for 24/7 processing
-  on edge devices. In this study, we trained two classification models: a
-high-accuracy, complex model (referred to as the BIG model) for fire and smoke
-detection, and a lightweight model (referred to as the SMALL model) for the
-skip-module.
+- **YOLOv5l** [@de2023hybrid]: A heavier variant of the above, based on the
+  larger YOLOv5l architecture, offering higher capacity at increased
+  computational cost.
 
-For the BIG model, we combined images from the D-Fire dataset [@dfiredataset]
-with additional fire and smoke images collected from the internet, resulting in
-a total of 18,000 images (#REVISE_NEEDED). These were divided into training
-(80%, 14,400 images) and testing (20%, 3,600 images) sets.
+- **BIG Model**: The BIG model is obtained by fine-tuning a pretrained
+  High-Performance GPU Network v2 (HGNetV2), specifically the
+  \texttt{hgnetv2\_b5.ssld\_stage2\_ft\_in1k} checkpoint [@hgnetv2timm:online]
+  from the Timm library [@rw2019timm], which was originally trained using SSLD
+  knowledge distillation [@cui2021beyond]. HGNetV2 [@hgnetv2PaddleCl7:online] is
+  a high-capacity CNN architecture designed to achieve substantially higher
+  accuracy than models of comparable inference speed on NVIDIA GPUs, making it
+  well-suited for deployment in our target environment. \textcolor{red}{For
+  fine-tuning, we compiled a dataset of 1,000,000,000 fire and smoke images collected
+  from internet sources, partitioned into training (80\%) and test (20\%)
+  subsets. The model was optimized using Adam with an initial learning rate of
+  $1 \times 10^{-4}$ and weight decay of $1 \times 10^{-5}$ for 100 epochs with
+  a batch size of 32. On the held-out test set, the final model achieved a
+  recall of xx.xx\% and a false alarm rate of xx.xx\%.}
 
-For the SMALL model, we randomly extracted 80,000 64×64 patches from datasets A
-and B (#REVISE_NEEDED). Of these, 80% were used for training, while the
-remaining 20% were reserved for testing to evaluate model performance.
-
-<!-- !TO EDIT: AI gen -->
-
-We construct a binary image classification dataset for fire and smoke detection,
-consisting of two classes: _fire/smoke_ and _none_. The dataset contains 18,500
-RGB images collected from publicly available sources, including FIRE Dataset and
-FIRESENSE Dataset, along with additional web-scraped images. The _fire/smoke_
-class includes images with visible flames or smoke under diverse conditions such
-as indoor fires, wildfires, and low-visibility environments, while the _none_
-class contains visually similar non-fire scenes (e.g., fog, clouds, and sunlight
-glare) to reduce false positives. The images vary in resolution from (480 \times
-1)   to (1920 \times 1080), and the dataset is split into 70% training, 10%
-validation, and 20% testing subsets with balanced class distribution. Prior to
-training, all images are resized to (224 \times 224) and normalized using
-ImageNet statistics, and data augmentation techniques including random
-horizontal flipping, rotation (±15°), color jittering, and random cropping are
-applied to improve robustness to variations in illumination, scale, and
-viewpoint. The model is implemented using PyTorch and trained on a single NVIDIA
-RTX 3090 GPU. Optimization is performed using the Adam optimizer with an initial
-learning rate of (1 \times 10^{-4}) and weight decay of (1 \times 10^{-5}), and
-the model is trained for 100 epochs with a batch size of 32. A cosine annealing
-learning rate schedule with a 5-epoch warm-up is employed to stabilize training,
-and gradient clipping with a maximum norm of 5.0 is applied to prevent
-instability. The training objective is binary cross-entropy loss, and model
-selection is based on validation F1-score, with early stopping applied if
-performance does not improve for 10 consecutive epochs. Final performance is
-reported on the held-out test set using accuracy, precision, recall, and
-F1-score.
-
-- **M1 (Lightweight Classifier) [@jadon2019firenet]:** A MobileNetV2-based
-  classifier trained on a smaller subset ($<5k$ images). It represents the
-  standard "efficiency" compromise: low latency ($\sim$15ms) but reduced
-  generalization capability.
-- **M2 (Lightweight Detector) [@de2023hybrid]:** A YOLOv8-Nano object detector
-  trained on a small dataset ($\sim$2k images). It offers localization but
-  struggles with small or semi-transparent smoke features due to limited
-  training data.
-- **M3 (Temporal Voting Method) [@de2023hybrid]:** A video-level approach that
-  aggregates inference results over a sliding window of 30 frames to reduce
-  false alarms. While effective for reducing noise, it introduces inherent
-  algorithmic latency.
+**Implementation Details**: Unless otherwise specified, all experiments were
+conducted on a workstation equipped with an Intel Core i9-12900K CPU, 64 GB DDR5
+system memory, and an NVIDIA GeForce RTX 3090 GPU (24 GB VRAM), running Windows
+10 Pro (build 19044). Deep learning inference was performed using PyTorch 2.7.1
+under CUDA 12.9, and video processing and motion estimation were carried out
+using OpenCV 4.11 (CPU-only).
 
 ## Results
 
@@ -571,88 +532,63 @@ module using `FrameDiffDet` as its motion estimator, we conducted a systematic
 grid search over four parameters: `scale_factor`, `block_size_orig`,
 `block_ratio_th`, and `diff_thresh`. The search space was defined as follows:
 
-<!-- ```{=latex}
-\begin{table}[h]
-\centering
-\caption{Grid search space for the \texttt{FrameDiffDet} skip module hyperparameters.}
-\label{tb:grid_search_space}
-\begin{tabular}{ll}
-\hline
-\textbf{Parameter} & \textbf{Search Values} \\
-\hline
-\texttt{scale\_factor}   & \{0.5, 1.0\} \\
-\texttt{block\_size\_orig} & \{16, 32\} \\
-\texttt{block\_ratio\_th} & \{0.05, 0.10, 0.15\} \\
-\texttt{diff\_thresh}    & \{3, 5, 7, 10\} \\
-\hline
-\multicolumn{2}{l}{\textit{Total configurations: $2 \times 2 \times 3 \times 4 = 48$}} \\
-\hline
-\end{tabular}
-\end{table}
-``` -->
 ```{=latex}
 \input{./4.table/tb_gridsearch_framediff.tex}
 ```
 
 <!-- ! Add explanation for each hyperparameter space choice -->
 
-To identify an optimal configuration for the FrameDiffDet skip module,
-we conducted a systematic grid search over four hyperparameters:
-scale factor $\alpha$, block size $B$, block active threshold $\tau$,
-and diff threshold $\tau_d$. The search space is summarized in
-Table~\ref{tb:grid_search_space}, yielding a total of
-$2 \times 2 \times 3 \times 4 = 48$ configurations.
+To identify an optimal configuration for the FrameDiffDet skip module, we
+conducted a systematic grid search over four hyperparameters: scale factor
+$\alpha$, block size $B$, block active threshold $\tau$, and diff threshold
+$\tau_d$. The search space is summarized in Table \ref{tb:grid_search_space},
+yielding a total of $2 \times 2 \times 3 \times 4 = 48$ configurations.
 
-**Scale factor** $\alpha \in \{0.5, 1.0\}$: The scale factor controls
-the spatial resolution at which per-block frame differences are
-computed. Full resolution ($\alpha = 1.0$) preserves fine-grained pixel
-detail, while half resolution ($\alpha = 0.5$) reduces sensitivity to
-high-frequency pixel noise that may generate spurious motion signals
-unrelated to actual scene changes. Two levels are evaluated to quantify
-the effect of pre-computation downscaling on both detection reliability
-and computational cost.
+**Scale factor** $\alpha \in \{0.5, 1.0\}$: The scale factor controls the
+spatial resolution at which per-block frame differences are computed. Full
+resolution ($\alpha = 1.0$) preserves fine-grained pixel detail, while half
+resolution ($\alpha = 0.5$) reduces sensitivity to high-frequency pixel noise
+that may generate spurious motion signals unrelated to actual scene changes. Two
+levels are evaluated to quantify the effect of pre-computation downscaling on
+both detection reliability and computational cost.
 
-**Block size** $B \in \{16, 32\}$: Block size $B$ determines the
-spatial granularity of the motion map, expressed in pixels of the
-original unscaled frame. Fine blocks ($B = 16$ px) enable detection of
-localized motion from small or nascent fire regions, whereas coarser
-blocks ($B = 32$ px) aggregate motion evidence over a broader spatial
-context, offering greater robustness against isolated pixel-level
-disturbances. This range spans a practically meaningful fine-to-coarse
-spectrum without becoming so coarse that spatially small fire events
-are missed entirely.
+**Block size** $B \in \{16, 32\}$: Block size $B$ determines the spatial
+granularity of the motion map, expressed in pixels of the original unscaled
+frame. Fine blocks ($B = 16$ px) enable detection of localized motion from small
+or nascent fire regions, whereas coarser blocks ($B = 32$ px) aggregate motion
+evidence over a broader spatial context, offering greater robustness against
+isolated pixel-level disturbances. This range spans a practically meaningful
+fine-to-coarse spectrum without becoming so coarse that spatially small fire
+events are missed entirely.
 
-**Block active threshold** $\tau \in \{0.05, 0.10, 0.15\}$: The
-threshold $\tau$ defines the minimum fraction of motion-active blocks
-required to trigger a full inference pass; frames below $\tau$ are
-skipped. A low value ($\tau = 0.05$) corresponds to a conservative
-policy where even sparse motion activity triggers inference, minimizing
-the risk of missed detections. A higher value ($\tau = 0.15$) reflects
-a more aggressive skip policy that demands broader scene-level motion
-before committing to inference. The three values are spaced at a
-uniform interval of 0.05 to enable a systematic and interpretable
-sweep across this conservative-to-aggressive spectrum.
+**Block active threshold** $\tau \in \{0.05, 0.10, 0.15\}$: The threshold $\tau$
+defines the minimum fraction of motion-active blocks required to trigger a full
+inference pass; frames below $\tau$ are skipped. A low value ($\tau = 0.05$)
+corresponds to a conservative policy where even sparse motion activity triggers
+inference, minimizing the risk of missed detections. A higher value ($\tau =
+0.15$) reflects a more aggressive skip policy that demands broader scene-level
+motion before committing to inference. The three values are spaced at a uniform
+interval of 0.05 to enable a systematic and interpretable sweep across this
+conservative-to-aggressive spectrum.
 
-**Diff threshold** $\tau_d \in \{3, 5, 7, 10\}$: The per-pixel
-difference threshold $\tau_d$ determines the minimum absolute intensity
-change required for a pixel to be counted as a motion event within a
-block. A low value ($\tau_d = 3$) is highly sensitive and responds to
-subtle illumination changes, while a high value ($\tau_d = 10$)
-responds only to strong, unambiguous motion. The four values span the
-full sensitivity spectrum --- from near-noise-level detection to robust
-large-motion detection --- with closer spacing at the lower end
-(3, 5, 7) to provide finer resolution in the sensitivity range most
-relevant to fire detection, where motion tends to be subtle and
-spatially confined.
+**Diff threshold** $\tau_d \in \{3, 5, 7, 10\}$: The per-pixel difference
+threshold $\tau_d$ determines the minimum absolute intensity change required for
+a pixel to be counted as a motion event within a block. A low value ($\tau_d =
+3$) is highly sensitive and responds to subtle illumination changes, while a
+high value ($\tau_d = 10$) responds only to strong, unambiguous motion. The four
+values span the full sensitivity spectrum --- from near-noise-level detection to
+robust large-motion detection --- with closer spacing at the lower end (3, 5, 7)
+to provide finer resolution in the sensitivity range most relevant to fire
+detection, where motion tends to be subtle and spatially confined.
 
 
-Table~\ref{tb:val_search} specifies the search space for the rule-based
+Table \ref{tb:val_search} specifies the search space for the rule-based
 skip-module parameters. The ranking and selection of the optimal configuration
-($\theta^*$) based on the validation set results are detailed in
-Table~\ref{tb:val_results}. Table~\ref{tab:skip-selection} shows an example of
-the validation-time ranking. The selected configuration $\theta_1^*$ satisfies
-the recall constraint and achieves the highest composite score by jointly
-balancing skip ratio, false alarm reduction, and recall retention.
+($\theta^*$) based on the validation set results are detailed in Table
+\ref{tb:val_results}. Table \ref{tab:skip-selection} shows an example of the
+validation-time ranking. The selected configuration $\theta_1^*$ satisfies the
+recall constraint and achieves the highest composite score by jointly balancing
+skip ratio, false alarm reduction, and recall retention.
 
 ```{=latex}
 \input{./4.table/tb_val_results.tex}
@@ -671,66 +607,61 @@ improving operational false alarm behavior.
 
 <!-- ! Add explanation for each hyperparameter space choice -->
 
-**Scale factor** $\alpha \in \{0.5, 1.0\}$  Identical rationale to
-FrameDiffDet: full resolution preserves fine-grained pixel detail,
-while half resolution reduces sensitivity to high-frequency noise.
-Since AccMotionDet accumulates differences across multiple frames,
-downscaling also reduces the memory footprint of the accumulated
-motion buffer, making this parameter particularly relevant for
-real-time deployment.
+**Scale factor** $\alpha \in \{0.5, 1.0\}$  Identical rationale to FrameDiffDet:
+full resolution preserves fine-grained pixel detail, while half resolution
+reduces sensitivity to high-frequency noise. Since AccMotionDet accumulates
+differences across multiple frames, downscaling also reduces the memory
+footprint of the accumulated motion buffer, making this parameter particularly
+relevant for real-time deployment.
 
-**Block size** $B \in \{16, 32\}$: Same motivation as FrameDiffDet.
-Coarser blocks (32 px) are relatively more important for AccMotionDet
-because accumulation inherently smooths out transient single-pixel
-disturbances --- so fine-grained 16 px blocks are less necessary but
-still evaluated to confirm this expectation.
+**Block size** $B \in \{16, 32\}$: Same motivation as FrameDiffDet. Coarser
+blocks (32 px) are relatively more important for AccMotionDet because
+accumulation inherently smooths out transient single-pixel disturbances --- so
+fine-grained 16 px blocks are less necessary but still evaluated to confirm this
+expectation.
 
-**Block active threshold** $\tau \in \{0.05, 0.10\}$: Narrower range
-than FrameDiffDet (which goes to 0.15) because AccMotionDet already
-suppresses spurious activations through temporal accumulation. A more
-aggressive threshold of 0.15 would double-penalize noise that
-accumulation already handles, so the upper bound is reduced to 0.10
-to focus the search on the practically useful range.
+**Block active threshold** $\tau \in \{0.05, 0.10\}$: Narrower range than
+FrameDiffDet (which goes to 0.15) because AccMotionDet already suppresses
+spurious activations through temporal accumulation. A more aggressive threshold
+of 0.15 would double-penalize noise that accumulation already handles, so the
+upper bound is reduced to 0.10 to focus the search on the practically useful
+range.
 
-**Diff threshold** $\tau_d \in \{3, 5\}$: Narrower than
-FrameDiffDet's $\{3, 5, 7, 10\}$. Because accumulated motion sums
-intensity differences across $\omega$ consecutive frames, the effective
-sensitivity is already amplified by the window length. Higher per-pixel
-thresholds (7, 10) would be redundant --- accumulation raises the
-effective signal level so that lower raw thresholds become sufficient.
+**Diff threshold** $\tau_d \in \{3, 5\}$: Narrower than FrameDiffDet's $\{3, 5,
+7, 10\}$. Because accumulated motion sums intensity differences across $\omega$
+consecutive frames, the effective sensitivity is already amplified by the window
+length. Higher per-pixel thresholds (7, 10) would be redundant --- accumulation
+raises the effective signal level so that lower raw thresholds become
+sufficient.
 
-**Motion increment / accumulation step** $\omega \in \{5\}$: Fixed
-at 5 rather than searched. A step of 5 frames at standard surveillance
-frame rates (15--25 FPS) corresponds to a temporal window of
-200--333 ms --- short enough to detect rapid flame onset yet long
-enough to distinguish sustained motion from single-frame illumination
-flicker. Fixing this reduces the search space while retaining the most
-physically motivated value.
+**Motion increment / accumulation step** $\omega \in \{5\}$: Fixed at 5 rather
+than searched. A step of 5 frames at standard surveillance frame rates (15--25
+FPS) corresponds to a temporal window of 200--333 ms --- short enough to detect
+rapid flame onset yet long enough to distinguish sustained motion from
+single-frame illumination flicker. Fixing this reduces the search space while
+retaining the most physically motivated value.
 
-**Activation threshold** $\tau_m \in \{5, 10\}$: This threshold
-operates on the accumulated motion score (sum of per-block differences
-over $\omega$ frames) required to trigger inference. A low value (5)
-triggers on weak but persistent motion --- appropriate for slowly
-spreading smoke. A higher value (10) requires stronger sustained
-activity, suppressing background flicker. Two values are sufficient
-because $\tau_d$ and $\tau$ jointly control sensitivity at the
-frame level.
+**Activation threshold** $\tau_m \in \{5, 10\}$: This threshold operates on the
+accumulated motion score (sum of per-block differences over $\omega$ frames)
+required to trigger inference. A low value (5) triggers on weak but persistent
+motion --- appropriate for slowly spreading smoke. A higher value (10) requires
+stronger sustained activity, suppressing background flicker. Two values are
+sufficient because $\tau_d$ and $\tau$ jointly control sensitivity at the frame
+level.
 
-**Accumulation cap** $K_{\max} \in \{15, 25, 35\}$: Caps the maximum
-accumulated motion score to prevent runaway accumulation during
-prolonged high-motion sequences (e.g., a person walking continuously).
-Without a cap, sustained motion would keep $s_t = 1$ indefinitely even
-after the scene returns to static. Three values span a low-saturation
-(15) to high-saturation (35) range, controlling how quickly the module
-resets after a high-activity period.
+**Accumulation cap** $K_{\max} \in \{15, 25, 35\}$: Caps the maximum accumulated
+motion score to prevent runaway accumulation during prolonged high-motion
+sequences (e.g., a person walking continuously). Without a cap, sustained motion
+would keep $s_t = 1$ indefinitely even after the scene returns to static. Three
+values span a low-saturation (15) to high-saturation (35) range, controlling how
+quickly the module resets after a high-activity period.
 
-**Decay rate** $\delta \in \{1\}$: Fixed at 1, meaning the
-accumulation score decreases by 1 per frame when no motion is detected.
-A decay of 1 provides linear cooldown behavior that is easy to
-interpret and tune. Larger decay values would reset the accumulator too
-aggressively, discarding genuine slow-onset events such as early-stage
-smoke diffusion. This parameter is fixed to isolate the effect of the
-remaining hyperparameters.
+**Decay rate** $\delta \in \{1\}$: Fixed at 1, meaning the accumulation score
+decreases by 1 per frame when no motion is detected. A decay of 1 provides
+linear cooldown behavior that is easy to interpret and tune. Larger decay values
+would reset the accumulator too aggressively, discarding genuine slow-onset
+events such as early-stage smoke diffusion. This parameter is fixed to isolate
+the effect of the remaining hyperparameters.
 
 ```{=latex}
 \input{./4.table/tb_val_results.tex}

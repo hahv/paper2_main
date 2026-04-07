@@ -153,7 +153,7 @@
 \title{Efficient Real-Time Fire Surveillance: A Lightweight
 Motion-Heuristic Skip Module for Accelerated Inference}
 \author{Hoang Van-Ha, Jong Weon Lee, Park Chun-Su}
-\date{2026.04.03}
+\date{2026.04.07}
 
 \begin{document}
 \maketitle
@@ -347,7 +347,7 @@ underlying classifier, limiting plug-and-play applicability to
 pre-trained models. This study bridges this gap by integrating
 lightweight frame-differencing-based motion estimation as a
 training-free gate for a high-capacity classifier, as described in
-Section\textasciitilde{}\ref{sec:method}.
+Section \ref{sec:method}.
 
 \section{The proposed method}\label{sec:method}
 
@@ -403,9 +403,8 @@ evaluate two motion-based instantiations of \(\mathcal{S}\): (1) a frame
 differencing method, and (2) a motion accumulation method. Both
 approaches are selected for their simplicity and low computational cost,
 making them well-suited for real-time deployment. The overall workflow
-of \(\mathcal{S}\) is illustrated in
-Figure\textasciitilde{}\ref{fig:skipmodule} and the detailed algorithms
-are described in the Algorithm\textasciitilde{}\ref{alg:skipmodule}.
+of \(\mathcal{S}\) is illustrated in Figure \ref{fig:skipmodule} and the
+detailed algorithms are described in the Algorithm \ref{alg:skipmodule}.
 
 \subsubsection{FrameDiffDet --- Naive Motion
 Detection}\label{framediffdet-naive-motion-detection}
@@ -427,24 +426,23 @@ motion threshold, accumulation window size) that can significantly
 impact the performance of the overall system. To identify the optimal
 configuration, we employ a grid search based hyperparameter optimization
 procedure on a validation set \(D_{\text{val}}\) derived from our video
-dataset with respect to several system-wide metrics defined in
-Section\textasciitilde{}\ref{sec:metrics}. More specifically, to select
-the optimal hyperparameters for the proposed skip module, we employ a
-constrained optimization procedure on the validation set
-\(D_{\text{val}}\). Let \(R_{\text{base}}\),
-\(\mathrm{FAR}_{\text{base}}\), and \(T_{\text{DL}}\) denote the recall,
-false alarm rate, and mean per-frame inference time of the baseline
-pipeline (without skipping), respectively. For each candidate parameter
-set \(\theta \in \Theta\) obtained by grid search, we evaluate the full
-pipeline
+dataset with respect to several system-wide metrics defined in Section
+\ref{sec:metrics}. More specifically, to select the optimal
+hyperparameters for the proposed skip module, we employ a constrained
+optimization procedure on the validation set \(D_{\text{val}}\). Let
+\(R_{\text{base}}\), \(\mathrm{FAR}_{\text{base}}\), and
+\(T_{\text{DL}}\) denote the recall, false alarm rate, and mean
+per-frame inference time of the baseline pipeline (without skipping),
+respectively. For each candidate parameter set \(\theta \in \Theta\)
+obtained by grid search, we evaluate the full pipeline
 \(\text{Read} \rightarrow \mathcal{S}(\theta) \rightarrow [\mathcal{M}]\)
 and compute four metrics: recall \(R(\theta)\), false alarm rate
 \(\mathrm{FAR}(\theta)\), skip rate \(S_r(\theta)\), and mean per-frame
 skip module time \(T_{\text{skip}}(\theta)\).
 
 The skip rate \(S_r(\theta)\) is computed on \(D_{\text{val}}\)
-following the definition in Section\textasciitilde{}\ref{sec:metrics},
-with \(N_{\text{neg}}\) instantiated as
+following the definition in Section \ref{sec:metrics}, with
+\(N_{\text{neg}}\) instantiated as
 \(N_{\text{neg}}^{\text{val}} = |\{f_i \in D_{\text{val}} : y_i = 0\}|\),
 which is fixed by the validation set and independent of \(\theta\).
 
@@ -552,22 +550,21 @@ footage captured by real CCTV cameras in various indoor environments
 Workplaces dataset \citeproc{ref-onal2024video}{{[}27{]}}, the Indoor
 Action dataset \citeproc{ref-deniz2024optimized}{{[}28{]}}, the MPII
 Cooking 2 Dataset \citeproc{ref-rohrbach2016recognizing}{{[}29{]}}, and
-the WiseNet dataset \citeproc{ref-marroquin2019wisenet}{{[}30{]}}.
-Table\textasciitilde{}\ref{tb:videodb} summarizes the properties of the
-self-collected video dataset alongside a comparison with existing
-benchmark datasets, and Figure\textasciitilde{}\ref{fig:videodb}
-presents representative sample frames.
+the WiseNet dataset \citeproc{ref-marroquin2019wisenet}{{[}30{]}}. Table
+\ref{tb:videodb} summarizes the properties of the self-collected video
+dataset alongside a comparison with existing benchmark datasets, and
+Figure \ref{fig:videodb} presents representative sample frames.
 
-For the hyperparameter optimization described in
-Section\textasciitilde{}\ref{sec:hyperparam}, the video dataset was
-further partitioned into a validation set, \(D_{\text{val}}\) (46
-videos), used to select the optimal skip-module hyperparameters, and a
-test set, \(D_{\text{test}}\) (104 videos), used for the final
-evaluation of the skip-enabled system against the baseline and existing
-methods. The split followed a 30:70 ratio (validation:test), following
-the protocol of \citeproc{ref-de2023hybrid}{{[}10{]}}, and was performed
-using stratified sampling to preserve balanced class distributions in
-both subsets.
+For the hyperparameter optimization described in Section
+\ref{sec:hyperparam}, the video dataset was further partitioned into a
+validation set, \(D_{\text{val}}\) (46 videos), used to select the
+optimal skip-module hyperparameters, and a test set, \(D_{\text{test}}\)
+(104 videos), used for the final evaluation of the skip-enabled system
+against the baseline and existing methods. The split followed a 30:70
+ratio (validation:test), following the protocol of
+\citeproc{ref-de2023hybrid}{{[}10{]}}, and was performed using
+stratified sampling to preserve balanced class distributions in both
+subsets.
 
 \subsection{Evaluation Metrics}\label{sec:metrics}
 
@@ -617,109 +614,61 @@ negative frames in the evaluated set. A higher \(S_r\) indicates greater
 computational savings, while a drop in recall signals unsafe skipping of
 fire/smoke frames.
 
-\subsection{Implementation Details}\label{implementation-details}
+\subsection{Baseline Models and and Implementation
+Details}\label{baseline-models-and-and-implementation-details}
 
-Due to their distinct computational requirements, the BIG and SMALL
-models were trained on separate hardware configurations. The BIG model
-was trained on a system equipped with an Intel i9-13900K CPU and two
-NVIDIA GeForce RTX 4090 GPUs. Training was conducted over 100 epochs
-using the Stochastic Gradient Descent (SGD) optimizer with the following
-hyperparameters: a batch size of 128, a learning rate of 0.01, momentum
-of 0.9, and weight decay of 0.0001. In contrast, the SMALL model was
-trained on a system with an Intel i9-9900K CPU and a single NVIDIA
-GeForce RTX 3090 GPU. This model employed the Adam optimizer for 50
-epochs with a batch size of 256, a learning rate of 0.001, (\beta\_1 =
-0.9), (\beta\_2 = 0.999), and a weight decay of 0.0001.
-
-\textbf{TODO}: add hardware and software context here The experiments
-were conducted on a workstation running Windows 10 Pro 21H2 (build
-19044) equipped with a Intel Core i9-12900K processor, 64 GB of DDR5
-system memory, and an NVIDIA GeForce RTX 3090 GPU (24 GB VRAM). All deep
-learning inference was performed under CUDA 12.9 with PyTorch 2.7.1.
-
-\subsection{Baseline Models and
-Context}\label{baseline-models-and-context}
-
-To validate the effectiveness of the proposed skip module, we compare it
-against a spectrum of existing solutions ranging from heavy,
-high-accuracy models to lightweight, real-time approximations:
+\textbf{Baseline Models}: To demonstrate both the superiority of the
+high-capacity classifier over lightweight alternatives and the
+effectiveness of the proposed skip module in accelerating its inference,
+we evaluate the following baseline models alongside our BIG model:
 
 \begin{itemize}
-\tightlist
 \item
-  \textbf{The ``Expert'' Baseline (BIG MODEL):} A state-of-the-art Deep
-  Learning model (ResNet-50 backbone) trained on a massive proprietary
-  dataset (\(>1M\) images). It achieves the highest accuracy but suffers
-  from high latency (\$\sim\$50ms/frame), making it computationally
-  prohibitive for 24/7 processing on edge devices. In this study, we
-  trained two classification models: a high-accuracy, complex model
-  (referred to as the BIG model) for fire and smoke detection, and a
-  lightweight model (referred to as the SMALL model) for the
-  skip-module.
+  \textbf{FireNet} \citeproc{ref-jadon2019firenet}{{[}16{]}}: A
+  lightweight CNN-based image classifier comprising 14 layers, with a
+  model size of 7.5 MB and approximately 650k trainable parameters.
+\item
+  \textbf{MobileNet} \citeproc{ref-mukhopadhyay2019fpga}{{[}32{]}}: A
+  modified MobileNet architecture fine-tuned for fire and smoke
+  detection.
+\item
+  \textbf{YOLOv5s} \citeproc{ref-de2023hybrid}{{[}10{]}}: A lightweight
+  object detector based on YOLOv5
+  \citeproc{ref-JocherYOLOv5byUltralytics2020}{{[}33{]}}, trained with
+  hyperparameters selected via grid search on the D-Fire dataset
+  \citeproc{ref-dfiredataset}{{[}20{]}}.
+\item
+  \textbf{YOLOv5l} \citeproc{ref-de2023hybrid}{{[}10{]}}: A heavier
+  variant of the above, based on the larger YOLOv5l architecture,
+  offering higher capacity at increased computational cost.
+\item
+  \textbf{BIG Model}: The BIG model is obtained by fine-tuning a
+  pretrained High-Performance GPU Network v2 (HGNetV2), specifically the
+  \texttt{hgnetv2\_b5.ssld\_stage2\_ft\_in1k} checkpoint
+  \citeproc{ref-hgnetv2timm:online}{{[}34{]}} from the Timm library
+  \citeproc{ref-rw2019timm}{{[}35{]}}, which was originally trained
+  using SSLD knowledge distillation
+  \citeproc{ref-cui2021beyond}{{[}36{]}}. HGNetV2
+  \citeproc{ref-hgnetv2PaddleCl7:online}{{[}37{]}} is a high-capacity
+  CNN architecture designed to achieve substantially higher accuracy
+  than models of comparable inference speed on NVIDIA GPUs, making it
+  well-suited for deployment in our target environment.
+  \textcolor{red}{For
+  fine-tuning, we compiled a dataset of 1,000,000,000 fire and smoke images collected
+  from internet sources, partitioned into training (80\%) and test (20\%)
+  subsets. The model was optimized using Adam with an initial learning rate of
+  $1 \times 10^{-4}$ and weight decay of $1 \times 10^{-5}$ for 100 epochs with
+  a batch size of 32. On the held-out test set, the final model achieved a
+  recall of xx.xx\% and a false alarm rate of xx.xx\%.}
 \end{itemize}
 
-For the BIG model, we combined images from the D-Fire dataset
-\citeproc{ref-dfiredataset}{{[}20{]}} with additional fire and smoke
-images collected from the internet, resulting in a total of 18,000
-images (\#REVISE\_NEEDED). These were divided into training (80\%,
-14,400 images) and testing (20\%, 3,600 images) sets.
-
-For the SMALL model, we randomly extracted 80,000 64×64 patches from
-datasets A and B (\#REVISE\_NEEDED). Of these, 80\% were used for
-training, while the remaining 20\% were reserved for testing to evaluate
-model performance.
-
-We construct a binary image classification dataset for fire and smoke
-detection, consisting of two classes: \emph{fire/smoke} and \emph{none}.
-The dataset contains 18,500 RGB images collected from publicly available
-sources, including FIRE Dataset and FIRESENSE Dataset, along with
-additional web-scraped images. The \emph{fire/smoke} class includes
-images with visible flames or smoke under diverse conditions such as
-indoor fires, wildfires, and low-visibility environments, while the
-\emph{none} class contains visually similar non-fire scenes (e.g., fog,
-clouds, and sunlight glare) to reduce false positives. The images vary
-in resolution from (480 \times
-1) to (1920 \times 1080), and the dataset is split into 70\% training,
-10\% validation, and 20\% testing subsets with balanced class
-distribution. Prior to training, all images are resized to (224
-\times 224) and normalized using ImageNet statistics, and data
-augmentation techniques including random horizontal flipping, rotation
-(±15°), color jittering, and random cropping are applied to improve
-robustness to variations in illumination, scale, and viewpoint. The
-model is implemented using PyTorch and trained on a single NVIDIA RTX
-3090 GPU. Optimization is performed using the Adam optimizer with an
-initial learning rate of (1 \times 10\^{}\{-4\}) and weight decay of (1
-\times 10\^{}\{-5\}), and the model is trained for 100 epochs with a
-batch size of 32. A cosine annealing learning rate schedule with a
-5-epoch warm-up is employed to stabilize training, and gradient clipping
-with a maximum norm of 5.0 is applied to prevent instability. The
-training objective is binary cross-entropy loss, and model selection is
-based on validation F1-score, with early stopping applied if performance
-does not improve for 10 consecutive epochs. Final performance is
-reported on the held-out test set using accuracy, precision, recall, and
-F1-score.
-
-\begin{itemize}
-\tightlist
-\item
-  \textbf{M1 (Lightweight Classifier)
-  \citeproc{ref-jadon2019firenet}{{[}16{]}}:} A MobileNetV2-based
-  classifier trained on a smaller subset (\(<5k\) images). It represents
-  the standard ``efficiency'' compromise: low latency (\$\sim\$15ms) but
-  reduced generalization capability.
-\item
-  \textbf{M2 (Lightweight Detector)
-  \citeproc{ref-de2023hybrid}{{[}10{]}}:} A YOLOv8-Nano object detector
-  trained on a small dataset (\$\sim\$2k images). It offers localization
-  but struggles with small or semi-transparent smoke features due to
-  limited training data.
-\item
-  \textbf{M3 (Temporal Voting Method)
-  \citeproc{ref-de2023hybrid}{{[}10{]}}:} A video-level approach that
-  aggregates inference results over a sliding window of 30 frames to
-  reduce false alarms. While effective for reducing noise, it introduces
-  inherent algorithmic latency.
-\end{itemize}
+\textbf{Implementation Details}: Unless otherwise specified, all
+experiments were conducted on a workstation equipped with an Intel Core
+i9-12900K CPU, 64 GB DDR5 system memory, and an NVIDIA GeForce RTX 3090
+GPU (24 GB VRAM), running Windows 10 Pro (build 19044). Deep learning
+inference was performed using PyTorch 2.7.1 under CUDA 12.9, and video
+processing and motion estimation were carried out using OpenCV 4.11
+(CPU-only).
 
 \subsection{Results}\label{results}
 
@@ -751,8 +700,8 @@ grid search over four parameters: \texttt{scale\_factor},
 To identify an optimal configuration for the FrameDiffDet skip module,
 we conducted a systematic grid search over four hyperparameters: scale
 factor \(\alpha\), block size \(B\), block active threshold \(\tau\),
-and diff threshold \(\tau_d\). The search space is summarized in
-Table\textasciitilde{}\ref{tb:grid_search_space}, yielding a total of
+and diff threshold \(\tau_d\). The search space is summarized in Table
+\ref{tb:grid_search_space}, yielding a total of
 \(2 \times 2 \times 3 \times 4 = 48\) configurations.
 
 \textbf{Scale factor} \(\alpha \in \{0.5, 1.0\}\): The scale factor
@@ -779,33 +728,32 @@ threshold \(\tau\) defines the minimum fraction of motion-active blocks
 required to trigger a full inference pass; frames below \(\tau\) are
 skipped. A low value (\(\tau = 0.05\)) corresponds to a conservative
 policy where even sparse motion activity triggers inference, minimizing
-the risk of missed detections. A higher value (\(\tau = 0.15\)) reflects
-a more aggressive skip policy that demands broader scene-level motion
-before committing to inference. The three values are spaced at a uniform
-interval of 0.05 to enable a systematic and interpretable sweep across
-this conservative-to-aggressive spectrum.
+the risk of missed detections. A higher value (\(\tau =
+0.15\)) reflects a more aggressive skip policy that demands broader
+scene-level motion before committing to inference. The three values are
+spaced at a uniform interval of 0.05 to enable a systematic and
+interpretable sweep across this conservative-to-aggressive spectrum.
 
 \textbf{Diff threshold} \(\tau_d \in \{3, 5, 7, 10\}\): The per-pixel
 difference threshold \(\tau_d\) determines the minimum absolute
 intensity change required for a pixel to be counted as a motion event
-within a block. A low value (\(\tau_d = 3\)) is highly sensitive and
-responds to subtle illumination changes, while a high value
-(\(\tau_d = 10\)) responds only to strong, unambiguous motion. The four
-values span the full sensitivity spectrum --- from near-noise-level
-detection to robust large-motion detection --- with closer spacing at
-the lower end (3, 5, 7) to provide finer resolution in the sensitivity
-range most relevant to fire detection, where motion tends to be subtle
-and spatially confined.
+within a block. A low value (\(\tau_d =
+3\)) is highly sensitive and responds to subtle illumination changes,
+while a high value (\(\tau_d = 10\)) responds only to strong,
+unambiguous motion. The four values span the full sensitivity spectrum
+--- from near-noise-level detection to robust large-motion detection ---
+with closer spacing at the lower end (3, 5, 7) to provide finer
+resolution in the sensitivity range most relevant to fire detection,
+where motion tends to be subtle and spatially confined.
 
-Table\textasciitilde{}\ref{tb:val_search} specifies the search space for
-the rule-based skip-module parameters. The ranking and selection of the
-optimal configuration (\(\theta^*\)) based on the validation set results
-are detailed in Table\textasciitilde{}\ref{tb:val_results}.
-Table\textasciitilde{}\ref{tab:skip-selection} shows an example of the
-validation-time ranking. The selected configuration \(\theta_1^*\)
-satisfies the recall constraint and achieves the highest composite score
-by jointly balancing skip ratio, false alarm reduction, and recall
-retention.
+Table \ref{tb:val_search} specifies the search space for the rule-based
+skip-module parameters. The ranking and selection of the optimal
+configuration (\(\theta^*\)) based on the validation set results are
+detailed in Table \ref{tb:val_results}. Table \ref{tab:skip-selection}
+shows an example of the validation-time ranking. The selected
+configuration \(\theta_1^*\) satisfies the recall constraint and
+achieves the highest composite score by jointly balancing skip ratio,
+false alarm reduction, and recall retention.
 
 \input{./4.table/tb_val_results.tex}
 
@@ -840,12 +788,12 @@ accumulation already handles, so the upper bound is reduced to 0.10 to
 focus the search on the practically useful range.
 
 \textbf{Diff threshold} \(\tau_d \in \{3, 5\}\): Narrower than
-FrameDiffDet's \(\{3, 5, 7, 10\}\). Because accumulated motion sums
-intensity differences across \(\omega\) consecutive frames, the
-effective sensitivity is already amplified by the window length. Higher
-per-pixel thresholds (7, 10) would be redundant --- accumulation raises
-the effective signal level so that lower raw thresholds become
-sufficient.
+FrameDiffDet's \(\{3, 5,
+7, 10\}\). Because accumulated motion sums intensity differences across
+\(\omega\) consecutive frames, the effective sensitivity is already
+amplified by the window length. Higher per-pixel thresholds (7, 10)
+would be redundant --- accumulation raises the effective signal level so
+that lower raw thresholds become sufficient.
 
 \textbf{Motion increment / accumulation step} \(\omega \in \{5\}\):
 Fixed at 5 rather than searched. A step of 5 frames at standard
@@ -1234,6 +1182,43 @@ vol. 27, p. 104654, 2019.}
 Botelho, {``Non-stationary VFD evaluation kit: Dataset and metrics to
 fuel video-based fire detection development,''} in \emph{Latin american
 robotics symposium}, Springer, 2016, pp. 135--151.}
+
+\bibitem[\citeproctext]{ref-mukhopadhyay2019fpga}
+\CSLLeftMargin{{[}32{]} }%
+\CSLRightInline{D. Mukhopadhyay, R. Iyer, S. Kadam, and R. Koli, {``FPGA
+deployable fire detection model for real-time video surveillance systems
+using convolutional neural networks,''} in \emph{2019 global conference
+for advancement in technology (GCAT)}, IEEE, 2019, pp. 1--7.}
+
+\bibitem[\citeproctext]{ref-JocherYOLOv5byUltralytics2020}
+\CSLLeftMargin{{[}33{]} }%
+\CSLRightInline{G. Jocher, {``{YOLOv5 by Ultralytics}.''} May 2020. doi:
+\href{https://doi.org/10.5281/zenodo.3908559}{10.5281/zenodo.3908559}.
+Available: \url{https://github.com/ultralytics/yolov5}}
+
+\bibitem[\citeproctext]{ref-hgnetv2timm:online}
+\CSLLeftMargin{{[}34{]} }%
+\CSLRightInline{{``Timm/hgnetv2\_b5.ssld\_stage2\_ft\_in1k · hugging
+face.''} Sep. 2025. Available:
+\url{https://huggingface.co/timm/hgnetv2_b5.ssld_stage2_ft_in1k}}
+
+\bibitem[\citeproctext]{ref-rw2019timm}
+\CSLLeftMargin{{[}35{]} }%
+\CSLRightInline{R. Wightman, {``PyTorch image models (timm).''} 2019.
+Available: \url{https://github.com/rwightman/pytorch-image-models}}
+
+\bibitem[\citeproctext]{ref-cui2021beyond}
+\CSLLeftMargin{{[}36{]} }%
+\CSLRightInline{C. Cui \emph{et al.}, {``Beyond self-supervision: A
+simple yet effective network distillation alternative to improve
+backbones,''} \emph{arXiv preprint arXiv:2103.05959}, 2021.}
+
+\bibitem[\citeproctext]{ref-hgnetv2PaddleCl7:online}
+\CSLLeftMargin{{[}37{]} }%
+\CSLRightInline{{``PaddleClas/docs/en/models/PP-HGNetV2\_en.md at
+f1233c18455b8acde4fc42ab0bea575fa06daa8e · PaddlePaddle/PaddleClas.''}
+Available:
+\url{https://github.com/PaddlePaddle/PaddleClas/blob/f1233c18455b8acde4fc42ab0bea575fa06daa8e/docs/en/models/PP-HGNetV2_en.md?plain=1\#L33}}
 
 \end{CSLReferences}
 

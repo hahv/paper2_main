@@ -1,4 +1,25 @@
 
+<!-- ! tb_gridsearch_framediff -->
+<!-- ```{=latex}
+\begin{table}[h]
+\centering
+\caption{Grid search space for the \texttt{FrameDiffDet} skip module hyperparameters.}
+\label{tb:grid_search_space}
+\begin{tabular}{ll}
+\hline
+\textbf{Parameter} & \textbf{Search Values} \\
+\hline
+\texttt{scale\_factor}   & \{0.5, 1.0\} \\
+\texttt{block\_size\_orig} & \{16, 32\} \\
+\texttt{block\_ratio\_th} & \{0.05, 0.10, 0.15\} \\
+\texttt{diff\_thresh}    & \{3, 5, 7, 10\} \\
+\hline
+\multicolumn{2}{l}{\textit{Total configurations: $2 \times 2 \times 3 \times 4 = 48$}} \\
+\hline
+\end{tabular}
+\end{table}
+``` -->
+
 <!-- /mnt/e/SyncData/paper2_main/zreport/available_dataset.xlsx -->
 <!-- ![dataset_list](3.fig/dataset_list.png)
 There is a lack of publicly available datasets for indoor fire/smoke detection with static cameras.
