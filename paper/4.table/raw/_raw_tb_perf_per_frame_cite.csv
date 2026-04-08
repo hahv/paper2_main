@@ -1,6 +1,6 @@
 Method;Cite;GFLOPs
-MobileNet;\citeproc{ref-mukhopadhyay2019fpga}{{[}xx{]}};
-FireNet;\citeproc{ref-jadon2019firenet}{{[}xx{]}};
-YOLOv5s;\citeproc{ref-de2023hybrid}{{[}xx{]}};
-YOLOv5l;\citeproc{ref-de2023hybrid}{{[}xx{]}};
+MobileNet;\citeproc{ref-mukhopadhyay2019fpga}{{[}xx{]}};1.135
+FireNet;\citeproc{ref-jadon2019firenet}{{[}xx{]}};0.018
+YOLOv5s;\citeproc{ref-de2023hybrid}{{[}xx{]}};15.8
+YOLOv5l;\citeproc{ref-de2023hybrid}{{[}xx{]}};107.7
 Our Big Model;(without Skip Module);30.61

@@ -34,6 +34,12 @@ steps:
           search: "yolov5s_notemp_per_frame",
           replace-with: "YOLOv5s",
         }
+      - {
+          column: Method,
+          op: replace,
+          search: "yolov5l_notemp_per_frame",
+          replace-with: "YOLOv5l",
+        }
 
   # ── 3. FILTER ROWS ────────────────────────────────────────
   - type: filter
@@ -41,7 +47,7 @@ steps:
       - {
           column: Method,
           op: "in",
-          value: ["Our Big Model", "FireNet", "MobileNet", "YOLOv5s"],
+          value: ["Our Big Model", "FireNet", "MobileNet", "YOLOv5s", "YOLOv5l"],
         }
 
   # ── 4. JOIN CITE ──────────────────────────────────────────
@@ -70,6 +76,7 @@ steps:
       - metric_f1_score
       - metric_precision
       - metric_fps
+      - GFLOPs
 
   # ── 7. RENAME FOR DISPLAY ─────────────────────────────────
   - type: rename

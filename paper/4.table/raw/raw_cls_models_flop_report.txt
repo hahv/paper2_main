@@ -1,0 +1,264 @@
+────────────────────────────── Run configuration ──────────────────────────────
+{
+│   'video_dir': ['E:\\SyncData\\paper2_main\\datasets\\UFireIndoor1'],
+│   'model_path': [
+│   │   'E:\\SyncData\\paper2_baseline\\weights\\firenet.h5',
+│   │   'E:\\SyncData\\paper2_baseline\\weights\\mobilenet.h5'
+│   ],
+│   'output_dir': ['E:\\SyncData\\paper2_baseline\\zout']
+}
+──────────────────────────── Start running models ─────────────────────────────
+──────── Running model: E:\SyncData\paper2_baseline\weights\firenet.h5 ────────
+Running command: python ./run_cls_model.py --ds UFireIndoor1 --model
+E:\SyncData\paper2_baseline\weights\firenet.h5 --videodir
+"E:\SyncData\paper2_main\datasets\UFireIndoor1" --outdir
+"E:\SyncData\paper2_baseline\zout"
+Output dir: E:\SyncData\paper2_baseline\zout\UFireIndoor1\firenet
+Model: firenet
+
+=========================Options=============================
+-max_depth                  10000
+-min_bytes                  0
+-min_peak_bytes             0
+-min_residual_bytes         0
+-min_output_bytes           0
+-min_micros                 0
+-min_accelerator_micros     0
+-min_cpu_micros             0
+-min_params                 0
+-min_float_ops              1
+-min_occurrence             0
+-step                       -1
+-order_by                   float_ops
+-account_type_regexes       .*
+-start_name_regexes         .*
+-trim_name_regexes
+-show_name_regexes          .*
+-hide_name_regexes
+-account_displayed_op_only  true
+-select                     float_ops
+-output                     stdout:
+
+==================Model Analysis Report======================
+
+Doc:
+scope: The nodes in the model graph are organized by their names, which is hierarchical like filesystem.
+flops: Number of float operations. Note: Please read the implementation for the math behind it.
+
+Profile:
+node name | # float_ops
+_TFProfRoot (--/17.82m flops)
+  conv2d_4/Conv2D (7.75m/7.75m flops)
+  conv2d_5/Conv2D (5.31m/5.31m flops)
+  conv2d_3/Conv2D (3.32m/3.32m flops)
+  dense_3/MatMul (1.18m/1.18m flops)
+  dense_4/MatMul (65.54k/65.54k flops)
+  average_pooling2d_3/AvgPool (61.50k/61.50k flops)
+  conv2d_3/BiasAdd (61.50k/61.50k flops)
+  conv2d_4/BiasAdd (26.91k/26.91k flops)
+  average_pooling2d_4/AvgPool (25.09k/25.09k flops)
+  average_pooling2d_5/AvgPool (9.22k/9.22k flops)
+  conv2d_5/BiasAdd (9.22k/9.22k flops)
+  dense_5/MatMul (512/512 flops)
+  dense_3/BiasAdd (256/256 flops)
+  dense_4/BiasAdd (128/128 flops)
+  dense_5/Softmax (10/10 flops)
+  dense_5/BiasAdd (2/2 flops)
+
+======================End of Report==========================
+  ↳ FLOPs: 0.018 GFLOPs / 17.820 MFLOPs  (input: 1×64×64×3)
+Model: firenet
+
+=========================Options=============================
+-max_depth                  10000
+-min_bytes                  0
+-min_peak_bytes             0
+-min_residual_bytes         0
+-min_output_bytes           0
+-min_micros                 0
+-min_accelerator_micros     0
+-min_cpu_micros             0
+-min_params                 0
+-min_float_ops              1
+-min_occurrence             0
+-step                       -1
+-order_by                   float_ops
+-account_type_regexes       .*
+-start_name_regexes         .*
+-trim_name_regexes
+-show_name_regexes          .*
+-hide_name_regexes
+-account_displayed_op_only  true
+-select                     float_ops
+-output                     stdout:
+
+==================Model Analysis Report======================
+
+Doc:
+scope: The nodes in the model graph are organized by their names, which is hierarchical like filesystem.
+flops: Number of float operations. Note: Please read the implementation for the math behind it.
+
+Profile:
+node name | # float_ops
+_TFProfRoot (--/17.82m flops)
+  conv2d_4/Conv2D (7.75m/7.75m flops)
+  conv2d_5/Conv2D (5.31m/5.31m flops)
+  conv2d_3/Conv2D (3.32m/3.32m flops)
+  dense_3/MatMul (1.18m/1.18m flops)
+  dense_4/MatMul (65.54k/65.54k flops)
+  average_pooling2d_3/AvgPool (61.50k/61.50k flops)
+  conv2d_3/BiasAdd (61.50k/61.50k flops)
+  conv2d_4/BiasAdd (26.91k/26.91k flops)
+  average_pooling2d_4/AvgPool (25.09k/25.09k flops)
+  average_pooling2d_5/AvgPool (9.22k/9.22k flops)
+  conv2d_5/BiasAdd (9.22k/9.22k flops)
+  dense_5/MatMul (512/512 flops)
+  dense_3/BiasAdd (256/256 flops)
+  dense_4/BiasAdd (128/128 flops)
+  dense_5/Softmax (10/10 flops)
+  dense_5/BiasAdd (2/2 flops)
+
+======================End of Report==========================
+  ↳ FLOPs: 0.018 GFLOPs / 17.820 MFLOPs  (input: 1×64×64×3)
+─────── Running model: E:\SyncData\paper2_baseline\weights\mobilenet.h5 ───────
+Running command: python ./run_cls_model.py --ds UFireIndoor1 --model
+E:\SyncData\paper2_baseline\weights\mobilenet.h5 --videodir
+"E:\SyncData\paper2_main\datasets\UFireIndoor1" --outdir
+"E:\SyncData\paper2_baseline\zout"
+Output dir: E:\SyncData\paper2_baseline\zout\UFireIndoor1\mobilenet
+Model: mobilenet
+
+=========================Options=============================
+-max_depth                  10000
+-min_bytes                  0
+-min_peak_bytes             0
+-min_residual_bytes         0
+-min_output_bytes           0
+-min_micros                 0
+-min_accelerator_micros     0
+-min_cpu_micros             0
+-min_params                 0
+-min_float_ops              1
+-min_occurrence             0
+-step                       -1
+-order_by                   float_ops
+-account_type_regexes       .*
+-start_name_regexes         .*
+-trim_name_regexes
+-show_name_regexes          .*
+-hide_name_regexes
+-account_displayed_op_only  true
+-select                     float_ops
+-output                     stdout:
+
+==================Model Analysis Report======================
+
+Doc:
+scope: The nodes in the model graph are organized by their names, which is hierarchical like filesystem.
+flops: Number of float operations. Note: Please read the implementation for the math behind it.
+
+Profile:
+node name | # float_ops
+_TFProfRoot (--/1.14b flops)
+  conv_pw_10/Conv2D (102.76m/102.76m flops)
+  conv_pw_11/Conv2D (102.76m/102.76m flops)
+  conv_pw_13/Conv2D (102.76m/102.76m flops)
+  conv_pw_3/Conv2D (102.76m/102.76m flops)
+  conv_pw_5/Conv2D (102.76m/102.76m flops)
+  conv_pw_7/Conv2D (102.76m/102.76m flops)
+  conv_pw_8/Conv2D (102.76m/102.76m flops)
+  conv_pw_9/Conv2D (102.76m/102.76m flops)
+  conv_pw_1/Conv2D (51.38m/51.38m flops)
+  conv_pw_12/Conv2D (51.38m/51.38m flops)
+  conv_pw_2/Conv2D (51.38m/51.38m flops)
+  conv_pw_4/Conv2D (51.38m/51.38m flops)
+  conv_pw_6/Conv2D (51.38m/51.38m flops)
+  conv1/Conv2D (21.68m/21.68m flops)
+  conv_dw_1/depthwise (7.23m/7.23m flops)
+  conv_dw_3/depthwise (7.23m/7.23m flops)
+  conv_dw_2/depthwise (3.61m/3.61m flops)
+  conv_dw_5/depthwise (3.61m/3.61m flops)
+  conv_dw_10/depthwise (1.81m/1.81m flops)
+  conv_dw_11/depthwise (1.81m/1.81m flops)
+  conv_dw_4/depthwise (1.81m/1.81m flops)
+  conv_dw_7/depthwise (1.81m/1.81m flops)
+  conv_dw_8/depthwise (1.81m/1.81m flops)
+  conv_dw_9/depthwise (1.81m/1.81m flops)
+  conv_dw_13/depthwise (903.17k/903.17k flops)
+  conv_dw_6/depthwise (903.17k/903.17k flops)
+  conv_dw_12/depthwise (451.58k/451.58k flops)
+  global_average_pooling2d_2/Mean (50.18k/50.18k flops)
+  dense_1/MatMul (4.10k/4.10k flops)
+  dense_1/Softmax (10/10 flops)
+  dense_1/BiasAdd (2/2 flops)
+
+======================End of Report==========================
+  ↳ FLOPs: 1.135 GFLOPs / 1135.487 MFLOPs  (input: 1×224×224×3)
+Model: mobilenet
+
+=========================Options=============================
+-max_depth                  10000
+-min_bytes                  0
+-min_peak_bytes             0
+-min_residual_bytes         0
+-min_output_bytes           0
+-min_micros                 0
+-min_accelerator_micros     0
+-min_cpu_micros             0
+-min_params                 0
+-min_float_ops              1
+-min_occurrence             0
+-step                       -1
+-order_by                   float_ops
+-account_type_regexes       .*
+-start_name_regexes         .*
+-trim_name_regexes
+-show_name_regexes          .*
+-hide_name_regexes
+-account_displayed_op_only  true
+-select                     float_ops
+-output                     stdout:
+
+==================Model Analysis Report======================
+
+Doc:
+scope: The nodes in the model graph are organized by their names, which is hierarchical like filesystem.
+flops: Number of float operations. Note: Please read the implementation for the math behind it.
+
+Profile:
+node name | # float_ops
+_TFProfRoot (--/1.14b flops)
+  conv_pw_10/Conv2D (102.76m/102.76m flops)
+  conv_pw_11/Conv2D (102.76m/102.76m flops)
+  conv_pw_13/Conv2D (102.76m/102.76m flops)
+  conv_pw_3/Conv2D (102.76m/102.76m flops)
+  conv_pw_5/Conv2D (102.76m/102.76m flops)
+  conv_pw_7/Conv2D (102.76m/102.76m flops)
+  conv_pw_8/Conv2D (102.76m/102.76m flops)
+  conv_pw_9/Conv2D (102.76m/102.76m flops)
+  conv_pw_1/Conv2D (51.38m/51.38m flops)
+  conv_pw_12/Conv2D (51.38m/51.38m flops)
+  conv_pw_2/Conv2D (51.38m/51.38m flops)
+  conv_pw_4/Conv2D (51.38m/51.38m flops)
+  conv_pw_6/Conv2D (51.38m/51.38m flops)
+  conv1/Conv2D (21.68m/21.68m flops)
+  conv_dw_1/depthwise (7.23m/7.23m flops)
+  conv_dw_3/depthwise (7.23m/7.23m flops)
+  conv_dw_2/depthwise (3.61m/3.61m flops)
+  conv_dw_5/depthwise (3.61m/3.61m flops)
+  conv_dw_10/depthwise (1.81m/1.81m flops)
+  conv_dw_11/depthwise (1.81m/1.81m flops)
+  conv_dw_4/depthwise (1.81m/1.81m flops)
+  conv_dw_7/depthwise (1.81m/1.81m flops)
+  conv_dw_8/depthwise (1.81m/1.81m flops)
+  conv_dw_9/depthwise (1.81m/1.81m flops)
+  conv_dw_13/depthwise (903.17k/903.17k flops)
+  conv_dw_6/depthwise (903.17k/903.17k flops)
+  conv_dw_12/depthwise (451.58k/451.58k flops)
+  global_average_pooling2d_2/Mean (50.18k/50.18k flops)
+  dense_1/MatMul (4.10k/4.10k flops)
+  dense_1/Softmax (10/10 flops)
+  dense_1/BiasAdd (2/2 flops)
+
+======================End of Report==========================
+  ↳ FLOPs: 1.135 GFLOPs / 1135.487 MFLOPs  (input: 1×224×224×3)

@@ -682,7 +682,7 @@ accuracy/latency), also comparing against the baseline system without skipping.
 ```{=latex}
 \input{./4.table/tb_perf_per_frame.tex}
 ```
-FLOPs (small s) static complexity of a mode
+FLOPs (small s) static complexity of a model
 FlOPs = Floating-Point Operations
 MFLOPs = $10^6$ FLOPs, GFLOPs = $10^9$ FLOPs
 

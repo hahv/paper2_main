@@ -1,0 +1,121 @@
+ python zrun_exp.py
+
+=======================YOLOv5 FLOPs Calculation Report=======================
+
+──────────────────────────────────────────────── Run configuration ─────────────────────────────────────────────────
+{
+│   'video_dir': ['E:\\SyncData\\paper2_main\\datasets\\UFireIndoor1'],
+│   'model_path': [
+│   │   'E:\\SyncData\\paper2_baseline\\weights\\yolov5s.pt',
+│   │   'E:\\SyncData\\paper2_baseline\\weights\\yolov5l.pt'
+│   ],
+│   'output_dir': ['E:\\SyncData\\paper2_baseline\\zout']
+}
+─────────────────────────────────────────────── Start running models ───────────────────────────────────────────────
+  0%|                                                                                        | 0/2 [00:00<?, ?it/s]────────────────────────── Running model: E:\SyncData\paper2_baseline\weights\yolov5s.pt ───────────────────────────
+Running command: python ./run_yolo.py --ds_name UFireIndoor1 --model_file
+E:\SyncData\paper2_baseline\weights\yolov5s.pt --video_dir "E:\SyncData\paper2_main\datasets\UFireIndoor1" --method
+notemp --outdir "E:\SyncData\paper2_baseline\zout" --device cuda:0
+────────────────────────────────────────────────────── <cfg> ───────────────────────────────────────────────────────
+{
+│   'outdir': 'E:\\SyncData\\paper2_baseline\\zout',
+│   'method': 'notemp',
+│   'area_thres': 0.0,
+│   'device': 'cuda:0',
+│   'enable_temporal': False,
+│   'half': False,
+│   'video_dir': 'E:\\SyncData\\paper2_main\\datasets\\UFireIndoor1',
+│   'ds_name': 'UFireIndoor1',
+│   'iou_thres': 0.45,
+│   'od_conf_thres': 0.0,
+│   'max_det': 1000,
+│   'num_cf': 0,
+│   'persist_thres': 0.5,
+│   'model_file': 'E:\\SyncData\\paper2_baseline\\weights\\yolov5s.pt',
+│   'frame_agg': 'max',
+│   'smooth_ws': 0,
+│   'window_size': 30,
+│   'conf_thres': 0.25,
+│   'imgsz': [640, 640],
+│   'cf_thres': 0.0,
+│   'method_params': {'method': 'notemp'}
+}
+────────────────────────────────────────────────────── </cfg> ──────────────────────────────────────────────────────
+  0%|                                                                                        | 0/2 [00:00<?, ?it/s]────────────────────────────────────────────── aihub__lb_smoke__0264 ───────────────────────────────────────────────
+'Running yolo model: E:\\SyncData\\paper2_baseline\\weights\\yolov5s.pt'
+enable_temporal=False
+YOLOv5  fecf1dc torch 1.10.1 CUDA:0 (NVIDIA GeForce RTX 3090, 24576MiB)
+
+Fusing layers...
+Model Summary: 213 layers, 7015519 parameters, 0 gradients, 15.8 GFLOPs
+Model: yolov5s
+  ↳ FLOPs calculation skipped: Input type (torch.FloatTensor) and weight type (torch.cuda.FloatTensor) should be the
+same or input should be a MKLDNN tensor and weight is a dense tensor
+
+
+=======================YOLOv5l FLOPs Calculation Report=======================
+  0%|                                                                                        | 0/2 [00:00<?, ?it/s]────────────────────────────────────────────── aihub__lb_smoke__0264 ───────────────────────────────────────────────
+'Running yolo model: E:\\SyncData\\paper2_baseline\\weights\\yolov5s.pt'
+enable_temporal=False
+ Detection results exist: E:\SyncData\paper2_baseline\zout\UFireIndoor1\yolov5s_notemp\aihub__lb_smoke__0264_od.csv
+─────────────────────────────────────────────── aihub__lb_none__0175 ───────────────────────────────────────────────
+'Running yolo model: E:\\SyncData\\paper2_baseline\\weights\\yolov5s.pt'
+enable_temporal=False
+ Detection results exist: E:\SyncData\paper2_baseline\zout\UFireIndoor1\yolov5s_notemp\aihub__lb_none__0175_od.csv
+100%|███████████████████████████████████████████████████████████████████████████████| 2/2 [00:00<00:00, 436.29it/s]
+ 50%|████████████████████████████████████████                                        | 1/2 [00:04<00:04,  4.39s/it]────────────────────────── Running model: E:\SyncData\paper2_baseline\weights\yolov5l.pt ───────────────────────────
+Running command: python ./run_yolo.py --ds_name UFireIndoor1 --model_file
+E:\SyncData\paper2_baseline\weights\yolov5l.pt --video_dir "E:\SyncData\paper2_main\datasets\UFireIndoor1" --method
+notemp --outdir "E:\SyncData\paper2_baseline\zout" --device cuda:0
+────────────────────────────────────────────────────── <cfg> ───────────────────────────────────────────────────────
+{
+│   'imgsz': [640, 640],
+│   'od_conf_thres': 0.0,
+│   'enable_temporal': False,
+│   'cf_thres': 0.0,
+│   'max_det': 1000,
+│   'smooth_ws': 0,
+│   'video_dir': 'E:\\SyncData\\paper2_main\\datasets\\UFireIndoor1',
+│   'frame_agg': 'max',
+│   'ds_name': 'UFireIndoor1',
+│   'persist_thres': 0.5,
+│   'area_thres': 0.0,
+│   'conf_thres': 0.25,
+│   'model_file': 'E:\\SyncData\\paper2_baseline\\weights\\yolov5l.pt',
+│   'window_size': 30,
+│   'iou_thres': 0.45,
+│   'num_cf': 0,
+│   'outdir': 'E:\\SyncData\\paper2_baseline\\zout',
+│   'method': 'notemp',
+│   'half': False,
+│   'device': 'cuda:0',
+│   'method_params': {'method': 'notemp'}
+}
+────────────────────────────────────────────────────── </cfg> ──────────────────────────────────────────────────────
+  0%|                                                                                        | 0/2 [00:00<?, ?it/s]────────────────────────────────────────────── aihub__lb_smoke__0264 ───────────────────────────────────────────────
+'Running yolo model: E:\\SyncData\\paper2_baseline\\weights\\yolov5l.pt'
+enable_temporal=False
+YOLOv5  fecf1dc torch 1.10.1 CUDA:0 (NVIDIA GeForce RTX 3090, 24576MiB)
+
+Fusing layers...
+Model Summary: 367 layers, 46113663 parameters, 0 gradients, 107.7 GFLOPs
+Model: yolov5l
+  ↳ FLOPs calculation skipped: Input type (torch.FloatTensor) and weight type (torch.cuda.FloatTensor) should be the
+same or input should be a MKLDNN tensor and weight is a dense tensor
+'Model: yolov5l, video: aihub__lb_smoke__0264, temporal method: notemp'
++---------+------------+-----------+-------+------------+------+------+------+------+----------------+
+| video   | frame_id   | pred_id   | cls   | cls_conf   | x1   | y1   | x2   | y2   | elapsed_time   |
+|---------+------------+-----------+-------+------------+------+------+------+------+----------------|
++---------+------------+-----------+-------+------------+------+------+------+------+----------------+
+ 50%|████████████████████████████████████████                                        | 1/2 [00:14<00:14, 14.96s/it]─────────────────────────────────────────────── aihub__lb_none__0175 ───────────────────────────────────────────────
+'Running yolo model: E:\\SyncData\\paper2_baseline\\weights\\yolov5l.pt'
+enable_temporal=False
+YOLOv5  fecf1dc torch 1.10.1 CUDA:0 (NVIDIA GeForce RTX 3090, 24576MiB)
+
+'Model: yolov5l, video: aihub__lb_none__0175, temporal method: notemp'
++---------+------------+-----------+-------+------------+------+------+------+------+----------------+
+| video   | frame_id   | pred_id   | cls   | cls_conf   | x1   | y1   | x2   | y2   | elapsed_time   |
+|---------+------------+-----------+-------+------------+------+------+------+------+----------------|
++---------+------------+-----------+-------+------------+------+------+------+------+----------------+
+100%|████████████████████████████████████████████████████████████████████████████████| 2/2 [00:24<00:00, 12.16s/it]
+100%|████████████████████████████████████████████████████████████████████████████████| 2/2 [00:33<00:00, 16.71s/it]

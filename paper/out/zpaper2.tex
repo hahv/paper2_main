@@ -660,7 +660,7 @@ well-suited for deployment in our target environment.
   Adam with an initial learning rate of $1 \times 10^{-4}$ and weight decay of
   $1 \times 10^{-5}$ for 100 epochs with a batch size of 32. On the held-out
   test set, the final model achieved a recall of xx.xx\% and a false alarm rate
-  of xx.xx\%.}
+  of xx.xx\%.}. We use input size INPUT\_SIZE = (3, 360, 640)
 
 \textbf{Implementation Details}: Unless otherwise specified, all
 experiments were conducted on a workstation equipped with an Intel Core
@@ -845,6 +845,9 @@ system without skipping.
 
 \input{./4.table/tb_perf_per_frame.tex}
 
+FLOPs (small s) static complexity of a model FlOPs = Floating-Point
+Operations MFLOPs = \(10^6\) FLOPs, GFLOPs = \(10^9\) FLOPs
+
 Obviously, the baseline system (BIG MODEL only) achieves the best
 performance compare to other lightweight alternatives like MobileNet,
 FireNet, and YOLOv5s/l due to more powerful capacity of the network
@@ -901,11 +904,6 @@ system is simply to detect whether \emph{any} hazard exists (regardless
 of whether it is fire or smoke), we measure safety using a unified
 anomaly recall metric. We also compare this against the recall
 capabilities of the lightweight standalone models (M1 and M2).
-
-Table \ref{tb:tb_no_skip_perf} assesses the intrinsic recall and
-filtering capability of each method as a standalone component.
-
-\input{./4.table/tb_no_skip_perf.tex}
 
 \emph{Analysis:} As demonstrated in Table \ref{tb:tb_no_skip_perf},
 lightweight standalone models (M1 and M2) offer fast processing but miss
