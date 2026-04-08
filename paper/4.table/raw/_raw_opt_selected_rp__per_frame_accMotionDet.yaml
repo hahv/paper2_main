@@ -1,6 +1,8 @@
 input: raw/_raw_opt_selected_rp__per_frame.csv
 output: output/
 sep: ";"
+prepend_lines:
+  - "Method;Parameters;;;;;;;; Metrics;;;;Combined Score"   # ← raw group header row
 
 steps:
   # ── 1. CLEAN UP COLUMN NAMES ──────────────────────────────
@@ -19,15 +21,15 @@ steps:
       "w_F": "Weight FAR"
       "w_R": "Weight Recall"
       "delta_R": "Recall Delta"
-      "skip_proc.params.motion.params.diff_frame_th": "Diff threshold $\\tau_d$"
-      "skip_proc.params.motion.params.impact_plus_one": "Motion increment $\\omega$"
-      "skip_proc.params.motion.params.mask_th": "Activation threshold $\\tau_m$"
-      "skip_proc.params.motion.params.max_val": "Accumulation cap $K_{\\max}$"
-      "skip_proc.params.motion.params.decay": "Decay rate $\\delta$"
-      "skip_proc.params.scale_factor": "Scale factor $\\alpha$"
-      "skip_proc.params.block_size_orig": "Block size $B$"
-      "skip_proc.params.block_ratio_th": "Block active threshold $\\tau$"
-      # "skip_proc.params.min_roi_ratio": "Min_ROI"
+      "skip_rate": "Skip Rate"
+      "skip_proc.params.motion.params.diff_frame_th": "Diff threshold"
+      "skip_proc.params.motion.params.impact_plus_one": "Motion increment"
+      "skip_proc.params.motion.params.mask_th": "Activation threshold"
+      "skip_proc.params.motion.params.max_val": "Accumulation cap"
+      "skip_proc.params.motion.params.decay": "Decay rate"
+      "skip_proc.params.scale_factor": "Scale factor"
+      "skip_proc.params.block_size_orig": "Block size"
+      "skip_proc.params.block_ratio_th": "Block active threshold"
 
   # ── 2. DROP JUNK COLUMNS ──────────────────────────────────
   - type: drop
@@ -52,34 +54,51 @@ steps:
         expr: "(df['Precision'] * 100).round(2)"
       - name: FPS
         expr: "df['FPS'].round(1)"
-      - name: skip_rate
-        expr: "(df['skip_rate'] * 100).round(2)"
+      - name: Skip Rate
+        expr: "(df['Skip Rate'] * 100).round(2)"
+      - name: "Exp."
+        expr: "df['Experiment'].str.replace('.*mt_temp_method_motion_block.*', 'AccMotionDet', regex=True).str.replace('.*mt_no_temp_method.*', 'Baseline (No Skip module)', regex=True)"
 
   # ── 5. REORDER & SELECT COLUMNS ───────────────────────────
+  - type: rename
+    mapping:
+      "Diff threshold": "Diff threshold $\\tau_d$"
+      "Motion increment": "Motion increment $\\omega$"
+      "Activation threshold": "Activation threshold $\\tau_m$"
+      "Accumulation cap": "Acc. cap $K_{\\max}$"
+      "Decay rate": "Decay rate $\\delta$"
+      "Scale factor": "Scale factor $\\alpha$"
+      "Block size": "Block size $B$"
+      "Block active threshold": "Block active threshold $\\tau$"
+      "Skip Rate": "Skip Rate (\\%)"
+      "Recall": "Recall (\\%)"
+      "FPR": "FPR (\\%)"
+
   - type: select
     columns:
       # Identification
-      - Experiment
+      - Exp.
       # - Method
       # Hyperparameters
-      - Scale factor $\\alpha$
-      - Block size $B$
-      - Block active threshold $\\tau$
-      - Diff threshold $\\tau_d$
-      - Motion increment $\\omega$
-      - Activation threshold $\\tau_m$
-      - Accumulation cap $K_{\\max}$
-      - Decay rate $\\delta$
+      - "Scale factor $\\alpha$"
+      - "Block size $B$"
+      - "Block active threshold $\\tau$"
+      - "Diff threshold $\\tau_d$"
+      - "Motion increment $\\omega$"
+      - "Activation threshold $\\tau_m$"
+      - "Acc. cap $K_{\\max}$"
+      - "Decay rate $\\delta$"
 
       # Primary Metrics
-      - Combined Score
-      - Recall
-      - FPR
+      - "Recall (\\%)"
+      - "FPR (\\%)"
+      - "Skip Rate (\\%)"
       - FPS
+      - Combined Score
       # Detailed
       # - recall_retention
       # - far_reduction_norm
-      # - skip_rate
+      # - Skip Rate
       # - Weight Skip
       # - Weight FAR
       # - Weight Recall
@@ -95,5 +114,17 @@ steps:
   # ── 6. SORT ───────────────────────────────────────────────
   # Sort by highest score first
   - type: sort
-    by: [Combined Score]
-    ascending: [false]
+    by: [Exp., Combined Score]
+    ascending: [false, false]
+  - type: fillna
+    mapping:
+      "Scale factor $\\alpha$": "-"
+      "Block size $B$": "-"
+      "Block active threshold $\\tau$": "-"
+      "Diff threshold $\\tau_d$": "-"
+      "Motion increment $\\omega$": "-"
+      "Activation threshold $\\tau_m$": "-"
+      "Acc. cap $K_{\\max}$": "-"
+      "Decay rate $\\delta$": "-"
+      "Skip Rate (\\%)": "-"
+      "Combined Score": "-"

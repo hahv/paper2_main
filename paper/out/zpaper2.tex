@@ -751,11 +751,7 @@ skip-module parameters. The ranking and selection of the optimal
 configuration (\(\theta^*\)) based on the validation set results are
 detailed in Table \ref{tb:val_results}. Table \ref{tab:skip-selection}
 shows an example of the validation-time ranking. The selected
-configuration \(\theta_1^*\) satisfies the recall constraint and
-achieves the highest composite score by jointly balancing skip ratio,
-false alarm reduction, and recall retention.
-
-\input{./4.table/tb_val_results.tex}
+configuration \(\theta_1^*\) satisfies the
 
 This formulation is systematic, interpretable, and aligned with the
 intended role of the skip module in real-time fire/smoke detection:
@@ -828,7 +824,7 @@ aggressively, discarding genuine slow-onset events such as early-stage
 smoke diffusion. This parameter is fixed to isolate the effect of the
 remaining hyperparameters.
 
-\input{./4.table/tb_val_results.tex}
+\input{./4.table/tb_val_results_accMotionDet.tex}
 
 \subsubsection{System-Level Performance: Frame-Based
 Efficiency}\label{sec:e2e-perf}

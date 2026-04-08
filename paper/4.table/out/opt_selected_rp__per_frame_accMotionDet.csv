@@ -1,4 +1,5 @@
-Experiment;Block size $B$;Combined Score;Recall;FPR;FPS
-MainPC__ds_UFireIndoor2__mt_temp_method_motion_block__be8f0906f34c__20260325.181303_per_frame;32.0;0.3345;97.5;18.61;24.1
-MainPC__ds_UFireIndoor2__mt_temp_method_motion_block__db7ab155d4e9__20260325.181303_per_frame;32.0;0.2494;97.5;25.56;23.0
-MainPC__ds_UFireIndoor2__mt_no_temp_method__af4b0d32a3d2__20260316.172122_per_frame;;-1.0;98.33;41.53;22.2
+Method;Parameters;;;;;;;; Metrics;;;; Rank Score
+Exp.;Scale factor $\alpha$;Block size $B$;Block active threshold $\tau$;Diff threshold $\tau_d$;Motion increment $\omega$;Activation threshold $\tau_m$;Acc. cap $K_{\max}$;Decay rate $\delta$;Recall (\%);FPR (\%);Skip Rate (\%);FPS;Combined Score
+Baseline (No Skip module);-;-;-;-;-;-;-;-;98.33;41.53;0.0;22.2;-1.0
+AccMotionDet Cfg1;0.5;32.0;0.05;3.0;5.0;10.0;25.0;1.0;97.5;18.61;31.81;24.1;0.3345
+AccMotionDet Cfg2;0.5;32.0;0.05;2.0;5.0;10.0;25.0;1.0;97.5;25.56;23.19;23.0;0.2494
