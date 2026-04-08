@@ -153,7 +153,7 @@
 \title{Efficient Real-Time Fire Surveillance: A Lightweight
 Motion-Heuristic Skip Module for Accelerated Inference}
 \author{Hoang Van-Ha, Jong Weon Lee, Park Chun-Su}
-\date{2026.04.07}
+\date{2026.04.08}
 
 \begin{document}
 \maketitle
@@ -614,8 +614,8 @@ negative frames in the evaluated set. A higher \(S_r\) indicates greater
 computational savings, while a drop in recall signals unsafe skipping of
 fire/smoke frames.
 
-\subsection{Baseline Models and and Implementation
-Details}\label{baseline-models-and-and-implementation-details}
+\subsection{Models and Implementation
+Details}\label{models-and-implementation-details}
 
 \textbf{Baseline Models}: To demonstrate both the superiority of the
 high-capacity classifier over lightweight alternatives and the
@@ -624,13 +624,13 @@ we evaluate the following baseline models alongside our BIG model:
 
 \begin{itemize}
 \item
-  \textbf{FireNet} \citeproc{ref-jadon2019firenet}{{[}16{]}}: A
-  lightweight CNN-based image classifier comprising 14 layers, with a
-  model size of 7.5 MB and approximately 650k trainable parameters.
-\item
   \textbf{MobileNet} \citeproc{ref-mukhopadhyay2019fpga}{{[}32{]}}: A
   modified MobileNet architecture fine-tuned for fire and smoke
   detection.
+\item
+  \textbf{FireNet} \citeproc{ref-jadon2019firenet}{{[}16{]}}: A
+  lightweight CNN-based image classifier comprising 14 layers, with a
+  model size of 7.5 MB and approximately 650k trainable parameters.
 \item
   \textbf{YOLOv5s} \citeproc{ref-de2023hybrid}{{[}10{]}}: A lightweight
   object detector based on YOLOv5
@@ -641,26 +641,26 @@ we evaluate the following baseline models alongside our BIG model:
   \textbf{YOLOv5l} \citeproc{ref-de2023hybrid}{{[}10{]}}: A heavier
   variant of the above, based on the larger YOLOv5l architecture,
   offering higher capacity at increased computational cost.
-\item
-  \textbf{BIG Model}: The BIG model is obtained by fine-tuning a
-  pretrained High-Performance GPU Network v2 (HGNetV2), specifically the
-  \texttt{hgnetv2\_b5.ssld\_stage2\_ft\_in1k} checkpoint
-  \citeproc{ref-hgnetv2timm:online}{{[}34{]}} from the Timm library
-  \citeproc{ref-rw2019timm}{{[}35{]}}, which was originally trained
-  using SSLD knowledge distillation
-  \citeproc{ref-cui2021beyond}{{[}36{]}}. HGNetV2
-  \citeproc{ref-hgnetv2PaddleCl7:online}{{[}37{]}} is a high-capacity
-  CNN architecture designed to achieve substantially higher accuracy
-  than models of comparable inference speed on NVIDIA GPUs, making it
-  well-suited for deployment in our target environment.
-  \textcolor{red}{For
-  fine-tuning, we compiled a dataset of 1,000,000,000 fire and smoke images collected
-  from internet sources, partitioned into training (80\%) and test (20\%)
-  subsets. The model was optimized using Adam with an initial learning rate of
-  $1 \times 10^{-4}$ and weight decay of $1 \times 10^{-5}$ for 100 epochs with
-  a batch size of 32. On the held-out test set, the final model achieved a
-  recall of xx.xx\% and a false alarm rate of xx.xx\%.}
 \end{itemize}
+
+\textbf{Proposed Classifier (BIG Model - HGNetV2)}: The BIG model is
+obtained by fine-tuning a pretrained High-Performance GPU Network v2
+(HGNetV2), specifically the \texttt{hgnetv2\_b5.ssld\_stage2\_ft\_in1k}
+checkpoint \citeproc{ref-hgnetv2timm:online}{{[}34{]}} from the Timm
+library \citeproc{ref-rw2019timm}{{[}35{]}}, which was originally
+trained using SSLD knowledge distillation
+\citeproc{ref-cui2021beyond}{{[}36{]}}. HGNetV2
+\citeproc{ref-hgnetv2PaddleCl7:online}{{[}37{]}} is a high-capacity CNN
+architecture designed to achieve substantially higher accuracy than
+models of comparable inference speed on NVIDIA GPUs, making it
+well-suited for deployment in our target environment.
+\textcolor{red}{For fine-tuning, we compiled a dataset of
+  1,000,000 fire and smoke images collected from internet sources, partitioned
+  into training (80\%) and test (20\%) subsets. The model was optimized using
+  Adam with an initial learning rate of $1 \times 10^{-4}$ and weight decay of
+  $1 \times 10^{-5}$ for 100 epochs with a batch size of 32. On the held-out
+  test set, the final model achieved a recall of xx.xx\% and a false alarm rate
+  of xx.xx\%.}
 
 \textbf{Implementation Details}: Unless otherwise specified, all
 experiments were conducted on a workstation equipped with an Intel Core
@@ -839,11 +839,20 @@ is calculated as the inherent skip module overhead plus the conditional
 latency of the BIG MODEL applied only to unskipped frames.
 
 The overall impact of integrating the skip modules into the full
-detection pipeline is quantified in Table \ref{tb:e2e_perf} (frame-level
-accuracy/latency), also comparing against the baseline system without
-skipping.
+detection pipeline is quantified in Table \ref{tb:perf_per_frame}
+(frame-level accuracy/latency), also comparing against the baseline
+system without skipping.
 
-\input{./4.table/tb_e2e_perf.tex}
+\input{./4.table/tb_perf_per_frame.tex}
+
+Obviously, the baseline system (BIG MODEL only) achieves the best
+performance compare to other lightweight alternatives like MobileNet,
+FireNet, and YOLOv5s/l due to more powerful capacity of the network
+architecture and the much larger dataset size used for training as it
+reflect the consequences of neural scaling laws
+\citeproc{ref-hestness2017deep}{{[}38{]}},
+\citeproc{ref-alabdulmohsin2022revisiting}{{[}39{]}},
+\citeproc{ref-bahri2024explaining}{{[}40{]}}.
 
 \emph{Analysis:} Simply replacing the BIG MODEL with lightweight
 alternatives (M1, M2) results in an unacceptable 17-22\% degradation in
@@ -1219,6 +1228,25 @@ backbones,''} \emph{arXiv preprint arXiv:2103.05959}, 2021.}
 f1233c18455b8acde4fc42ab0bea575fa06daa8e · PaddlePaddle/PaddleClas.''}
 Available:
 \url{https://github.com/PaddlePaddle/PaddleClas/blob/f1233c18455b8acde4fc42ab0bea575fa06daa8e/docs/en/models/PP-HGNetV2_en.md?plain=1\#L33}}
+
+\bibitem[\citeproctext]{ref-hestness2017deep}
+\CSLLeftMargin{{[}38{]} }%
+\CSLRightInline{J. Hestness \emph{et al.}, {``Deep learning scaling is
+predictable, empirically,''} \emph{arXiv preprint arXiv:1712.00409},
+2017.}
+
+\bibitem[\citeproctext]{ref-alabdulmohsin2022revisiting}
+\CSLLeftMargin{{[}39{]} }%
+\CSLRightInline{I. M. Alabdulmohsin, B. Neyshabur, and X. Zhai,
+{``Revisiting neural scaling laws in language and vision,''}
+\emph{Advances in Neural Information Processing Systems}, vol. 35, pp.
+22300--22312, 2022.}
+
+\bibitem[\citeproctext]{ref-bahri2024explaining}
+\CSLLeftMargin{{[}40{]} }%
+\CSLRightInline{Y. Bahri, E. Dyer, J. Kaplan, J. Lee, and U. Sharma,
+{``Explaining neural scaling laws,''} \emph{Proceedings of the National
+Academy of Sciences}, vol. 121, no. 27, p. e2311878121, 2024.}
 
 \end{CSLReferences}
 

@@ -1,4 +1,4 @@
-input: raw/users.csv
+input: raw/_raw_opt_selected_rp__per_frame.csv
 output: output/
 sep: ";"
 
@@ -6,30 +6,30 @@ steps:
   # ── 1. SHAPE THE SCHEMA ───────────────────────────────────
   - type: rename
     mapping:
-      Metric: Model
+      Metric: Method
 
   - type: str_op
     ops:
       - {
-          column: Model,
+          column: Method,
           op: replace,
           search: "4GPU_SV__ds_UFireIndoorTest__mt_no_temp_method__af4b0d32a3d2__20260303.180228_per_frame",
           replace-with: "Our Big Model",
         }
       - {
-          column: Model,
+          column: Method,
           op: replace,
           search: "firenet_per_frame",
           replace-with: "FireNet",
         }
       - {
-          column: Model,
+          column: Method,
           op: replace,
           search: "mobilenet_per_frame",
           replace-with: "MobileNet",
         }
       - {
-          column: Model,
+          column: Method,
           op: replace,
           search: "yolov5s_notemp_per_frame",
           replace-with: "YOLOv5s",
@@ -39,10 +39,22 @@ steps:
   - type: filter
     conditions:
       - {
-          column: Model,
+          column: Method,
           op: "in",
           value: ["Our Big Model", "FireNet", "MobileNet", "YOLOv5s"],
         }
+
+  # ── 4. JOIN CITE ──────────────────────────────────────────
+  - type: join
+    file: raw/_raw_tb_perf_per_frame_cite.csv
+    key: Method
+    how: left
+    sep: ";"
+
+  - type: add_column
+    cols:
+      - name: Method
+        expr: "df['Method'].str.strip() + ' ' + df['Cite'].fillna('').astype(str).str.strip()"
 
   # ── 6. SORT & LIMIT ───────────────────────────────────────
   - type: sort
@@ -51,10 +63,36 @@ steps:
 
   - type: select
     columns:
-      - Model
+      - Method
       - metric_recall (tpr)
       - metric_fpr (false alarm rate)
-      - metric_fps
       - metric_accuracy
       - metric_f1_score
       - metric_precision
+      - metric_fps
+
+  # ── 7. RENAME FOR DISPLAY ─────────────────────────────────
+  - type: rename
+    mapping:
+      "metric_recall (tpr)": "Recall"
+      "metric_fpr (false alarm rate)": "FAR"
+      "metric_accuracy": "Accuracy"
+      "metric_f1_score": "F1-Score"
+      "metric_precision": "Precision"
+      "metric_fps": "FPS"
+
+  # ── 8. FORMAT METRICS ─────────────────────────────────────
+  - type: add_column
+    cols:
+      - name: Recall
+        expr: "(df['Recall'] * 100).round(2)"
+      - name: FAR
+        expr: "(df['FAR'] * 100).round(2)"
+      - name: Accuracy
+        expr: "(df['Accuracy'] * 100).round(2)"
+      - name: F1-Score
+        expr: "df['F1-Score'].round(2)"
+      - name: Precision
+        expr: "(df['Precision'] * 100).round(2)"
+      - name: FPS
+        expr: "df['FPS'].round(2)"

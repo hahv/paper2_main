@@ -4,7 +4,7 @@
 <!-- TARGET_PROJECT: G:\My Drive\1_PhD\Obsidian\Home\3. Writing\paperfire2 -->
 <!-- SYNC_TARGET_FILE: 00_Meta_Abstract.md-->
 <!-- BLOCK_ID: abstract -->
-date: 2026.04.07
+date: 2026.04.08
 title: "Efficient Real-Time Fire Surveillance: A Lightweight Motion-Heuristic
 Skip Module for Accelerated Inference"
 abstract: "Conventional deep learning (DL)-based fire and smoke detection systems process
@@ -474,12 +474,12 @@ classifier over lightweight alternatives and the effectiveness of the proposed
 skip module in accelerating its inference, we evaluate the following baseline
 models alongside our BIG model:
 
+- **MobileNet** [@mukhopadhyay2019fpga]: A modified MobileNet architecture
+  fine-tuned for fire and smoke detection.
+
 - **FireNet** [@jadon2019firenet]: A lightweight CNN-based image classifier
   comprising 14 layers, with a model size of 7.5 MB and approximately 650k
   trainable parameters.
-
-- **MobileNet** [@mukhopadhyay2019fpga]: A modified MobileNet architecture
-  fine-tuned for fire and smoke detection.
 
 - **YOLOv5s** [@de2023hybrid]: A lightweight object detector based on YOLOv5
   [@JocherYOLOv5byUltralytics2020], trained with hyperparameters selected via
@@ -676,13 +676,20 @@ the inherent skip module overhead plus the conditional latency of the BIG MODEL
 applied only to unskipped frames.
 
 The overall impact of integrating the skip modules into the full detection
-pipeline is quantified in Table \ref{tb:e2e_perf} (frame-level
+pipeline is quantified in Table \ref{tb:perf_per_frame} (frame-level
 accuracy/latency), also comparing against the baseline system without skipping.
 
 ```{=latex}
-\input{./4.table/tb_e2e_perf.tex}
+\input{./4.table/tb_perf_per_frame.tex}
 ```
 
+Obviously, the baseline system (BIG MODEL only) achieves the best performance
+compare to other lightweight alternatives like MobileNet, FireNet, and YOLOv5s/l
+due to more powerful capacity of the network architecture and the much larger
+dataset size used for training as it reflect the consequences of neural scaling
+laws [@hestness2017deep; @alabdulmohsin2022revisiting; @bahri2024explaining].
+
+<!-- ! Place holder -->
 _Analysis:_ Simply replacing the BIG MODEL with lightweight alternatives (M1,
 M2) results in an unacceptable 17-22% degradation in F1-Score. Our proposed
 pipeline (Approach 2 + BIG MODEL) successfully bridges this gap. By filtering
@@ -727,13 +734,6 @@ whether _any_ hazard exists (regardless of whether it is fire or smoke), we
 measure safety using a unified anomaly recall metric. We also compare this
 against the recall capabilities of the lightweight standalone models (M1 and
 M2).
-
-Table \ref{tb:tb_no_skip_perf} assesses the intrinsic recall and filtering
-capability of each method as a standalone component.
-
-```{=latex}
-\input{./4.table/tb_no_skip_perf.tex}
-```
 
 _Analysis:_ As demonstrated in Table \ref{tb:tb_no_skip_perf}, lightweight
 standalone models (M1 and M2) offer fast processing but miss between 11% and 15%
