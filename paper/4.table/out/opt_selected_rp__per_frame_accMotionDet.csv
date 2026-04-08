@@ -1,0 +1,4 @@
+Experiment;Block size $B$;Combined Score;Recall;FPR;FPS
+MainPC__ds_UFireIndoor2__mt_temp_method_motion_block__be8f0906f34c__20260325.181303_per_frame;32.0;0.3345;97.5;18.61;24.1
+MainPC__ds_UFireIndoor2__mt_temp_method_motion_block__db7ab155d4e9__20260325.181303_per_frame;32.0;0.2494;97.5;25.56;23.0
+MainPC__ds_UFireIndoor2__mt_no_temp_method__af4b0d32a3d2__20260316.172122_per_frame;;-1.0;98.33;41.53;22.2

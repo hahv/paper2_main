@@ -1,2 +1,0 @@
-experiment;Combined_Score;metric_recall (tpr);metric_fpr (false alarm rate);skip_rate;recall_retention;far_reduction_norm;w_S;w_F;w_R;delta_R;metric_accuracy;metric_f1_score;metric_fps;metric_precision
-MainPC__ds_UFireIndoorVal__mt_no_temp_method__af4b0d32a3d2__20260327.162459_per_frame;-1.0;0.9434738159179688;0.0074028703384101;0.0;1.0;0.0;;;;;0.9826026558876038;0.956648588180542;24.05961036682129;0.9701966047286988

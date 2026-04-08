@@ -1,3 +1,0 @@
-input: raw/_raw_opt_sel_rp__per_frame.csv
-output: output/
-sep: ";"

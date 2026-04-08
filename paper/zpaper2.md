@@ -503,7 +503,7 @@ models alongside our BIG model:
   Adam with an initial learning rate of $1 \times 10^{-4}$ and weight decay of
   $1 \times 10^{-5}$ for 100 epochs with a batch size of 32. On the held-out
   test set, the final model achieved a recall of xx.xx\% and a false alarm rate
-  of xx.xx\%.}
+  of xx.xx\%.}. We use input size INPUT_SIZE  = (3, 360, 640)
 
 **Implementation Details**: Unless otherwise specified, all experiments were
 conducted on a workstation equipped with an Intel Core i9-12900K CPU, 64 GB DDR5
@@ -682,6 +682,9 @@ accuracy/latency), also comparing against the baseline system without skipping.
 ```{=latex}
 \input{./4.table/tb_perf_per_frame.tex}
 ```
+FLOPs (small s) static complexity of a mode
+FlOPs = Floating-Point Operations
+MFLOPs = $10^6$ FLOPs, GFLOPs = $10^9$ FLOPs
 
 Obviously, the baseline system (BIG MODEL only) achieves the best performance
 compare to other lightweight alternatives like MobileNet, FireNet, and YOLOv5s/l

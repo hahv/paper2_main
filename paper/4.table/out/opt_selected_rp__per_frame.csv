@@ -1,3 +1,0 @@
-experiment;Method;Combined_Score;Recall;FPR;FPS;recall_retention;far_reduction_norm;skip_rate;Weight Skip;Weight FAR;Weight Recall;Recall Delta;F1_Score;Accuracy;Precision;Scale;Block_Size;Block_Ratio;Min_ROI;Diff_Th;Impact;Mask_Th;Max_Val;Decay
-MainPC__ds_UFireIndoor2__mt_temp_method_motion_block__db7ab155d4e9__20260325.144050_per_frame;motion_only_block_skip_proc.MotionOnlyBlockSkipProc;0.2494;97.5;25.56;310.4;0.1666674613952858;0.3846153514931741;23.19;0.6;0.2;0.2;0.01;90.89;88.28;85.13;0.5;32.0;0.05;0.75;2.0;5.0;10.0;25.0;1.0
-MainPC__ds_UFireIndoor2__mt_no_temp_method__af4b0d32a3d2__20260316.172122_per_frame;;-1.0;98.33;41.53;22.2;1.0;0.0;0.0;;;;;87.01;82.39;78.03;;;;;;;;;
