@@ -1,0 +1,34 @@
+\begin{table*}[hbtp]
+    \caption{Validation-set performance and hyperparameter configurations for Frame Difference (FrameDiff) combinations.}
+    \label{tb:val_results_frameDiff}
+    \csvreader[separator=semicolon,
+    no head,
+    range=1-,
+    centered tabularray = {
+        width = \textwidth,
+        colspec = {X[2,c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]},
+        colsep = {1pt},
+        hlines,
+        vlines,
+        cells = {font = \scriptsize, halign = c, valign = m},
+        row{1} = {font = \bfseries\scriptsize},
+        row{2} = {font = \bfseries\tiny},
+        % ↓ only 3 new lines needed
+        cell{1}{1} = {r=2}{c},   % Exp. spans rows 1-2
+        cell{1}{2} = {c=4}{c},   % Parameters spans cols 2-5
+        cell{1}{6} = {c=4}{c},   % Metrics spans cols 6-9
+        cell{1}{10} = {r=2}{c},  % Combined Score spans rows 1-2
+    },
+    ]{./4.table/out/opt_selected_rp__per_frame_frameDiff.csv}{}{
+    \csvexpval\csvcoli &
+    \csvexpval\csvcolii &
+    \csvexpval\csvcoliii &
+    \csvexpval\csvcoliv &
+    \csvexpval\csvcolv &
+    \csvexpval\csvcolvi &
+    \csvexpval\csvcolvii &
+    \csvexpval\csvcolviii &
+    \csvexpval\csvcolix &
+    \csvexpval\csvcolx
+    }
+\end{table*}

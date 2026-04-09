@@ -4,7 +4,7 @@
 <!-- TARGET_PROJECT: G:\My Drive\1_PhD\Obsidian\Home\3. Writing\paperfire2 -->
 <!-- SYNC_TARGET_FILE: 00_Meta_Abstract.md-->
 <!-- BLOCK_ID: abstract -->
-date: 2026.04.08
+date: 2026.04.09
 title: "Efficient Real-Time Fire Surveillance: A Lightweight Motion-Heuristic
 Skip Module for Accelerated Inference"
 abstract: "Conventional deep learning (DL)-based fire and smoke detection systems process
@@ -595,6 +595,9 @@ role of the skip module in real-time fire/smoke detection: preserve recall
 first, then prefer candidates that skip more negative frames while still
 improving operational false alarm behavior.
 
+```{=latex}
+\input{./4.table/tb_val_results_frameDiff.tex}
+```
 
 #### Hyperparameter Search Space for the AccMotionDet Skip Module
 
