@@ -1,0 +1,7 @@
+Exp.;Parameters;;;; Metrics;;;;Ranking Score
+Exp.;Scale factor $\alpha$;Block size $B$;Block active threshold $\tau$;Diff threshold $\tau_d$;Recall (\%);FPR (\%);Skip Rate (\%);FPS;Combined Score
+Baseline (No Skip module);-;-;-;-;94.35;0.74;0.0;24.1;-
+FrameDiff;1.0;16.0;0.05;3.0;94.18;0.74;0.72;22.4;0.1710
+FrameDiff;0.5;16.0;0.05;3.0;93.97;0.74;0.94;23.3;0.1312
+FrameDiff;0.5;16.0;0.05;3.0;93.97;0.74;0.94;23.3;0.1312
+FrameDiff;1.0;16.0;0.1;3.0;93.54;0.74;0.97;22.7;0.0451

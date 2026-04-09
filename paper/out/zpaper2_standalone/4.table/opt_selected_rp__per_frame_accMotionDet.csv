@@ -1,0 +1,5 @@
+Method;Parameters;;;;;;;; Metrics;;;;Ranking Score
+Exp.;Scale factor $\alpha$;Block size $B$;Block active threshold $\tau$;Diff threshold $\tau_d$;Motion increment $\omega$;Activation threshold $\tau_m$;Acc. cap $K_{\max}$;Decay rate $\delta$;Recall (\%);FPR (\%);Skip Rate (\%);FPS;Combined Score
+Baseline (No Skip module);-;-;-;-;-;-;-;-;98.33;41.53;0.0;22.2;-
+AccMotionDet;0.5;32.0;0.05;3.0;5.0;10.0;25.0;1.0;97.5;18.61;31.81;24.1;0.3345
+AccMotionDet;0.5;32.0;0.05;2.0;5.0;10.0;25.0;1.0;97.5;25.56;23.19;23.0;0.2494
