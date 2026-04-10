@@ -1,0 +1,29 @@
+\textbf{General justification for excluding FAR-based terms from the scoring objective.}
+
+We show that, under a mild independence assumption, the expected false alarm rate ($\mathrm{FAR}(\theta)$) of the skip-enabled system is entirely determined by the skip rate $S_r(\theta)$ and the fixed baseline constant $\mathrm{FAR}_{\text{base}}$. This implies that any scoring term depending on the expected FAR is redundant with $S_r(\theta)$ and adds no independent optimization signal.
+
+By definition, the FAR of the skip-enabled system is:
+\[ \mathrm{FAR}(\theta) = \frac{FP(\theta)}{N_{\text{neg}}} \]
+where $N_{\text{neg}}$ is the total number of ground-truth negative frames, and $FP(\theta)$ is the number of false positives produced. 
+
+Since every skipped frame is assigned a negative label ($0$), it cannot trigger a false positive. Therefore, the total number of false positives is exactly the baseline false positives minus the baseline false positives that were skipped:
+\[ FP(\theta) = FP_{\text{base}} - a \]
+where $FP_{\text{base}}$ is the baseline false positive count, and $a$ is the number of skipped frames that the baseline model would have misclassified. Taking the expectation yields:
+\[ \mathbb{E}[\mathrm{FAR}(\theta)] = \frac{FP_{\text{base}} - \mathbb{E}[a]}{N_{\text{neg}}} \]
+
+The skip module $\mathcal{S}$ operates solely on inter-frame motion, independent of the baseline model $\mathcal{M}$'s weights or outputs. Its skip decision is therefore \emph{statistically independent} of whether a frame would be a false positive or a true negative under $\mathcal{M}$. Because $\mathcal{S}$ samples blindly from the negative pool, the expected number of skipped false positives ($\mathbb{E}[a]$) is simply the total number of skipped negative frames ($N_{\text{skip\_neg}}$) multiplied by the prevalence of false positives in the full negative pool ($\mathrm{FAR}_{\text{base}}$):
+\[ \mathbb{E}[a] = N_{\text{skip\_neg}} \cdot \mathrm{FAR}_{\text{base}} \]
+
+Substituting this back into the expectation equation and splitting the fraction:
+\[ \mathbb{E}[\mathrm{FAR}(\theta)] = \frac{FP_{\text{base}} - (N_{\text{skip\_neg}} \cdot \mathrm{FAR}_{\text{base}})}{N_{\text{neg}}} \]
+\[ \mathbb{E}[\mathrm{FAR}(\theta)] = \frac{FP_{\text{base}}}{N_{\text{neg}}} - \left( \frac{N_{\text{skip\_neg}}}{N_{\text{neg}}} \right) \mathrm{FAR}_{\text{base}} \]
+
+Recognizing that $\mathrm{FAR}_{\text{base}} = \frac{FP_{\text{base}}}{N_{\text{neg}}}$ and that the skip rate on negative frames is defined as $S_r(\theta) = \frac{N_{\text{skip\_neg}}}{N_{\text{neg}}}$, we can simplify:
+\[ \mathbb{E}[\mathrm{FAR}(\theta)] = \mathrm{FAR}_{\text{base}} - S_r(\theta) \cdot \mathrm{FAR}_{\text{base}} \]
+\[ \mathbb{E}[\mathrm{FAR}(\theta)] = \mathrm{FAR}_{\text{base}} \bigl(1 - S_r(\theta)\bigr) \]
+
+This result has a direct consequence for scoring objective design. For any loss function $g$ evaluated on the expected metric, the scoring term satisfies:
+\[ g\bigl(\mathbb{E}[\mathrm{FAR}(\theta)]\bigr) = g\Bigl(\mathrm{FAR}_{\text{base}} \bigl(1 - S_r(\theta)\bigr)\Bigr) = h\bigl(S_r(\theta)\bigr) \]
+for some function $h$ that depends purely on $S_r(\theta)$ and the fixed constant $\mathrm{FAR}_{\text{base}}$. 
+
+Consequently, including any FAR-based scoring term alongside $S_r(\theta)$ in the objective is equivalent to re-weighting $S_r(\theta)$ under a different scale---it introduces no genuinely independent optimization dimension. We therefore exclude all FAR-based terms from the scoring objective and retain $\mathrm{FAR}(\theta)$ solely as an observed consequence metric reported in the results tables.

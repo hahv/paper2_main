@@ -293,7 +293,7 @@ algorithms are described in the Algorithm \ref{alg:skipmodule}.
 ## Skip Module Hyperparameter Optimization {#sec:hyperparam}
 
 ```{=latex}
-\input{./6.algo/hyperparam_algo_v2.tex}
+\input{./6.algo/hyperparam_algo.tex}
 ```
 
 <!-- !END_SYNC_BLOCK -->
