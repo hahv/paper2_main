@@ -4,7 +4,7 @@
 <!-- TARGET_PROJECT: G:\My Drive\1_PhD\Obsidian\Home\3. Writing\paperfire2 -->
 <!-- SYNC_TARGET_FILE: 00_Meta_Abstract.md-->
 <!-- BLOCK_ID: abstract -->
-date: 2026.04.09
+date: 2026.04.10
 title: "Efficient Real-Time Fire Surveillance: A Lightweight Motion-Heuristic
 Skip Module for Accelerated Inference"
 abstract: "Conventional deep learning (DL)-based fire and smoke detection systems process
@@ -293,85 +293,8 @@ algorithms are described in the Algorithm \ref{alg:skipmodule}.
 ## Skip Module Hyperparameter Optimization {#sec:hyperparam}
 
 ```{=latex}
-\input{./6.algo/hyperparam_algo.tex}
+\input{./6.algo/hyperparam_algo_v2.tex}
 ```
-The skip module $\mathcal{S}$ contains several hyperparameters (e.g., motion
-threshold, accumulation window size) that can significantly impact the
-performance of the overall system. To identify the optimal configuration, we
-employ a grid search based hyperparameter optimization procedure on a validation
-set $D_{\text{val}}$ derived from our video dataset with respect to several
-system-wide metrics defined in  Section \ref{sec:metrics}. More specifically, to
-select the optimal hyperparameters for the proposed skip module, we employ a
-constrained optimization procedure on the validation set $D_{\text{val}}$. Let
-$R_{\text{base}}$, $\mathrm{FAR}_{\text{base}}$, and $T_{\text{DL}}$ denote the
-recall, false alarm rate, and mean per-frame inference time of the baseline
-pipeline (without skipping), respectively. For each candidate parameter set
-$\theta \in \Theta$ obtained by grid search, we evaluate the full pipeline
-$\text{Read} \rightarrow \mathcal{S}(\theta) \rightarrow [\mathcal{M}]$ and
-compute four metrics: recall $R(\theta)$, false alarm rate
-$\mathrm{FAR}(\theta)$, skip rate $S_r(\theta)$, and mean per-frame skip module
-time $T_{\text{skip}}(\theta)$.
-
-The skip rate $S_r(\theta)$ is computed on $D_{\text{val}}$ following the
-definition in Section \ref{sec:metrics}, with $N_{\text{neg}}$ instantiated as
-$N_{\text{neg}}^{\text{val}} = |\{f_i \in D_{\text{val}} : y_i = 0\}|$, which is
-fixed by the validation set and independent of $\theta$.
-
-The mean per-frame inference times are defined as
-
-$$ T_{\text{DL}} = \frac{1}{|D_{\text{val}}|} \sum_{i=1}^{|D_{\text{val}}|}
-t_{\text{DL}}(f_i), \qquad T_{\text{skip}}(\theta) = \frac{1}{|D_{\text{val}}|}
-\sum_{i=1}^{|D_{\text{val}}|} t_{\text{skip}}(f_i, \theta), $$
-
-where $f_i$ denotes the $i$-th frame in $D_{\text{val}}$, and both averages are
-taken over all frames to reflect the runtime cost on a typical video stream.
-
-**Feasibility constraints.** A candidate $\theta$ is considered feasible only if
-it satisfies two hard constraints:
-
-$$ R(\theta) \geq R_{\text{base}} - \delta_R, \qquad T_{\text{skip}}(\theta)
-\leq \beta \cdot T_{\text{DL}}, $$
-
-where $\delta_R > 0$ is the maximum allowable absolute recall drop, and $\beta
-\in (0, 1)$ bounds the skip module overhead as a fraction of one full DL
-inference. For example, setting $\delta_R = 0.01$ and $\beta = 0.10$ means the
-system tolerates at most a 1\% recall drop and requires the skip module to run
-within 10\% of the cost of a single DL inference.
-
-**Scoring feasible candidates.** To rank feasible candidates, we define two
-normalized scoring terms. The false alarm reduction term is
-
-$$ F(\theta) = \max\!\left(0,\; \frac{\mathrm{FAR}_{\text{base}} -
-\mathrm{FAR}(\theta)} {\mathrm{FAR}_{\text{base}}}\right), $$
-
-which measures the relative FAR improvement with respect to the baseline. The
-recall retention term is
-
-$$ \rho(\theta) = 1 - \frac{R_{\text{base}} - R(\theta)}{\delta_R}, $$
-
-which equals $1$ when recall matches the baseline and $0$ when recall reaches
-the lowest acceptable level $R_{\text{base}} - \delta_R$. Both terms are bounded
-in $[0, 1]$ over the feasible region, making them directly comparable to
-$S(\theta)$ in the weighted score.
-
-**Optimal selection.** The optimal parameter set $\theta^*$ is selected as
-
-$$ \theta^* = \arg\max_{\theta \in \Theta_{\text{feasible}}} \left[ w_S\,
-S(\theta) + w_F\, F(\theta) + w_R\, \rho(\theta) \right], $$
-
-where $\Theta_{\text{feasible}} = \{\theta \in \Theta : R(\theta) \geq
-R_{\text{base}} - \delta_R \text{ and } T_{\text{skip}}(\theta) \leq \beta \cdot
-T_{\text{DL}}\}$, and the nonnegative weights satisfy $w_S + w_F + w_R = 1$.
-
-**Theoretical justification.** The skip module $\mathcal{S}$ acts as a
-conservative gate: skipped frames are labeled negative directly, while passed
-frames are processed by the same downstream detector $\mathcal{M}$ as in the
-baseline. Therefore, every false alarm produced by the skip-enabled system is
-also present in the baseline, implying $\mathrm{FAR}(\theta) \leq
-\mathrm{FAR}_{\text{base}}$. The primary safety risk is recall degradation
-caused by incorrectly skipped fire/smoke frames, which motivates enforcing the
-recall constraint as a hard gate prior to any candidate ranking.
-
 
 <!-- !END_SYNC_BLOCK -->
 
@@ -454,18 +377,6 @@ frames per second (FPS) — as defined below.
 ```{=latex}
 \input{./5.eq/eq_metrics.tex}
 ```
-In addition to standard metrics, we report the skip rate $S_r$, a system-level
-efficiency criterion specific to the proposed skip-based framework. Skip rate
-measures the proportion of ground-truth negative frames correctly bypassed by
-$\mathcal{S}$, defined as
-
-$$ S_r = \frac{N_{\text{skip}}^{-}}{N_{\text{neg}}}, $$
-
-where $N_{\text{skip}}^{-}$ is the number of true-negative frames for which
-$\mathcal{S}$ correctly outputs $s_t = 0$, and $N_{\text{neg}} = TN + FP$ is the
-total number of ground-truth negative frames in the evaluated set. A higher
-$S_r$ indicates greater computational savings, while a drop in recall signals
-unsafe skipping of fire/smoke frames.
 
 ## Models and Implementation Details
 

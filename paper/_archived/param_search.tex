@@ -70,7 +70,7 @@
 	w_F=0.20,\qquad
 	w_R=0.20,
 	\]
-	so that skip ratio remains the primary efficiency objective, while false alarm reduction and recall retention are treated as secondary but still explicit preferences. This formulation preserves the safety-first role of recall through the hard constraint, while avoiding the drawback of selecting among feasible candidates using skip ratio alone.
+	so that skip ratio remains the primary efficiency objective, while recall retention are treated as secondary but still explicit preferences. This formulation preserves the safety-first role of recall through the hard constraint, while avoiding the drawback of selecting among feasible candidates using skip ratio alone.
 
 	\textbf{Theoretical justification.}
 	The skip module acts as a conservative gate: skipped frames are forced to output ``negative,'' while passed frames are processed by the same downstream detector as in the baseline system. Therefore, the false alarms of the skip-enabled system form a subset of those of the baseline system, implying $\mathrm{FAR}(\theta)\leq \mathrm{FAR}_{\text{base}}$ under the assumed architecture. The main safety risk is thus recall degradation due to false skips, which motivates using recall as both a hard feasibility condition and a soft ranking term.

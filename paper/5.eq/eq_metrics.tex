@@ -1,10 +1,22 @@
 \begin{align}
   \text{Accuracy} &= \frac{TP + TN}{TP + TN + FP + FN}, \\
-  \text{True Positive Rate (TPR) = Recall (R)} &= \frac{TP}{TP + FN}, \\
-  \text{False Positive Rate (FPR)} &= \frac{FP}{FP + TN}, \\
+  \text{Recall (R)} &= \frac{TP}{TP + FN}, \\
+  \text{False Alarm Rate (FAR)} &= \frac{FP}{FP + TN}, \\
   \text{Precision (P)} &= \frac{TP}{TP + FP}, \\
   \text{F1-score} &= 2 \times \frac{P \times R}{P + R}, \\
-  \text{FPS} &= \frac{\text{Total processing Time (seconds)}}{\text{Total Frames}}, \\
-  S &= \frac{N_{\mathrm{skip}}^{-}}{TN + FP}
+  \text{FPS} &= \frac{\text{Total Frames}}{\text{Total processing Time (seconds)}},\\
 \end{align}
 where $TP$, $TN$, $FP$, and $FN$ represent True Positive, True Negative, False Positive, and False Negative, respectively.
+
+In addition to standard metrics, we report the skip rate $S_r$, a system-level
+efficiency criterion specific to the proposed skip-based framework. Skip rate
+measures the proportion of ground-truth negative frames correctly bypassed by
+$\mathcal{S}$, defined as
+
+$$ S_r = \frac{N_{\text{skip\_neg}}}{N_{\text{neg}}}$$
+
+where $N_{\text{skip\_neg}}$ is the number of ground-truth negative frames that
+the skip module $\mathcal{S}$ assigns $s_t = 0$ --- that is, background frames bypassed without invoking $\mathcal{M}$ --- and $N_{\text{neg}}$ is the total number of
+ground-truth negative frames in the evaluated set. A higher $S_r$ indicates
+greater computational savings, while a drop in recall signals unsafe skipping of
+fire/smoke frames.

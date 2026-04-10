@@ -1,0 +1,288 @@
+\begin{algorithm}[htbp]
+\caption{Skip Module Hyperparameter Selection}
+\label{alg:hyperparam}
+\begin{algorithmic}[1]
+
+\Require Parameter space $\Theta$, validation set $D_{\text{val}}$,
+DL model $\mathcal{M}$, recall tolerance $\delta_R$,
+overhead ratio $\beta$, weights $w_S, w_R$
+\Ensure Optimal parameters $\theta^*$
+
+\State baseline $\gets$ \textsc{EvaluatePipeline}($D_{\text{val}}$, skip=None, $\mathcal{M}$)
+\State Extract $R_{\text{base}}$, $T_{\text{DL}}$ from baseline
+\State best\_score $\gets -\infty$; \quad $\theta^* \gets$ None
+
+\For{each $\theta \in \Theta$}
+\State results $\gets$ \textsc{EvaluatePipeline}($D_{\text{val}}$, $\mathcal{S}(\theta)$, $\mathcal{M}$)
+\State Extract $R(\theta)$, $S_r(\theta)$, $T_{\text{skip}}(\theta)$ from results
+\If{$R(\theta) \geq R_{\text{base}} - \delta_R$
+\textbf{ and }
+$T_{\text{skip}}(\theta) \leq \beta \cdot T_{\text{DL}}$}
+\State $\rho(\theta) \gets 1 - \dfrac{R_{\text{base}} - R(\theta)}{\delta_R}$
+\State score $\gets w_S\, S_r(\theta) + w_R\, \rho(\theta)$
+\If{score $>$ best\_score}
+\State best\_score $\gets$ score
+\State $\theta^* \gets \theta$
+\EndIf
+\EndIf
+\EndFor
+
+\State \Return $\theta^*$
+
+\end{algorithmic}
+\end{algorithm}
+
+The skip module $\mathcal{S}$ contains several hyperparameters (e.g., motion
+threshold, accumulation window size) that can significantly impact the
+performance of the overall system. To identify the optimal configuration, we
+employ a grid search based hyperparameter optimization procedure on a validation
+set $D_{\text{val}}$ derived from our video dataset with respect to several
+system-wide metrics defined in Section \ref{sec:metrics}. More specifically, to
+select the optimal hyperparameters for the proposed skip module, we employ a
+constrained optimization procedure on the validation set $D_{\text{val}}$. Let $R_{\text{base}}$ denote the baseline recall, i.e., the fraction of fire/smoke frames correctly detected by the pipeline without skipping, and let $T_{\text{DL}}$ denote its mean per-frame inference time. For
+each candidate parameter set $\theta \in \Theta$ obtained by grid search, we
+evaluate the full pipeline $\text{Read} \rightarrow \mathcal{S}(\theta)
+\rightarrow [\mathcal{M}]$ and compute three metrics: recall $R(\theta)$ (the fraction of fire/smoke frames correctly detected), skip rate $S_r(\theta)$ (the fraction of ground-truth negative frames skipped by $\mathcal{S}$), and mean per-frame skip module time $T_{\text{skip}}(\theta)$. Formal metric definitions are given in Section~\ref{sec:metrics}.
+
+
+The skip rate $S_r(\theta)$ is computed on $D_{\text{val}}$ following the
+definition in Section \ref{sec:metrics}, with $N_{\text{neg}}$ instantiated as
+$N_{\text{neg}}^{\text{val}} = |\{f_i \in D_{\text{val}} : y_i = 0\}|$, which is
+fixed by the validation set and independent of $\theta$.
+
+The mean per-frame inference times are defined as
+
+\[ T_{\text{DL}} = \frac{1}{|D_{\text{val}}|} \sum_{i=1}^{|D_{\text{val}}|}
+t_{\text{DL}}(f_i), \qquad T_{\text{skip}}(\theta) = \frac{1}{|D_{\text{val}}|}
+\sum_{i=1}^{|D_{\text{val}}|} t_{\text{skip}}(f_i, \theta), \]
+
+where $f_i$ denotes the $i$-th frame in $D_{\text{val}}$, and both averages are
+taken over all frames to reflect the runtime cost on a typical video stream.
+
+\textbf{Feasibility constraints.} A candidate $\theta$ is considered feasible
+only if it satisfies two hard constraints:
+
+\[ R(\theta) \geq R_{\text{base}} - \delta_R, \qquad T_{\text{skip}}(\theta)
+\leq \beta \cdot T_{\text{DL}}, \]
+
+where recall tolerance $\delta_R > 0$ is the maximum allowable absolute recall
+drop, and overhead ratio $\beta \in (0, 1)$ bounds the skip module overhead as a fraction of one full DL
+inference. For example, setting $\delta_R = 0.01$ and $\beta = 0.10$ means the
+system tolerates at most a 1\% recall drop and requires the skip module to run
+within 10\% of the cost of a single DL inference.
+
+\textbf{Scoring feasible candidates.} Among feasible candidates, the only
+term that requires explicit optimization is recall retention, defined as
+
+\[ \rho(\theta) = 1 - \frac{R_{\text{base}} - R(\theta)}{\delta_R}, \]
+
+which equals $1$ when recall matches the baseline and $0$ when recall reaches
+the lowest acceptable level $R_{\text{base}} - \delta_R$. This term is bounded
+in $[0, 1]$ over the feasible region, making it directly comparable to
+$S_r(\theta)$ in the weighted score.
+
+\textbf{Optimal selection.} The optimal parameter set $\theta^*$ is selected as
+
+\[ \theta^* = \arg\max_{\theta \in \Theta_{\text{feasible}}} \left[ w_R  \rho(\theta) + w_S S_r(\theta) \right], \]
+
+where $\Theta_{\text{feasible}} = \{\theta \in \Theta : R(\theta) \geq
+R_{\text{base}} - \delta_R \text{ and } T_{\text{skip}}(\theta) \leq \beta \cdot
+T_{\text{DL}}\}$, and the nonnegative weights satisfy $w_S + w_R = 1$.
+
+\textbf{Theoretical justification}: The skip module $\mathcal{S}$ acts as a
+conservative gate: skipped frames are labeled negative directly, while passed
+frames are processed by the same downstream detector $\mathcal{M}$ as in the
+baseline. Therefore, every false alarm produced by the skip-enabled system is
+also present in the baseline, implying $\mathrm{FAR}(\theta) \leq \mathrm{FAR}_{\text{base}}$, where $\mathrm{FAR}(\theta)$ and $\mathrm{FAR}_{\text{base}}$ denote the false alarm rates of the skip-enabled and baseline systems, respectively.The primary safety risk is recall degradation
+caused by incorrectly skipped fire/smoke frames, which motivates enforcing the
+recall constraint as a hard gate prior to any candidate ranking.
+
+% ! Start justification here
+
+\textbf{Theoretical justification for excluding FAR from the scoring objective.}
+One might consider including a normalized FAR-reduction term
+
+\[ F(\theta) = \frac{\mathrm{FAR}_{\text{base}} -
+\mathrm{FAR}(\theta)}{\mathrm{FAR}_{\text{base}}}, \]
+
+which measures the relative reduction in false alarm rate with respect to the
+baseline, in the scoring objective. We argue that doing so is both structurally
+unsound and statistically redundant, and therefore exclude it.
+
+\textit{Structural argument.}
+The skip module $\mathcal{S}$ labels every skipped frame as negative
+($\hat{y}_t = 0$), so a skipped frame can never generate a new false positive.
+Consequently, $\mathrm{FAR}(\theta) \leq \mathrm{FAR}_{\text{base}}$ holds for
+all $\theta$, implying $F(\theta) \geq 0$ unconditionally. A scoring term that
+is non-negative for every feasible candidate provides no discriminating signal:
+it uniformly rewards all candidates and cannot distinguish configurations that
+skip more effectively from those that do not. FAR reduction is therefore a
+guaranteed structural side-effect of the skip mechanism, not an independently
+optimizable objective.
+
+\textit{Statistical argument.}
+Let $N_{\text{neg}}$ be the total number of ground-truth negative frames in
+$D_{\text{val}}$, $FP_{\text{base}}$ the number of those frames the baseline
+classifier $\mathcal{M}$ labels as false positives, and
+$\mathrm{FAR}_{\text{base}} = FP_{\text{base}} / N_{\text{neg}}$.
+Among the $N_{\text{skip\_neg}}$ negative frames skipped by $\mathcal{S}(\theta)$,
+let $a$ be the count that $\mathcal{M}$ \emph{would have} labeled as false
+positives and $b$ the count it would have labeled correctly, so that
+$a + b = N_{\text{skip\_neg}}$.
+Since skipped frames are labeled $0$ and cannot be false positives,
+$FP(\theta) = FP_{\text{base}} - a$, and substituting into $F(\theta)$ gives:
+
+\[ F(\theta)
+= \frac{a / N_{\text{neg}}}{FP_{\text{base}} / N_{\text{neg}}}
+= \frac{a}{FP_{\text{base}}},
+\qquad \text{while} \qquad
+S_r(\theta) = \frac{a + b}{N_{\text{neg}}} \]
+
+Both terms share variable $a$, so the question is whether $\mathcal{S}$ tends
+to skip group-$a$ frames more often than group-$b$ frames.
+Since $\mathcal{S}$ operates solely on inter-frame pixel motion and has no
+access to $\mathcal{M}$'s weights or outputs, its skip decision is
+\emph{statistically independent} of the FP/TN label.
+Under this independence, the skip module samples blindly from the negative pool,
+so each sub-type appears in proportion to its share in the full pool.
+The expected count of group-$a$ frames among the skipped set is therefore:
+
+\[ \mathbb{E}[a]
+= N_{\text{skip\_neg}} \times \mathrm{FAR}_{\text{base}}
+= N_{\text{skip\_neg}} \times \frac{FP_{\text{base}}}{N_{\text{neg}}} \]
+
+Since $FP_{\text{base}}$ is a fixed constant, it passes through the expectation
+unchanged, and $F(\theta)$ evaluates to:
+
+\[ \mathbb{E}[F(\theta)]
+= \frac{\mathbb{E}[a]}{FP_{\text{base}}}
+= \frac{N_{\text{skip\_neg}} \times \dfrac{FP_{\text{base}}}{N_{\text{neg}}}}{FP_{\text{base}}}
+= \frac{N_{\text{skip\_neg}}}{N_{\text{neg}}}
+= S_r(\theta) \]
+
+The $FP_{\text{base}}$ terms cancel exactly. In expectation, $F(\theta)$
+is therefore identical to $S_r(\theta)$ and carries no independent information.
+Including both in the scoring objective would silently assign skip-rate
+behaviour a combined weight of $w_S + w_F$. We therefore exclude $F(\theta)$
+from the scoring criterion and retain $\mathrm{FAR}(\theta)$ solely as an
+observed consequence metric in the results tables.
+
+
+% ! A long justification version
+% \textbf{Theoretical justification for excluding FAR from the scoring objective.}
+% One might consider including a normalized FAR-reduction term
+
+% \[ F(\theta) = \frac{\mathrm{FAR}_{\text{base}} -
+% \mathrm{FAR}(\theta)}{\mathrm{FAR}_{\text{base}}} \]
+
+% which measures the relative reduction in false alarm rate with respect to the
+% baseline, in the scoring objective. We argue that doing so is both structurally
+% unsound and statistically redundant, and therefore exclude it.
+
+% \textit{Structural argument.}
+% The skip module $\mathcal{S}$ labels every skipped frame as negative
+% ($\hat{y}_t = 0$). Since a false positive requires the system to output $1$ on a
+% ground-truth negative frame, a skipped frame can never generate a new false
+% positive. Consequently, $\mathrm{FAR}(\theta) \leq \mathrm{FAR}_{\text{base}}$
+% holds for all $\theta$, which implies $F(\theta) \geq 0$ unconditionally.
+% A scoring term that is non-negative for every feasible candidate provides no
+% discriminating signal: it uniformly rewards all candidates and cannot distinguish
+% configurations that skip more effectively from those that do not. FAR reduction
+% is therefore a guaranteed structural side-effect of the skip mechanism, not an
+% independently optimizable objective.
+
+% \textit{Statistical argument.}
+% We show that $F(\theta)$ is statistically redundant with respect to $S_r(\theta)$,
+% meaning they carry the same information in expectation, and including both in the
+% scoring objective is therefore unnecessary.
+
+% Let $N_{\text{neg}}$ denote the total number of ground-truth negative
+% (background-only) frames in the validation set $D_{\text{val}}$, and let
+% $FP_{\text{base}}$ denote the number of those frames that the baseline classifier
+% $\mathcal{M}$ incorrectly labels as fire or smoke --- its false positives.
+% The baseline false alarm rate is then
+% $\mathrm{FAR}_{\text{base}} = FP_{\text{base}} / N_{\text{neg}}$,
+% which is the fraction of all negative frames that the classifier gets wrong.
+
+% Now consider a candidate skip configuration $\theta$.
+% Let $N_{\text{skip\_neg}}$ denote the number of negative frames that
+% $\mathcal{S}(\theta)$ skips --- that is, frames assigned $s_t = 0$ without
+% invoking $\mathcal{M}$.
+% Among these $N_{\text{skip\_neg}}$ skipped frames, let $a$ denote the count of
+% frames that $\mathcal{M}$ \emph{would have} labeled as false positives had they
+% not been skipped, and let $b$ denote the count of frames it would have labeled
+% correctly as true negatives, so that $a + b = N_{\text{skip\_neg}}$.
+
+% Since every skipped frame is assigned label $0$ and therefore cannot be a false
+% positive, the false positive count of the skip-enabled system satisfies
+% $FP(\theta) = FP_{\text{base}} - a$, which gives
+% $\mathrm{FAR}_{\text{base}} - \mathrm{FAR}(\theta)
+% = (FP_{\text{base}} - FP(\theta)) / N_{\text{neg}}
+% = a / N_{\text{neg}}$.
+% Substituting into the definition of $F(\theta)$ yields:
+
+% \[ F(\theta)
+% = \frac{\mathrm{FAR}_{\text{base}} - \mathrm{FAR}(\theta)}{\mathrm{FAR}_{\text{base}}}
+% = \frac{a / N_{\text{neg}}}{FP_{\text{base}} / N_{\text{neg}}}
+% = \frac{a}{FP_{\text{base}}} \]
+
+% Using the same counts, the skip rate $S_r(\theta)$ --- the fraction of all
+% negative frames that were skipped --- expands as:
+
+% \[ S_r(\theta) = \frac{N_{\text{skip\_neg}}}{N_{\text{neg}}} = \frac{a + b}{N_{\text{neg}}} \]
+
+% The two terms therefore share variable $a$ but differ in what they divide by:
+% $S_r$ counts all skipped negative frames $(a + b)$ over the full negative pool
+% $N_{\text{neg}}$, while $F$ counts only the prevented false positives $(a)$ over
+% the baseline FP count $FP_{\text{base}}$.
+% The central question is whether the skip module has any systematic tendency to
+% target frames in group $a$ over group $b$.
+
+% The skip module $\mathcal{S}$ makes its decision based solely on inter-frame
+% pixel motion: it compares the current frame against the previous one and skips
+% if no significant motion is detected.
+% It has no access to $\mathcal{M}$'s internal weights, learned feature
+% representations, or prediction outputs.
+% The classifier's false positives arise from background scenes that
+% \emph{visually resemble} fire or smoke to $\mathcal{M}$ --- a property encoded
+% entirely within the classifier's learned parameters, which is invisible to a
+% motion detector.
+% Therefore, the skip decision is \emph{statistically independent} of the FP/TN
+% label: knowing that a frame was skipped provides no information about whether
+% $\mathcal{M}$ would have misclassified it, and vice versa.
+
+% Because of this independence, the skip module draws the $N_{\text{skip\_neg}}$
+% skipped frames from the negative pool without any preference for one label over
+% the other --- it samples blindly with respect to the FP/TN property.
+% When items are sampled blindly from a pool, each sub-type appears in the sample
+% in proportion to its share in the full pool.
+% The proportion of false positives in the full negative pool is exactly
+% $\mathrm{FAR}_{\text{base}} = FP_{\text{base}} / N_{\text{neg}}$.
+% Applying this proportional sampling rule, the expected value
+% $\mathbb{E}[\,\cdot\,]$ --- the long-run average count over many random
+% outcomes --- of $a$ is:
+
+% \[ \mathbb{E}[a] = N_{\text{skip\_neg}} \times \mathrm{FAR}_{\text{base}}
+% = N_{\text{skip\_neg}} \times \frac{FP_{\text{base}}}{N_{\text{neg}}} \]
+
+% We now compute the expected value of $F(\theta)$.
+% Since $FP_{\text{base}}$ is a fixed constant determined by the baseline
+% evaluation and does not vary randomly, it passes through the expectation
+% unchanged:
+
+% \[ \mathbb{E}[F(\theta)]
+% = \frac{\mathbb{E}[a]}{FP_{\text{base}}}
+% = \frac{N_{\text{skip\_neg}} \times \dfrac{FP_{\text{base}}}{N_{\text{neg}}}}{FP_{\text{base}}}
+% = \frac{N_{\text{skip\_neg}}}{N_{\text{neg}}}
+% = S_r(\theta) \]
+
+% The $FP_{\text{base}}$ terms cancel exactly, and the result is the skip rate
+% $S_r(\theta)$. Therefore, $F(\theta)$ carries no additional information beyond
+% what $S_r(\theta)$ already captures: any difference between them in a specific
+% experimental run is random variation, not a systematic signal attributable to
+% the hyperparameter configuration $\theta$. Including both terms in the scoring
+% objective would implicitly assign skip-rate behaviour a combined weight of
+% $w_S + w_F$, while creating the appearance of a balanced objective with three
+% independent criteria. We therefore exclude $F(\theta)$ from the scoring
+% criterion and retain $\mathrm{FAR}(\theta)$ solely as an observed consequence
+% metric reported in the results tables.

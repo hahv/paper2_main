@@ -1,0 +1,114 @@
+\begin{algorithm}[htbp]
+\caption{Skip Module Hyperparameter Selection}
+\label{alg:hyperparam}
+\begin{algorithmic}[1]
+
+\Require Parameter space $\Theta$, validation set $D_{\text{val}}$,
+         DL model $\mathcal{M}$, recall tolerance $\delta_R$,
+         overhead ratio $\beta$, weights $w_S, w_F, w_R$
+\Ensure Optimal parameters $\theta^*$
+
+\State baseline $\gets$ \textsc{EvaluatePipeline}($D_{\text{val}}$, skip=None, $\mathcal{M}$)
+\State Extract $R_{\text{base}}$, $\mathrm{FAR}_{\text{base}}$, $T_{\text{DL}}$ from baseline
+\State best\_score $\gets -\infty$; \quad $\theta^* \gets$ None
+
+\For{each $\theta \in \Theta$}
+    \State results $\gets$ \textsc{EvaluatePipeline}($D_{\text{val}}$, $\mathcal{S}(\theta)$, $\mathcal{M}$)
+    \State Extract $R(\theta)$, $\mathrm{FAR}(\theta)$, $S(\theta)$, $T_{\text{skip}}(\theta)$ from results
+    \If{$R(\theta) \geq R_{\text{base}} - \delta_R$
+        \textbf{ and }
+        $T_{\text{skip}}(\theta) \leq \beta \cdot T_{\text{DL}}$}
+        \State $F(\theta) \gets \max\!\left(0,\;
+               \dfrac{\mathrm{FAR}_{\text{base}} - \mathrm{FAR}(\theta)}
+               {\mathrm{FAR}_{\text{base}}}\right)$
+        \State $\rho(\theta) \gets 1 - \dfrac{R_{\text{base}} - R(\theta)}{\delta_R}$
+        \State score $\gets w_S\, S(\theta) + w_F\, F(\theta) + w_R\, \rho(\theta)$
+        \If{score $>$ best\_score}
+            \State best\_score $\gets$ score
+            \State $\theta^* \gets \theta$
+        \EndIf
+    \EndIf
+\EndFor
+
+\State \Return $\theta^*$
+
+\end{algorithmic}
+\end{algorithm}
+
+The skip module $\mathcal{S}$ contains several hyperparameters (e.g., motion
+threshold, accumulation window size) that can significantly impact the
+performance of the overall system. To identify the optimal configuration, we
+employ a grid search based hyperparameter optimization procedure on a validation
+set $D_{\text{val}}$ derived from our video dataset with respect to several
+system-wide metrics defined in  Section \ref{sec:metrics}. More specifically, to
+select the optimal hyperparameters for the proposed skip module, we employ a
+constrained optimization procedure on the validation set $D_{\text{val}}$. Let
+$R_{\text{base}}$, $\mathrm{FAR}_{\text{base}}$, and $T_{\text{DL}}$ denote the
+recall, false alarm rate, and mean per-frame inference time of the baseline
+pipeline (without skipping), respectively. For each candidate parameter set
+$\theta \in \Theta$ obtained by grid search, we evaluate the full pipeline
+$\text{Read} \rightarrow \mathcal{S}(\theta) \rightarrow [\mathcal{M}]$ and
+compute four metrics: recall $R(\theta)$, false alarm rate
+$\mathrm{FAR}(\theta)$, skip rate $S_r(\theta)$, and mean per-frame skip module
+time $T_{\text{skip}}(\theta)$.
+
+The skip rate $S_r(\theta)$ is computed on $D_{\text{val}}$ following the
+definition in Section \ref{sec:metrics}, with $N_{\text{neg}}$ instantiated as
+$N_{\text{neg}}^{\text{val}} = |\{f_i \in D_{\text{val}} : y_i = 0\}|$, which is
+fixed by the validation set and independent of $\theta$.
+
+The mean per-frame inference times are defined as
+
+$$ T_{\text{DL}} = \frac{1}{|D_{\text{val}}|} \sum_{i=1}^{|D_{\text{val}}|}
+t_{\text{DL}}(f_i), \qquad T_{\text{skip}}(\theta) = \frac{1}{|D_{\text{val}}|}
+\sum_{i=1}^{|D_{\text{val}}|} t_{\text{skip}}(f_i, \theta), $$
+
+where $f_i$ denotes the $i$-th frame in $D_{\text{val}}$, and both averages are
+taken over all frames to reflect the runtime cost on a typical video stream.
+
+**Feasibility constraints.** A candidate $\theta$ is considered feasible only if
+it satisfies two hard constraints:
+
+$$ R(\theta) \geq R_{\text{base}} - \delta_R, \qquad T_{\text{skip}}(\theta)
+\leq \beta \cdot T_{\text{DL}}, $$
+
+where recall tolerance $\delta_R > 0$ is the maximum allowable absolute recall
+drop, and overhead ratio $\beta
+\in (0, 1)$ bounds the skip module overhead as a fraction of one full DL
+inference. For example, setting $\delta_R = 0.01$ and $\beta = 0.10$ means the
+system tolerates at most a 1\% recall drop and requires the skip module to run
+within 10\% of the cost of a single DL inference.
+
+**Scoring feasible candidates.** To rank feasible candidates, we define two
+normalized scoring terms. The false alarm reduction term is
+
+$$ F(\theta) = \max\!\left(0,\; \frac{\mathrm{FAR}_{\text{base}} -
+\mathrm{FAR}(\theta)} {\mathrm{FAR}_{\text{base}}}\right), $$
+
+which measures the relative FAR improvement with respect to the baseline. The
+recall retention term is
+
+$$ \rho(\theta) = 1 - \frac{R_{\text{base}} - R(\theta)}{\delta_R}, $$
+
+which equals $1$ when recall matches the baseline and $0$ when recall reaches
+the lowest acceptable level $R_{\text{base}} - \delta_R$. Both terms are bounded
+in $[0, 1]$ over the feasible region, making them directly comparable to
+$S(\theta)$ in the weighted score.
+
+**Optimal selection.** The optimal parameter set $\theta^*$ is selected as
+
+$$ \theta^* = \arg\max_{\theta \in \Theta_{\text{feasible}}} \left[ w_S\,
+S(\theta) + w_F\, F(\theta) + w_R\, \rho(\theta) \right], $$
+
+where $\Theta_{\text{feasible}} = \{\theta \in \Theta : R(\theta) \geq
+R_{\text{base}} - \delta_R \text{ and } T_{\text{skip}}(\theta) \leq \beta \cdot
+T_{\text{DL}}\}$, and the nonnegative weights satisfy $w_S + w_F + w_R = 1$.
+
+**Theoretical justification.** The skip module $\mathcal{S}$ acts as a
+conservative gate: skipped frames are labeled negative directly, while passed
+frames are processed by the same downstream detector $\mathcal{M}$ as in the
+baseline. Therefore, every false alarm produced by the skip-enabled system is
+also present in the baseline, implying $\mathrm{FAR}(\theta) \leq
+\mathrm{FAR}_{\text{base}}$. The primary safety risk is recall degradation
+caused by incorrectly skipped fire/smoke frames, which motivates enforcing the
+recall constraint as a hard gate prior to any candidate ranking.
