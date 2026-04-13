@@ -13,8 +13,14 @@ steps:
       - {
           column: Method,
           op: replace,
-          search: "4GPU_SV__ds_UFireIndoorTest__mt_no_temp_method__af4b0d32a3d2__20260303.180228_per_frame",
-          replace-with: "Our Big Model",
+          search: "1GPU_SV__ds_UFireIndoorTest__mt_no_temp_method__af4b0d32a3d2__20260303.180228_per_frame",
+          replace-with: "Our Big Model (without Skip Module)",
+        }
+      - {
+          column: Method,
+          op: replace,
+          search: "1GPU_SV__ds_UFireIndoorTest__mt_temp_method_motion_block__e1ccb7b889a0__20260401.144240_per_frame",
+          replace-with: "Our Big Model (with Skip Module)",
         }
       - {
           column: Method,
@@ -47,7 +53,7 @@ steps:
       - {
           column: Method,
           op: "in",
-          value: ["Our Big Model", "FireNet", "MobileNet", "YOLOv5s", "YOLOv5l"],
+          value: ["Our Big Model (without Skip Module)", "Our Big Model (with Skip Module)", "FireNet", "MobileNet", "YOLOv5s", "YOLOv5l"],
         }
 
   # ── 4. JOIN CITE ──────────────────────────────────────────
@@ -62,10 +68,16 @@ steps:
       - name: Method
         expr: "df['Method'].str.strip() + ' ' + df['Cite'].fillna('').astype(str).str.strip()"
 
+  # ── 5. CUSTOM SORTING ─────────────────────────────────────
+  - type: add_column
+    cols:
+      - name: is_skip_module
+        expr: "df['Method'].str.contains('Our Big Model (with Skip Module)', regex=False).astype(int)"
+
   # ── 6. SORT & LIMIT ───────────────────────────────────────
   - type: sort
-    by: [metric_recall (tpr), metric_fpr (false alarm rate), metric_fps, metric_accuracy]
-    ascending: [true, true, false, false]
+    by: [is_skip_module, metric_recall (tpr), metric_fpr (false alarm rate), metric_fps, metric_accuracy]
+    ascending: [true, true, true, false, false]
 
   - type: select
     columns:

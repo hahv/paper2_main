@@ -71,6 +71,7 @@ class GlobalConst:
     COL_PARAM_RECALL = "metric_recall (tpr)"
     COL_PARAM_FAR = "metric_fpr (false alarm rate)"
     COL_PARAM_COMBINED_SCORE = "Combined_Score"
+    COL_PARAM_RECALL_DROP = "Recall_Drop"
     COL_PARAM_W_S = "w_S"
     COL_PARAM_W_F = "w_F"
     COL_PARAM_W_R = "w_R"

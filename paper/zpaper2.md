@@ -427,6 +427,15 @@ using OpenCV 4.11 (CPU-only).
 
 ### Hyperparameter Optimization Results
 
+The recall tolerance is set to $\delta_R = 0.015$, permitting an absolute
+recall drop of at most $1.5\%$ relative to the baseline.
+This value is chosen to reflect the safety requirement of the application:
+at the baseline recall of approximately $95\%$, a tolerance of $1.5\%$
+ensures that the worst-case deployed system retains a recall of at least
+$93.5\%$ --- a level consistent with operational fire and smoke detection
+standards --- while providing the hyperparameter search sufficient
+flexibility to identify configurations with meaningful efficiency gains.
+
 In this work, we set
 \[
     w_S = 0.70, \qquad w_R = 0.30,
@@ -439,7 +448,6 @@ The recall hard constraint already screens all unsafe candidates
 prior to ranking; $w_R > 0$ ensures that within the feasible set,
 configurations closer to baseline recall are preferred as a
 conservative tie-breaking rule.
-
 
 
 **Frame Diff Parameter Grid Search:**
@@ -517,6 +525,32 @@ improving operational false alarm behavior.
 \input{./4.table/tb_val_results_frameDiff.tex}
 ```
 
+Table~\ref{tb:val_results_frameDiff} reveals a fundamental limitation of the
+\textsc{FrameDiffDet} skip module: it fails to deliver meaningful
+throughput improvement under the safety constraint $\delta_R = 0.015$.
+Among all 48 evaluated configurations, only four satisfy the hard recall
+constraint, and the best feasible configuration
+($\alpha{=}1.0,\ B{=}16,\ \tau{=}0.05,\ \tau_d{=}3$) achieves a skip
+rate of merely $0.72\%$ --- meaning the module bypasses fewer than
+$1$ in $100$ background frames.
+As a direct consequence, the FPS of the top-ranked configuration
+($22.4$ FPS) is actually \emph{lower} than the no-skip baseline
+($24.1$ FPS), indicating that the skip module introduces measurable
+overhead without delivering any compensating efficiency gain.
+This behavior stems from the intrinsic sensitivity of naive frame
+differencing: ambient illumination fluctuations, sensor noise, and
+subtle background variations continuously produce non-zero inter-frame
+pixel differences, causing the detector to classify nearly every frame
+as motion-active and trigger inference regardless.
+Configurations that do achieve substantial skip rates --- reaching
+$47$--$60\%$ at higher $\tau_d$ values --- do so only at the cost of
+severe recall degradation of $5$--$10\%$, a level entirely
+incompatible with fire and smoke safety requirements.
+The results collectively demonstrate that \textsc{FrameDiffDet}, without
+temporal smoothing or accumulation, lacks the noise robustness required
+to operate effectively as a skip gate in real indoor surveillance
+conditions.
+
 #### Hyperparameter Search Space for the AccMotionDet Skip Module
 
 ```{=latex}
@@ -585,6 +619,91 @@ the effect of the remaining hyperparameters.
 ```{=latex}
 \input{./4.table/tb_val_results_accMotionDet.tex}
 ```
+<!-- ! Analysis the hyperparameters search results of AccMotionDet -->
+## Hyperparameter Optimization Results: AccMotionDet
+
+Table \ref{tb:val_results_accMotionDet} shows the top-10 ranked configurations for the AccMotionDet
+skip module on the validation set $\mathcal{D}_\text{val}$, ordered by combined score $\Phi$.
+The baseline system (no skip module) achieves a recall of 94.35\% at 24.1~FPS.
+
+### Selected Configuration
+
+The optimal configuration (Exp.~1) uses a half-resolution scale ($\alpha = 0.5$), coarse
+block size ($B = 32$), conservative block-active threshold ($\tau = 0.05$), moderate pixel
+sensitivity ($\tau_d = 5$), low activation threshold ($\tau_m = 5$), and a small accumulation
+cap ($K_{\max} = 15$).
+This configuration achieves a skip rate of **44.39\%** and a recall of **93.90\%**
+($\Delta = -0.45\%$), well within the tolerance $\delta_R = 0.015$.
+The resulting FPS improves from 24.1 to **36.6**, a **52\% throughput gain**, with no change
+in FPR (0.74\% throughout).
+
+### Hyperparameter Sensitivity Analysis
+
+**Scale factor $\alpha$.**
+All top-10 configurations consistently use $\alpha = 0.5$ (half resolution).
+Full-resolution processing ($\alpha = 1.0$) does not appear in any feasible high-scoring
+configuration, confirming that downscaling reduces sensitivity to high-frequency pixel noise
+while lowering skip-module latency --- both effects are beneficial.
+
+**Block size $B$.**
+$B = 32$ dominates the top-10 rankings, with only one entry using $B = 16$ (Exp.~10,
+score 0.4906).
+Coarser blocks aggregate motion evidence spatially, providing greater robustness to isolated
+pixel-level disturbances that could otherwise trigger unnecessary inference calls.
+The result confirms the prior expectation in Section~\ref{secmethod} that temporal
+accumulation already suppresses transient noise, making fine-grained $B = 16$ blocks
+less necessary for AccMotionDet.
+
+**Block active threshold $\tau$.**
+Configurations with $\tau = 0.05$ yield the highest skip rates (42--44\%), while
+$\tau = 0.10$ achieves slightly lower skip rates (39--40\%) but marginally better
+recall retention.
+The top-ranked configuration (score 0.5203) uses $\tau = 0.05$, confirming that a
+conservative trigger policy --- requiring only sparse motion evidence before invoking
+inference --- is preferred for maximizing the combined score under the recall constraint.
+
+**Activation threshold $\tau_m$.**
+Configurations with $\tau_m = 5$ (Exp.~1--6) consistently outscore those with
+$\tau_m = 10$ (Exp.~7--8).
+A higher activation threshold $\tau_m = 10$ requires stronger sustained motion before
+triggering inference, which slightly improves the skip rate but incurs a larger recall
+drop (up to $-0.53\%$), reducing the recall retention term in $\Phi$.
+
+**Accumulation cap $K_{\max}$.**
+Across all three values evaluated ($K_{\max} \in \{15, 25, 35\}$), the skip rate
+decreases monotonically with increasing $K_{\max}$
+(e.g., 44.39\% $\to$ 42.89\% $\to$ 42.38\% for Exp.~1--3).
+A lower cap allows the accumulator to reset more readily after high-motion periods,
+enabling faster recognition of subsequent static frames and thus higher skip rates.
+The difference in combined score across the three values is small ($\leq 0.007$),
+indicating low sensitivity to this parameter within the evaluated range.
+
+### Comparison with FrameDiffDet
+
+A fundamental contrast emerges when comparing AccMotionDet and FrameDiffDet on the
+validation set (Table @tbl:frameDiff-val).
+All feasible FrameDiffDet configurations --- those satisfying $\Delta R \leq \delta_R$
+--- achieve skip rates below **1.4\%**, yielding no meaningful FPS improvement over
+the baseline (22.4--23.5~FPS vs.\ 24.1~FPS baseline).
+This reveals a structural limitation of naive frame differencing: in the static indoor
+surveillance setting, the per-pixel sensitivity required to safely detect slow-onset
+smoke events forces the threshold $\tau_d$ to remain low (i.e., $\tau_d = 3$), which
+in turn flags even subtle illumination changes as motion, suppressing skip decisions
+on nearly all frames.
+By contrast, the temporal accumulation in AccMotionDet absorbs transient pixel
+fluctuations over multiple frames, enabling confident skip decisions on genuinely
+static frames while preserving sensitivity to sustained motion signatures
+characteristic of fire and smoke.
+This results in a **30$\times$ higher skip rate** (44.39\% vs.\ 0.72\%) and a
+**63\% higher FPS** (36.6 vs.\ 22.4) for the respective best configurations, at a
+comparable recall cost ($-0.45\%$ vs.\ $-0.17\%$).
+FrameDiffDet achieves high skip rates only at the cost of severe recall degradation
+($\geq 5.5\%$ for skip rates $\geq 47\%$), confirming that it lacks the temporal
+smoothing necessary for safe operation in this domain.
+AccMotionDet is therefore selected as the skip module for all subsequent
+system-level evaluations.
+
+
 ### System-Level Performance: Frame-Based Efficiency {#sec:e2e-perf}
 
 We subsequently integrated the skip modules into the full inference pipeline to
@@ -620,10 +739,24 @@ Baseline's 98.5% F1-Score.
 
 ### Comparison with Temporal Methods (M3) {#sec:cmp-temporal}
 
-A critical distinction in anomaly detection is between frame-level and
+<!-- A critical distinction in anomaly detection is between frame-level and
 video-level processing. The M3 baseline reduces false alarms by executing
 majority voting across a 30-frame window. While highly accurate, this
-architectural choice introduces significant latency.
+architectural choice introduces significant latency. -->
+Temporal baseline MEthod: Temporal Persistence Thresholding [@de2023hybrid]: The temporal baseline method, referred to as Temporal Persistence Thresholding (TPT),
+augments the standard per-frame inference pipeline with a lightweight post-processing
+stage designed to suppress isolated false alarms.
+Unlike the proposed skip module, TPT does not reduce the number of frames forwarded
+to the classifier --- every frame is still processed by the full BIG model.
+Instead, a circular boolean buffer of length $W$ records the raw per-frame predictions
+over a rolling window.
+When the classifier predicts fire or smoke on a given frame, the detection is
+confirmed only if the fraction of positive predictions within the buffer exceeds a
+persistence threshold $\tau_\text{persist}$; otherwise, the prediction is suppressed
+and the frame is relabelled as background.
+This mechanism filters out transient, single-frame activations caused by brief
+illumination changes or camera artefacts, trading a fixed minimum detection latency
+of $\lceil \tau_\text{persist} \times W \rceil$ frames for a reduction in false alarm rate.
 
 Table \ref{tb:cmp_base_temp} compares our method against other temporal
 processing techniques, evaluating both detection performance and computational

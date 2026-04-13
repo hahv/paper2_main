@@ -1,4 +1,4 @@
-w_s : 0.60 # weight for skip ratio
-w_f : 0.20 # weight for false alarm rate
-w_r : 0.20 # weight for recall
-delta_r : 0.01 # recall retention threshold (e.g., 0.01 means allowable recall drop of 1%)
+w_s : 0.70 # weight for skip ratio
+w_f : 0.00 # weight for false alarm rate
+w_r : 0.30 # weight for recall
+delta_r : 0.015 # recall retention threshold (e.g., 0.01 means allowable recall drop of 1%)

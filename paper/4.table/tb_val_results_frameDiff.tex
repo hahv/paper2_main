@@ -1,5 +1,11 @@
 \begin{table*}[hbtp]
-    \caption{Validation-set performance and hyperparameter configurations for Frame Difference (FrameDiff) combinations.}
+    \caption{Representative hyperparameter configurations for
+    \textsc{FrameDiffDet} on the validation set, selected to illustrate the
+    recall--efficiency trade-off across the full search space. Only
+    configurations above the dashed line satisfy the recall constraint
+    $\delta_R = 0.015$. The ``Recall (\%)'' column reports the retained
+    recall alongside the absolute drop relative to the baseline in
+    parentheses, i.e., $R\ (-\Delta R)$.}
     \label{tb:val_results_frameDiff}
     \csvreader[separator=semicolon,
     no head,
@@ -13,22 +19,21 @@
         cells = {font = \scriptsize, halign = c, valign = m},
         row{1} = {font = \bfseries\scriptsize},
         row{2} = {font = \bfseries\tiny},
-        % ↓ only 3 new lines needed
-        cell{1}{1} = {r=2}{c},   % Exp. spans rows 1-2
-        cell{1}{2} = {c=4}{c},   % Parameters spans cols 2-5
-        cell{1}{6} = {c=4}{c},   % Metrics spans cols 6-9
+        cell{1}{1}  = {r=2}{c},  % Exp. spans rows 1-2
+        cell{1}{2}  = {c=4}{c},  % Parameters spans cols 2-5
+        cell{1}{6}  = {c=4}{c},  % Metrics spans cols 6-9
         cell{1}{10} = {r=2}{c},  % Combined Score spans rows 1-2
     },
-    ]{./4.table/out/opt_selected_rp__per_frame_frameDiff.csv}{}{
-    \csvexpval\csvcoli &
-    \csvexpval\csvcolii &
+    ]{./4.table/out/opt_selected_rp__per_frame_frameDiff.csv}{}{%
+    \csvexpval\csvcoli   &
+    \csvexpval\csvcolii  &
     \csvexpval\csvcoliii &
-    \csvexpval\csvcoliv &
-    \csvexpval\csvcolv &
-    \csvexpval\csvcolvi &
+    \csvexpval\csvcoliv  &
+    \csvexpval\csvcolv   &
+    \csvexpval\csvcolvi  &
     \csvexpval\csvcolvii &
     \csvexpval\csvcolviii &
-    \csvexpval\csvcolix &
+    \csvexpval\csvcolix  &
     \csvexpval\csvcolx
     }
 \end{table*}

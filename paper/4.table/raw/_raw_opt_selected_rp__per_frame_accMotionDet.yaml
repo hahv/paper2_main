@@ -1,4 +1,4 @@
-input: raw/_raw_opt_selected_rp__per_frame.csv
+input: raw/_raw_opt_selected_rp__per_frame_accMotionDet.csv
 output: output/
 sep: ";"
 prepend_lines:
@@ -30,11 +30,17 @@ steps:
       "skip_proc.params.scale_factor": "Scale factor"
       "skip_proc.params.block_size_orig": "Block size"
       "skip_proc.params.block_ratio_th": "Block active threshold"
+      "Recall_Drop" : "Recall Drop"
 
   # ── 2. DROP JUNK COLUMNS ──────────────────────────────────
   - type: drop
     columns:
       - skip_proc.params.motion.name # Redundant (always acc_motion_det)
+
+  # ── 3. FILTER SELECTED ROWS ───────────────────────────────
+  - type: filter
+    conditions:
+      - { column: select, op: "==", value: "x" }
 
   # ── 4. ROUND METRICS ──────────────────────────────────────
   # Using add_column to round floats so the CSV is readable
@@ -58,6 +64,13 @@ steps:
         expr: "(df['Skip Rate'] * 100).round(2)"
       - name: "Exp."
         expr: "df['Experiment'].str.replace('.*mt_temp_method_motion_block.*', 'AccMotionDet', regex=True).str.replace('.*mt_no_temp_method.*', 'Baseline (No Skip module)', regex=True)"
+      - name: "Recall Drop"
+        expr: "(df['Recall Drop'] * 100).round(2)" # Convert to percentage
+
+  - type: add_column
+    cols:
+      - name: Recall
+        expr: "df.apply(lambda x: f\"{x['Recall']:.2f}\" if pd.isna(x['Recall Drop']) else f\"{x['Recall']:.2f} (-{x['Recall Drop']:.2f})\", axis=1)"
 
   # ── 5. REORDER & SELECT COLUMNS ───────────────────────────
   - type: rename

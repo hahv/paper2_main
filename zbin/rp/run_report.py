@@ -379,8 +379,8 @@ def report_optim_by_csv(
         optim_df = optim_csv_path.copy()
     param_select_dict = yamlfile.load_yaml(param_select_cfg, to_dict=True)
     weighted_select = WeightedSelect(optim_df, context=param_select_dict)
-    chosen_param_df = weighted_select.choose_params()
-    return chosen_param_df
+    chosen_param_df, ranking_full_df = weighted_select.choose_params()
+    return chosen_param_df, ranking_full_df
 
 
 def report_optim(
@@ -395,7 +395,7 @@ def report_optim(
     optim_df = prepare_optim_df(
         indir, metric_cfg_file, report_dir, selected_metricSet, force=force
     )
-    chosen_param_df = report_optim_by_csv(
+    chosen_param_df, ranking_full_df = report_optim_by_csv(
         optim_df,
         param_select_cfg=param_select_cfg,
         shorten=shorten,
@@ -409,9 +409,20 @@ def report_optim(
         get_wins_path=True,
         tag_or_box_title="Save chosen parameters for optimization to ⏬:",
     )
+    ranking_full_outfile = os.path.join(
+        report_dir, f"{GlobalConst.OPT_ALL_RP_FILE_PREFIX}{selected_metricSet}_ranking_full.csv"
+    )
+    ranking_full_df.to_csv(
+        ranking_full_outfile, sep=";", encoding="utf-8", index=False
+    )
+    pprint_local_path(
+        ranking_full_outfile,
+        get_wins_path=True,
+        tag_or_box_title="Save full ranking of parameters for optimization to ⏬:",
+    )
     # ! Copy to csv folder for paper raw table, with prefix "_raw" for further paper processing.
-    copy_to_paper_raw_csv(chosen_param_outfile)
-    return chosen_param_df
+    # copy_to_paper_raw_csv(chosen_param_outfile)
+    return chosen_param_df, ranking_full_df
 
 def main():
     args = ReportArgs().parse_args()
