@@ -1,0 +1,22 @@
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{./3.fig/videodb/fig_videodb.pdf}
+\caption{
+\textbf{Qualitative analysis of the AccMotionDet skip module.}
+\textit{Top row (success cases):}
+(a)~A static background frame correctly skipped by $\mathcal{S}$
+($s_t = 0$);
+(b)~an active fire frame correctly passed to $\mathcal{M}$
+($s_t = 1$, true positive);
+(c)~an early smoke frame correctly passed to $\mathcal{M}$
+($s_t = 1$, true positive).
+\textit{Bottom row (failure cases):}
+(d)~A slow-onset smoke frame incorrectly skipped due to
+insufficient accumulated motion ($s_t = 0$, false negative);
+(e)~a background frame with persistent foreground motion
+(e.g., walking person) that forces $s_t = 1$ on nearly every
+frame, reducing computational savings to near zero for
+such videos.
+}
+\label{fig:qualitative}
+\end{figure}

@@ -776,9 +776,9 @@ metrics, our skip-module approach achieves higher recall and requires
 significantly less aggregate computational time per second of video, proving
 highly competitive in false alarm suppression.
 
-### Ablation and Qualitative Analysis
+### Quantitative and Qualitative Analysis
 
-#### Component Analysis: Efficacy of the Skip Module {#sec:comp-perf}
+<!-- #### Component Analysis: Efficacy of the Skip Module {#sec:comp-perf}
 
 First, we evaluate the skip modules in isolation to ensure they function as safe
 gatekeepers. The primary objective is to maximize the Filter Rate without
@@ -822,20 +822,117 @@ smoke events that lack the raw pixel displacement required to trigger Approach
 swaying foliage, Approach 1 frequently generated false positives (unnecessarily
 passing safe frames to the BIG MODEL). Approach 2 successfully filtered these
 frames by applying color-channel heuristics, verifying that the moving pixels
-did not match the chromatic signatures of either fire or smoke.
+did not match the chromatic signatures of either fire or smoke. -->
 
-**Speed of Skip Module**:
+#### Efficiency of Skip Module:
 
 ```{=latex}
 \input{./3.fig/fig_fps_increase.tex}
 ```
 
-<!-- ! Content to fill -->
+<!--! GUIDE: #### Qualitative Analysis:
+  + Success case analysis: Side-by-side frames: correctly skipped static
+  background vs. correctly passed fire/smoke frame, one for each class -- Gives
+  reviewers visual intuition of what the gating looks like in practice
+  + Failure case analysis: Pick 2-3 failure videos from test set: (1) slow smoke
+  onset over-skipped, (2) persistent background motion (zero skip), show
+  representative frames with caption -- Scientific honesty; safety-critical
+  papers are expected to show where the system fails -->
 
-+ Failure case analysis
 
-+ Qualitative visualization
+#### Qualitative Analysis
 
+Figure~\ref{fig:qualitative} illustrates representative success and
+failure cases of the AccMotionDet skip module on the test set
+$\mathcal{D}_\text{test}$.
+
+**Success cases.**
+The top row shows two canonical scenarios where $\mathcal{S}$ operates
+as intended.
+In the first case, a static indoor background frame --- with no
+inter-frame motion --- is correctly skipped ($s_t = 0$), avoiding an
+unnecessary invocation of $\mathcal{M}$ and contributing directly to
+the 44.39\% skip rate reported in
+Table~\ref{tb:val_results_accMotionDet}.
+In the second case, a frame containing active fire (left) and smoke
+(right) exhibits sufficient accumulated motion to trigger inference
+($s_t = 1$), and $\mathcal{M}$ correctly raises an alarm.
+These cases confirm that $\mathcal{S}$ reliably distinguishes
+scene-level activity from quiescence in the target indoor
+surveillance setting.
+<!-- +-----------------------------------------------------------------------+
+|                    fig_qualitative_success.pdf                        |
+|                                                                       |
+|        (a) SKIP — Static BG     (b) RUN — Fire     (c) RUN — Smoke   |
+|                                                                       |
+|  Raw   +----------------+    +------------+    +------------+        |
+|        |                |    |            |    |            |        |
+|        |  Empty room    |    | 🔥 Flames  |    | 💨 Haze    |        |
+|        |  No change     |    | Flickering |    | Diffusing  |        |
+|        |                |    |            |    |            |        |
+|        | [GREEN border] |    |[BLUE border]    |[BLUE border]        |
+|        +----------------+    +------------+    +------------+        |
+|                                                                       |
+|  Mask  +----------------+    +------------+    +------------+        |
+|        |                |    |            |    |            |        |
+|        |   ░░░░░░░░░░   |    | ██████████ |    | ░░███░░░░  |        |
+|        |   (near dark)  |    | (fully lit)|    |(partially  |        |
+|        |   no activity  |    | high accum.|    | lit)       |        |
+|        +----------------+    +------------+    +------------+        |
+|         s_t = 0  ✓ SKIP       s_t = 1  ✓ RUN   s_t = 1  ✓ RUN      |
++-----------------------------------------------------------------------+ -->
+
+**Failure cases.**
+
+<!-- +-----------------------------------------------------------------------+
+|                    fig_qualitative_failure.pdf                        |
+|                                                                       |
+|         (d) WRONGLY SKIPPED — Slow Smoke                             |
+|                    (e) FORCED RUN — Persistent Motion                |
+|                                                                       |
+|  Raw   +---------------------+    +---------------------+           |
+|        |                     |    |                     |           |
+|        | 💨 Barely visible   |    | 🚶 Walking person   |           |
+|        |    smoke onset      |    |    no fire/smoke    |           |
+|        |    early stage      |    |    continuous move  |           |
+|        |                     |    |                     |           |
+|        |   [RED border]      |    |  [ORANGE border]    |           |
+|        +---------------------+    +---------------------+           |
+|                                                                       |
+|  Mask  +---------------------+    +---------------------+           |
+|        |                     |    |                     |           |
+|        |  ░░░░░░░░░░░░░░░   |    | ████████████████    |           |
+|        |  (near dark —       |    | (saturated —        |           |
+|        |  accumulator        |    |  K_max reached,     |           |
+|        |  not triggered)     |    |  never resets)      |           |
+|        +---------------------+    +---------------------+           |
+|         s_t = 0  ✗ MISSED          s_t = 1  ✗ NO SAVINGS           |
++-----------------------------------------------------------------------+ -->
+
+
+The bottom row exposes two structural limitations of the motion-based
+gating approach.
+First, in a slow-onset smoke video, the initial frames of smoke
+diffusion produce minimal inter-frame pixel change --- below the
+activation threshold $\tau_m$ of the AccMotionDet accumulator ---
+causing $\mathcal{S}$ to skip these frames and delay the first alarm.
+This represents the primary recall risk identified in
+Section~\ref{sec:hyperparam}: the skip module is conservative by
+design, but gradual diffusion events are the edge case where this
+conservatism incurs a safety cost.
+Second, in a scene containing continuous background motion
+(e.g., a person walking repeatedly through the frame), $\mathcal{S}$
+assigns $s_t = 1$ to nearly every frame, reducing the skip rate to
+near zero and negating the computational efficiency gain for that
+video.
+Both failure modes are consistent with the motion-only design of
+$\mathcal{S}$: they arise not from classification errors in
+$\mathcal{M}$, but from the inherent limitation of using inter-frame
+motion as a sole proxy for scene informativeness.
+
+```{=latex}
+\input{./3.fig/fig_qualitative.tex}
+```
 <!-- !END_SYNC_BLOCK -->
 
 # Conclusion {#sec:conclusion label="Conclusion"}
