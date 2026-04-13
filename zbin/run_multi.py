@@ -50,31 +50,30 @@ class RunOptimArgs(Tap):
         )
 
 
-def get_opt_cfg(method_name: str):
+def _get_cfg_path(method_name: str, prefix: str) -> str | None:
+    """Helper to resolve paths for optim or wandb config files."""
     BASE_CFG_OPTIM = "config/zruns/optim"
-    # temp_method_motion_block, temp_method_rule_block
-    opt_cfg = os.path.join(
-        BASE_CFG_OPTIM, f"opt_{method_name.replace('temp_method_', '')}.yaml"
-    )
-    if not os.path.exists(opt_cfg):
+
+    if "temp_baseline" in method_name:
+        suffix = method_name.replace("temp_baseline_", "")
+        file_name = f"{prefix}baseline_{suffix}.yaml"
+    elif "temp_method" in method_name:
+        suffix = method_name.replace("temp_method_", "")
+        file_name = f"{prefix}{suffix}.yaml"
+    else:
         return None
-    return opt_cfg
+    # pprint(locals())
+    # assert 0, "Debugging: Check the method name parsing logic and the generated file name."
+
+    cfg_path = os.path.join(BASE_CFG_OPTIM, file_name)
+    return cfg_path if os.path.exists(cfg_path) else None
+
+def get_opt_cfg(method_name: str) -> str | None:
+    return _get_cfg_path(method_name, "opt_")
 
 
-def get_wandb_params_cfg(method_name: str):
-    BASE_CFG_OPTIM = "config/zruns/optim"
-    # temp_method_motion_block, temp_method_rule_block
-    opt_cfg = os.path.join(
-        BASE_CFG_OPTIM, f"keep_opt_{method_name.replace('temp_method_', '')}.yaml"
-    )
-    if not os.path.exists(opt_cfg):
-        return None
-    return opt_cfg
-
-
-def get_sweep_cfgs(base_cfg: dict, method_name: str) -> List[Config]:
-    ls_cfg: List[Config] = []
-    return ls_cfg
+def get_wandb_params_cfg(method_name: str) -> str | None:
+    return _get_cfg_path(method_name, "keep_opt_")
 
 
 def send_slack_noti(logger: WandbLogger, message: str):

@@ -70,7 +70,18 @@ class TempMethod(NoTempMethod):
                 # pre_calc_time=float → inject precomputed value; profiler
                 #                       auto-accumulates into ctx duration ✅
                 with ctx.step("heavy_infer", pre_calc_time=pre_calc_time):
-                    infer_result = super().infer_frame(frame, frame_idx)
+                    # Use precomputed results if available
+                    if (
+                        hasattr(self, "precomputed_rs_proc")
+                        and self.precomputed_rs_proc is not None
+                    ):
+                        pre_rs = self.precomputed_rs_proc.get_frame_data(frame_idx)
+                        if pre_rs is not None:
+                            infer_result = pre_rs
+                        else:
+                            infer_result = super().infer_frame(frame, frame_idx)
+                    else:
+                        infer_result = super().infer_frame(frame, frame_idx)
 
                 # Propagate overhead into result so downstream consumers
                 # (e.g. base_method.py) see the true combined elapsed cost
