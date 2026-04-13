@@ -1,7 +1,7 @@
-Method;Recall;FAR;Accuracy;F1-Score;Precision;FPS;GFLOPs
-MobileNet \citeproc{ref-mukhopadhyay2019fpga}{{[}xx{]}};5.84;0.18;77.49;0.11;91.06;35.15;1.135
-FireNet \citeproc{ref-jadon2019firenet}{{[}xx{]}};34.1;13.47;74.07;0.38;44.11;48.12;0.018
-YOLOv5l \citeproc{ref-de2023hybrid}{{[}xx{]}};49.36;3.61;85.22;0.61;81.0;78.08;107.7
-YOLOv5s \citeproc{ref-de2023hybrid}{{[}xx{]}};68.58;10.39;84.61;0.68;67.29;109.94;15.8
-Our Big Model (without Skip Module) ;95.62;0.25;98.77;0.97;99.17;25.08;30.61
-Our Big Model (with Skip Module) ;94.38;0.14;98.56;0.97;99.54;33.16;30.61
+Method;Recall;FAR;Accuracy;F1-Score;Precision;FPS;GFLOPs;Model size (Mb)
+MobileNet \citeproc{ref-mukhopadhyay2019fpga}{{[}xx{]}};5.84;0.18;77.49;0.11;91.06;35.15;1.135;20.6
+FireNet \citeproc{ref-jadon2019firenet}{{[}xx{]}};34.1;13.47;74.07;0.38;44.11;48.12;0.018;7.45
+YOLOv5l \citeproc{ref-de2023hybrid}{{[}xx{]}};49.36;3.61;85.22;0.61;81.0;78.08;107.7;88.5
+YOLOv5s \citeproc{ref-de2023hybrid}{{[}xx{]}};68.58;10.39;84.61;0.68;67.29;109.94;15.8;13.7
+Our Big Model (without Skip Module) ;95.62;0.25;98.77;0.97;99.17;25.08;30.61;430.0
+Our Big Model (with Skip Module) ;94.38;0.14;98.56;0.97;99.54;33.16;30.61;430.0

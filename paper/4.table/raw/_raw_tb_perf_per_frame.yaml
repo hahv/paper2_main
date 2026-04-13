@@ -89,6 +89,7 @@ steps:
       - metric_precision
       - metric_fps
       - GFLOPs
+      - Model size (Mb)
 
   # ── 7. RENAME FOR DISPLAY ─────────────────────────────────
   - type: rename

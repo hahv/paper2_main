@@ -896,10 +896,23 @@ F1-Score.
 \subsubsection{Comparison with Temporal Methods
 (M3)}\label{sec:cmp-temporal}
 
-A critical distinction in anomaly detection is between frame-level and
-video-level processing. The M3 baseline reduces false alarms by
-executing majority voting across a 30-frame window. While highly
-accurate, this architectural choice introduces significant latency.
+Temporal baseline MEthod: Temporal Persistence Thresholding
+\citeproc{ref-de2023hybrid}{{[}10{]}}: The temporal baseline method,
+referred to as Temporal Persistence Thresholding (TPT), augments the
+standard per-frame inference pipeline with a lightweight post-processing
+stage designed to suppress isolated false alarms. Unlike the proposed
+skip module, TPT does not reduce the number of frames forwarded to the
+classifier --- every frame is still processed by the full BIG model.
+Instead, a circular boolean buffer of length \(W\) records the raw
+per-frame predictions over a rolling window. When the classifier
+predicts fire or smoke on a given frame, the detection is confirmed only
+if the fraction of positive predictions within the buffer exceeds a
+persistence threshold \(\tau_\text{persist}\); otherwise, the prediction
+is suppressed and the frame is relabelled as background. This mechanism
+filters out transient, single-frame activations caused by brief
+illumination changes or camera artefacts, trading a fixed minimum
+detection latency of \(\lceil \tau_\text{persist} \times W \rceil\)
+frames for a reduction in false alarm rate.
 
 Table \ref{tb:cmp_base_temp} compares our method against other temporal
 processing techniques, evaluating both detection performance and
