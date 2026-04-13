@@ -4,7 +4,7 @@
 <!-- TARGET_PROJECT: G:\My Drive\1_PhD\Obsidian\Home\3. Writing\paperfire2 -->
 <!-- SYNC_TARGET_FILE: 00_Meta_Abstract.md-->
 <!-- BLOCK_ID: abstract -->
-date: 2026.04.10
+date: 2026.04.13
 title: "Efficient Real-Time Fire Surveillance: A Lightweight Motion-Heuristic
 Skip Module for Accelerated Inference"
 abstract: "Conventional deep learning (DL)-based fire and smoke detection systems process
@@ -428,12 +428,19 @@ using OpenCV 4.11 (CPU-only).
 ### Hyperparameter Optimization Results
 
 In this work, we set
+\[
+    w_S = 0.70, \qquad w_R = 0.30,
+\]
+reflecting that skip rate is the primary optimization objective ---
+as it directly determines throughput gain --- while recall retention
+serves as a secondary criterion that fine-tunes selection among
+configurations of comparable efficiency.
+The recall hard constraint already screens all unsafe candidates
+prior to ranking; $w_R > 0$ ensures that within the feasible set,
+configurations closer to baseline recall are preferred as a
+conservative tie-breaking rule.
 
-$$ w_S = 0.60, \qquad w_F = 0.20, \qquad w_R = 0.20, $$
 
-so that skip rate remains the primary efficiency objective, while false alarm
-reduction and recall retention are treated as secondary but explicitly rewarded
-preferences.
 
 **Frame Diff Parameter Grid Search:**
 
@@ -689,6 +696,12 @@ did not match the chromatic signatures of either fire or smoke.
 ```{=latex}
 \input{./3.fig/fig_fps_increase.tex}
 ```
+
+<!-- ! Content to fill -->
+
++ Failure case analysis
+
++ Qualitative visualization
 
 <!-- !END_SYNC_BLOCK -->
 

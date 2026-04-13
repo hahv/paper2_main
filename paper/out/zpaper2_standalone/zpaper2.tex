@@ -1,154 +1,4 @@
-% Options for packages loaded elsewhere
-\PassOptionsToPackage{unicode}{hyperref}
-\PassOptionsToPackage{hyphens}{url}
-\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
-%
-\documentclass[
-  10pt,
-]{article}
-\usepackage{amsmath,amssymb}
-\usepackage{iftex}
-\ifPDFTeX
-  \usepackage[T1]{fontenc}
-  \usepackage[utf8]{inputenc}
-  \usepackage{textcomp} % provide euro and other symbols
-\else % if luatex or xetex
-  \usepackage{unicode-math} % this also loads fontspec
-  \defaultfontfeatures{Scale=MatchLowercase}
-  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
-\fi
-\usepackage{lmodern}
-\ifPDFTeX\else
-  % xetex/luatex font selection
-\fi
-% Use upquote if available, for straight quotes in verbatim environments
-\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
-\IfFileExists{microtype.sty}{% use microtype if available
-  \usepackage[]{microtype}
-  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
-}{}
-\makeatletter
-\@ifundefined{KOMAClassName}{% if non-KOMA class
-  \IfFileExists{parskip.sty}{%
-    \usepackage{parskip}
-  }{% else
-    \setlength{\parindent}{0pt}
-    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
-}{% if KOMA class
-  \KOMAoptions{parskip=half}}
-\makeatother
-\usepackage{xcolor}
-\usepackage[a4paper,margin=1cm]{geometry}
-\usepackage{longtable,booktabs,array}
-\usepackage{calc} % for calculating minipage widths
-% Correct order of tables after \paragraph or \subparagraph
-\usepackage{etoolbox}
-\makeatletter
-\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
-\makeatother
-% Allow footnotes in longtable head/foot
-\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
-\makesavenoteenv{longtable}
-\setlength{\emergencystretch}{3em} % prevent overfull lines
-\providecommand{\tightlist}{%
-  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
-\setcounter{secnumdepth}{5}
-% definitions for citeproc citations
-\NewDocumentCommand\citeproctext{}{}
-\NewDocumentCommand\citeproc{mm}{%
-  \begingroup\def\citeproctext{#2}\cite{#1}\endgroup}
-\makeatletter
- % allow citations to break across lines
- \let\@cite@ofmt\@firstofone
- % avoid brackets around text for \cite:
- \def\@biblabel#1{}
- \def\@cite#1#2{{#1\if@tempswa , #2\fi}}
-\makeatother
-\newlength{\cslhangindent}
-\setlength{\cslhangindent}{1.5em}
-\newlength{\csllabelwidth}
-\setlength{\csllabelwidth}{3em}
-\newenvironment{CSLReferences}[2] % #1 hanging-indent, #2 entry-spacing
- {\begin{list}{}{%
-  \setlength{\itemindent}{0pt}
-  \setlength{\leftmargin}{0pt}
-  \setlength{\parsep}{0pt}
-  % turn on hanging indent if param 1 is 1
-  \ifodd #1
-   \setlength{\leftmargin}{\cslhangindent}
-   \setlength{\itemindent}{-1\cslhangindent}
-  \fi
-  % set entry spacing
-  \setlength{\itemsep}{#2\baselineskip}}}
- {\end{list}}
-\usepackage{calc}
-\newcommand{\CSLBlock}[1]{\hfill\break\parbox[t]{\linewidth}{\strut\ignorespaces#1\strut}}
-\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{\strut#1\strut}}
-\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{\strut#1\strut}}
-\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
-\usepackage{fontspec}
-\usepackage{kotex}
-\usepackage{orcidlink}
-\usepackage{amsmath,amssymb,amsfonts}
-\usepackage{graphicx}
-\usepackage{textcomp}
-\usepackage{csvsimple-l3}
-\usepackage{etoolbox}
-\usepackage{caption,setspace}
-\usepackage{subcaption}
-\usepackage{tabularray}
-\usepackage{booktabs}       % <-- add this
-\usepackage{fontawesome5} % <-- changed from "fontawesome"
-\usepackage{float}
-\usepackage{xurl}
-\usepackage{ifthen}
-\usepackage{xcolor}
-\usepackage{hyperref}
-\usepackage{hyperref}
-\AtBeginDocument{
-  \hypersetup{
-    colorlinks=true,
-    linkcolor=blue,
-    citecolor=blue,
-    urlcolor=blue
-  }
-}
 
-\usepackage{gensymb}
-\usepackage[flushleft]{threeparttable}
-\usepackage{bm}
-\usepackage{rotating}
-\usepackage{makecell}
-\usepackage{soul}
-\setulcolor{red}
-\sethlcolor{white}
-\usepackage{dutchcal}
-\usepackage{fancyhdr}
-\pagestyle{fancy}
-\setlength{\footskip}{10pt}
-\setlength{\textheight}{\dimexpr\textheight+\footskip\relax}
-\fancyhf{}
-\cfoot{\thepage}
-\renewcommand{\headrulewidth}{0pt}
-\renewcommand{\footrulewidth}{0pt}
-\usepackage{algorithm}
-\usepackage{algorithmicx}
-\usepackage{algpseudocode}
-\algdef{SE}[SUBALG]{Indent}{EndIndent}{}{\algorithmicend\ }
-\algtext*{Indent}
-\algtext*{EndIndent}
-\usepackage{bookmark}
-\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
-\urlstyle{same}
-\hypersetup{
-  pdftitle={Efficient Real-Time Fire Surveillance: A Lightweight Motion-Heuristic Skip Module for Accelerated Inference},
-  pdfauthor={Hoang Van-Ha, Jong Weon Lee, Park Chun-Su},
-  colorlinks=true,
-  linkcolor={Maroon},
-  filecolor={Maroon},
-  citecolor={Blue},
-  urlcolor={Blue},
-  pdfcreator={LaTeX via pandoc}}
 
 \title{Efficient Real-Time Fire Surveillance: A Lightweight
 Motion-Heuristic Skip Module for Accelerated Inference}
@@ -269,85 +119,7 @@ metrics, and performance results on our large-scale indoor video
 dataset. Finally, Section~\ref{sec:conclusion} summarizes the key
 findings and discusses limitations and future research directions.
 
-\section{Related Work}\label{sec:relatedWork}
 
-\textbf{Fire and Smoke Detection in Images and Videos}: Automated fire
-and smoke detection has attracted considerable research interest, with
-deep learning emerging as the dominant paradigm.
-\citeproc{ref-cheng2024visual}{{[}3{]}} provide a comprehensive survey
-of visual fire detection methods, highlighting the rapid adoption of
-DL-based approaches in this domain. The majority of these methods
-formulate the problem as image-level binary classification (fire/smoke
-vs.~none) or object detection, in which a model receives a single RGB
-image and outputs either a class label with confidence score or
-localized bounding boxes \citeproc{ref-geng2024yolofm}{{[}5{]}},
-\citeproc{ref-khan2025optimized}{{[}6{]}}. Research efforts have
-primarily focused on improving model accuracy and inference speed
-through architectural modifications and advanced training strategies. In
-video-based deployments, these image classifiers are applied directly to
-each frame, enabling integration with existing pipelines without
-architectural changes.
-
-Relying exclusively on individual frames, however, discards temporal
-information inherent in video data that is potentially informative for
-detection. \citeproc{ref-khan2025beyond}{{[}7{]}} survey video-based
-fire and smoke detection approaches and highlight the benefit of
-modeling temporal dynamics. Representative methods include the work of
-\citeproc{ref-cao2019attention}{{[}8{]}}, who combine a CNN for spatial
-feature extraction with a bidirectional LSTM for temporal modeling, and
-\citeproc{ref-ali2025toward}{{[}9{]}}, who employ 3D CNNs with attention
-mechanisms to jointly capture spatio-temporal patterns. While these
-approaches demonstrate improved detection performance over purely
-image-based methods, they incur greater computational cost and require
-more laborious dataset construction involving temporal annotation.
-Hybrid methods address this partially by combining image-based
-classifiers with lightweight temporal post-processing --- such as
-temporal voting \citeproc{ref-de2023hybrid}{{[}10{]}} or motion-based
-false positive suppression
-\citeproc{ref-gragnaniello2025flame}{{[}11{]}} --- yet still apply DL
-inference unconditionally to every frame, regardless of scene content.
-
-Across both paradigms, the dominant deployment pattern applies DL
-inference to each frame or short clip, without considering whether
-inference is warranted given the frame content. In static surveillance
-scenarios, particularly indoors, video streams frequently consist of
-purely background frames with no motion, in which fire or smoke is a
-priori unlikely. Motivated by this observation, we propose a skip-module
-that filters such low-activity frames prior to DL inference, reducing
-computational cost while preserving detection reliability. The module
-prioritizes retaining positive frames (fire/smoke present) while
-skipping negative frames (background only), functioning as a
-complementary accelerator for any existing frame-wise detection
-pipeline.
-
-\textbf{Motion Detection and The proposed Skip Module}: The skip
-decision in our module relies on motion estimation, which connects to
-the well-studied problem of background subtraction.
-\citeproc{ref-sobral2014comprehensive}{{[}12{]}} and
-\citeproc{ref-garcia2020background}{{[}13{]}} provide comprehensive
-reviews of background subtraction methods, ranging from simple
-statistical models to deep learning-based approaches. More robust
-methods such as MOG2 and KNN
-\citeproc{ref-zivkovic2006efficient}{{[}14{]}} model the scene
-background statistically and are resilient to gradual illumination
-changes; however, they introduce non-trivial memory overhead and
-initialization latency. As the skip-module is designed primarily as a
-fast, lightweight gate, we instead adopt frame differencing ---
-computing the absolute per-pixel intensity change between consecutive
-frames --- which offers minimal computational overhead and requires no
-background model initialization.
-
-While classical motion detection provides an efficient means of
-identifying scene activity, it has not been systematically exploited to
-gate DL inference in fire and smoke detection pipelines. Existing
-efficient video inference methods, such as FrameExit
-\citeproc{ref-ghodrati2021frameexit}{{[}15{]}}, address per-frame
-redundancy but require joint training of the gating mechanism and the
-underlying classifier, limiting plug-and-play applicability to
-pre-trained models. This study bridges this gap by integrating
-lightweight frame-differencing-based motion estimation as a
-training-free gate for a high-capacity classifier, as described in
-Section \ref{sec:method}.
 
 \section{The proposed method}\label{sec:method}
 
@@ -603,259 +375,165 @@ threshold, accumulation window size) that can significantly impact the
 performance of the overall system. To identify the optimal configuration, we
 employ a grid search based hyperparameter optimization procedure on a validation
 set $D_{\text{val}}$ derived from our video dataset with respect to several
-system-wide metrics defined in Section \ref{sec:metrics}. More specifically, to
+system-wide metrics defined in Section~\ref{sec:metrics}. More specifically, to
 select the optimal hyperparameters for the proposed skip module, we employ a
 constrained optimization procedure on the validation set $D_{\text{val}}$. Let
-$R_{\text{base}}$ and $T_{\text{DL}}$ denote the recall and mean per-frame
-inference time of the baseline pipeline (without skipping), respectively. For
-each candidate parameter set $\theta \in \Theta$ obtained by grid search, we
-evaluate the full pipeline $\text{Read} \rightarrow \mathcal{S}(\theta)
-\rightarrow [\mathcal{M}]$ and compute three metrics: recall $R(\theta)$, skip
-rate $S_r(\theta)$, and mean per-frame skip module time $T_{\text{skip}}(\theta)$.
+$R_{\text{base}}$ denote the baseline recall, i.e., the fraction of fire/smoke
+frames correctly detected by the pipeline without skipping, and let $T_{\text{DL}}$
+denote its mean per-frame inference time. For each candidate parameter set
+$\theta \in \Theta$ obtained by grid search, we evaluate the full pipeline
+$\text{Read} \rightarrow \mathcal{S}(\theta) \rightarrow [\mathcal{M}]$ and
+compute three metrics: recall $R(\theta)$ (the fraction of fire/smoke frames
+correctly detected), skip rate $S_r(\theta)$ (the fraction of ground-truth
+negative frames skipped by $\mathcal{S}$), and mean per-frame skip module time
+$T_{\text{skip}}(\theta)$. Formal metric definitions are given in
+Section~\ref{sec:metrics}.
 
 The skip rate $S_r(\theta)$ is computed on $D_{\text{val}}$ following the
-definition in Section \ref{sec:metrics}, with $N_{\text{neg}}$ instantiated as
-$N_{\text{neg}}^{\text{val}} = |\{f_i \in D_{\text{val}} : y_i = 0\}|$, which is
-fixed by the validation set and independent of $\theta$.
+definition in Section~\ref{sec:metrics}, with $N_{\text{neg}}$ instantiated as
+$N_{\text{neg}}^{\text{val}} = |\{f_i \in D_{\text{val}} : y_i = 0\}|$, which
+is fixed by the validation set and independent of $\theta$.
 
-The mean per-frame inference times are defined as
-
-\[ T_{\text{DL}} = \frac{1}{|D_{\text{val}}|} \sum_{i=1}^{|D_{\text{val}}|}
-t_{\text{DL}}(f_i), \qquad T_{\text{skip}}(\theta) = \frac{1}{|D_{\text{val}}|}
-\sum_{i=1}^{|D_{\text{val}}|} t_{\text{skip}}(f_i, \theta), \]
-
+The mean per-frame inference times are defined as:
+\begin{equation}
+    T_{\text{DL}} = \frac{1}{|D_{\text{val}}|}
+    \sum_{i=1}^{|D_{\text{val}}|} t_{\text{DL}}(f_i),
+\end{equation}
+\begin{equation}
+    T_{\text{skip}}(\theta) = \frac{1}{|D_{\text{val}}|}
+    \sum_{i=1}^{|D_{\text{val}}|} t_{\text{skip}}(f_i, \theta),
+\end{equation}
 where $f_i$ denotes the $i$-th frame in $D_{\text{val}}$, and both averages are
 taken over all frames to reflect the runtime cost on a typical video stream.
 
 \textbf{Feasibility constraints.} A candidate $\theta$ is considered feasible
 only if it satisfies two hard constraints:
-
-\[ R(\theta) \geq R_{\text{base}} - \delta_R, \qquad T_{\text{skip}}(\theta)
-\leq \beta \cdot T_{\text{DL}}, \]
-
+\begin{equation}
+    R(\theta) \geq R_{\text{base}} - \delta_R,
+\end{equation}
+\begin{equation}
+    T_{\text{skip}}(\theta) \leq \beta \cdot T_{\text{DL}},
+\end{equation}
 where recall tolerance $\delta_R > 0$ is the maximum allowable absolute recall
-drop, and overhead ratio $\beta \in (0, 1)$ bounds the skip module overhead as a fraction of one full DL
-inference. For example, setting $\delta_R = 0.01$ and $\beta = 0.10$ means the
-system tolerates at most a 1\% recall drop and requires the skip module to run
-within 10\% of the cost of a single DL inference.
+drop, and overhead ratio $\beta \in (0, 1)$ bounds the skip module overhead as
+a fraction of one full DL inference. For example, setting $\delta_R = 0.01$ and
+$\beta = 0.10$ means the system tolerates at most a 1\% recall drop and requires
+the skip module to run within 10\% of the cost of a single DL inference.
 
-\textbf{Scoring feasible candidates.} Among feasible candidates, the only
-term that requires explicit optimization is recall retention, defined as
-
-\[ \rho(\theta) = 1 - \frac{R_{\text{base}} - R(\theta)}{\delta_R}, \]
-
+\textbf{Scoring feasible candidates.} Among feasible candidates, the only term
+that requires explicit optimization is recall retention, defined as
+\begin{equation}
+    \rho(\theta) = 1 - \frac{R_{\text{base}} - R(\theta)}{\delta_R},
+\end{equation}
 which equals $1$ when recall matches the baseline and $0$ when recall reaches
 the lowest acceptable level $R_{\text{base}} - \delta_R$. This term is bounded
 in $[0, 1]$ over the feasible region, making it directly comparable to
 $S_r(\theta)$ in the weighted score.
 
 \textbf{Optimal selection.} The optimal parameter set $\theta^*$ is selected as
-
-\[ \theta^* = \arg\max_{\theta \in \Theta_{\text{feasible}}} \left[ w_S\,
-S_r(\theta) + w_R\, \rho(\theta) \right], \]
-
+\begin{equation}
+    \theta^* = \arg\max_{\theta \in \Theta_{\text{feasible}}}
+    \left[ w_R\,\rho(\theta) + w_S\,S_r(\theta) \right],
+\end{equation}
 where $\Theta_{\text{feasible}} = \{\theta \in \Theta : R(\theta) \geq
-R_{\text{base}} - \delta_R \text{ and } T_{\text{skip}}(\theta) \leq \beta \cdot
-T_{\text{DL}}\}$, and the nonnegative weights satisfy $w_S + w_R = 1$.
+R_{\text{base}} - \delta_R \text{ and } T_{\text{skip}}(\theta) \leq \beta
+\cdot T_{\text{DL}}\}$, and the nonnegative weights satisfy $w_S + w_R = 1$.
 
-\textbf{Theoretical justification}: The skip module $\mathcal{S}$ acts as a
-conservative gate: skipped frames are labeled negative directly, while passed
+\textbf{FAR of the skip-enabled system.} The skip module $\mathcal{S}$ acts as
+a conservative gate: skipped frames are labeled negative directly, while passed
 frames are processed by the same downstream detector $\mathcal{M}$ as in the
 baseline. Therefore, every false alarm produced by the skip-enabled system is
-also present in the baseline, implying $\mathrm{FAR}(\theta) \leq
-\mathrm{FAR}_{\text{base}}$. The primary safety risk is recall degradation
-caused by incorrectly skipped fire/smoke frames, which motivates enforcing the
-recall constraint as a hard gate prior to any candidate ranking.
+also present in the baseline, implying
+\begin{equation}
+    \mathrm{FAR}(\theta) \leq \mathrm{FAR}_{\text{base}},
+\end{equation}
+where $\mathrm{FAR}(\theta)$ and $\mathrm{FAR}_{\text{base}}$ denote the false
+alarm rates of the skip-enabled and baseline systems, respectively. The primary
+safety risk is recall degradation caused by incorrectly skipped fire/smoke
+frames, which motivates enforcing the recall constraint as a hard gate prior to
+any candidate ranking.
 
-% ! Start justification here
+% !=======================================================
+% ! Start justification here 0
+\textbf{Why excluding FAR-based terms from the scoring objective.}
+We show that, under a mild independence assumption, the expected false
+alarm rate ($\mathrm{FAR}(\theta)$) of the skip-enabled system is
+entirely determined by the skip rate $S_r(\theta)$ and the fixed
+baseline constant $\mathrm{FAR}_{\text{base}}$. This implies that any
+scoring term depending on the expected FAR is redundant with $S_r(\theta)$
+and adds no independent optimization signal.
 
-\textbf{Theoretical justification for excluding FAR from the scoring objective.}
-One might consider including a normalized FAR-reduction term
+By definition, the FAR of the skip-enabled system is:
+\begin{equation}
+    \mathrm{FAR}(\theta) = \frac{FP(\theta)}{N_{\text{neg}}}
+\end{equation}
+where $N_{\text{neg}}$ is the total number of ground-truth negative
+frames, and $FP(\theta)$ is the number of false positives produced.
 
-\[ F(\theta) = \frac{\mathrm{FAR}_{\text{base}} -
-\mathrm{FAR}(\theta)}{\mathrm{FAR}_{\text{base}}}, \]
+Since every skipped frame is assigned a negative label ($0$), it cannot
+trigger a false positive. Therefore, the total number of false positives
+is exactly the baseline false positives minus the baseline false
+positives that were skipped:
+\begin{equation}
+    FP(\theta) = FP_{\text{base}} - a
+\end{equation}
+where $FP_{\text{base}}$ is the baseline false positive count, and $a$
+is the number of skipped frames that the baseline model would have
+misclassified. Taking the expectation yields:
+\begin{equation}
+    \mathbb{E}[\mathrm{FAR}(\theta)]
+    = \frac{FP_{\text{base}} - \mathbb{E}[a]}{N_{\text{neg}}}
+\end{equation}
 
-which measures the relative reduction in false alarm rate with respect to the
-baseline, in the scoring objective. We argue that doing so is both structurally
-unsound and statistically redundant, and therefore exclude it.
+The skip module $\mathcal{S}$ operates solely on inter-frame motion,
+independent of the baseline model $\mathcal{M}$'s weights or outputs.
+Its skip decision is therefore \emph{statistically independent} of
+whether a frame would be a false positive or a true negative under
+$\mathcal{M}$. Because $\mathcal{S}$ samples blindly from the negative
+pool, the expected number of skipped false positives ($\mathbb{E}[a]$)
+is simply the total number of skipped negative frames
+($N_{\text{skip\_neg}}$) multiplied by the prevalence of false positives
+in the full negative pool ($\mathrm{FAR}_{\text{base}}$):
+\begin{equation}
+    \mathbb{E}[a]
+    = N_{\text{skip\_neg}} \cdot \mathrm{FAR}_{\text{base}}
+\end{equation}
 
-\textit{Structural argument.}
-The skip module $\mathcal{S}$ labels every skipped frame as negative
-($\hat{y}_t = 0$), so a skipped frame can never generate a new false positive.
-Consequently, $\mathrm{FAR}(\theta) \leq \mathrm{FAR}_{\text{base}}$ holds for
-all $\theta$, implying $F(\theta) \geq 0$ unconditionally. A scoring term that
-is non-negative for every feasible candidate provides no discriminating signal:
-it uniformly rewards all candidates and cannot distinguish configurations that
-skip more effectively from those that do not. FAR reduction is therefore a
-guaranteed structural side-effect of the skip mechanism, not an independently
-optimizable objective.
+Substituting (4) into (3) and splitting the fraction:
+\begin{equation}
+    \mathbb{E}[\mathrm{FAR}(\theta)]
+    = \frac{FP_{\text{base}}}{N_{\text{neg}}}
+    - \left(\frac{N_{\text{skip\_neg}}}{N_{\text{neg}}}\right)
+      \mathrm{FAR}_{\text{base}}
+\end{equation}
 
-\textit{Statistical argument.}
-Let $N_{\text{neg}}$ be the total number of ground-truth negative frames in
-$D_{\text{val}}$, $FP_{\text{base}}$ the number of those frames the baseline
-classifier $\mathcal{M}$ labels as false positives, and
-$\mathrm{FAR}_{\text{base}} = FP_{\text{base}} / N_{\text{neg}}$.
-Among the $N_{\text{skip\_neg}}$ negative frames skipped by $\mathcal{S}(\theta)$,
-let $a$ be the count that $\mathcal{M}$ \emph{would have} labeled as false
-positives and $b$ the count it would have labeled correctly, so that
-$a + b = N_{\text{skip\_neg}}$.
-Since skipped frames are labeled $0$ and cannot be false positives,
-$FP(\theta) = FP_{\text{base}} - a$, and substituting into $F(\theta)$ gives:
+Recognising that $\mathrm{FAR}_{\text{base}} = FP_{\text{base}} /
+N_{\text{neg}}$ and $S_r(\theta) = N_{\text{skip\_neg}} /
+N_{\text{neg}}$, equation~(5) simplifies to:
+\begin{equation}
+    \mathbb{E}[\mathrm{FAR}(\theta)]
+    = \mathrm{FAR}_{\text{base}} \bigl(1 - S_r(\theta)\bigr)
+\end{equation}
 
-\[ F(\theta)
-= \frac{a / N_{\text{neg}}}{FP_{\text{base}} / N_{\text{neg}}}
-= \frac{a}{FP_{\text{base}}},
-\qquad \text{while} \qquad
-S_r(\theta) = \frac{a + b}{N_{\text{neg}}} \]
-
-Both terms share variable $a$, so the question is whether $\mathcal{S}$ tends
-to skip group-$a$ frames more often than group-$b$ frames.
-Since $\mathcal{S}$ operates solely on inter-frame pixel motion and has no
-access to $\mathcal{M}$'s weights or outputs, its skip decision is
-\emph{statistically independent} of the FP/TN label.
-Under this independence, the skip module samples blindly from the negative pool,
-so each sub-type appears in proportion to its share in the full pool.
-The expected count of group-$a$ frames among the skipped set is therefore:
-
-\[ \mathbb{E}[a]
-= N_{\text{skip\_neg}} \times \mathrm{FAR}_{\text{base}}
-= N_{\text{skip\_neg}} \times \frac{FP_{\text{base}}}{N_{\text{neg}}} \]
-
-Since $FP_{\text{base}}$ is a fixed constant, it passes through the expectation
-unchanged, and $F(\theta)$ evaluates to:
-
-\[ \mathbb{E}[F(\theta)]
-= \frac{\mathbb{E}[a]}{FP_{\text{base}}}
-= \frac{N_{\text{skip\_neg}} \times \dfrac{FP_{\text{base}}}{N_{\text{neg}}}}{FP_{\text{base}}}
-= \frac{N_{\text{skip\_neg}}}{N_{\text{neg}}}
-= S_r(\theta) \]
-
-The $FP_{\text{base}}$ terms cancel exactly. In expectation, $F(\theta)$
-is therefore identical to $S_r(\theta)$ and carries no independent information.
-Including both in the scoring objective would silently assign skip-rate
-behaviour a combined weight of $w_S + w_F$. We therefore exclude $F(\theta)$
-from the scoring criterion and retain $\mathrm{FAR}(\theta)$ solely as an
-observed consequence metric in the results tables.
-
-
-% ! A long justification version
-% \textbf{Theoretical justification for excluding FAR from the scoring objective.}
-% One might consider including a normalized FAR-reduction term
-
-% \[ F(\theta) = \frac{\mathrm{FAR}_{\text{base}} -
-% \mathrm{FAR}(\theta)}{\mathrm{FAR}_{\text{base}}} \]
-
-% which measures the relative reduction in false alarm rate with respect to the
-% baseline, in the scoring objective. We argue that doing so is both structurally
-% unsound and statistically redundant, and therefore exclude it.
-
-% \textit{Structural argument.}
-% The skip module $\mathcal{S}$ labels every skipped frame as negative
-% ($\hat{y}_t = 0$). Since a false positive requires the system to output $1$ on a
-% ground-truth negative frame, a skipped frame can never generate a new false
-% positive. Consequently, $\mathrm{FAR}(\theta) \leq \mathrm{FAR}_{\text{base}}$
-% holds for all $\theta$, which implies $F(\theta) \geq 0$ unconditionally.
-% A scoring term that is non-negative for every feasible candidate provides no
-% discriminating signal: it uniformly rewards all candidates and cannot distinguish
-% configurations that skip more effectively from those that do not. FAR reduction
-% is therefore a guaranteed structural side-effect of the skip mechanism, not an
-% independently optimizable objective.
-
-% \textit{Statistical argument.}
-% We show that $F(\theta)$ is statistically redundant with respect to $S_r(\theta)$,
-% meaning they carry the same information in expectation, and including both in the
-% scoring objective is therefore unnecessary.
-
-% Let $N_{\text{neg}}$ denote the total number of ground-truth negative
-% (background-only) frames in the validation set $D_{\text{val}}$, and let
-% $FP_{\text{base}}$ denote the number of those frames that the baseline classifier
-% $\mathcal{M}$ incorrectly labels as fire or smoke --- its false positives.
-% The baseline false alarm rate is then
-% $\mathrm{FAR}_{\text{base}} = FP_{\text{base}} / N_{\text{neg}}$,
-% which is the fraction of all negative frames that the classifier gets wrong.
-
-% Now consider a candidate skip configuration $\theta$.
-% Let $N_{\text{skip\_neg}}$ denote the number of negative frames that
-% $\mathcal{S}(\theta)$ skips --- that is, frames assigned $s_t = 0$ without
-% invoking $\mathcal{M}$.
-% Among these $N_{\text{skip\_neg}}$ skipped frames, let $a$ denote the count of
-% frames that $\mathcal{M}$ \emph{would have} labeled as false positives had they
-% not been skipped, and let $b$ denote the count of frames it would have labeled
-% correctly as true negatives, so that $a + b = N_{\text{skip\_neg}}$.
-
-% Since every skipped frame is assigned label $0$ and therefore cannot be a false
-% positive, the false positive count of the skip-enabled system satisfies
-% $FP(\theta) = FP_{\text{base}} - a$, which gives
-% $\mathrm{FAR}_{\text{base}} - \mathrm{FAR}(\theta)
-% = (FP_{\text{base}} - FP(\theta)) / N_{\text{neg}}
-% = a / N_{\text{neg}}$.
-% Substituting into the definition of $F(\theta)$ yields:
-
-% \[ F(\theta)
-% = \frac{\mathrm{FAR}_{\text{base}} - \mathrm{FAR}(\theta)}{\mathrm{FAR}_{\text{base}}}
-% = \frac{a / N_{\text{neg}}}{FP_{\text{base}} / N_{\text{neg}}}
-% = \frac{a}{FP_{\text{base}}} \]
-
-% Using the same counts, the skip rate $S_r(\theta)$ --- the fraction of all
-% negative frames that were skipped --- expands as:
-
-% \[ S_r(\theta) = \frac{N_{\text{skip\_neg}}}{N_{\text{neg}}} = \frac{a + b}{N_{\text{neg}}} \]
-
-% The two terms therefore share variable $a$ but differ in what they divide by:
-% $S_r$ counts all skipped negative frames $(a + b)$ over the full negative pool
-% $N_{\text{neg}}$, while $F$ counts only the prevented false positives $(a)$ over
-% the baseline FP count $FP_{\text{base}}$.
-% The central question is whether the skip module has any systematic tendency to
-% target frames in group $a$ over group $b$.
-
-% The skip module $\mathcal{S}$ makes its decision based solely on inter-frame
-% pixel motion: it compares the current frame against the previous one and skips
-% if no significant motion is detected.
-% It has no access to $\mathcal{M}$'s internal weights, learned feature
-% representations, or prediction outputs.
-% The classifier's false positives arise from background scenes that
-% \emph{visually resemble} fire or smoke to $\mathcal{M}$ --- a property encoded
-% entirely within the classifier's learned parameters, which is invisible to a
-% motion detector.
-% Therefore, the skip decision is \emph{statistically independent} of the FP/TN
-% label: knowing that a frame was skipped provides no information about whether
-% $\mathcal{M}$ would have misclassified it, and vice versa.
-
-% Because of this independence, the skip module draws the $N_{\text{skip\_neg}}$
-% skipped frames from the negative pool without any preference for one label over
-% the other --- it samples blindly with respect to the FP/TN property.
-% When items are sampled blindly from a pool, each sub-type appears in the sample
-% in proportion to its share in the full pool.
-% The proportion of false positives in the full negative pool is exactly
-% $\mathrm{FAR}_{\text{base}} = FP_{\text{base}} / N_{\text{neg}}$.
-% Applying this proportional sampling rule, the expected value
-% $\mathbb{E}[\,\cdot\,]$ --- the long-run average count over many random
-% outcomes --- of $a$ is:
-
-% \[ \mathbb{E}[a] = N_{\text{skip\_neg}} \times \mathrm{FAR}_{\text{base}}
-% = N_{\text{skip\_neg}} \times \frac{FP_{\text{base}}}{N_{\text{neg}}} \]
-
-% We now compute the expected value of $F(\theta)$.
-% Since $FP_{\text{base}}$ is a fixed constant determined by the baseline
-% evaluation and does not vary randomly, it passes through the expectation
-% unchanged:
-
-% \[ \mathbb{E}[F(\theta)]
-% = \frac{\mathbb{E}[a]}{FP_{\text{base}}}
-% = \frac{N_{\text{skip\_neg}} \times \dfrac{FP_{\text{base}}}{N_{\text{neg}}}}{FP_{\text{base}}}
-% = \frac{N_{\text{skip\_neg}}}{N_{\text{neg}}}
-% = S_r(\theta) \]
-
-% The $FP_{\text{base}}$ terms cancel exactly, and the result is the skip rate
-% $S_r(\theta)$. Therefore, $F(\theta)$ carries no additional information beyond
-% what $S_r(\theta)$ already captures: any difference between them in a specific
-% experimental run is random variation, not a systematic signal attributable to
-% the hyperparameter configuration $\theta$. Including both terms in the scoring
-% objective would implicitly assign skip-rate behaviour a combined weight of
-% $w_S + w_F$, while creating the appearance of a balanced objective with three
-% independent criteria. We therefore exclude $F(\theta)$ from the scoring
-% criterion and retain $\mathrm{FAR}(\theta)$ solely as an observed consequence
-% metric reported in the results tables.
+This result has a direct consequence for scoring objective design.
+For a \emph{linear} FAR-based scoring term $g$, linearity ensures
+$\mathbb{E}[g(\mathrm{FAR}(\theta))] = g(\mathbb{E}[\mathrm{FAR}(\theta)])$,
+so substituting equation~(6) gives:
+\begin{equation}
+    \mathbb{E}[g(\mathrm{FAR}(\theta))]
+    = g\Bigl(\mathrm{FAR}_{\text{base}}
+      \bigl(1 - S_r(\theta)\bigr)\Bigr)
+    = h\bigl(S_r(\theta)\bigr)
+\end{equation}
+for some function $h$ that depends purely on $S_r(\theta)$ and the
+fixed constant $\mathrm{FAR}_{\text{base}}$. For nonlinear $g$,
+equation~(7) holds approximately when $\mathrm{FAR}(\theta)$
+concentrates tightly around its expectation, which is satisfied for
+sufficiently large validation sets. In either case, any FAR-based
+scoring term alongside $S_r(\theta)$ introduces no genuinely independent
+optimization dimension. We therefore exclude all FAR-based terms from
+the scoring objective and retain $\mathrm{FAR}(\theta)$ solely as an
+observed consequence metric reported in the results tables.
 
 \section{Experiments and Results}\label{sec:results}
 
@@ -985,11 +663,11 @@ F1-score, and frames per second (FPS) --- as defined below.
 
 \begin{align}
   \text{Accuracy} &= \frac{TP + TN}{TP + TN + FP + FN}, \\
-  \text{True Positive Rate (TPR) = Recall (R)} &= \frac{TP}{TP + FN}, \\
-  \text{False Positive Rate (FPR)} &= \frac{FP}{FP + TN}, \\
+  \text{Recall (R)} &= \frac{TP}{TP + FN}, \\
+  \text{False Alarm Rate (FAR)} &= \frac{FP}{FP + TN}, \\
   \text{Precision (P)} &= \frac{TP}{TP + FP}, \\
   \text{F1-score} &= 2 \times \frac{P \times R}{P + R}, \\
-  \text{FPS} &= \frac{\text{Total processing Time (seconds)}}{\text{Total Frames}}, \\
+  \text{FPS} &= \frac{\text{Total Frames}}{\text{Total processing Time (seconds)}},\\
 \end{align}
 where $TP$, $TN$, $FP$, and $FN$ represent True Positive, True Negative, False Positive, and False Negative, respectively.
 
@@ -1001,9 +679,7 @@ $\mathcal{S}$, defined as
 $$ S_r = \frac{N_{\text{skip\_neg}}}{N_{\text{neg}}}$$
 
 where $N_{\text{skip\_neg}}$ is the number of ground-truth negative frames that
-the skip module $\mathcal{S}$ assigns $s_t = 0$ --- that is, background frames
-correctly identified as having no motion and therefore bypassed without invoking
-$\mathcal{M}$ --- and $N_{\text{neg}}$ is the total number of
+the skip module $\mathcal{S}$ assigns $s_t = 0$ --- that is, background frames bypassed without invoking $\mathcal{M}$ --- and $N_{\text{neg}}$ is the total number of
 ground-truth negative frames in the evaluated set. A higher $S_r$ indicates
 greater computational savings, while a drop in recall signals unsafe skipping of
 fire/smoke frames.
@@ -1069,9 +745,6 @@ processing and motion estimation were carried out using OpenCV 4.11
 \subsubsection{Hyperparameter Optimization
 Results}\label{hyperparameter-optimization-results}
 
-In this work, we set
-
-\[ w_S = 0.60, \qquad w_F = 0.20, \qquad w_R = 0.20, \]
 
 so that skip rate remains the primary efficiency objective, while false
 alarm reduction and recall retention are treated as secondary but
@@ -1533,274 +1206,5 @@ Future work may explore alternative skip strategies --- such as
 leveraging color, texture, or learned features as gating cues --- and
 extend the framework to outdoor surveillance scenarios where
 motion-based filtering is less effective.
-
-\section*{References}\label{sec:references}
-\addcontentsline{toc}{section}{References}
-
-\phantomsection\label{refs}
-\begin{CSLReferences}{0}{0}
-\bibitem[\citeproctext]{ref-californiafire:online}
-\CSLLeftMargin{{[}1{]} }%
-\CSLRightInline{N. F. P. A. (NFPA), {``NFPA report - largest fire losses
-in the united states.''} Jan. 1AD. Available:
-\url{https://www.nfpa.org/education-and-research/research/nfpa-research/fire-statistical-reports/large-loss-fires-in-the-united-states/largest-fire-losses-in-the-united-states}}
-
-\bibitem[\citeproctext]{ref-southkoreafire:online}
-\CSLLeftMargin{{[}2{]} }%
-\CSLRightInline{{``South korea wildfires become biggest on record as
-disaster chief points to {`harsh reality'} of climate crisis \textbar{}
-south korea \textbar{} the guardian.''} Jul. 2025. Available:
-\url{https://www.theguardian.com/world/2025/mar/27/south-korea-fires-death-toll-rises-worst-in-history}}
-
-\bibitem[\citeproctext]{ref-cheng2024visual}
-\CSLLeftMargin{{[}3{]} }%
-\CSLRightInline{G. Cheng, X. Chen, C. Wang, X. Li, B. Xian, and H. Yu,
-{``Visual fire detection using deep learning: A survey,''}
-\emph{Neurocomputing}, vol. 596, p. 127975, 2024.}
-
-\bibitem[\citeproctext]{ref-gragnaniello2024fire}
-\CSLLeftMargin{{[}4{]} }%
-\CSLRightInline{D. Gragnaniello, A. Greco, C. Sansone, and B. Vento,
-{``Fire and smoke detection from videos: A literature review under a
-novel taxonomy,''} \emph{Expert Systems with Applications}, vol. 255, p.
-124783, 2024.}
-
-\bibitem[\citeproctext]{ref-geng2024yolofm}
-\CSLLeftMargin{{[}5{]} }%
-\CSLRightInline{X. Geng, Y. Su, X. Cao, H. Li, and L. Liu, {``YOLOFM: An
-improved fire and smoke object detection algorithm based on YOLOv5n,''}
-\emph{Scientific Reports}, vol. 14, no. 1, p. 4543, 2024.}
-
-\bibitem[\citeproctext]{ref-khan2025optimized}
-\CSLLeftMargin{{[}6{]} }%
-\CSLRightInline{Z. A. Khan \emph{et al.}, {``Optimized cross-module
-attention network and medium-scale dataset for effective fire
-detection,''} \emph{Pattern Recognition}, vol. 161, p. 111273, 2025.}
-
-\bibitem[\citeproctext]{ref-khan2025beyond}
-\CSLLeftMargin{{[}7{]} }%
-\CSLRightInline{R. A. Khan, U. I. Bajwa, R. H. Raza, and M. W. Anwar,
-{``Beyond boundaries: Advancements in fire and smoke detection for
-indoor and outdoor surveillance feeds,''} \emph{Engineering Applications
-of Artificial Intelligence}, vol. 142, p. 109855, 2025.}
-
-\bibitem[\citeproctext]{ref-cao2019attention}
-\CSLLeftMargin{{[}8{]} }%
-\CSLRightInline{Y. Cao, F. Yang, Q. Tang, and X. Lu, {``An attention
-enhanced bidirectional LSTM for early forest fire smoke recognition,''}
-\emph{IEEE Access}, vol. 7, pp. 154732--154742, 2019.}
-
-\bibitem[\citeproctext]{ref-ali2025toward}
-\CSLLeftMargin{{[}9{]} }%
-\CSLRightInline{M. M. Ali and M. Ghodrat, {``Toward reliable fire
-detection in indoor CCTV footage: Reducing false alarms from benign
-flames using 3D attention CNNs,''} \emph{IEEE Access}, 2025.}
-
-\bibitem[\citeproctext]{ref-de2023hybrid}
-\CSLLeftMargin{{[}10{]} }%
-\CSLRightInline{P. V. A. de Venancio, R. J. Campos, T. M. Rezende, A. C.
-Lisboa, and A. V. Barbosa, {``A hybrid method for fire detection based
-on spatial and temporal patterns,''} \emph{Neural Computing and
-Applications}, vol. 35, no. 13, pp. 9349--9361, 2023.}
-
-\bibitem[\citeproctext]{ref-gragnaniello2025flame}
-\CSLLeftMargin{{[}11{]} }%
-\CSLRightInline{D. Gragnaniello, A. Greco, C. Sansone, and B. Vento,
-{``FLAME: Fire detection in videos combining a deep neural network with
-a model-based motion analysis,''} \emph{Neural Computing and
-Applications}, vol. 37, no. 8, pp. 6181--6197, 2025.}
-
-\bibitem[\citeproctext]{ref-sobral2014comprehensive}
-\CSLLeftMargin{{[}12{]} }%
-\CSLRightInline{A. Sobral and A. Vacavant, {``A comprehensive review of
-background subtraction algorithms evaluated with synthetic and real
-videos,''} \emph{Computer Vision and Image Understanding}, vol. 122, pp.
-4--21, 2014.}
-
-\bibitem[\citeproctext]{ref-garcia2020background}
-\CSLLeftMargin{{[}13{]} }%
-\CSLRightInline{B. Garcia-Garcia, T. Bouwmans, and A. J. R. Silva,
-{``Background subtraction in real applications: Challenges, current
-models and future directions,''} \emph{Computer Science Review}, vol.
-35, p. 100204, 2020.}
-
-\bibitem[\citeproctext]{ref-zivkovic2006efficient}
-\CSLLeftMargin{{[}14{]} }%
-\CSLRightInline{Z. Zivkovic and F. Van Der Heijden, {``Efficient
-adaptive density estimation per image pixel for the task of background
-subtraction,''} \emph{Pattern recognition letters}, vol. 27, no. 7, pp.
-773--780, 2006.}
-
-\bibitem[\citeproctext]{ref-ghodrati2021frameexit}
-\CSLLeftMargin{{[}15{]} }%
-\CSLRightInline{A. Ghodrati, B. E. Bejnordi, and A. Habibian,
-{``Frameexit: Conditional early exiting for efficient video
-recognition,''} in \emph{Proceedings of the IEEE/CVF conference on
-computer vision and pattern recognition}, 2021, pp. 15608--15618.}
-
-\bibitem[\citeproctext]{ref-jadon2019firenet}
-\CSLLeftMargin{{[}16{]} }%
-\CSLRightInline{A. Jadon, M. Omama, A. Varshney, M. S. Ansari, and R.
-Sharma, {``FireNet: A specialized lightweight fire \& smoke detection
-model for real-time IoT applications,''} \emph{arXiv preprint
-arXiv:1905.11922}, 2019.}
-
-\bibitem[\citeproctext]{ref-Firesens4:online}
-\CSLLeftMargin{{[}17{]} }%
-\CSLRightInline{{``Firesense.''} Available:
-\url{https://www.firesense.eu/}}
-
-\bibitem[\citeproctext]{ref-cazzolato2017fismo}
-\CSLLeftMargin{{[}18{]} }%
-\CSLRightInline{M. T. Cazzolato \emph{et al.}, {``Fismo: A compilation
-of datasets from emergency situations for fire and smoke analysis,''} in
-\emph{Brazilian symposium on databases-SBBD}, SBC Uberl{â}ndia, Brazil,
-2017, pp. 213--223.}
-
-\bibitem[\citeproctext]{ref-steffens2015unconstrained}
-\CSLLeftMargin{{[}19{]} }%
-\CSLRightInline{C. R. Steffens, R. N. Rodrigues, and S. S. da Costa
-Botelho, {``An unconstrained dataset for non-stationary video based fire
-detection,''} in \emph{2015 12th latin american robotics symposium and
-2015 3rd brazilian symposium on robotics (LARS-SBR)}, IEEE, 2015, pp.
-25--30.}
-
-\bibitem[\citeproctext]{ref-dfiredataset}
-\CSLLeftMargin{{[}20{]} }%
-\CSLRightInline{P. V. A. de Venâncio, A. C. Lisboa, and A. V. Barbosa,
-{``An automatic fire detection system based on deep convolutional neural
-networks for low-power, resource-constrained devices,''} \emph{Neural
-Computing and Applications}, vol. 34, no. 18, pp. 15349--15368, 2022.}
-
-\bibitem[\citeproctext]{ref-VisiFireBilkent:online}
-\CSLLeftMargin{{[}21{]} }%
-\CSLRightInline{E. Cetin, {``Computer vision based fire detection
-software.''} 2015. Available:
-\url{http://signal.ee.bilkent.edu.tr/VisiFire/}}
-
-\bibitem[\citeproctext]{ref-KMUFireSmokeDataset}
-\CSLLeftMargin{{[}22{]} }%
-\CSLRightInline{B. C. Ko, S. J. Ham, and J. Y. Nam, {``Modeling and
-formalization of fuzzy finite automata for detection of irregular fire
-flames,''} \emph{IEEE Transactions on Circuits and Systems for Video
-Technology}, vol. 21, no. 12, pp. 1903--1912, 2011.}
-
-\bibitem[\citeproctext]{ref-foggia2015real}
-\CSLLeftMargin{{[}23{]} }%
-\CSLRightInline{P. Foggia, A. Saggese, and M. Vento, {``Real-time fire
-detection for video-surveillance applications using a combination of
-experts based on color, shape, and motion,''} \emph{IEEE TRANSACTIONS on
-circuits and systems for video technology}, vol. 25, no. 9, pp.
-1545--1556, 2015.}
-
-\bibitem[\citeproctext]{ref-lin2017smoke}
-\CSLLeftMargin{{[}24{]} }%
-\CSLRightInline{G. Lin, Y. Zhang, Q. Zhang, Y. Jia, G. Xu, and J. Wang,
-{``Smoke detection in video sequences based on dynamic texture using
-volume local binary patterns.''} \emph{KSII Trans. Internet Inf. Syst.},
-vol. 11, no. 11, pp. 5522--5536, 2017.}
-
-\bibitem[\citeproctext]{ref-AIHub87:online}
-\CSLLeftMargin{{[}25{]} }%
-\CSLRightInline{{``AI-hub.''} Available:
-\url{https://aihub.or.kr/aihubdata/data/view.do?dataSetSn=71751}}
-
-\bibitem[\citeproctext]{ref-huang2022fire}
-\CSLLeftMargin{{[}26{]} }%
-\CSLRightInline{L. Huang, G. Liu, Y. Wang, H. Yuan, and T. Chen, {``Fire
-detection in video surveillances using convolutional neural networks and
-wavelet transform,''} \emph{Engineering Applications of Artificial
-Intelligence}, vol. 110, p. 104737, 2022.}
-
-\bibitem[\citeproctext]{ref-onal2024video}
-\CSLLeftMargin{{[}27{]} }%
-\CSLRightInline{O. Önal and E. Dandıl, {``Video dataset for the
-detection of safe and unsafe behaviours in workplaces,''} \emph{Data in
-Brief}, vol. 56, p. 110791, 2024.}
-
-\bibitem[\citeproctext]{ref-deniz2024optimized}
-\CSLLeftMargin{{[}28{]} }%
-\CSLRightInline{D. Deniz, E. Ros, E. M. Ortigosa, and F. Barranco,
-{``Optimized edge-cloud system for activity monitoring using knowledge
-distillation,''} \emph{Electronics}, vol. 13, no. 23, p. 4786, 2024.}
-
-\bibitem[\citeproctext]{ref-rohrbach2016recognizing}
-\CSLLeftMargin{{[}29{]} }%
-\CSLRightInline{M. Rohrbach \emph{et al.}, {``Recognizing fine-grained
-and composite activities using hand-centric features and script data,''}
-\emph{International Journal of Computer Vision}, vol. 119, no. 3, pp.
-346--373, 2016.}
-
-\bibitem[\citeproctext]{ref-marroquin2019wisenet}
-\CSLLeftMargin{{[}30{]} }%
-\CSLRightInline{R. Marroquin, J. Dubois, and C. Nicolle, {``WiseNET: An
-indoor multi-camera multi-space dataset with contextual information and
-annotations for people detection and tracking,''} \emph{Data in brief},
-vol. 27, p. 104654, 2019.}
-
-\bibitem[\citeproctext]{ref-steffens2016non}
-\CSLLeftMargin{{[}31{]} }%
-\CSLRightInline{C. R. Steffens, R. N. Rodrigues, and S. S. da Costa
-Botelho, {``Non-stationary VFD evaluation kit: Dataset and metrics to
-fuel video-based fire detection development,''} in \emph{Latin american
-robotics symposium}, Springer, 2016, pp. 135--151.}
-
-\bibitem[\citeproctext]{ref-mukhopadhyay2019fpga}
-\CSLLeftMargin{{[}32{]} }%
-\CSLRightInline{D. Mukhopadhyay, R. Iyer, S. Kadam, and R. Koli, {``FPGA
-deployable fire detection model for real-time video surveillance systems
-using convolutional neural networks,''} in \emph{2019 global conference
-for advancement in technology (GCAT)}, IEEE, 2019, pp. 1--7.}
-
-\bibitem[\citeproctext]{ref-JocherYOLOv5byUltralytics2020}
-\CSLLeftMargin{{[}33{]} }%
-\CSLRightInline{G. Jocher, {``{YOLOv5 by Ultralytics}.''} May 2020. doi:
-\href{https://doi.org/10.5281/zenodo.3908559}{10.5281/zenodo.3908559}.
-Available: \url{https://github.com/ultralytics/yolov5}}
-
-\bibitem[\citeproctext]{ref-hgnetv2timm:online}
-\CSLLeftMargin{{[}34{]} }%
-\CSLRightInline{{``Timm/hgnetv2\_b5.ssld\_stage2\_ft\_in1k · hugging
-face.''} Sep. 2025. Available:
-\url{https://huggingface.co/timm/hgnetv2_b5.ssld_stage2_ft_in1k}}
-
-\bibitem[\citeproctext]{ref-rw2019timm}
-\CSLLeftMargin{{[}35{]} }%
-\CSLRightInline{R. Wightman, {``PyTorch image models (timm).''} 2019.
-Available: \url{https://github.com/rwightman/pytorch-image-models}}
-
-\bibitem[\citeproctext]{ref-cui2021beyond}
-\CSLLeftMargin{{[}36{]} }%
-\CSLRightInline{C. Cui \emph{et al.}, {``Beyond self-supervision: A
-simple yet effective network distillation alternative to improve
-backbones,''} \emph{arXiv preprint arXiv:2103.05959}, 2021.}
-
-\bibitem[\citeproctext]{ref-hgnetv2PaddleCl7:online}
-\CSLLeftMargin{{[}37{]} }%
-\CSLRightInline{{``PaddleClas/docs/en/models/PP-HGNetV2\_en.md at
-f1233c18455b8acde4fc42ab0bea575fa06daa8e · PaddlePaddle/PaddleClas.''}
-Available:
-\url{https://github.com/PaddlePaddle/PaddleClas/blob/f1233c18455b8acde4fc42ab0bea575fa06daa8e/docs/en/models/PP-HGNetV2_en.md?plain=1\#L33}}
-
-\bibitem[\citeproctext]{ref-hestness2017deep}
-\CSLLeftMargin{{[}38{]} }%
-\CSLRightInline{J. Hestness \emph{et al.}, {``Deep learning scaling is
-predictable, empirically,''} \emph{arXiv preprint arXiv:1712.00409},
-2017.}
-
-\bibitem[\citeproctext]{ref-alabdulmohsin2022revisiting}
-\CSLLeftMargin{{[}39{]} }%
-\CSLRightInline{I. M. Alabdulmohsin, B. Neyshabur, and X. Zhai,
-{``Revisiting neural scaling laws in language and vision,''}
-\emph{Advances in Neural Information Processing Systems}, vol. 35, pp.
-22300--22312, 2022.}
-
-\bibitem[\citeproctext]{ref-bahri2024explaining}
-\CSLLeftMargin{{[}40{]} }%
-\CSLRightInline{Y. Bahri, E. Dyer, J. Kaplan, J. Lee, and U. Sharma,
-{``Explaining neural scaling laws,''} \emph{Proceedings of the National
-Academy of Sciences}, vol. 121, no. 27, p. e2311878121, 2024.}
-
-\end{CSLReferences}
 
 \end{document}
