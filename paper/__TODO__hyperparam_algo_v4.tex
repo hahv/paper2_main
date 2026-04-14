@@ -1,0 +1,204 @@
+\begin{algorithm}[htbp]
+\caption{Skip Module Hyperparameter Selection}
+\label{alg:hyperparam}
+\begin{algorithmic}[1]
+
+\Require Parameter space $\Theta$, validation set $D_{\text{val}}$,
+DL model $\mathcal{M}$, recall tolerance $\delta_R$,
+overhead ratio $\beta$, weights $w_S, w_R$
+\Ensure Optimal parameters $\theta^*$
+
+\State baseline $\gets$ \textsc{EvaluatePipeline}($D_{\text{val}}$, skip=None, $\mathcal{M}$)
+\State Extract $R_{\text{base}}$, $T_{\text{DL}}$ from baseline
+\State best\_score $\gets -\infty$; \quad $\theta^* \gets$ None
+
+\For{each $\theta \in \Theta$}
+\State results $\gets$ \textsc{EvaluatePipeline}($D_{\text{val}}$, $\mathcal{S}(\theta)$, $\mathcal{M}$)
+\State Extract $R(\theta)$, $S_r(\theta)$, $T_{\text{skip}}(\theta)$ from results
+\If{$R(\theta) \geq R_{\text{base}} - \delta_R$
+\textbf{ and }
+$T_{\text{skip}}(\theta) \leq \beta \cdot T_{\text{DL}}$}
+\State $\rho(\theta) \gets 1 - \dfrac{R_{\text{base}} - R(\theta)}{\delta_R}$
+\State score $\gets w_S\, S_r(\theta) + w_R\, \rho(\theta)$
+\If{score $>$ best\_score}
+\State best\_score $\gets$ score
+\State $\theta^* \gets \theta$
+\EndIf
+\EndIf
+\EndFor
+
+\State \Return $\theta^*$
+
+\end{algorithmic}
+\end{algorithm}
+
+The skip module $\mathcal{S}$ contains several hyperparameters (e.g., motion
+threshold, accumulation window size) that can significantly impact the
+performance of the overall system. To identify the optimal configuration, we
+employ a grid search based hyperparameter optimization procedure on a validation
+set $D_{\text{val}}$ derived from our video dataset with respect to several
+system-wide metrics defined in Section~\ref{sec:metrics}. More specifically, to
+select the optimal hyperparameters for the proposed skip module, we employ a
+constrained optimization procedure on the validation set $D_{\text{val}}$. Let
+$R_{\text{base}}$ denote the baseline recall, i.e., the fraction of fire/smoke
+frames correctly detected by the pipeline without skipping, and let $T_{\text{DL}}$
+denote its mean per-frame inference time. For each candidate parameter set
+$\theta \in \Theta$ obtained by grid search, we evaluate the full pipeline
+$\text{Read} \rightarrow \mathcal{S}(\theta) \rightarrow [\mathcal{M}]$ and
+compute three metrics: recall $R(\theta)$ (the fraction of fire/smoke frames
+correctly detected), skip rate $S_r(\theta)$ (the fraction of ground-truth
+negative frames skipped by $\mathcal{S}$), and mean per-frame skip module time
+$T_{\text{skip}}(\theta)$. Formal metric definitions are given in
+Section~\ref{sec:metrics}.
+
+The skip rate $S_r(\theta)$ is computed on $D_{\text{val}}$ following the
+definition in Section~\ref{sec:metrics}, with $N_{\text{neg}}$ instantiated as
+$N_{\text{neg}}^{\text{val}} = |\{f_i \in D_{\text{val}} : y_i = 0\}|$, which
+is fixed by the validation set and independent of $\theta$.
+
+The mean per-frame inference times are defined as:
+\begin{equation}
+    T_{\text{DL}} = \frac{1}{|D_{\text{val}}|}
+    \sum_{i=1}^{|D_{\text{val}}|} t_{\text{DL}}(f_i),
+\end{equation}
+\begin{equation}
+    T_{\text{skip}}(\theta) = \frac{1}{|D_{\text{val}}|}
+    \sum_{i=1}^{|D_{\text{val}}|} t_{\text{skip}}(f_i, \theta),
+\end{equation}
+where $f_i$ denotes the $i$-th frame in $D_{\text{val}}$, and both averages are
+taken over all frames to reflect the runtime cost on a typical video stream.
+
+\textbf{Feasibility constraints.} A candidate $\theta$ is considered feasible
+only if it satisfies two hard constraints:
+\begin{equation}
+    R(\theta) \geq R_{\text{base}} - \delta_R,
+\end{equation}
+\begin{equation}
+    T_{\text{skip}}(\theta) \leq \beta \cdot T_{\text{DL}},
+\end{equation}
+where recall tolerance $\delta_R > 0$ is the maximum allowable absolute recall
+drop, and overhead ratio $\beta \in (0, 1)$ bounds the skip module overhead as
+a fraction of one full DL inference. For example, setting $\delta_R = 0.01$ and
+$\beta = 0.10$ means the system tolerates at most a 1\% recall drop and requires
+the skip module to run within 10\% of the cost of a single DL inference.
+
+\textbf{Scoring feasible candidates.}
+Among feasible candidates, both objectives are normalized over
+$\Theta_{\text{feasible}}$ before weighting, so that the weights
+$w_S$ and $w_R$ reflect the intended relative importance rather
+than the raw scale of each term.
+The range-normalized recall retention and skip rate are defined as:
+\begin{equation}
+    \tilde{\rho}(\theta)
+    = \frac{\rho(\theta) - \min_{\Theta_f}\rho}
+           {\max_{\Theta_f}\rho - \min_{\Theta_f}\rho},
+    \qquad
+    \tilde{S}_r(\theta)
+    = \frac{S_r(\theta) - \min_{\Theta_f}S_r}
+           {\max_{\Theta_f}S_r  - \min_{\Theta_f}S_r},
+\end{equation}
+where $\Theta_f \equiv \Theta_{\text{feasible}}$,
+and $\rho(\theta)$ is defined as in Equation~\eqref{eq:rho}.
+Both normalized terms are bounded in $[0, 1]$ over the feasible
+region, ensuring that the weights $w_S$ and $w_R$ directly control
+the relative influence of each objective on the final ranking.
+
+\textbf{Optimal selection.}
+The optimal parameter set $\theta^*$ is selected as
+\begin{equation}
+    \theta^*
+    = \arg\max_{\theta \in \Theta_{\text{feasible}}}
+      \Bigl[
+          w_R\,\tilde{\rho}(\theta)
+          +
+          w_S\,\tilde{S}_r(\theta)
+      \Bigr],
+\end{equation}
+where $\Theta_{\text{feasible}} = \{\theta \in \Theta :
+R(\theta) \geq R_{\text{base}} - \delta_R
+\ \text{and}\ T_{\text{skip}}(\theta) \leq \beta \cdot T_{\text{DL}}\}$,
+and the nonnegative weights satisfy $w_S + w_R = 1$.
+
+\textbf{FAR of the skip-enabled system.} The skip module $\mathcal{S}$ acts as
+a conservative gate: skipped frames are labeled negative directly, while passed
+frames are processed by the same downstream detector $\mathcal{M}$ as in the
+baseline. Therefore, every false alarm produced by the skip-enabled system is
+also present in the baseline, implying
+\begin{equation}
+    \mathrm{FAR}(\theta) \leq \mathrm{FAR}_{\text{base}},
+\end{equation}
+where $\mathrm{FAR}(\theta)$ and $\mathrm{FAR}_{\text{base}}$ denote the false
+alarm rates of the skip-enabled and baseline systems, respectively. The primary
+safety risk is recall degradation caused by incorrectly skipped fire/smoke
+frames, which motivates enforcing the recall constraint as a hard gate prior to
+any candidate ranking.
+
+% !=======================================================
+% ! Start justification here 0
+% !=======================================================
+% ! Start justification here 0
+\textbf{Exclusion of FAR-based terms from the scoring objective.}
+We derive an assumption-free interval for $\mathrm{FAR}(\theta)$ in terms of
+$S_r(\theta)$ and the fixed baseline constant
+$\mathrm{FAR}_{\text{base}}$, and then argue that explicitly optimizing
+for FAR reduction is unnecessary in the present setting.
+
+By definition:
+\begin{equation}\label{eq:far_def}
+    \mathrm{FAR}(\theta) = \frac{FP(\theta)}{N_{\text{neg}}}
+\end{equation}
+where $N_{\text{neg}}$ is the total number of ground-truth negative frames
+and $FP(\theta)$ is the number of false positives produced.
+Since every skipped frame receives a negative label, false positives arise
+only from frames passed to $\mathcal{M}$:
+\begin{equation}\label{eq:fp_decomp}
+    FP(\theta) = FP_{\text{base}} - a, \quad a \geq 0
+\end{equation}
+where $a$ is the number of skipped frames that $\mathcal{M}$ would have
+misclassified as positive.
+A skipped false positive must simultaneously be a baseline false positive
+and a skipped negative frame, so:
+\begin{equation}\label{eq:a_bound}
+    0 \;\leq\; a \;\leq\; \min\!\bigl(FP_{\text{base}},\;N_{\text{skip\_neg}}\bigr)
+\end{equation}
+This bound requires no assumption on the relationship between the skip
+decisions of $\mathcal{S}$ and the outputs of $\mathcal{M}$.
+Substituting \eqref{eq:a_bound} into \eqref{eq:fp_decomp}, dividing by
+$N_{\text{neg}}$, and using
+$\mathrm{FAR}_{\text{base}} = FP_{\text{base}}/N_{\text{neg}}$ and
+$S_r(\theta) = N_{\text{skip\_neg}}/N_{\text{neg}}$ gives:
+\begin{equation}\label{eq:far_interval}
+    \mathrm{FAR}(\theta)
+    \;\in\;
+    \Bigl[
+        \max\!\bigl(0,\;\mathrm{FAR}_{\text{base}} - S_r(\theta)\bigr),
+        \;\;
+        \mathrm{FAR}_{\text{base}}
+    \Bigr]
+\end{equation}
+
+\textbf{Justification for excluding FAR optimization.}
+Equation~\eqref{eq:far_interval} does not imply that $\mathrm{FAR}(\theta)$
+is uniquely determined by $S_r(\theta)$: two configurations with the same
+skip rate may skip different frames and therefore yield different realized
+values of $a$, leading to different FAR values within the same interval.
+However, explicit FAR optimization is not necessary here for two reasons.
+
+First, \eqref{eq:far_interval} provides a hard guarantee that
+$\mathrm{FAR}(\theta) \leq \mathrm{FAR}_{\text{base}}$ for every $\theta$.
+Thus, the skip module cannot increase the false alarm rate relative to the
+baseline.
+
+Second, $\mathcal{S}$ makes skip decisions using only inter-frame motion,
+without access to the outputs or error behavior of $\mathcal{M}$.
+Therefore, the hyperparameters of $\mathcal{S}$ do not directly control
+which baseline false positives are removed.
+Any observed FAR reduction depends on whether the motion patterns selected
+by $\mathcal{S}$ happen to overlap with frames that $\mathcal{M}$ would
+misclassify on the validation set.
+Including FAR in the objective could therefore favor configurations that
+match validation-specific error patterns, which may not generalize well.
+
+For these reasons, we exclude FAR-based terms from the scoring objective
+and report $\mathrm{FAR}(\theta)$ only as an observed consequence metric
+in the results tables.
