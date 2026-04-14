@@ -153,7 +153,7 @@
 \title{Efficient Real-Time Fire Surveillance: A Lightweight
 Motion-Heuristic Skip Module for Accelerated Inference}
 \author{Hoang Van-Ha, Jong Weon Lee, Park Chun-Su}
-\date{2026.04.13}
+\date{2026.04.14}
 
 \begin{document}
 \maketitle
@@ -931,11 +931,10 @@ achieves higher recall and requires significantly less aggregate
 computational time per second of video, proving highly competitive in
 false alarm suppression.
 
-\subsubsection{Ablation and Qualitative
-Analysis}\label{ablation-and-qualitative-analysis}
+\subsubsection{Quantitative and Qualitative
+Analysis}\label{quantitative-and-qualitative-analysis}
 
-\paragraph{Efficiency of Skip
-Module**:}\label{efficiency-of-skip-module}
+\paragraph{Efficiency of Skip Module:}\label{efficiency-of-skip-module}
 
 \input{./3.fig/fig_fps_increase.tex}
 
@@ -957,25 +956,27 @@ sufficient accumulated motion to trigger inference (\(s_t = 1\)), and
 \(\mathcal{S}\) reliably distinguishes scene-level activity from
 quiescence in the target indoor surveillance setting.
 
-\textbf{Failure cases.} The bottom row exposes two structural
-limitations of the motion-based gating approach. First, in a slow-onset
-smoke video, the initial frames of smoke diffusion produce minimal
-inter-frame pixel change --- below the activation threshold \(\tau_m\)
-of the AccMotionDet accumulator --- causing \(\mathcal{S}\) to skip
-these frames and delay the first alarm. This represents the primary
-recall risk identified in Section\textasciitilde{}\ref{sec:hyperparam}:
-the skip module is conservative by design, but gradual diffusion events
-are the edge case where this conservatism incurs a safety cost. Second,
-in a scene containing continuous background motion (e.g., a person
-walking repeatedly through the frame), \(\mathcal{S}\) assigns
-\(s_t = 1\) to nearly every frame, reducing the skip rate to near zero
-and negating the computational efficiency gain for that video. Both
-failure modes are consistent with the motion-only design of
-\(\mathcal{S}\): they arise not from classification errors in
-\(\mathcal{M}\), but from the inherent limitation of using inter-frame
-motion as a sole proxy for scene informativeness.
+\input{./3.fig/fig_quality_success.tex}
 
-\input{./3.fig/fig_qualitative.tex}
+The bottom row exposes two structural limitations of the motion-based
+gating approach. First, in a slow-onset smoke video, the initial frames
+of smoke diffusion produce minimal inter-frame pixel change --- below
+the activation threshold \(\tau_m\) of the AccMotionDet accumulator ---
+causing \(\mathcal{S}\) to skip these frames and delay the first alarm.
+This represents the primary recall risk identified in
+Section\textasciitilde{}\ref{sec:hyperparam}: the skip module is
+conservative by design, but gradual diffusion events are the edge case
+where this conservatism incurs a safety cost. Second, in a scene
+containing continuous background motion (e.g., a person walking
+repeatedly through the frame), \(\mathcal{S}\) assigns \(s_t = 1\) to
+nearly every frame, reducing the skip rate to near zero and negating the
+computational efficiency gain for that video. Both failure modes are
+consistent with the motion-only design of \(\mathcal{S}\): they arise
+not from classification errors in \(\mathcal{M}\), but from the inherent
+limitation of using inter-frame motion as a sole proxy for scene
+informativeness.
+
+\input{./3.fig/fig_quality_failure.tex}
 
 \section{Conclusion}\label{sec:conclusion}
 

@@ -4,7 +4,7 @@
 <!-- TARGET_PROJECT: G:\My Drive\1_PhD\Obsidian\Home\3. Writing\paperfire2 -->
 <!-- SYNC_TARGET_FILE: 00_Meta_Abstract.md-->
 <!-- BLOCK_ID: abstract -->
-date: 2026.04.13
+date: 2026.04.14
 title: "Efficient Real-Time Fire Surveillance: A Lightweight Motion-Heuristic
 Skip Module for Accelerated Inference"
 abstract: "Conventional deep learning (DL)-based fire and smoke detection systems process
@@ -860,54 +860,10 @@ In the second case, a frame containing active fire (left) and smoke
 These cases confirm that $\mathcal{S}$ reliably distinguishes
 scene-level activity from quiescence in the target indoor
 surveillance setting.
-<!-- +-----------------------------------------------------------------------+
-|                    fig_qualitative_success.pdf                        |
-|                                                                       |
-|        (a) SKIP — Static BG     (b) RUN — Fire     (c) RUN — Smoke   |
-|                                                                       |
-|  Raw   +----------------+    +------------+    +------------+        |
-|        |                |    |            |    |            |        |
-|        |  Empty room    |    | 🔥 Flames  |    | 💨 Haze    |        |
-|        |  No change     |    | Flickering |    | Diffusing  |        |
-|        |                |    |            |    |            |        |
-|        | [GREEN border] |    |[BLUE border]    |[BLUE border]        |
-|        +----------------+    +------------+    +------------+        |
-|                                                                       |
-|  Mask  +----------------+    +------------+    +------------+        |
-|        |                |    |            |    |            |        |
-|        |   ░░░░░░░░░░   |    | ██████████ |    | ░░███░░░░  |        |
-|        |   (near dark)  |    | (fully lit)|    |(partially  |        |
-|        |   no activity  |    | high accum.|    | lit)       |        |
-|        +----------------+    +------------+    +------------+        |
-|         s_t = 0  ✓ SKIP       s_t = 1  ✓ RUN   s_t = 1  ✓ RUN      |
-+-----------------------------------------------------------------------+ -->
 
-**Failure cases.**
-
-<!-- +-----------------------------------------------------------------------+
-|                    fig_qualitative_failure.pdf                        |
-|                                                                       |
-|         (d) WRONGLY SKIPPED — Slow Smoke                             |
-|                    (e) FORCED RUN — Persistent Motion                |
-|                                                                       |
-|  Raw   +---------------------+    +---------------------+           |
-|        |                     |    |                     |           |
-|        | 💨 Barely visible   |    | 🚶 Walking person   |           |
-|        |    smoke onset      |    |    no fire/smoke    |           |
-|        |    early stage      |    |    continuous move  |           |
-|        |                     |    |                     |           |
-|        |   [RED border]      |    |  [ORANGE border]    |           |
-|        +---------------------+    +---------------------+           |
-|                                                                       |
-|  Mask  +---------------------+    +---------------------+           |
-|        |                     |    |                     |           |
-|        |  ░░░░░░░░░░░░░░░   |    | ████████████████    |           |
-|        |  (near dark —       |    | (saturated —        |           |
-|        |  accumulator        |    |  K_max reached,     |           |
-|        |  not triggered)     |    |  never resets)      |           |
-|        +---------------------+    +---------------------+           |
-|         s_t = 0  ✗ MISSED          s_t = 1  ✗ NO SAVINGS           |
-+-----------------------------------------------------------------------+ -->
+```{=latex}
+\input{./3.fig/fig_quality_success.tex}
+```
 
 
 The bottom row exposes two structural limitations of the motion-based
@@ -931,7 +887,7 @@ $\mathcal{M}$, but from the inherent limitation of using inter-frame
 motion as a sole proxy for scene informativeness.
 
 ```{=latex}
-\input{./3.fig/fig_qualitative.tex}
+\input{./3.fig/fig_quality_failure.tex}
 ```
 <!-- !END_SYNC_BLOCK -->
 

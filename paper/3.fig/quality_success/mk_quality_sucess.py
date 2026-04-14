@@ -1,28 +1,26 @@
+from IPython.testing.plugin.simplevars import x
 import sys
 
 # +-----------------------------------------------------------------------+
-# |                    fig_qualitative_failure.pdf                        |
+# |                    fig_qualitative_success.pdf                        |
 # |                                                                       |
-# |         (d) WRONGLY SKIPPED — Slow Smoke                             |
-# |                    (e) FORCED RUN — Persistent Motion                |
+# |        (a) SKIP — Static BG    (b) INFER — Fire    (c) INFER — Smoke   |
 # |                                                                       |
-# |  Raw   +---------------------+    +---------------------+           |
-# |        |                     |    |                     |           |
-# |        | 💨 Barely visible   |    | 🚶 Walking person   |           |
-# |        |    smoke onset      |    |    no fire/smoke    |           |
-# |        |    early stage      |    |    continuous move  |           |
-# |        |                     |    |                     |           |
-# |        |   [RED border]      |    |  [ORANGE border]    |           |
-# |        +---------------------+    +---------------------+           |
+# |  Raw   +----------------+    +------------+    +------------+        |
+# |        |                |    |            |    |            |        |
+# |        |  Empty room    |    | 🔥 Flames  |    | 💨 Haze    |        |
+# |        |  No change     |    | Flickering |    | Diffusing  |        |
+# |        |                |    |            |    |            |        |
+# |        | [GREEN border] |    |[BLUE border]    |[BLUE border]        |
+# |        +----------------+    +------------+    +------------+        |
 # |                                                                       |
-# |  Mask  +---------------------+    +---------------------+           |
-# |        |                     |    |                     |           |
-# |        |  ░░░░░░░░░░░░░░░   |    | ████████████████    |           |
-# |        |  (near dark —       |    | (saturated —        |           |
-# |        |  accumulator        |    |  K_max reached,     |           |
-# |        |  not triggered)     |    |  never resets)      |           |
-# |        +---------------------+    +---------------------+           |
-# |         s_t = 0  ✗ MISSED          s_t = 1  ✗ NO SAVINGS           |
+# |  Mask  +----------------+    +------------+    +------------+        |
+# |        |                |    |            |    |            |        |
+# |        |   ░░░░░░░░░░   |    | ██████████ |    | ░░███░░░░  |        |
+# |        |   (near dark)  |    | (fully lit)|    |(partially  |        |
+# |        |   no activity  |    | high accum.|    | lit)       |        |
+# |        +----------------+    +------------+    +------------+        |
+# |         s_t = 0  ✓ SKIP       s_t = 1  ✓ RUN   s_t = 1  ✓ RUN      |
 # +-----------------------------------------------------------------------+
 
 sys.path.append("E:/Dev/__halib")
@@ -34,7 +32,8 @@ from halib.exp.viz.plot import PlotHelper as plth
 import os
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-OUTFILE_NAME = "fig_qualitative_failure"
+outfile = os.path.join(CURRENT_DIR, "fig_qualitative_success.pdf")
+OUTFILE_NAME =  "fig_qualitative_success"
 
 df = plth.get_img_grid_df(f"{CURRENT_DIR}/src")
 df.columns = [f"sample_{i}" for i in range(len(df.columns))]
@@ -50,13 +49,15 @@ def fmt_row_label_func(x):
 
 def fmt_col_label_func(x):
     # MAPPING_COL_NAME = {
-    #     "sample_0": "SKIP — Static BG",
-    #     "sample_1": "RUN — Fire",
-    #     "sample_2": "RUN — Smoke",
+    #     "sample_0": "Type of Frame",
+    #     "sample_1": "(a) SKIP — Static BG",
+    #     "sample_2": "(b) INFER — Fire",
+    #     "sample_3": "(c) INFER — Smoke",
     # }
+    # return MAPPING_COL_NAME.get(x, x)]
     return ""
 
-
+# target_fmt = ["png", "pdf"]
 target_fmt = ["pdf"]
 for fmt in tqdm(target_fmt):
     console.rule(f"Exporting {fmt} ...")
@@ -76,7 +77,7 @@ for fmt in tqdm(target_fmt):
         row_line_size=2,
         col_line_size=2,
         tickfont=dict(size=16, family="CMU Serif", color="black"),
-        fig_extra_size=(100, 280),
+        fig_extra_size=(100, 220),
         format_row_label_func=fmt_row_label_func,
         format_col_label_func=fmt_col_label_func,
         show=False,
@@ -84,25 +85,27 @@ for fmt in tqdm(target_fmt):
 
     annotations = [
         r"<b><span style=\"color: black;\">Frame<br>Type</b>",
-        r"(a) WRONGLY SKIPPED <br> Slow Smoke (✗ MISSED)",
-        r"(b) WASTED INFER <br> Persistent Motion (✗ NO SAVINGS)",
-        r"(c) WRONG INFER <br> Properly Infer <br> But Wrongly Predicted <br> (✗ BIG MODEl ERROR)",
+        r"(a) SKIP <br> Static BG  ✓ SKIP",
+        r"(b) INFER <br> Fire  ✓ RUN",
+        r"(c) INFER <br> Smoke ✓ RUN",
     ]
+
     BOLD_START = "<b>"
     BOLD_END = "</b>"
-    CUSTOM_COLOR_START_TAG = '<span style="color: #a80319;">'
+    CUSTOM_COLOR_START_TAG = '<span style="color: #035922;">' # dark green color
     CUSTOM_COLOR_END_TAG = "</span>"
+
     for i in range(1, len(annotations)):
         annotations[i] = f"{CUSTOM_COLOR_START_TAG}{annotations[i]}{CUSTOM_COLOR_END_TAG}"
+
     num_cols = len(annotations)
-    x_pos_ls = [-0.03, 0.15, 0.50, 0.82]  # Adjust manually for 4 columns visually
-    y_pos_ls = [0.015] * num_cols  # Keep y position constant for all annotations
-    y_pos_ls[-1] = -0.005  # Adjust y position for the first annotation (column label)
+    x_pos_ls = [-0.03, 0.15, 0.50, 0.82]  # Manually set x positions for each annotation
+    y_pos_ls = [0.01] * num_cols
 
     for i, text in enumerate(annotations):
-        pprint(f'Adding annotation: {text} at x={x_pos_ls[i]}, y={y_pos_ls[i]}')
+        x_pos = x_pos_ls[i]
         fig.add_annotation(
-            x=x_pos_ls[i],
+            x=x_pos,
             y=y_pos_ls[i],
             xref="paper",
             yref="paper",
