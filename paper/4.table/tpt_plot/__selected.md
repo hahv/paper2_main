@@ -1,0 +1,9 @@
+# Selected Configurations for TPT method
+Based on `__lines_recall_far.html`, we have selected the following
+configurations for the TPT method:
+
+| Priority                    | window_size | persist_thres | Recall | FAR      | Recall Drop | FAR Reduction | Score S |
+| --------------------------- | ----------- | ------------- | ------ | -------- | ----------- | ------------- | ------- |
+| Conservative (safety-first) | 5           | 0.20          | 0.9422 | 0.007385 | −0.14%      | −0.24%        | 0.955   |
+| Balanced ✅ recommended      | 10          | 0.50          | 0.9370 | 0.007315 | −0.69%      | −1.18%        | 0.777   |
+| Aggressive (max FAR gain)   | 25          | 0.45          | 0.9266 | 0.007175 | −1.79%      | −3.07%        | 0.421   |

@@ -14,7 +14,7 @@ from loguru import logger as llogger
 from src.exp import Paper2Exp
 from src.common import GlobalConst
 from src.param_select import WeightedSelect
-from src.utils import copy_to_paper_raw_csv
+from src.utils import copy_to_paper_raw_csv  # noqa: F401
 
 from typing import Union
 
@@ -364,7 +364,7 @@ def prepare_optim_df(
         tag_or_box_title="Save optimization report to ⏬:",
     )
     # ! Copy to csv folder for paper raw table, with prefix "_raw" for further paper processing.
-    copy_to_paper_raw_csv(final_outfile)
+    # copy_to_paper_raw_csv(final_outfile)
     return final_df
 
 
