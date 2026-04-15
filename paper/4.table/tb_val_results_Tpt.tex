@@ -1,0 +1,27 @@
+\begin{table*}[hbtp]
+    \caption{Performance grid search of TPT method}
+    \label{tb:gridsearch_tpt}
+    \csvreader[separator=semicolon,
+    no head,
+    range=1-,
+    centered tabularray = {
+    width = \columnwidth,
+    colspec = {X[2,c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]},
+    colsep = {1pt},
+    hlines,
+    vlines,
+    cells = {font = \scriptsize, halign = c, valign = m},
+    row{1} = {font = \bfseries\scriptsize},
+    },
+    ]{./4.table/out/selected_tb_gridsearch_Tpt.csv}{}{
+        \csvexpval\csvcoli &
+        \csvexpval\csvcolii &
+        \csvexpval\csvcoliii &
+        \csvexpval\csvcoliv &
+        \csvexpval\csvcolv &
+        \csvexpval\csvcolvi &
+        \csvexpval\csvcolvii &
+        \csvexpval\csvcolviii &
+        \csvexpval\csvcolix
+    }
+\end{table*}

@@ -1,0 +1,42 @@
+\documentclass[12pt]{article}
+
+\input{preamble.tex}
+
+\title{CSV Operations Test}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+This document demonstrates various CSV operations using LaTeX and the
+csvsimple-l3 package.
+
+\begin{table*}[htbp]
+    \caption{Comparison of different methods on various metrics. Arrows indicate whether higher ($\uparrow$) or lower ($\downarrow$) is better.}
+    \label{tb:arrowheader}
+    \csvreader[separator=semicolon,
+        no head,
+        range=1-,
+        centered tabularray = {
+        colspec = {cccccc},
+        colsep = {3pt},
+        hlines,
+        vlines,
+        cells = {font = \scriptsize, halign = c, valign = m},
+        cell{1}{1} = {halign = l},
+        row{1} = {font = \bfseries\scriptsize},
+        },
+    ]{./_raw_results_processed.csv}{}{
+        \csvexpval\csvcoli &
+        \csvexpval\csvcolii &
+        \csvexpval\csvcoliii &
+        \csvexpval\csvcoliv &
+        \csvexpval\csvcolv &
+        \csvexpval\csvcolvi
+    }
+\end{table*}
+
+\end{document}

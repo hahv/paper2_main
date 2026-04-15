@@ -1,0 +1,7 @@
+Method;Recall (\%);FAR (\%);Accuracy (\%);Precision (\%);F1 Score;FPS
+Baseline (notemp);56.59;5.96;85.14;74.73;0.6441;91.66
+"$\text{TPT}_\text{strict} (W = 5, \tau_\text{persist} =
+0.2)$";94.38;0.14;98.56;99.54;0.9689;33.16
+"$\text{TPT}_\text{strict} (W = 5, \tau_\text{persist} =
+0.2)$";95.62;0.25;98.77;99.17;0.9736;25.08
+Big Model with Skip module;68.58;10.39;84.61;67.29;0.6793;109.94

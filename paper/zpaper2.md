@@ -4,7 +4,7 @@
 <!-- TARGET_PROJECT: G:\My Drive\1_PhD\Obsidian\Home\3. Writing\paperfire2 -->
 <!-- SYNC_TARGET_FILE: 00_Meta_Abstract.md-->
 <!-- BLOCK_ID: abstract -->
-date: 2026.04.14
+date: 2026.04.15
 title: "Efficient Real-Time Fire Surveillance: A Lightweight Motion-Heuristic
 Skip Module for Accelerated Inference"
 abstract: "Conventional deep learning (DL)-based fire and smoke detection systems process
@@ -756,14 +756,28 @@ persistence threshold $\tau_\text{persist}$; otherwise, the prediction is suppre
 and the frame is relabelled as background.
 This mechanism filters out transient, single-frame activations caused by brief
 illumination changes or camera artefacts, trading a fixed minimum detection latency
-of $\lceil \tau_\text{persist} \times W \rceil$ frames for a reduction in false alarm rate.
+of $\lceil \tau_\text{persist} \times W \rceil$ frames for a reduction in false
+alarm rate.
 
-Table \ref{tb:cmp_base_temp} compares our method against other temporal
+We follow the implementation and hyperparameter selection protocol of
+[@de2023hybrid] on our validation set $\mathcal{D}_\text{val}$, and get two
+representative configurations shown in the table below:
+
+```{=latex}
+\input{./4.table/tb_val_results_Tpt.tex}
+```
+
+Table \ref{tb:cmp_other_temp} compares our method against other temporal
 processing techniques, evaluating both detection performance and computational
 efficiency.
 
+And we found two Configuration of TPT let call it $\text{TPT}_\text{strict}$ and
+$\text{TPT}_\text{balanced}$. The strict ones ($W = 5, \tau_\text{persist} =
+0.2$) and the balanced one ($W = 10, \tau_\text{persist} = 0.5$) achieve a
+recall of 98.7\%.
+
 ```{=latex}
-\input{./4.table/tb_cmp_base_temp.tex}
+\input{./4.table/tb_cmp_other_temp.tex}
 ```
 
 _Analysis:_ Because M3 requires a full temporal buffer before confirming an

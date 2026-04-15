@@ -1,0 +1,75 @@
+input: raw/raw_selected_tb_gridsearch_Tpt.csv
+output: output/
+sep: ";"
+
+steps:
+  # ── 1. CLEAN UP COLUMN NAMES ──────────────────────────────
+  - type: rename
+    mapping:
+      "experiment": "Experiment"
+      "window_size": "Window Size"
+      "persist_thres": "Persist Threshold"
+      "metric_recall (tpr)": "Recall"
+      "metric_fpr (false alarm rate)": "FAR"
+      "Recall_Drop": "Recall Drop"
+      "FAR_drop": "FAR Drop"
+      "delta_R": "Delta R"
+      "metric_accuracy": "Accuracy"
+      "metric_f1_score": "F1_Score"
+      "metric_fps": "FPS"
+      "metric_precision": "Precision"
+
+  # ── 2. ROUND METRICS ──────────────────────────────────────
+  - type: add_column
+    cols:
+      - name: Recall
+        expr: "(df['Recall'] * 100).round(2)"
+      - name: FAR
+        expr: "(df['FAR'] * 100).round(4)"
+      - name: Accuracy
+        expr: "(df['Accuracy'] * 100).round(2)"
+      - name: F1_Score
+        expr: "df['F1_Score'].round(4)"
+      - name: Precision
+        expr: "(df['Precision'] * 100).round(2)"
+      - name: FPS
+        expr: "df['FPS'].round(4)"
+      - name: "Recall Drop"
+        expr: "(df['Recall Drop'] * 100).round(2)"
+      - name: "FAR Drop"
+        expr: "(df['FAR Drop'] * 100).round(4)"
+
+  - type: add_column
+    cols:
+      - name: Recall
+        expr: "df.apply(lambda x: f\"{x['Recall']:.2f}\" if pd.isna(x['Recall Drop']) else f\"{x['Recall']:.2f} (-{x['Recall Drop']:.2f})\", axis=1)"
+      - name: FAR
+        expr: "df.apply(lambda x: f\"{x['FAR']:.4f}\" if pd.isna(x['FAR Drop']) else f\"{x['FAR']:.4f} (-{x['FAR Drop']:.4f})\", axis=1)"
+
+  # ── 3. REORDER & SELECT COLUMNS ───────────────────────────
+  - type: rename
+    mapping:
+      "Window Size": "Window Size $W$"
+      "Persist Threshold": "Persist Threshold $\\tau_p$"
+      "Recall": "Recall (\\%)"
+      "FAR": "FAR (\\%)"
+      "Accuracy": "Accuracy (\\%)"
+      "Precision": "Precision (\\%)"
+      "F1_Score": "F1 Score"
+  - type: select
+    columns:
+      - Experiment
+      - "Window Size $W$"
+      - "Persist Threshold $\\tau_p$"
+      - "Recall (\\%)"
+      - "FAR (\\%)"
+      - "Accuracy (\\%)"
+      - "Precision (\\%)"
+      - "F1 Score"
+      - FPS
+
+  # ── 4. FILLNA ───────────────────────────────────────────────
+  - type: fillna
+    mapping:
+      "Window Size $W$": "-"
+      "Persist Threshold $\\tau_p$": "-"

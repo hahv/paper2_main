@@ -1,0 +1,42 @@
+# using halib.utils.csv_ops to apply a sequence of operations to a CSV file, with the goal of producing a more human-readable and presentation-ready version of the results.
+input: test/test_csv_ops/arrowheader_hl/_raw_results.csv
+output: test/test_csv_ops/arrowheader_hl
+sep: ";"
+
+steps:
+  # 1. Human-readable column names
+  - type: rename
+    mapping:
+      method:   Method
+      acc:      Accuracy
+      map50:    "mAP@50"
+      fid:      FID
+      lat_ms:   "Latency (ms)"
+      params_m: "Params (M)"
+
+  # 2. Stamp direction arrows onto metric headers
+  - type: header_arrow
+    columns:
+      Accuracy:    up      # higher is better
+      "mAP@50":   up
+      FID:         down    # lower is better
+      "Latency (ms)": down
+      "Params (M)":   down
+
+  # 3. Wrap best / 2nd-best cells in LaTeX commands
+  #    Direction is auto-read from the arrows added above.
+  - type: highlight_best
+    best:         [bold, color]               # \textbf{val}
+    second:       [underline, color]  # \textit{\underline{val}}
+    best_color:   black          # only used when "color" token is listed
+    second_color: black
+    skip_rows: 0
+    strict: false
+
+    # Per-column override for FID: also colorise the best cell
+    columns:
+      "FID $\\downarrow$":   # match the header name after arrow stamping
+        best:      [bold, color]
+        second:    [underline, color]
+        best_color: black
+        second_color: black
