@@ -65,10 +65,6 @@ steps:
       - name: "Recall Drop"
         expr: "(df['Recall Drop'] * 100).round(2)" # Convert to percentage
 
-  - type: add_column
-    cols:
-      - name: Recall
-        expr: "df.apply(lambda x: f\"{x['Recall']:.2f}\" if pd.isna(x['Recall Drop']) else f\"{x['Recall']:.2f} (-{x['Recall Drop']:.2f})\", axis=1)"
 
   # ── 5. REORDER & SELECT COLUMNS ───────────────────────────
   - type: rename
@@ -97,6 +93,8 @@ steps:
       - "FPR (\\%)"
       - FPS
       - Combined Score
+      - "Recall Drop"          # ← FIX: keep it through the pipeline
+
 
   # ── 6. SORT ───────────────────────────────────────────────
   # Sort by highest score first
@@ -118,3 +116,36 @@ steps:
       "Diff threshold $\\tau_d$": "-"
       "Skip Rate (\\%)": "-"
       "Combined Score": "-"
+
+  # ── 8. STAMP ARROWS ───────────────────────────────────────
+  - type: header_arrow
+    columns:
+      "Recall (\\%)":       up
+      "Skip Rate (\\%)":    up
+      "FPR (\\%)":          down
+      FPS:                  up
+      "Combined Score":     up
+
+  # ── 9. HIGHLIGHT BEST ─────────────────────────────────────
+  - type: highlight_best
+    best:         [bold, color]
+    second:       [underline, color]
+    best_color:   black
+    second_color: black
+    skip_rows: 0
+    strict: false
+
+  # ── 10. APPEND DROP SUFFIX (after highlighting) ───────────
+  - type: add_column
+    cols:
+      - name: "Recall (\\%) $\\uparrow$"
+        expr: >
+          df.apply(lambda x:
+            str(x["Recall (\\%) $\\uparrow$"])
+            if pd.isna(x["Recall Drop"])
+            else str(x["Recall (\\%) $\\uparrow$"]) + " (-" + f"{x['Recall Drop']:.2f}" + ")",
+            axis=1)
+    # ── 12. DROP HELPER COLUMN ────────────────────────────────
+  - type: drop                 # ← FIX: clean up before writing CSV
+    columns:
+      - "Recall Drop"

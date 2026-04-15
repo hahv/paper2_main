@@ -53,3 +53,22 @@ steps:
       - "Precision (\\%)"
       - "F1 Score"
       - "FPS"
+
+  # ── 4. STAMP ARROWS ───────────────────────────────────────
+  - type: header_arrow
+    columns:
+      "Recall (\\%)": up
+      "FAR (\\%)": down
+      "Accuracy (\\%)": up
+      "Precision (\\%)": up
+      "F1 Score": up
+      "FPS": up
+
+  # ── 5. HIGHLIGHT BEST ─────────────────────────────────────
+  - type: highlight_best
+    best: [bold, color]
+    second: [underline, color]
+    best_color: black
+    second_color: black
+    skip_rows: 0
+    strict: false

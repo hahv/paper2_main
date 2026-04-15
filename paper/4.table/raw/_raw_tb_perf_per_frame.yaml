@@ -116,3 +116,24 @@ steps:
         expr: "(df['Precision'] * 100).round(2)"
       - name: FPS
         expr: "df['FPS'].round(2)"
+
+  # ── 9. STAMP ARROWS ───────────────────────────────────────
+  - type: header_arrow
+    columns:
+      Recall: up
+      FAR: down
+      Accuracy: up
+      "F1-Score": up
+      Precision: up
+      FPS: up
+      GFLOPs: down
+      "Model size (Mb)": down
+
+  # ── 10. HIGHLIGHT BEST ────────────────────────────────────
+  - type: highlight_best
+    best: [bold, color]
+    second: [underline, color]
+    best_color: black
+    second_color: black
+    skip_rows: 0
+    strict: false
