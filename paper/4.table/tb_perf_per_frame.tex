@@ -1,11 +1,12 @@
 \begin{table}[htbp]
-    \caption{End-to-End System Performance Comparison on Test Set. Recall, FAR, Accuracy, Precision are reported in percentage (\%). FPS is reported in frames per second, averaged across the entire frames of the videos in the test set.}
+    \caption{End-to-End System Performance Comparison on Test Set. Recall, FAR, Accuracy, Precision are reported in percentage (\%). FPS is reported in frames per second, averaged across the entire frames of the videos in the test set. The best and second-best results for each metric are highlighted in \textbf{bold} and \textit{\underline{italic underline}}, respectively.}
     \label{tb:perf_per_frame}
     \csvreader[separator=semicolon,
         no head,
         range=1-,
         centered tabularray = {
-        colspec = {lllllllll},
+        width = \textwidth,
+        colspec = {X[2,c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]},
         colsep = {4pt},
         hlines,
         vlines,

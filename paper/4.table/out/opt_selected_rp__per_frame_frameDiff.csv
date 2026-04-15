@@ -1,16 +1,16 @@
 Exp.;Parameters;;;; Metrics;;;;Ranking Score
-Exp.;Scale factor $\alpha$;Block size $B$;Block active threshold $\tau$;Diff threshold $\tau_d$;Recall (\%);Skip Rate (\%);FPR (\%);FPS;Combined Score
-Baseline (No Skip module);-;-;-;-;94.35 (-0.00);0.0;0.74;24.1;-
-FrameDiff;1.0;16.0;0.05;3.0;94.18 (-0.17);0.72;0.74;22.4;0.2708
-FrameDiff;0.5;16.0;0.05;3.0;93.97 (-0.38);0.94;0.74;23.3;0.2312
-FrameDiff;1.0;16.0;0.1;3.0;93.54 (-0.81);0.97;0.74;22.7;0.1451
-FrameDiff;0.5;16.0;0.1;3.0;92.83 (-1.51);1.35;0.74;23.5;0.0066
-FrameDiff;1.0;16.0;0.15;3.0;92.05 (-2.30);1.53;0.74;22.9;-0.1483
-FrameDiff;1.0;32.0;0.05;3.0;91.63 (-2.72);2.43;0.74;23.5;-0.2270
-FrameDiff;0.5;16.0;0.15;3.0;91.45 (-2.90);3.92;0.74;24.1;-0.2522
-FrameDiff;1.0;16.0;0.05;5.0;91.46 (-2.88);1.94;0.74;22.9;-0.2633
-FrameDiff;0.5;32.0;0.05;3.0;90.98 (-3.36);7.11;0.74;25.1;-0.3230
-FrameDiff;0.5;16.0;0.05;5.0;90.55 (-3.80);6.23;0.74;24.5;-0.4156
-FrameDiff;0.5;16.0;0.1;7.0;88.87 (-5.47);47.22;0.73;37.5;-0.4644
-FrameDiff;0.5;16.0;0.05;10.0;88.19 (-6.16);49.0;0.73;38.6;-0.5889
-FrameDiff;0.5;32.0;0.05;10.0;84.56 (-9.79);59.53;0.73;45.9;-1.2415
+Exp.;Scale factor $\alpha$;Block size $B$;Block active threshold $\tau$;Diff threshold $\tau_d$;Recall (\%) $\uparrow$;Skip Rate (\%) $\uparrow$;FPR (\%) $\downarrow$;FPS $\uparrow$;Combined Score $\uparrow$
+Baseline (No Skip module);-;-;-;-;\textbf{\textcolor{black}{94.35}} (-0.00);0.0;\underline{\textcolor{black}{0.74}};24.1;-
+FrameDiff;1.0;16.0;0.05;3.0;\underline{\textcolor{black}{94.18}} (-0.17);0.72;\underline{\textcolor{black}{0.74}};22.4;\textbf{\textcolor{black}{0.2708}}
+FrameDiff;0.5;16.0;0.05;3.0;93.97 (-0.38);0.94;\underline{\textcolor{black}{0.74}};23.3;\underline{\textcolor{black}{0.2312}}
+FrameDiff;1.0;16.0;0.1;3.0;93.54 (-0.81);0.97;\underline{\textcolor{black}{0.74}};22.7;0.1451
+FrameDiff;0.5;16.0;0.1;3.0;92.83 (-1.51);1.35;\underline{\textcolor{black}{0.74}};23.5;0.0066
+FrameDiff;1.0;16.0;0.15;3.0;92.05 (-2.30);1.53;\underline{\textcolor{black}{0.74}};22.9;-0.1483
+FrameDiff;1.0;32.0;0.05;3.0;91.63 (-2.72);2.43;\underline{\textcolor{black}{0.74}};23.5;-0.2270
+FrameDiff;0.5;16.0;0.15;3.0;91.45 (-2.90);3.92;\underline{\textcolor{black}{0.74}};24.1;-0.2522
+FrameDiff;1.0;16.0;0.05;5.0;91.46 (-2.88);1.94;\underline{\textcolor{black}{0.74}};22.9;-0.2633
+FrameDiff;0.5;32.0;0.05;3.0;90.98 (-3.36);7.11;\underline{\textcolor{black}{0.74}};25.1;-0.3230
+FrameDiff;0.5;16.0;0.05;5.0;90.55 (-3.80);6.23;\underline{\textcolor{black}{0.74}};24.5;-0.4156
+FrameDiff;0.5;16.0;0.1;7.0;88.87 (-5.47);47.22;\textbf{\textcolor{black}{0.73}};37.5;-0.4644
+FrameDiff;0.5;16.0;0.05;10.0;88.19 (-6.16);\underline{\textcolor{black}{49.0}};\textbf{\textcolor{black}{0.73}};\underline{\textcolor{black}{38.6}};-0.5889
+FrameDiff;0.5;32.0;0.05;10.0;84.56 (-9.79);\textbf{\textcolor{black}{59.53}};\textbf{\textcolor{black}{0.73}};\textbf{\textcolor{black}{45.9}};-1.2415

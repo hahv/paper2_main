@@ -39,13 +39,6 @@ steps:
       - name: "FAR Drop"
         expr: "(df['FAR Drop'] * 100).round(4)"
 
-  - type: add_column
-    cols:
-      - name: Recall
-        expr: "df.apply(lambda x: f\"{x['Recall']:.2f}\" if pd.isna(x['Recall Drop']) else f\"{x['Recall']:.2f} (-{x['Recall Drop']:.2f})\", axis=1)"
-      - name: FAR
-        expr: "df.apply(lambda x: f\"{x['FAR']:.4f}\" if pd.isna(x['FAR Drop']) else f\"{x['FAR']:.4f} (-{x['FAR Drop']:.4f})\", axis=1)"
-
   # ── 3. REORDER & SELECT COLUMNS ───────────────────────────
   - type: rename
     mapping:
@@ -67,9 +60,54 @@ steps:
       - "Precision (\\%)"
       - "F1 Score"
       - FPS
+      - "Recall Drop"
+      - "FAR Drop"
 
   # ── 4. FILLNA ───────────────────────────────────────────────
   - type: fillna
     mapping:
       "Window Size $W$": "-"
       "Persist Threshold $\\tau_p$": "-"
+
+  # ── 5. STAMP ARROWS ───────────────────────────────────────
+  - type: header_arrow
+    columns:
+      "Recall (\\%)": up
+      "FAR (\\%)": down
+      "Accuracy (\\%)": up
+      "Precision (\\%)": up
+      "F1 Score": up
+      FPS: up
+
+  # ── 6. HIGHLIGHT BEST ─────────────────────────────────────
+  - type: highlight_best
+    best: [bold, color]
+    second: [underline, color]
+    best_color: black
+    second_color: black
+    skip_rows: 0
+    strict: false
+
+  # ── 7. APPEND DROP SUFFIX (after highlighting) ───────────
+  - type: add_column
+    cols:
+      - name: "Recall (\\%) $\\uparrow$"
+        expr: >
+          df.apply(lambda x:
+            str(x["Recall (\\%) $\\uparrow$"])
+            if pd.isna(x["Recall Drop"])
+            else str(x["Recall (\\%) $\\uparrow$"]) + " (-" + f"{x['Recall Drop']:.2f}" + ")",
+            axis=1)
+      - name: "FAR (\\%) $\\downarrow$"
+        expr: >
+          df.apply(lambda x:
+            str(x["FAR (\\%) $\\downarrow$"])
+            if pd.isna(x["FAR Drop"])
+            else str(x["FAR (\\%) $\\downarrow$"]) + " (-" + f"{x['FAR Drop']:.4f}" + ")",
+            axis=1)
+
+  # ── 8. DROP HELPER COLUMN ────────────────────────────────
+  - type: drop
+    columns:
+      - "Recall Drop"
+      - "FAR Drop"
