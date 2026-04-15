@@ -1,3 +1,7 @@
+from matplotlib.pylab import seed
+from src.common import seed_everything
+from halib import *
+from halib.common import *
 from tap import Tap
 import os
 import yaml
@@ -12,6 +16,24 @@ ROWS = ["row_01_rgb", "row_02_mask"]
 
 class Args(Tap):
     yaml_path: str = "./zz_fig_extract.yaml"  # Path to the fig-extract YAML config file
+    force_recreate: bool = (
+        False  # Whether to force re-creation of folders if they already exist
+    )
+
+    def configure(self):
+        self.add_argument(
+            "-i",
+            "--yaml_path",
+            type=str,
+            default="./zz_fig_extract.yaml",
+            help="Path to the fig-extract YAML config file. Default is './zz_fig_extract.yaml'.",
+        )
+        self.add_argument(
+            "-f",
+            "--force_recreate",
+            action="store_true",
+            help="Whether to force re-creation of folders if they already exist. Default is False.",
+        )
 
 
 # ── Data model ───────────────────────────────────────────────────────────────
@@ -58,7 +80,8 @@ def parse_sub_case(raw: dict) -> SubCase:
     )
 
 
-def load_config(yaml_path: str) -> tuple[str, list[Case]]:
+def load_config(yaml_path: str) -> tuple[str, list[Case], dict]:
+    cfg = None
     with open(yaml_path, "r") as f:
         cfg = yaml.safe_load(f)
 
@@ -70,7 +93,7 @@ def load_config(yaml_path: str) -> tuple[str, list[Case]]:
         )
         for c in cfg["list_cases"]
     ]
-    return outdir, cases
+    return outdir, cases, cfg
 
 
 # ── Folder creation ───────────────────────────────────────────────────────────
@@ -83,7 +106,7 @@ def get_sub_case_folders(col_idx: int, sub_case: SubCase) -> list[str]:
 
 
 def create_case_dirs(outdir: str, case: Case) -> None:
-    case_dir = os.path.join(outdir, case.name)
+    case_dir = os.path.join(outdir, "src", case.name)
     for row in ROWS:
         for col_idx, sub_case in enumerate(case.sub_cases, start=1):
             for folder_name in get_sub_case_folders(col_idx, sub_case):
@@ -119,10 +142,18 @@ def print_tree(outdir: str, cases: list[Case]) -> None:
 
 # ── Entry point ───────────────────────────────────────────────────────────────
 
-
 def main(args: Args) -> None:
-    outdir, cases = load_config(args.yaml_path)
+    outdir, cases, cfg = load_config(args.yaml_path)
+    seed_everything(cfg.get("random_seed", 42))  # Set random seed from config if provided
     os.makedirs(outdir, exist_ok=True)
+
+    if args.force_recreate and os.path.exists(f"{outdir}/src"):
+        import shutil
+        console.rule("[red]Force Recreate Enabled - Removing Existing 'src/' Folder")
+        shutil.rmtree(f"{outdir}/src")
+    else:
+        console.rule("[green][Done][/green] Already exists folders under 'src/'. Use --force_recreate to remove and recreate them.")
+        return
     create_all_dirs(outdir, cases)
     print_tree(outdir, cases)
 

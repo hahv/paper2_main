@@ -1,7 +1,9 @@
 # method: no_temp; temp_motion_block_FrameDiff; temp_motion_block_AccMotionDet
 indir: "/zout/reports/baseline_vs_accMotion/1GPU_SV__ds_UFireIndoorTest__mt_temp_method_motion_block__e1ccb7b889a0__20260401.144240"
 
-outdir: "./zz_fig_extract_out"
+outdir: "./paper/3.fig/_quality_analyses"
+
+random_seed: 42 # For reproducibility of any random sampling in figure generation
 
 exp_valid_types:
   - no_temp
@@ -9,7 +11,7 @@ exp_valid_types:
   - temp_motion_block_AccMotionDet
 
 list_cases:
-  - name: sucess
+  - name: success
     sub_cases:
       - {
           case_name: success_skip,
