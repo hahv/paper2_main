@@ -1,14 +1,14 @@
-# method: no_temp; temp_motion_block_FrameDiff; temp_motion_block_AccMotionDet
-indir: "/zout/reports/baseline_vs_accMotion/1GPU_SV__ds_UFireIndoorTest__mt_temp_method_motion_block__e1ccb7b889a0__20260401.144240"
+# method: no_temp_method; temp_method_motion_block_FrameDiffDet; temp_method_motion_block.AccMotionDet
+indir: "./zout/reports/baseline_vs_accMotion"
 
 outdir: "./paper/3.fig/_quality_analyses"
 
 random_seed: 42 # For reproducibility of any random sampling in figure generation
 
 exp_valid_types:
-  - no_temp
-  - temp_motion_block_FrameDiff
-  - temp_motion_block_AccMotionDet
+  - no_temp_method
+  - temp_method_motion_block.FrameDiffDet
+  - temp_method_motion_block.AccMotionDet
 
 list_cases:
   - name: success
@@ -17,18 +17,31 @@ list_cases:
           case_name: success_skip,
           case_desc: "Frames that were successfully skipped (i.e., no DL infer wasted)",
           num_cases: 2,
-          conditions: [
-              { exp: "no_temp", raw_label: "None" },
-              { exp: "temp_motion_block_AccMotionDet", raw_label: "skipped" },
+          conditions:
+            [
+              { exp: "no_temp_method", raw_label: "None" },
+              {
+                exp: "temp_method_motion_block.AccMotionDet",
+                raw_label: "skipped",
+              },
+            ],
+          prefer:
+            [
+              { video: "SomeVideoName.mp4", frames: [123, 456] },
+              { video: "AnotherVideo.mp4", frames: [789] },
             ],
         }
       - {
           case_name: success_infer,
           case_desc: "Skip module correctly detected motion and allowed DL inference to proceed",
           num_cases: 2,
-          conditions: [
-              { exp: "no_temp", raw_label: "detected" },
-              { exp: "temp_motion_block_AccMotionDet", raw_label: "detected" },
+          conditions:
+            [
+              { exp: "no_temp_method", raw_label: "detected" },
+              {
+                exp: "temp_method_motion_block.AccMotionDet",
+                raw_label: "detected",
+              },
             ],
         }
   - name: failure
@@ -39,8 +52,11 @@ list_cases:
           num_cases: 1,
           conditions:
             [
-              { exp: "no_temp", gt_label: "fire_smoke" },
-              { exp: "temp_motion_block_AccMotionDet", raw_label: "skipped" },
+              { exp: "no_temp_method", gt_label: "fire_smoke" },
+              {
+                exp: "temp_method_motion_block.AccMotionDet",
+                raw_label: "skipped",
+              },
             ],
         }
       - {
@@ -49,8 +65,11 @@ list_cases:
           num_cases: 2,
           conditions:
             [
-              { exp: "no_temp", gt_label: "None" },
-              { exp: "temp_motion_block_AccMotionDet", raw_label: "None" },
+              { exp: "no_temp_method", gt_label: "None" },
+              {
+                exp: "temp_method_motion_block.AccMotionDet",
+                raw_label: "None",
+              },
             ],
         }
       - {
@@ -59,8 +78,11 @@ list_cases:
           num_cases: 2,
           conditions:
             [
-              { exp: "no_temp", gt_label: "fire_smoke" },
-              { exp: "temp_motion_block_AccMotionDet", raw_label: "None" },
+              { exp: "no_temp_method", gt_label: "fire_smoke" },
+              {
+                exp: "temp_method_motion_block.AccMotionDet",
+                raw_label: "None",
+              },
             ],
         }
       - {
@@ -69,9 +91,9 @@ list_cases:
           num_cases: 1,
           conditions:
             [
-              { exp: "no_temp", gt_label: "None" },
+              { exp: "no_temp_method", gt_label: "None" },
               {
-                exp: "temp_motion_block_AccMotionDet",
+                exp: "temp_method_motion_block.AccMotionDet",
                 raw_label: ["Fire", "SmokeOnly"],
               },
             ],
