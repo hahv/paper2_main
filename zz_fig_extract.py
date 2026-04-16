@@ -22,7 +22,7 @@ MASK_VIDEO_SUFFIX = "_fgmask_out.mp4"
 
 def create_placeholder_img(
     img_name: str = "placeholder",
-    size: tuple[int, int] = (1920, 1080),
+    size: tuple[int, int] = (640, 640),
     color: str = PLACEHOLDER_COLOR,
     outdir: str | None = None,
 ) -> np.ndarray:
@@ -149,8 +149,13 @@ def get_sub_case_folders(col_idx: int, sub_case: SubCase) -> list[str]:
     return [f"{base}_{i:02d}" for i in range(1, sub_case.num_cases + 1)]
 
 
+CASE_DIR = {}
+
+
 def create_case_dirs(outdir: str, case: Case) -> None:
     case_dir = os.path.join(outdir, "src", case.name)
+    global CASE_DIR
+    CASE_DIR[case.name] = case_dir
     for row in ROWS:
         for col_idx, sub_case in enumerate(case.sub_cases, start=1):
             for folder_name in get_sub_case_folders(col_idx, sub_case):
@@ -359,8 +364,18 @@ def get_mask_dir_col(sub_case: SubCase) -> str | None:
 def extract_all_cases(outdir: str, cases: list[Case], df: pd.DataFrame) -> None:
     """For each sub_case: filter → sample → extract RGB + mask → save (placeholder if missing)."""
     src_dir = os.path.join(outdir, "src")
+    global CASE_DIR
+    from halib.filetype import textfile
 
-    for case in cases:
+    for case in cases:  # case: success, failure
+        case_dir = CASE_DIR.get(case.name)
+        assert os.path.exists(case_dir), f"Case dir '{case_dir}' does not exist"  # ty:ignore[invalid-argument-type]
+        anno_file = os.path.join(case_dir, "col_anno.txt")  # ty:ignore[no-matching-overload]
+
+        # sub_case: success_skip, success_infer, failure_false_skip,
+        # failure_wasted_infer, failure_model_error_1
+        sub_case_anno = []
+        col = 0
         for col_idx, sub_case in enumerate(case.sub_cases, start=1):
             console.rule(
                 f"[cyan]{case.name} / {sub_case.case_name}[/cyan]  (need {sub_case.num_cases})"
@@ -388,8 +403,9 @@ def extract_all_cases(outdir: str, cases: list[Case], df: pd.DataFrame) -> None:
                     f"  [WARN] Mask dir col '{mask_dir_col}' not in df — masks will be placeholders"
                 )
                 mask_dir_col = None
-
             for i, folder_name in enumerate(get_sub_case_folders(col_idx, sub_case)):
+                col += 1
+                sub_case_anno.append(f"col_{col}---{sub_case.case_desc} ")
                 rgb_dst = os.path.join(
                     src_dir, case.name, "row_01_rgb", folder_name, FRAME_FILENAME
                 )
@@ -449,7 +465,8 @@ def extract_all_cases(outdir: str, cases: list[Case], df: pd.DataFrame) -> None:
                     )
                 cv2.imwrite(mask_dst, mask)
                 print(f"  [MASK] {tag} → {mask_dst}")
-
+        textfile.write(sub_case_anno, anno_file)
+        print(f"  Annotation saved to {anno_file}")
 
 # ── Entry point ───────────────────────────────────────────────────────────────
 
@@ -473,14 +490,14 @@ def main(args: FigExtractArgs) -> None:
 
     console.rule("[bold green]Building unified DataFrame")
     df = get_df(cfg)
-    outfile_top_5 = os.path.abspath(os.path.join(outdir, "head5_unified_df.csv"))
-    outfile_full = os.path.abspath(os.path.join(outdir, "unified_df.csv"))
+    outfile_top_5 = os.path.abspath(os.path.join(src_dir, "head5_unified_df.csv"))
+    outfile_full = os.path.abspath(os.path.join(src_dir, "unified_df.csv"))
     df.head(5).to_csv(outfile_top_5, sep=";", encoding="utf-8", index=False)
     df.to_csv(outfile_full, sep=";", encoding="utf-8", index=False)
 
     with ConsoleLog(f"Flatten unified_df.csv"):
         os.system(f"xan flatten {outfile_top_5}")
-    with ConsoleLog('Extract frames'):
+    with ConsoleLog("Extract frames"):
         extract_all_cases(outdir, cases, df)
 
 
