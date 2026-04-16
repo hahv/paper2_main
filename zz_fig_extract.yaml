@@ -1,7 +1,7 @@
 # method: no_temp_method; temp_method_motion_block_FrameDiffDet; temp_method_motion_block.AccMotionDet
 indir: "./zout/reports/baseline_vs_accMotion"
 
-outdir: "./paper/3.fig/_quality_analyses"
+outdir: "./paper/3.fig/quality_analyses"
 
 random_seed: 42 # For reproducibility of any random sampling in figure generation
 
