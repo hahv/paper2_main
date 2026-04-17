@@ -77,6 +77,8 @@ class GlobalConst:
     COL_PARAM_W_R = "w_R"
     COL_PARAM_DELTA_R = "delta_R"
     COL_PARAM_RECALL_RET = "recall_retention"
+    COL_PARAM_RECALL_RET_NORM = "recall_retention_norm"
+    COL_PARAM_SKIP_RATE_NORM = "skip_rate_norm"
     COL_PARAM_FAR_REDUC_NORM = "far_reduction_norm"
 
     # Optim report file name

@@ -49,7 +49,7 @@ steps:
       - name: Recall
         expr: "(df['Recall'] * 100).round(2)" # Convert to percentage
       - name: FPR
-        expr: "(df['FPR'] * 100).round(2)" # Convert to percentage
+        expr: "(df['FPR'] * 100).round(3)" # Convert to percentage
       - name: Accuracy
         expr: "(df['Accuracy'] * 100).round(2)"
       - name: F1_Score
@@ -99,8 +99,8 @@ steps:
   # ── 6. SORT ───────────────────────────────────────────────
   # Sort by highest score first
   - type: sort
-    by: ["Combined Score"]
-    ascending: [false]
+    by: ["Combined Score", "Recall (\\%)", "Skip Rate (\\%)", "FPR (\\%)",  "FPS"]
+    ascending: [false, false, false, true, false]
 
   # ── 7. REPLACE SENTINEL → DISPLAY VALUE ──────────────────  ← ADD THIS
   - type: add_column
@@ -145,7 +145,16 @@ steps:
             if pd.isna(x["Recall Drop"])
             else str(x["Recall (\\%) $\\uparrow$"]) + " (-" + f"{x['Recall Drop']:.2f}" + ")",
             axis=1)
-    # ── 12. DROP HELPER COLUMN ────────────────────────────────
+  # ── 12. DROP HELPER COLUMN ────────────────────────────────
   - type: drop                 # ← FIX: clean up before writing CSV
     columns:
       - "Recall Drop"
+
+  # ── 13. CLEAN NAN VALUES ──────────────────────────────────
+  # replace all "Combined Score" (as string = "nan") with '-' for better display (since
+  # these are failed configs that shouldn't be ranked)
+  - type: add_column
+    cols:
+      - name: "Combined Score $\\uparrow$"
+        expr: >
+          df["Combined Score $\\uparrow$"].replace('nan', '-')

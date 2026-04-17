@@ -2,7 +2,7 @@ input: raw/_raw_opt_selected_rp__per_frame_accMotionDet.csv
 output: output/
 sep: ";"
 prepend_lines:
-  - "Method;Parameters;;;;;;;; Metrics;;;;Ranking Score" # ← raw group header row
+  - "Method;Parameters;;;;;; Metrics;;;;Ranking Score" # ← raw group header row
 
 steps:
   # ── 1. CLEAN UP COLUMN NAMES ──────────────────────────────
@@ -51,7 +51,7 @@ steps:
       - name: Recall
         expr: "(df['Recall'] * 100).round(2)" # Convert to percentage
       - name: FPR
-        expr: "(df['FPR'] * 100).round(2)" # Convert to percentage
+        expr: "(df['FPR'] * 100).round(3)" # Convert to percentage
       - name: Accuracy
         expr: "(df['Accuracy'] * 100).round(2)"
       - name: F1_Score
@@ -92,10 +92,10 @@ steps:
       - "Block size $B$"
       - "Block active threshold $\\tau$"
       - "Diff threshold $\\tau_d$"
-      - "Motion increment $\\omega$"
+      # - "Motion increment $\\omega$"
       - "Activation threshold $\\tau_m$"
       - "Acc. cap $K_{\\max}$"
-      - "Decay rate $\\delta$"
+      # - "Decay rate $\\delta$"
 
       # Primary Metrics
       - "Recall (\\%)"
