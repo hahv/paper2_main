@@ -82,24 +82,42 @@ a fraction of one full DL inference. For example, setting $\delta_R = 0.01$ and
 $\beta = 0.10$ means the system tolerates at most a 1\% recall drop and requires
 the skip module to run within 10\% of the cost of a single DL inference.
 
-\textbf{Scoring feasible candidates.} Among feasible candidates, the only term
-that requires explicit optimization is recall retention, defined as
+\textbf{Scoring feasible candidates.}
+Among feasible candidates, both objectives are normalized over
+$\Theta_{\text{feasible}}$ before weighting, so that the weights
+$w_S$ and $w_R$ reflect the intended relative importance rather
+than the raw scale of each term.
+The range-normalized recall retention and skip rate are defined as:
 \begin{equation}
-    \rho(\theta) = 1 - \frac{R_{\text{base}} - R(\theta)}{\delta_R},
+    \tilde{\rho}(\theta)
+    = \frac{\rho(\theta) - \min_{\Theta_f}\rho}
+           {\max_{\Theta_f}\rho - \min_{\Theta_f}\rho},
+    \qquad
+    \tilde{S}_r(\theta)
+    = \frac{S_r(\theta) - \min_{\Theta_f}S_r}
+           {\max_{\Theta_f}S_r  - \min_{\Theta_f}S_r},
 \end{equation}
-which equals $1$ when recall matches the baseline and $0$ when recall reaches
-the lowest acceptable level $R_{\text{base}} - \delta_R$. This term is bounded
-in $[0, 1]$ over the feasible region, making it directly comparable to
-$S_r(\theta)$ in the weighted score.
+where $\Theta_f \equiv \Theta_{\text{feasible}}$,
+and $\rho(\theta)$ is defined as in Equation~\eqref{eq:rho}.
+Both normalized terms are bounded in $[0, 1]$ over the feasible
+region, ensuring that the weights $w_S$ and $w_R$ directly control
+the relative influence of each objective on the final ranking.
 
-\textbf{Optimal selection.} The optimal parameter set $\theta^*$ is selected as
+\textbf{Optimal selection.}
+The optimal parameter set $\theta^*$ is selected as
 \begin{equation}
-    \theta^* = \arg\max_{\theta \in \Theta_{\text{feasible}}}
-    \left[ w_R\,\rho(\theta) + w_S\,S_r(\theta) \right],
+    \theta^*
+    = \arg\max_{\theta \in \Theta_{\text{feasible}}}
+      \Bigl[
+          w_R\,\tilde{\rho}(\theta)
+          +
+          w_S\,\tilde{S}_r(\theta)
+      \Bigr],
 \end{equation}
-where $\Theta_{\text{feasible}} = \{\theta \in \Theta : R(\theta) \geq
-R_{\text{base}} - \delta_R \text{ and } T_{\text{skip}}(\theta) \leq \beta
-\cdot T_{\text{DL}}\}$, and the nonnegative weights satisfy $w_S + w_R = 1$.
+where $\Theta_{\text{feasible}} = \{\theta \in \Theta :
+R(\theta) \geq R_{\text{base}} - \delta_R
+\ \text{and}\ T_{\text{skip}}(\theta) \leq \beta \cdot T_{\text{DL}}\}$,
+and the nonnegative weights satisfy $w_S + w_R = 1$.
 
 \textbf{FAR of the skip-enabled system.} The skip module $\mathcal{S}$ acts as
 a conservative gate: skipped frames are labeled negative directly, while passed
