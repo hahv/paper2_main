@@ -307,11 +307,19 @@ def sample_rows(df: pd.DataFrame, sub_case: SubCase) -> list[dict]:
                 break
 
     used = {(r["video"], r["frame_idx"]) for r in selected}
-    remaining = df[~df.apply(lambda r: (r["video"], r["frame_idx"]) in used, axis=1)]
+    used_videos = {r["video"] for r in selected}
+    remaining = df[~df.apply(lambda r: (r["video"], r["frame_idx"]) in used, axis=1)].copy()
     need = n - len(selected)
     if need > 0 and len(remaining) > 0:
         # seed_everything() at main() ensures this is deterministic across runs
-        sampled = remaining.sample(n=min(need, len(remaining)))
+        remaining = remaining.sample(frac=1.0)  # shuffle to randomize
+
+        # Priority: 1. Unseen videos first, 2. Round-robin across videos
+        remaining["__used"] = remaining["video"].isin(used_videos)
+        remaining["__g_idx"] = remaining.groupby("video").cumcount()
+        remaining = remaining.sort_values(["__used", "__g_idx"])
+
+        sampled = remaining.head(need).drop(columns=["__used", "__g_idx"])
         selected.extend(sampled.to_dict("records"))
 
     return selected[:n]
