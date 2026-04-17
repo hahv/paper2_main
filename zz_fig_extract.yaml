@@ -10,6 +10,9 @@ exp_valid_types:
   - temp_method_motion_block.FrameDiffDet
   - temp_method_motion_block.AccMotionDet
 
+# ! gt_label = [fire_smoke, none]
+# ! raw_label = [fire, smokeonly, none, skipped]
+
 list_cases:
   - name: success
         # r"(a) SKIP <br> Static BG  ✓ SKIP",
@@ -22,10 +25,10 @@ list_cases:
           num_cases: 2,
           conditions:
             [
-              { exp: "no_temp_method", raw_label: "None" },
+              { col_name: "gt_label", raw_value: "none" },
               {
-                exp: "temp_method_motion_block.AccMotionDet",
-                raw_label: "skipped",
+                col_name: "temp_method_motion_block.AccMotionDet",
+                raw_value: "skipped",
               },
             ],
           prefer:
@@ -40,10 +43,10 @@ list_cases:
           num_cases: 2,
           conditions:
             [
-              { exp: "no_temp_method", raw_label: "detected" },
+              { col_name: "gt_label", raw_value: "fire_smoke" },
               {
-                exp: "temp_method_motion_block.AccMotionDet",
-                raw_label: "detected",
+                col_name: "temp_method_motion_block.AccMotionDet",
+                raw_value: ["fire", "smokeonly"],
               },
             ],
         }
@@ -58,10 +61,10 @@ list_cases:
           num_cases: 1,
           conditions:
             [
-              { exp: "no_temp_method", gt_label: "fire_smoke" },
+              { col_name: "gt_label", raw_value: "fire_smoke" },
               {
-                exp: "temp_method_motion_block.AccMotionDet",
-                raw_label: "skipped",
+                col_name: "temp_method_motion_block.AccMotionDet",
+                raw_value: "skipped",
               },
             ],
         }
@@ -71,10 +74,10 @@ list_cases:
           num_cases: 2,
           conditions:
             [
-              { exp: "no_temp_method", gt_label: "None" },
+              { col_name: "gt_label", raw_value: "none" },
               {
-                exp: "temp_method_motion_block.AccMotionDet",
-                raw_label: "None",
+                col_name: "temp_method_motion_block.AccMotionDet",
+                raw_value: "none",
               },
             ],
         }
@@ -84,10 +87,10 @@ list_cases:
           num_cases: 2,
           conditions:
             [
-              { exp: "no_temp_method", gt_label: "fire_smoke" },
+              { col_name: "gt_label", raw_value: "fire_smoke" },
               {
-                exp: "temp_method_motion_block.AccMotionDet",
-                raw_label: "None",
+                col_name: "temp_method_motion_block.AccMotionDet",
+                raw_value: "none",
               },
             ],
         }

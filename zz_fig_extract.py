@@ -88,9 +88,19 @@ class FigExtractArgs(Tap):
 
 @dataclass
 class Condition:
-    exp: str
-    gt_label: str | None = None
-    raw_label: str | list[str] | None = None
+    col_name: str
+    raw_value: str | list[str] = field(default_factory=list)
+
+    def __post_init__(self):
+        if isinstance(self.raw_value, str):
+            self.raw_value = [self.raw_value]
+        for v in self.raw_value:
+            if self.col_name == 'gt_label':
+                valid_gt = ["fire_smoke", "none"]
+                assert str(v).lower() in valid_gt, f"gt_label value must be in {valid_gt}, got: {v}"
+            else:
+                valid_raw = ["fire", "smokeonly", "none", "skipped"]
+                assert str(v).lower() in valid_raw, f"raw_label value must be in {valid_raw}, got: {v}"
 
 
 @dataclass
@@ -113,9 +123,8 @@ class Case:
 
 def parse_condition(raw: dict) -> Condition:
     return Condition(
-        exp=raw["exp"],
-        gt_label=raw.get("gt_label"),
-        raw_label=raw.get("raw_label"),
+        col_name=raw["col_name"],
+        raw_value=raw["raw_value"],
     )
 
 
@@ -173,8 +182,7 @@ def create_all_dirs(outdir: str, cases: list[Case]) -> None:
 
 
 def _fmt_condition(c: Condition) -> str:
-    label = f"gt={c.gt_label}" if c.gt_label else f"raw={c.raw_label}"
-    return f"{c.exp}[{label}]"
+    return f"{c.col_name}[{c.raw_value}]"
 
 
 def print_tree(outdir: str, cases: list[Case]) -> None:
@@ -210,7 +218,8 @@ def get_df(config: dict) -> pd.DataFrame:
     method_unique_list = []
     for exp_dir in exp_dirs:
         csv_path = os.path.join(indir, exp_dir, TARGET_FILE)
-        df = pd.read_csv(csv_path, sep=";", encoding="utf-8")
+        df = pd.read_csv(csv_path, sep=";", encoding="utf-8", keep_default_na=False, na_values=[""])
+
         # Last column of each CSV must be the method name
         method_name = df.columns.tolist()[-1]
         assert method_name not in method_unique_list, (
@@ -229,8 +238,16 @@ def get_df(config: dict) -> pd.DataFrame:
         assert len(predict_col) == 1, (
             f"Expected exactly one predict column for '{method_name}', found: {predict_col}"
         )
-        df.rename(columns={predict_col[0]: method_name}, inplace=True)
+        # df.rename(columns={predict_col[0]: method_name}, inplace=True)
+        # csvfile.fn_display_df(df.head(5))
+
+        # make gt_label consistent (e.g. "None" vs "none")
+        df["gt_label"] = df["gt_label"].str.lower()
+
         df = df[FIXED_COLS + [method_name]].set_index(JOIN_COLS)
+        pprint(df.columns.tolist())
+        # make method_name col values consistent (lowercase, remove spaces)
+        df[method_name] = df[method_name].str.lower().str.strip()
 
         # Store abs path of this exp dir as a sibling column
         df[f"{method_name}_dir"] = os.path.abspath(os.path.join(indir, exp_dir))
@@ -265,13 +282,10 @@ def filter_df_for_subcase(df: pd.DataFrame, sub_case: SubCase) -> pd.DataFrame:
     """Return rows where ALL conditions are satisfied."""
     mask = pd.Series(True, index=df.index)
     for cond in sub_case.conditions:
-        if cond.gt_label is not None:
-            mask &= df["gt_label"].apply(lambda v: _match_label(v, cond.gt_label))
-        if cond.raw_label is not None:
-            if cond.exp not in df.columns:
-                print(f"  [WARN] Column '{cond.exp}' missing in df — condition skipped")
-                continue
-            mask &= df[cond.exp].apply(lambda v: _match_label(v, cond.raw_label))
+        if cond.col_name not in df.columns:
+            print(f"  [WARN] Column '{cond.col_name}' missing in df — condition skipped")
+            continue
+        mask &= df[cond.col_name].apply(lambda v: _match_label(v, cond.raw_value))
     return df[mask].copy()
 
 
@@ -341,8 +355,8 @@ def get_rgb_dir_col(sub_case: SubCase) -> str | None:
     e.g. returns 'no_temp_method_dir'
     """
     for cond in sub_case.conditions:
-        if cond.gt_label is not None:
-            return f"{cond.exp}_dir"
+        if cond.col_name != "gt_label":
+            return f"{cond.col_name}_dir"
     return None
 
 
@@ -353,10 +367,9 @@ def get_mask_dir_col(sub_case: SubCase) -> str | None:
     e.g. returns 'temp_method_motion_block.AccMotionDet_dir'
     """
     for cond in sub_case.conditions:
-        if cond.raw_label is not None:
-            return f"{cond.exp}_dir"
+        if cond.col_name != "gt_label":
+            return f"{cond.col_name}_dir"
     return None
-
 
 # ── Main extraction loop ──────────────────────────────────────────────────────
 
@@ -368,9 +381,9 @@ def extract_all_cases(outdir: str, cases: list[Case], df: pd.DataFrame) -> None:
     from halib.filetype import textfile
 
     for case in cases:  # case: success, failure
-        case_dir = CASE_DIR.get(case.name)
-        assert os.path.exists(case_dir), f"Case dir '{case_dir}' does not exist"  # ty:ignore[invalid-argument-type]
-        anno_file = os.path.join(case_dir, "col_anno.txt")  # ty:ignore[no-matching-overload]
+        case_dir: str = CASE_DIR.get(case.name)  # ty:ignore[invalid-assignment]
+        assert os.path.exists(case_dir), f"Case dir '{case_dir}' does not exist"
+        anno_file = os.path.join(case_dir, "col_anno.txt")
 
         # sub_case: success_skip, success_infer, failure_false_skip,
         # failure_wasted_infer, failure_model_error_1
@@ -382,7 +395,11 @@ def extract_all_cases(outdir: str, cases: list[Case], df: pd.DataFrame) -> None:
             )
 
             filtered = filter_df_for_subcase(df, sub_case)
-            print(f"  Matched {len(filtered)} rows from df")
+            # ! save filter result for debugging
+            filtered_outfile = os.path.join(
+                case_dir, f"filtered_{sub_case.case_name}.csv"
+            )
+            filtered.to_csv(filtered_outfile, index=False, encoding="utf-8", sep=";")
 
             rows = sample_rows(filtered, sub_case) if len(filtered) > 0 else []
             if len(rows) < sub_case.num_cases:
@@ -403,18 +420,21 @@ def extract_all_cases(outdir: str, cases: list[Case], df: pd.DataFrame) -> None:
                     f"  [WARN] Mask dir col '{mask_dir_col}' not in df — masks will be placeholders"
                 )
                 mask_dir_col = None
+
             for i, folder_name in enumerate(get_sub_case_folders(col_idx, sub_case)):
                 col += 1
                 sub_case_anno.append(f"col_{col}---{sub_case.case_desc} ")
-                rgb_dst = os.path.join(
-                    src_dir, case.name, "row_01_rgb", folder_name, FRAME_FILENAME
-                )
-                mask_dst = os.path.join(
-                    src_dir, case.name, "row_02_mask", folder_name, FRAME_FILENAME
-                )
 
                 # No matching row → full placeholder pair
                 if i >= len(rows):
+                    file_name = f"{sub_case.case_name}_placeholder_{i + 1}.jpg"
+                    rgb_dst = os.path.join(
+                        src_dir, case.name, "row_01_rgb", folder_name, file_name
+                    )
+                    mask_dst = os.path.join(
+                        src_dir, case.name, "row_02_mask", folder_name, file_name
+                    )
+
                     ph = create_placeholder_img(
                         img_name=f"{sub_case.case_name} placeholder {i + 1}",
                         outdir=None,
@@ -426,6 +446,14 @@ def extract_all_cases(outdir: str, cases: list[Case], df: pd.DataFrame) -> None:
 
                 row = rows[i]
                 tag = f"{row['video']}@{row['frame_idx']}"
+                file_name = f"{sub_case.case_name}_{tag}.jpg"
+                rgb_dst = os.path.join(
+                    src_dir, case.name, "row_01_rgb", folder_name, file_name
+                )
+                mask_dst = os.path.join(
+                    src_dir, case.name, "row_02_mask", folder_name, file_name
+                )
+
                 video_stem = os.path.splitext(row["video"])[0]
 
                 # ── RGB: seek into {stem}_out.mp4 inside the baseline exp dir
@@ -467,6 +495,7 @@ def extract_all_cases(outdir: str, cases: list[Case], df: pd.DataFrame) -> None:
                 print(f"  [MASK] {tag} → {mask_dst}")
         textfile.write(sub_case_anno, anno_file)
         print(f"  Annotation saved to {anno_file}")
+
 
 # ── Entry point ───────────────────────────────────────────────────────────────
 
