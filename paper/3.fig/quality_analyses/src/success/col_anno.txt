@@ -1,0 +1,4 @@
+col_1---SKIP <br> Static BG  ✓ SKIP 
+col_2---SKIP <br> Static BG  ✓ SKIP 
+col_3---INFER <br> Fire/Smoke  ✓ RUN 
+col_4---INFER <br> Fire/Smoke  ✓ RUN 

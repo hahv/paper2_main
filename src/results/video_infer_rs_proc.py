@@ -15,7 +15,7 @@ class VideoInferRsProc(BaseRsProc):
         self.outdir = os.path.abspath(cfg.get_outdir())
         self.pipelines: List[VideoPipeline] = []
         self.outfile_exists = False
-        self.video_output_path: str = None
+        self.video_output_path: str = ""
         self.out_video_postfix = "out"
 
     def update_video_output_path(self, video_path: str):

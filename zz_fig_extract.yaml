@@ -1,7 +1,7 @@
 # method: no_temp_method; temp_method_motion_block_FrameDiffDet; temp_method_motion_block.AccMotionDet
 indir: "./zout/reports/baseline_vs_accMotion"
 
-outdir: "./paper/3.fig/_quality_analyses"
+outdir: "./paper/3.fig/quality_analyses"
 
 random_seed: 42 # For reproducibility of any random sampling in figure generation
 
@@ -10,19 +10,25 @@ exp_valid_types:
   - temp_method_motion_block.FrameDiffDet
   - temp_method_motion_block.AccMotionDet
 
+# ! gt_label = [fire_smoke, none]
+# ! raw_label = [fire, smokeonly, none, skipped]
+
 list_cases:
   - name: success
+        # r"(a) SKIP <br> Static BG  ✓ SKIP",
+        # r"(b) INFER <br> Fire  ✓ RUN",
+        # r"(c) INFER <br> Smoke ✓ RUN",
     sub_cases:
       - {
           case_name: success_skip,
-          case_desc: "Frames that were successfully skipped (i.e., no DL infer wasted)",
+          case_desc: "SKIP <br> Static BG  ✓ SKIP",
           num_cases: 2,
           conditions:
             [
-              { exp: "no_temp_method", raw_label: "None" },
+              { col_name: "gt_label", raw_value: "none" },
               {
-                exp: "temp_method_motion_block.AccMotionDet",
-                raw_label: "skipped",
+                col_name: "temp_method_motion_block.AccMotionDet",
+                raw_value: "skipped",
               },
             ],
           prefer:
@@ -33,68 +39,58 @@ list_cases:
         }
       - {
           case_name: success_infer,
-          case_desc: "Skip module correctly detected motion and allowed DL inference to proceed",
+          case_desc: "INFER <br> Fire/Smoke  ✓ RUN",
           num_cases: 2,
           conditions:
             [
-              { exp: "no_temp_method", raw_label: "detected" },
+              { col_name: "gt_label", raw_value: "fire_smoke" },
               {
-                exp: "temp_method_motion_block.AccMotionDet",
-                raw_label: "detected",
+                col_name: "temp_method_motion_block.AccMotionDet",
+                raw_value: ["fire", "smokeonly"],
               },
             ],
         }
   - name: failure
+        # r"(a) WRONGLY SKIPPED <br> Slow Smoke (✗ MISSED)",
+        # r"(b) WASTED INFER <br> Persistent Motion (✗ NO SAVINGS)",
+        # r"(c) WRONG INFER <br> Properly Infer <br> But Wrongly Predicted <br> (✗ BIG MODEl ERROR)",
     sub_cases:
       - {
           case_name: failure_false_skip,
-          case_desc: "Frames incorrectly skipped despite containing fire/smoke (false negatives)",
+          case_desc: "WRONGLY SKIPPED <br> Slow Smoke (✗ MISSED)",
           num_cases: 1,
           conditions:
             [
-              { exp: "no_temp_method", gt_label: "fire_smoke" },
+              { col_name: "gt_label", raw_value: "fire_smoke" },
               {
-                exp: "temp_method_motion_block.AccMotionDet",
-                raw_label: "skipped",
+                col_name: "temp_method_motion_block.AccMotionDet",
+                raw_value: "skipped",
               },
             ],
         }
       - {
           case_name: failure_wasted_infer,
-          case_desc: "Skip module triggered inference on frames with no fire/smoke (wasted computation)",
+          case_desc: "WASTED INFER <br> Persistent Motion (✗ NO SAVINGS)",
           num_cases: 2,
           conditions:
             [
-              { exp: "no_temp_method", gt_label: "None" },
+              { col_name: "gt_label", raw_value: "none" },
               {
-                exp: "temp_method_motion_block.AccMotionDet",
-                raw_label: "None",
+                col_name: "temp_method_motion_block.AccMotionDet",
+                raw_value: "none",
               },
             ],
         }
       - {
           case_name: failure_model_error_1,
-          case_desc: "Skip module correctly allowed inference, but model misclassified the result",
+          case_desc: "WRONG INFER <br> Properly Infer <br> But Wrongly Predicted <br> (✗ BIG MODEl ERROR)",
           num_cases: 2,
           conditions:
             [
-              { exp: "no_temp_method", gt_label: "fire_smoke" },
+              { col_name: "gt_label", raw_value: "fire_smoke" },
               {
-                exp: "temp_method_motion_block.AccMotionDet",
-                raw_label: "None",
-              },
-            ],
-        }
-      - {
-          case_name: failure_model_error_2,
-          case_desc: "Skip module correctly allowed inference, but model misclassified the result",
-          num_cases: 1,
-          conditions:
-            [
-              { exp: "no_temp_method", gt_label: "None" },
-              {
-                exp: "temp_method_motion_block.AccMotionDet",
-                raw_label: ["Fire", "SmokeOnly"],
+                col_name: "temp_method_motion_block.AccMotionDet",
+                raw_value: "none",
               },
             ],
         }
