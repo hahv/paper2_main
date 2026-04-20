@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999994 (TeX Live 2022) (preloaded format=xelatex 2022.7.18)  14 APR 2026 20:14
+This is XeTeX, Version 3.141592653-2.6-0.999994 (TeX Live 2022) (preloaded format=xelatex 2022.7.18)  20 APR 2026 14:48
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1001,7 +1001,26 @@ sty
 Package: algpseudocode 
 
 Document Style - pseudocode environments for use with the `algorithmicx' style
-)) (./temp.aux)
+)) (d:/Program Files/texlive/2022/texmf-dist/tex/latex/geometry/geometry.sty
+Package: geometry 2020/01/02 v5.9 Page Geometry
+
+(d:/Program Files/texlive/2022/texmf-dist/tex/generic/iftex/ifvtex.sty
+Package: ifvtex 2019/10/25 v1.7 ifvtex legacy package. Use iftex instead.
+)
+\Gm@cnth=\count370
+\Gm@cntv=\count371
+\c@Gm@tempcnt=\count372
+\Gm@bindingoffset=\dimen337
+\Gm@wd@mp=\dimen338
+\Gm@odd@mp=\dimen339
+\Gm@even@mp=\dimen340
+\Gm@layoutwidth=\dimen341
+\Gm@layoutheight=\dimen342
+\Gm@layouthoffset=\dimen343
+\Gm@layoutvoffset=\dimen344
+\Gm@dimlist=\toks49
+)
+(./temp.aux)
 \openout1 = `temp.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 8.
@@ -1015,8 +1034,7 @@ LaTeX Font Info:    ... okay on input line 8.
 LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 8.
 LaTeX Font Info:    Trying to load font information for TS1+cmr on input line 8
 .
-
-(d:/Program Files/texlive/2022/texmf-dist/tex/latex/base/ts1cmr.fd
+ (d:/Program Files/texlive/2022/texmf-dist/tex/latex/base/ts1cmr.fd
 File: ts1cmr.fd 2019/12/16 v2.5j Standard LaTeX font definitions
 )
 LaTeX Font Info:    ... okay on input line 8.
@@ -1177,6 +1195,40 @@ LaTeX Info: Redefining \ohm on input line 8.
 Package gensymb Info: Using \textohm for \ohm on input line 8.
 Package gensymb Info: Using \textmu for \micro on input line 8.
 
+*geometry* driver: auto-detecting
+*geometry* detected driver: xetex
+*geometry* verbose mode - [ preamble ] result:
+* driver: xetex
+* paper: a4paper
+* layout: <same size as paper>
+* layoutoffset:(h,v)=(0.0pt,0.0pt)
+* modes: 
+* h-part:(L,W,R)=(14.22636pt, 569.05515pt, 14.22636pt)
+* v-part:(T,H,B)=(14.22636pt, 816.59412pt, 14.22636pt)
+* \paperwidth=597.50787pt
+* \paperheight=845.04684pt
+* \textwidth=569.05515pt
+* \textheight=816.59412pt
+* \oddsidemargin=-58.04362pt
+* \evensidemargin=-58.04362pt
+* \topmargin=-95.04362pt
+* \headheight=12.0pt
+* \headsep=25.0pt
+* \topskip=10.0pt
+* \footskip=10.0pt
+* \marginparwidth=65.0pt
+* \marginparsep=11.0pt
+* \columnsep=10.0pt
+* \skip\footins=9.0pt plus 4.0pt minus 2.0pt
+* \hoffset=0.0pt
+* \voffset=0.0pt
+* \mag=1000
+* \@twocolumnfalse
+* \@twosidefalse
+* \@mparswitchfalse
+* \@reversemarginfalse
+* (1in=72.27pt=25.4mm, 1cm=28.453pt)
+
 
 Package hyperref Warning: Option `colorlinks' has already been used,
 (hyperref)                setting the option has no effect on input line 8.
@@ -1197,7 +1249,7 @@ ilable
 (Font)              Font shape `TU/UnBatang.ttf(0)/b/n' tried instead on input 
 line 12.
 
-(./__TODO__hyperparam_algo_v4.tex
+(./6.algo/skip_module_period_check.tex
 Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on in
 put line 2.
 LaTeX Font Info:    Font shape `TU/UnBatang.ttf(0)/bx/n' in size <10> not avail
@@ -1205,55 +1257,46 @@ able
 (Font)              Font shape `TU/UnBatang.ttf(0)/b/n' tried instead on input 
 line 2.
 LaTeX Font Info:    Trying to load font information for U+dutchcal on input lin
-e 7.
+e 2.
 
 (d:/Program Files/texlive/2022/texmf-dist/tex/latex/dutchcal/udutchcal.fd
 File: udutchcal.fd 2011/06/16 Fontinst v1.933 font definitions for U/dutchcal.
 )
 LaTeX Font Info:    Font shape `U/dutchcal/m/n' will be
-(Font)              scaled to size 10.0pt on input line 7.
+(Font)              scaled to size 10.0pt on input line 2.
 LaTeX Font Info:    Font shape `U/dutchcal/m/n' will be
-(Font)              scaled to size 7.0pt on input line 7.
+(Font)              scaled to size 7.0pt on input line 2.
 LaTeX Font Info:    Font shape `U/dutchcal/m/n' will be
-(Font)              scaled to size 5.0pt on input line 7.
+(Font)              scaled to size 5.0pt on input line 2.
+
+
+LaTeX Warning: Reference `alg:skipmodule' on page 1 undefined on input line 7.
+
+
+LaTeX Font Warning: Font shape `TU/UnBatang.ttf(0)/m/it' undefined
+(Font)              using `TU/UnBatang.ttf(0)/m/n' instead on input line 14.
 
 
 LaTeX Font Warning: Font shape `TU/UnBatang.ttf(0)/m/sc' undefined
-(Font)              using `TU/UnBatang.ttf(0)/m/n' instead on input line 11.
+(Font)              using `TU/UnBatang.ttf(0)/m/n' instead on input line 14.
 
 
-LaTeX Warning: Reference `sec:metrics' on page 1 undefined on input line 40.
+LaTeX Warning: Reference `alg:skipmodule' on page 1 undefined on input line 21.
 
 
-LaTeX Warning: Reference `sec:metrics' on page 1 undefined on input line 52.
 
-[1
+LaTeX Warning: Reference `alg:skipmodule' on page 1 undefined on input line 55.
+
+
+) [1
 
 ]
 
-LaTeX Warning: Reference `sec:metrics' on page 2 undefined on input line 55.
-
-
-LaTeX Warning: Reference `eq:rho' on page 2 undefined on input line 101.
-
-
 Package fancyhdr Warning: \footskip is too small (10.0pt): 
 (fancyhdr)                Make it at least 12.0pt, for example:
 (fancyhdr)                \setlength{\footskip}{12.0pt}.
 
-[2])
-
-Package fancyhdr Warning: \footskip is too small (10.0pt): 
-(fancyhdr)                Make it at least 12.0pt, for example:
-(fancyhdr)                \setlength{\footskip}{12.0pt}.
-
-[3]
-
-Package fancyhdr Warning: \footskip is too small (10.0pt): 
-(fancyhdr)                Make it at least 12.0pt, for example:
-(fancyhdr)                \setlength{\footskip}{12.0pt}.
-
-[4] (./temp.aux)
+[2] (./temp.aux)
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
@@ -1264,12 +1307,12 @@ Package rerunfilecheck Info: File `temp.out' has not changed.
 (rerunfilecheck)             Checksum: E6F93436FA3A73B5DD03917E5C22888C;88.
  ) 
 Here is how much of TeX's memory you used:
- 33712 strings out of 475865
- 658009 string characters out of 5799410
- 964396 words of memory out of 5000000
- 54201 multiletter control sequences out of 15000+600000
- 485134 words of font info for 117 fonts, out of 8000000 for 9000
+ 34220 strings out of 475865
+ 666243 string characters out of 5799410
+ 982341 words of memory out of 5000000
+ 54696 multiletter control sequences out of 15000+600000
+ 485174 words of font info for 122 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
- 120i,12n,121p,459b,2709s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 120i,11n,121p,459b,2709s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on temp.pdf (4 pages).
+Output written on temp.pdf (2 pages).

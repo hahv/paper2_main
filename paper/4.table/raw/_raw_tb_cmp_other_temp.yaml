@@ -17,15 +17,15 @@ steps:
   - type: add_column
     cols:
       - name: Recall
-        expr: "(df['Recall'] * 100).round(2)"
+        expr: "(df['Recall'] * 100).round(3)"
       - name: FAR
-        expr: "(df['FAR'] * 100).round(2)"
+        expr: "(df['FAR'] * 100).round(3)"
       - name: Accuracy
-        expr: "(df['Accuracy'] * 100).round(2)"
+        expr: "(df['Accuracy'] * 100).round(3)"
       - name: F1-Score
         expr: "df['F1-Score'].round(4)"
       - name: Precision
-        expr: "(df['Precision'] * 100).round(2)"
+        expr: "(df['Precision'] * 100).round(3)"
       - name: FPS
         expr: "df['FPS'].round(2)"
 

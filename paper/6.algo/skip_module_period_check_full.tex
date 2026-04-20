@@ -1,0 +1,81 @@
+\begin{algorithm}[ht]
+\caption{Skip Module $\mathcal{S}$: Motion-Based Gating with Eager Mode and Periodic Forced Check}
+\label{alg:skipmodule_eager}
+\begin{algorithmic}[1]
+
+\Require Video stream $\{f_1, f_2, \dots\}$, motion detector $\mathcal{D}$,
+scale factor $\alpha$, block size $B$, block active threshold $\tau$,
+forced check interval $N_{\text{chk}}$, clear confirmation window $W_{\text{clr}}$
+
+\Ensure Skip decisions $\{s_1, s_2, \dots\}$, where $s_t \in \{0,1\}$
+
+\State $f_{\text{prev}} \leftarrow \text{null}$
+\State $\textit{eager\_mode} \leftarrow \textsc{False}$    \Comment{When TRUE, skip is fully suppressed}
+\State $\textit{no\_fire\_streak} \leftarrow 0$             \Comment{Consecutive no-fire frames since last detection}
+\State $\textit{skip\_streak} \leftarrow 0$                \Comment{Consecutive skipped frames — forced check trigger}
+
+\For{each incoming frame $f_t$}
+
+    \Statex \hspace{1.5em} \textbf{Step 1: Pre-process}
+    \State Downsample $f_t$ by $\alpha$ and pad $\rightarrow \tilde{f}_t$
+
+    \Statex \hspace{1.5em} \textbf{Step 2: Eager Mode Override}
+    \If{$\textit{eager\_mode} = \textsc{True}$}
+        \State $s_t \leftarrow 1$  \Comment{Skip disabled — always run DL inference}
+        \State $\hat{y}_t \leftarrow \textsc{RunDL}(f_t)$
+        \If{$\hat{y}_t = \text{fire\_smoke}$}
+            \State $\textit{no\_fire\_streak} \leftarrow 0$  \Comment{Fire still present — stay in eager mode}
+        \Else
+            \State $\textit{no\_fire\_streak} \leftarrow \textit{no\_fire\_streak} + 1$
+            \If{$\textit{no\_fire\_streak} \geq W_{\text{clr}}$}
+                \State $\textit{eager\_mode} \leftarrow \textsc{False}$  \Comment{Scene confirmed clear — exit eager mode}
+                \State $\textit{no\_fire\_streak} \leftarrow 0$
+                \State $\textit{skip\_streak} \leftarrow 0$
+            \EndIf
+        \EndIf
+        \State $f_{\text{prev}} \leftarrow \tilde{f}_t$
+        \State \textbf{continue}
+    \EndIf
+
+    \Statex \hspace{1.5em} \textbf{Step 3: Periodic Forced Check}
+    \If{$\textit{skip\_streak} \geq N_{\text{chk}}$}
+        \State $s_t \leftarrow 1$  \Comment{Force-run DL — motion gate overridden}
+        \State $\hat{y}_t \leftarrow \textsc{RunDL}(f_t)$
+        \State $\textit{skip\_streak} \leftarrow 0$
+        \If{$\hat{y}_t = \text{fire\_smoke}$}
+            \State $\textit{eager\_mode} \leftarrow \textsc{True}$  \Comment{Forced check detected fire — enter eager mode}
+            \State $\textit{no\_fire\_streak} \leftarrow 0$
+        \EndIf
+        \State $f_{\text{prev}} \leftarrow \tilde{f}_t$
+        \State \textbf{continue}
+    \EndIf
+
+    \Statex \hspace{1.5em} \textbf{Step 4: Compute Foreground Mask}
+    \If{$f_{\text{prev}} = \text{null}$}
+        \State $s_t \leftarrow 1$;\ \ $f_{\text{prev}} \leftarrow \tilde{f}_t$
+        \State \textbf{continue}
+    \EndIf
+    \State $\mathbf{M}_t \leftarrow \mathcal{D}(\tilde{f}_t,\, f_{\text{prev}})$
+    \State Partition $\mathbf{M}_t$ into non-overlapping blocks of size $B_s = B \cdot \alpha$
+    \State Mark block as \textit{active} if foreground pixel ratio $> \tau$
+
+    \Statex \hspace{1.5em} \textbf{Step 5: Gate Decision}
+    \If{any active block exists}
+        \State $s_t \leftarrow 1$;\ \ $\hat{y}_t \leftarrow \textsc{RunDL}(f_t)$
+        \State $\textit{skip\_streak} \leftarrow 0$
+        \If{$\hat{y}_t = \text{fire\_smoke}$}
+            \State $\textit{eager\_mode} \leftarrow \textsc{True}$  \Comment{Motion gate detected fire — enter eager mode}
+            \State $\textit{no\_fire\_streak} \leftarrow 0$
+        \EndIf
+    \Else
+        \State $s_t \leftarrow 0$  \Comment{No motion — skip}
+        \State $\textit{skip\_streak} \leftarrow \textit{skip\_streak} + 1$
+    \EndIf
+
+    \State $f_{\text{prev}} \leftarrow \tilde{f}_t$
+    \State \textbf{yield} $s_t$
+
+\EndFor
+
+\end{algorithmic}
+\end{algorithm}

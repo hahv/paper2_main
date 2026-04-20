@@ -1,0 +1,4 @@
+Experiment;Window Size $W$;Persist Threshold $\tau_p$;Recall (\%) $\uparrow$;FAR (\%) $\downarrow$;Accuracy (\%) $\uparrow$;Precision (\%) $\uparrow$;F1 Score $\uparrow$;FPS $\uparrow$
+Big Model without Skip Module (Baseline);-;-;\textbf{\textcolor{black}{94.35}} (-0.00);0.7403;\textbf{\textcolor{black}{98.26}};\underline{\textcolor{black}{97.02}};\textbf{\textcolor{black}{0.9566}};\textbf{\textcolor{black}{24.0596}}
+TPT method (Conservative: safety-first);5.0;0.2;\underline{\textcolor{black}{94.22}} (-0.13);\underline{\textcolor{black}{0.7385}} (-0.0018);\underline{\textcolor{black}{98.24}};\underline{\textcolor{black}{97.02}};\underline{\textcolor{black}{0.956}};\underline{\textcolor{black}{24.0557}}
+TPT method (Balanced between Recall Drop and FAR decrease gain);10.0;0.5;93.7 (-0.65);\textbf{\textcolor{black}{0.7315}} (-0.0088);98.13;\textbf{\textcolor{black}{97.03}};0.9534;24.0555

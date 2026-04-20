@@ -153,7 +153,7 @@
 \title{Efficient Real-Time Fire Surveillance: A Lightweight
 Motion-Heuristic Skip Module for Accelerated Inference}
 \author{Hoang Van-Ha, Jong Weon Lee, Park Chun-Su}
-\date{2026.04.13}
+\date{2026.04.20}
 
 \begin{document}
 \maketitle
@@ -648,24 +648,42 @@ a fraction of one full DL inference. For example, setting $\delta_R = 0.01$ and
 $\beta = 0.10$ means the system tolerates at most a 1\% recall drop and requires
 the skip module to run within 10\% of the cost of a single DL inference.
 
-\textbf{Scoring feasible candidates.} Among feasible candidates, the only term
-that requires explicit optimization is recall retention, defined as
+\textbf{Scoring feasible candidates.}
+Among feasible candidates, both objectives are normalized over
+$\Theta_{\text{feasible}}$ before weighting, so that the weights
+$w_S$ and $w_R$ reflect the intended relative importance rather
+than the raw scale of each term.
+The range-normalized recall retention and skip rate are defined as:
 \begin{equation}
-    \rho(\theta) = 1 - \frac{R_{\text{base}} - R(\theta)}{\delta_R},
+    \tilde{\rho}(\theta)
+    = \frac{\rho(\theta) - \min_{\Theta_f}\rho}
+           {\max_{\Theta_f}\rho - \min_{\Theta_f}\rho},
+    \qquad
+    \tilde{S}_r(\theta)
+    = \frac{S_r(\theta) - \min_{\Theta_f}S_r}
+           {\max_{\Theta_f}S_r  - \min_{\Theta_f}S_r},
 \end{equation}
-which equals $1$ when recall matches the baseline and $0$ when recall reaches
-the lowest acceptable level $R_{\text{base}} - \delta_R$. This term is bounded
-in $[0, 1]$ over the feasible region, making it directly comparable to
-$S_r(\theta)$ in the weighted score.
+where $\Theta_f \equiv \Theta_{\text{feasible}}$,
+and $\rho(\theta)$ is defined as in Equation~\eqref{eq:rho}.
+Both normalized terms are bounded in $[0, 1]$ over the feasible
+region, ensuring that the weights $w_S$ and $w_R$ directly control
+the relative influence of each objective on the final ranking.
 
-\textbf{Optimal selection.} The optimal parameter set $\theta^*$ is selected as
+\textbf{Optimal selection.}
+The optimal parameter set $\theta^*$ is selected as
 \begin{equation}
-    \theta^* = \arg\max_{\theta \in \Theta_{\text{feasible}}}
-    \left[ w_R\,\rho(\theta) + w_S\,S_r(\theta) \right],
+    \theta^*
+    = \arg\max_{\theta \in \Theta_{\text{feasible}}}
+      \Bigl[
+          w_R\,\tilde{\rho}(\theta)
+          +
+          w_S\,\tilde{S}_r(\theta)
+      \Bigr],
 \end{equation}
-where $\Theta_{\text{feasible}} = \{\theta \in \Theta : R(\theta) \geq
-R_{\text{base}} - \delta_R \text{ and } T_{\text{skip}}(\theta) \leq \beta
-\cdot T_{\text{DL}}\}$, and the nonnegative weights satisfy $w_S + w_R = 1$.
+where $\Theta_{\text{feasible}} = \{\theta \in \Theta :
+R(\theta) \geq R_{\text{base}} - \delta_R
+\ \text{and}\ T_{\text{skip}}(\theta) \leq \beta \cdot T_{\text{DL}}\}$,
+and the nonnegative weights satisfy $w_S + w_R = 1$.
 
 \textbf{FAR of the skip-enabled system.} The skip module $\mathcal{S}$ acts as
 a conservative gate: skipped frames are labeled negative directly, while passed
@@ -774,11 +792,12 @@ Dataset}\label{fire-and-smoke-indoor-video-dataset}
     no head,
     range=2-,
     centered tabularray = {
-    colspec = {ccccccccc},
+    width = \textwidth,
+    colspec = {X[2,c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]},
     colsep = {3pt},
     hlines,
     vlines,
-    cells = {font = \scriptsize, halign = c, valign = m},
+    cells = {font = \small, halign = c, valign = m},
     cell{1}{1} = {halign = l},
     cell{1}{2} = {halign = l},
     row{1} = {font = \bfseries\scriptsize},
@@ -1081,7 +1100,7 @@ frames while still improving operational false alarm behavior.
     configurations above the dashed line satisfy the recall constraint
     $\delta_R = 0.015$. The ``Recall (\%)'' column reports the retained
     recall alongside the absolute drop relative to the baseline in
-    parentheses, i.e., $R\ (-\Delta R)$.}
+    parentheses, i.e., $R\ (-\Delta R)$. The best and second-best results for each metric are highlighted in \textbf{bold} and \textit{\underline{italic underline}}, respectively.}
     \label{tb:val_results_frameDiff}
     \csvreader[separator=semicolon,
     no head,
@@ -1094,7 +1113,7 @@ frames while still improving operational false alarm behavior.
         vlines,
         cells = {font = \scriptsize, halign = c, valign = m},
         row{1} = {font = \bfseries\scriptsize},
-        row{2} = {font = \bfseries\tiny},
+        row{2} = {font = \bfseries\scriptsize},
         cell{1}{1}  = {r=2}{c},  % Exp. spans rows 1-2
         cell{1}{2}  = {c=4}{c},  % Parameters spans cols 2-5
         cell{1}{6}  = {c=4}{c},  % Metrics spans cols 6-9
@@ -1226,14 +1245,22 @@ smoke diffusion. This parameter is fixed to isolate the effect of the
 remaining hyperparameters.
 
 \begin{table*}[hbtp]
-    \caption{Validation-set performance and hyperparameter configurations for Accumulation Motion Detector (AccMotionDet) combinations. Note that the ``Recall (\%)'' column displays the retained recall alongside the absolute recall drop relative to the baseline in parentheses, i.e., Recall (-Recall Drop).}
+    \caption{Validation-set performance and hyperparameter configurations for
+    Accumulation Motion Detector (AccMotionDet) combinations. Note that the
+    ``Recall (\%)'' column displays the retained recall alongside the absolute
+    recall drop relative to the baseline in parentheses, i.e., Recall (-Recall
+    Drop). The best and second-best results for each metric are highlighted in
+    \textbf{bold} and \textit{\underline{italic underline}}, respectively.
+    Note that Motion increment $\omega=5$ and Decay rate $\delta=0.1$ are fixed
+    across all configurations.
+    }
     \label{tb:val_results_accMotionDet}
     \csvreader[separator=semicolon,
     no head,
     range=1-,
     centered tabularray = {
         width = \textwidth,
-        colspec = {X[2,c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]},
+        colspec = {X[2,c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]},
         colsep = {1pt},
         hlines,
         vlines,
@@ -1243,8 +1270,8 @@ remaining hyperparameters.
         % ↓ only 3 new lines needed
         cell{1}{1} = {r=2}{c},   % Exp. spans rows 1-2
         cell{1}{2} = {c=8}{c},   % Parameters spans cols 2-9
-        cell{1}{10} = {c=4}{c},  % Metrics spans cols 10-13
-        cell{1}{14} = {r=2}{c},  % Combined Score spans rows 1-2
+        cell{1}{8} = {c=4}{c},  % Metrics spans cols 10-13
+        cell{1}{12} = {r=2}{c},  % Combined Score spans rows 1-2
     },
     ]{4.table/opt_selected_rp__per_frame_accMotionDet.csv}{}{
     \csvexpval\csvcoli &
@@ -1258,9 +1285,7 @@ remaining hyperparameters.
     \csvexpval\csvcolix &
     \csvexpval\csvcolx &
     \csvexpval\csvcolxi &
-    \csvexpval\csvcolxii &
-    \csvexpval\csvcolxiii &
-    \csvexpval\csvcolxiv
+    \csvexpval\csvcolxii
     }
 \end{table*}
 
@@ -1374,13 +1399,14 @@ detection pipeline is quantified in Table \ref{tb:perf_per_frame}
 system without skipping.
 
 \begin{table}[htbp]
-    \caption{End-to-End System Performance Comparison on Test Set. Recall, FAR, Accuracy, Precision are reported in percentage (\%). FPS is reported in frames per second, averaged across the entire frames of the videos in the test set.}
+    \caption{End-to-End System Performance Comparison on Test Set. Recall, FAR, Accuracy, Precision are reported in percentage (\%). FPS is reported in frames per second, averaged across the entire frames of the videos in the test set. The best and second-best results for each metric are highlighted in \textbf{bold} and \textit{\underline{italic underline}}, respectively.}
     \label{tb:perf_per_frame}
     \csvreader[separator=semicolon,
         no head,
         range=1-,
         centered tabularray = {
-        colspec = {lllllllll},
+        width = \textwidth,
+        colspec = {X[2,c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]},
         colsep = {4pt},
         hlines,
         vlines,
@@ -1443,25 +1469,28 @@ illumination changes or camera artefacts, trading a fixed minimum
 detection latency of \(\lceil \tau_\text{persist} \times W \rceil\)
 frames for a reduction in false alarm rate.
 
-Table \ref{tb:cmp_base_temp} compares our method against other temporal
-processing techniques, evaluating both detection performance and
-computational efficiency.
+We follow the implementation and hyperparameter selection protocol of
+\citeproc{ref-de2023hybrid}{{[}10{]}} on our validation set
+\(\mathcal{D}_\text{val}\), and get two representative configurations
+shown in the table below:
 
-\begin{table*}[htbp]
-    \caption{Comparison of Video-level performance metrics, measuring the delay and initial detection speed.}
-    \label{tb:cmp_base_temp}
+\begin{table*}[hbtp]
+    \caption{Performance grid search of TPT method. The best and second-best results for each metric are highlighted in \textbf{bold} and \textit{\underline{italic underline}}, respectively.}
+    \label{tb:gridsearch_tpt}
     \csvreader[separator=semicolon,
-        no head,
-        range=2-,
-        centered tabularray = {
-        colspec = {llllllll},
-        colsep = {4pt},
-        hlines,
-        vlines,
-        cells = {font = \small, halign = c, valign = m},
-        row{1} = {font = \bfseries\small},
+    no head,
+    range=1-,
+    centered tabularray = {
+    width = \columnwidth,
+    colspec = {X[2,c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]},
+    colsep = {1pt},
+    hlines,
+    vlines,
+    cells = {font = \small, halign = c, valign = m},
+    row{1} = {font = \bfseries\scriptsize},
     },
-    ]{4.table/tb_cmp_base_temp.csv}{}{
+    ]{4.table/selected_tb_gridsearch_Tpt.csv}{}{
+        \csvexpval\csvcoli &
         \csvexpval\csvcolii &
         \csvexpval\csvcoliii &
         \csvexpval\csvcoliv &
@@ -1470,6 +1499,42 @@ computational efficiency.
         \csvexpval\csvcolvii &
         \csvexpval\csvcolviii &
         \csvexpval\csvcolix
+    }
+\end{table*}
+
+
+Table \ref{tb:cmp_other_temp} compares our method against other temporal
+processing techniques, evaluating both detection performance and
+computational efficiency.
+
+And we found two Configuration of TPT let call it
+\(\text{TPT}_\text{strict}\) and \(\text{TPT}_\text{balanced}\). The
+strict ones (\(W = 5, \tau_\text{persist} =
+0.2\)) and the balanced one (\(W = 10, \tau_\text{persist} = 0.5\))
+achieve a recall of 98.7\%.
+
+\begin{table*}[htbp]
+    \caption{Comparison of Video-level performance metrics, measuring the delay and initial detection speed. The best and second-best results for each metric are highlighted in \textbf{bold} and \textit{\underline{italic underline}}, respectively.}
+    \label{tb:cmp_other_temp}
+    \csvreader[separator=semicolon,
+        no head,
+        range=1-,
+        centered tabularray = {
+        colspec = {X[2,c]X[c]X[c]X[c]X[c]X[c]X[c]},
+        colsep = {3pt},
+        hlines,
+        vlines,
+        cells = {font = \small, halign = c, valign = m},
+        row{1} = {font = \bfseries\small},
+    },
+    ]{4.table/tb_cmp_other_temp.csv}{}{
+        \csvexpval\csvcoli &
+        \csvexpval\csvcolii &
+        \csvexpval\csvcoliii &
+        \csvexpval\csvcoliv &
+        \csvexpval\csvcolv &
+        \csvexpval\csvcolvi &
+        \csvexpval\csvcolvii
     }
 \end{table*}
 
@@ -1484,61 +1549,10 @@ achieves higher recall and requires significantly less aggregate
 computational time per second of video, proving highly competitive in
 false alarm suppression.
 
-\subsubsection{Ablation and Qualitative
-Analysis}\label{ablation-and-qualitative-analysis}
+\subsubsection{Quantitative and Qualitative
+Analysis}\label{quantitative-and-qualitative-analysis}
 
-\paragraph{Component Analysis: Efficacy of the Skip
-Module}\label{sec:comp-perf}
-
-First, we evaluate the skip modules in isolation to ensure they function
-as safe gatekeepers. The primary objective is to maximize the Filter
-Rate without compromising Recall. Because the ultimate goal of the
-system is simply to detect whether \emph{any} hazard exists (regardless
-of whether it is fire or smoke), we measure safety using a unified
-anomaly recall metric. We also compare this against the recall
-capabilities of the lightweight standalone models (M1 and M2).
-
-\emph{Analysis:} As demonstrated in Table \ref{tb:tb_no_skip_perf},
-lightweight standalone models (M1 and M2) offer fast processing but miss
-between 11\% and 15\% of critical anomaly events. Approach 1 (Naive
-Motion) operates extremely fast (1.2ms) but struggles with the slow,
-diffusing nature of smoke. This deficiency drags its overall combined
-Recall down to 97.2\%---an unacceptable safety margin for early-warning
-systems. Conversely, our proposed Approach 2 integrates color and
-texture heuristics to successfully capture both rapid flames and
-semi-transparent smoke. It achieves a near-perfect combined Recall of
-99.1\% while actually improving the Filter Rate to 72.1\% by effectively
-distinguishing true anomaly indicators from environmental noise (e.g.,
-swaying trees).
-
-To isolate the impact of our specific heuristic rules, we conducted an
-ablation study comparing the naive motion baseline (Approach 1) against
-the full rule-based engine (Approach 2). While Approach 1 performed
-adequately for dynamic, rapidly flickering fires, its recall dropped
-significantly on smoke events. Because smoke diffuses slowly and lacks
-sharp edge transitions, naive background subtraction thresholds
-frequently misclassified it as static background lighting changes.
-
-The integration of the rule-based engine in Approach 2---specifically
-the grayish-color tracking and temporal texture consistency
-rules---corrected this deficiency, bridging the gap in Recall. This
-quantitative improvement is supported by qualitative reviews of edge
-cases (see Figure 4).
-
-\emph{(Insert Figure 4 here: 2x2 grid showing a frame with smoke missed
-by Appr 1 but caught by Appr 2, and a safe frame with swaying trees
-flagged by Appr 1 but skipped by Appr 2).}
-
-As illustrated in Figure 4, Approach 2 successfully captures
-slow-diffusion smoke events that lack the raw pixel displacement
-required to trigger Approach 1. Furthermore, in scenes featuring subtle
-twilight illumination shifts and swaying foliage, Approach 1 frequently
-generated false positives (unnecessarily passing safe frames to the BIG
-MODEL). Approach 2 successfully filtered these frames by applying
-color-channel heuristics, verifying that the moving pixels did not match
-the chromatic signatures of either fire or smoke.
-
-\textbf{Speed of Skip Module}:
+\paragraph{Efficiency of Skip Module:}\label{efficiency-of-skip-module}
 
 \begin{figure}[htbp]
   \centering
@@ -1546,12 +1560,53 @@ the chromatic signatures of either fire or smoke.
   \caption{Proposed pipeline with Skip Frame Mechanism for Indoor Fire and Smoke Detection}\label{fig:fps_increase}
 \end{figure}
 
-\begin{itemize}
-\item
-  Failure case analysis
-\item
-  Qualitative visualization
-\end{itemize}
+\paragraph{Qualitative Analysis}\label{qualitative-analysis}
+
+Figure\textasciitilde{}\ref{fig:qualitative} illustrates representative
+success and failure cases of the AccMotionDet skip module on the test
+set \(\mathcal{D}_\text{test}\).
+
+\textbf{Success cases.} The top row shows two canonical scenarios where
+\(\mathcal{S}\) operates as intended. In the first case, a static indoor
+background frame --- with no inter-frame motion --- is correctly skipped
+(\(s_t = 0\)), avoiding an unnecessary invocation of \(\mathcal{M}\) and
+contributing directly to the 44.39\% skip rate reported in
+Table\textasciitilde{}\ref{tb:val_results_accMotionDet}. In the second
+case, a frame containing active fire (left) and smoke (right) exhibits
+sufficient accumulated motion to trigger inference (\(s_t = 1\)), and
+\(\mathcal{M}\) correctly raises an alarm. These cases confirm that
+\(\mathcal{S}\) reliably distinguishes scene-level activity from
+quiescence in the target indoor surveillance setting.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\linewidth,keepaspectratio]{3.fig/fig_qualitative_success.pdf}
+  \caption{Qualitative results illustrating successful skip module operations. (a) Static backgrounds are correctly skipped ($s_t = 0$), saving computation. (b) and (c) Active fire and smoke scenes trigger the motion accumulator, correctly prompting the full deep learning model to evaluate the frame ($s_t = 1$).}\label{fig:qualitative_success}
+\end{figure}
+
+The bottom row exposes two structural limitations of the motion-based
+gating approach. First, in a slow-onset smoke video, the initial frames
+of smoke diffusion produce minimal inter-frame pixel change --- below
+the activation threshold \(\tau_m\) of the AccMotionDet accumulator ---
+causing \(\mathcal{S}\) to skip these frames and delay the first alarm.
+This represents the primary recall risk identified in
+Section\textasciitilde{}\ref{sec:hyperparam}: the skip module is
+conservative by design, but gradual diffusion events are the edge case
+where this conservatism incurs a safety cost. Second, in a scene
+containing continuous background motion (e.g., a person walking
+repeatedly through the frame), \(\mathcal{S}\) assigns \(s_t = 1\) to
+nearly every frame, reducing the skip rate to near zero and negating the
+computational efficiency gain for that video. Both failure modes are
+consistent with the motion-only design of \(\mathcal{S}\): they arise
+not from classification errors in \(\mathcal{M}\), but from the inherent
+limitation of using inter-frame motion as a sole proxy for scene
+informativeness.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\linewidth,keepaspectratio]{3.fig/fig_qualitative_failure.pdf}
+  \caption{Qualitative results illustrating skip module failure cases. (a) Slowly developing smoke is wrongly skipped because the subtle motion fails to trigger the accumulator. (b) Persistent non-fire motion (e.g., a walking person) saturates the accumulator, forcing continuous wasted inferences. (c) A frame is correctly passed to the deep learning model, but the model incorrectly predicts the label (a false positive or false negative).}\label{fig:qualitative_failure}
+\end{figure}
 
 \section{Conclusion}\label{sec:conclusion}
 
