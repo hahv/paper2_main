@@ -16,6 +16,6 @@ extra_cfgs:
           mask_th: 5
           max_val: 15
           decay: 1
-      n_chk: 30 # forced check interval (skip state -> eager state transition)
-      w_clr: 5 # eager exit window (frames) - number of consecutive clear frames to exit eager state and reset skip proc
+      n_chk: 50 # forced check interval (skip state -> eager state transition)
+      w_clr: 3 # eager exit window (frames) - number of consecutive clear frames to exit eager state and reset skip proc
 
