@@ -1,0 +1,24 @@
+\begin{table*}[htbp]
+    \caption{Comparison of Video-level performance metrics, measuring the delay and initial detection speed. The best and second-best results for each metric are highlighted in \textbf{bold} and \textit{\underline{italic underline}}, respectively.}
+    \label{tb:cmp_other_temp}
+    \csvreader[separator=semicolon,
+        no head,
+        range=1-,
+        centered tabularray = {
+        colspec = {X[2,c]X[c]X[c]X[c]X[c]X[c]X[c]},
+        colsep = {3pt},
+        hlines,
+        vlines,
+        cells = {font = \small, halign = c, valign = m},
+        row{1} = {font = \bfseries\small},
+    },
+    ]{./4.table/out/tb_cmp_other_temp_with_eager.csv}{}{
+        \csvexpval\csvcoli &
+        \csvexpval\csvcolii &
+        \csvexpval\csvcoliii &
+        \csvexpval\csvcoliv &
+        \csvexpval\csvcolv &
+        \csvexpval\csvcolvi &
+        \csvexpval\csvcolvii
+    }
+\end{table*}

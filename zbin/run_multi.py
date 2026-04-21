@@ -184,6 +184,13 @@ def main():
 
     did_send_meta = False
 
+    # with ConsoleLog('All cfgs:'):
+    #     for idx, config in tqdm(enumerate(all_optim_run_cfgs)):
+    #         pprint(config.methodCfg)
+
+    #     assert 0, "Debugging: Check the final list of configs to run after
+    #     processing optim configs and task split."
+
     for idx, config in tqdm(enumerate(all_optim_run_cfgs)):
         current_cfg: Config = config
         if args.pre_computed_no_skip_dir:

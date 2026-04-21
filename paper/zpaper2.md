@@ -879,6 +879,7 @@ surveillance setting.
 \input{./3.fig/fig_quality_success.tex}
 ```
 
+**Failure Cases**
 
 The bottom row exposes two structural limitations of the motion-based
 gating approach.
@@ -904,6 +905,23 @@ motion as a sole proxy for scene informativeness.
 \input{./3.fig/fig_quality_failure.tex}
 ```
 <!-- !END_SYNC_BLOCK -->
+
+**Fix for slow-onset smoke:** We intro the skip module with eager mode and
+periodically check for specific scences
+
+```{=latex}
+\input{./6.algo/skip_module_period_check.tex}
+```
+
+We do hyper-parameter search on $D_\text{val}$ to find the optimal params for
+this eager mode.
+```{=latex}
+\input{./4.table/tb_gridsearch_accMotionDetEager.tex}
+```
+we Compare again on test set
+```{=latex}
+\input{./4.table/tb_cmp_other_temp_eager.tex}
+```
 
 # Conclusion {#sec:conclusion label="Conclusion"}
 

@@ -1,0 +1,74 @@
+input: raw/_raw_tb_cmp_other_temp_with_eager.csv
+output: output/
+sep: ";"
+
+steps:
+  # ── 1. RENAME FOR DISPLAY ─────────────────────────────────
+  - type: rename
+    mapping:
+      "metric_recall (tpr)": "Recall"
+      "metric_fpr (false alarm rate)": "FAR"
+      "metric_accuracy": "Accuracy"
+      "metric_f1_score": "F1-Score"
+      "metric_precision": "Precision"
+      "metric_fps": "FPS"
+
+  # ── 2. FORMAT METRICS ─────────────────────────────────────
+  - type: add_column
+    cols:
+      - name: Recall
+        expr: "(df['Recall'] * 100).round(3)"
+      - name: FAR
+        expr: "(df['FAR'] * 100).round(3)"
+      - name: Accuracy
+        expr: "(df['Accuracy'] * 100).round(3)"
+      - name: F1-Score
+        expr: "df['F1-Score'].round(4)"
+      - name: Precision
+        expr: "(df['Precision'] * 100).round(3)"
+      - name: FPS
+        expr: "df['FPS'].round(2)"
+
+  # ── 3. SORT & SELECT ───────────────────────────────────────
+  - type: sort
+    by: [Recall, FAR, FPS]
+    ascending: [true, true, false]
+
+  - type: rename
+    mapping:
+      "Recall": "Recall (\\%)"
+      "FAR": "FAR (\\%)"
+      "Accuracy": "Accuracy (\\%)"
+      "Precision": "Precision (\\%)"
+      "F1-Score": "F1 Score"
+  - type: sort
+    by: ["order"]
+    ascending: [true]
+  - type: select
+    columns:
+      - Method
+      - "Recall (\\%)"
+      - "FAR (\\%)"
+      - "Accuracy (\\%)"
+      - "Precision (\\%)"
+      - "F1 Score"
+      - "FPS"
+
+  # ── 4. STAMP ARROWS ───────────────────────────────────────
+  - type: header_arrow
+    columns:
+      "Recall (\\%)": up
+      "FAR (\\%)": down
+      "Accuracy (\\%)": up
+      "Precision (\\%)": up
+      "F1 Score": up
+      "FPS": up
+
+  # ── 5. HIGHLIGHT BEST ─────────────────────────────────────
+  - type: highlight_best
+    best: [bold, color]
+    second: [underline, color]
+    best_color: black
+    second_color: black
+    skip_rows: 0
+    strict: false

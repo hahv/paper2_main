@@ -58,6 +58,19 @@ class BaseSkipProc(ABC):
         """
         pass
 
+    def reset(self):
+        """Reset internal state between videos. Override in subclasses to add more resets."""
+        if self.motion_det is not None:
+            self.motion_det.reset()
+
+    def update_eager_state(self, pred_label: str) -> None:
+        """
+        Called by TempMethod after DL inference completes.
+        Subclasses with eager mode override this to update their internal state.
+        Default: no-op (for skip procs that don't have eager mode).
+        """
+        pass
+
     def get_dummy_result(self, class_names) -> dict:
         """Returns a standardized dummy result for skipped frames."""
         num_classes = len(class_names)

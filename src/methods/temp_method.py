@@ -18,8 +18,7 @@ class TempMethod(NoTempMethod):
 
     # ! This video done, reset the skip proc motion det if any
     def after_infer_video(self, video_path: str):
-        if self.skip_proc.motion_det is not None:
-            self.skip_proc.motion_det.reset()
+        self.skip_proc.reset()  # handles motion_det + eager state reset
         super().after_infer_video(video_path)
 
     def _resolve_pre_calc_time(self, frame_idx: int) -> float | None:
@@ -98,4 +97,6 @@ class TempMethod(NoTempMethod):
                 "Meta data from skip proc is empty!"
             )
             infer_result.update(meta_data)
+            # ── NEW: feed DL result back to skip proc for eager state update ──
+            self.skip_proc.update_eager_state(infer_result.get("predLabel", ""))
             return infer_result
