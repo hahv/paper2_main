@@ -63,7 +63,7 @@ class GlobalConst:
     EXTERNAL_CFG = "config/zruns/_run_ext.yaml"
 
     # Config related
-    OPTIM_OUTDIR = "zout/zoptim_sanity"
+    OPTIM_OUTDIR = "zout/zoptim_val"
 
     # Optim
     METHOD_NAME = "method_name"

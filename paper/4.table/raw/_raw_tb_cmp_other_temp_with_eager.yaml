@@ -28,6 +28,8 @@ steps:
         expr: "(df['Precision'] * 100).round(3)"
       - name: FPS
         expr: "df['FPS'].round(2)"
+      - name: "Skip Rate"
+        expr: "(df['Skip Rate'] * 100).round(2)"
 
   # ── 3. SORT & SELECT ───────────────────────────────────────
   - type: sort
@@ -41,6 +43,7 @@ steps:
       "Accuracy": "Accuracy (\\%)"
       "Precision": "Precision (\\%)"
       "F1-Score": "F1 Score"
+      "Skip Rate": "Skip Rate (\\%)"
   - type: sort
     by: ["order"]
     ascending: [true]
@@ -52,6 +55,7 @@ steps:
       - "Accuracy (\\%)"
       - "Precision (\\%)"
       - "F1 Score"
+      - "Skip Rate (\\%)"
       - "FPS"
 
   # ── 4. STAMP ARROWS ───────────────────────────────────────
@@ -62,6 +66,7 @@ steps:
       "Accuracy (\\%)": up
       "Precision (\\%)": up
       "F1 Score": up
+      "Skip Rate (\\%)": up
       "FPS": up
 
   # ── 5. HIGHLIGHT BEST ─────────────────────────────────────

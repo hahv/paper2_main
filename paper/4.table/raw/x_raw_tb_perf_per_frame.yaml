@@ -13,13 +13,13 @@ steps:
       - {
           column: Method,
           op: replace,
-          search: "1GPU_SV__ds_UFireIndoorTest__mt_no_temp_method__af4b0d32a3d2__20260303.180228_per_frame",
+          search: "MainPC__ds_UFireIndoorTest__mt_no_temp_method__af4b0d32a3d2__20260330.205208",
           replace-with: "Our Big Model (without Skip Module)",
         }
       - {
           column: Method,
           op: replace,
-          search: "1GPU_SV__ds_UFireIndoorTest__mt_temp_method_motion_block__e1ccb7b889a0__20260401.144240_per_frame",
+          search: "MainPC__ds_UFireIndoorTest__mt_temp_method_motion_block__e1ccb7b889a0__20260421.145709",
           replace-with: "Our Big Model (with Skip Module)",
         }
       - {

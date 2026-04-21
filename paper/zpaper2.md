@@ -4,7 +4,7 @@
 <!-- TARGET_PROJECT: G:\My Drive\1_PhD\Obsidian\Home\3. Writing\paperfire2 -->
 <!-- SYNC_TARGET_FILE: 00_Meta_Abstract.md-->
 <!-- BLOCK_ID: abstract -->
-date: 2026.04.20
+date: 2026.04.21
 title: "Efficient Real-Time Fire Surveillance: A Lightweight Motion-Heuristic
 Skip Module for Accelerated Inference"
 abstract: "Conventional deep learning (DL)-based fire and smoke detection systems process
@@ -417,9 +417,9 @@ models alongside our BIG model:
   of xx.xx\%.}. We use input size INPUT_SIZE  = (3, 360, 640)
 
 **Implementation Details**: Unless otherwise specified, all experiments were
-conducted on a workstation equipped with an Intel Core i9-12900K CPU, 64 GB DDR5
+conducted on a workstation equipped with an Intel Core i9-10900K CPU, 64 GB DDR4
 system memory, and an NVIDIA GeForce RTX 3090 GPU (24 GB VRAM), running Windows
-10 Pro (build 19044). Deep learning inference was performed using PyTorch 2.7.1
+10 Pro (22H2, build 19045). Deep learning inference was performed using PyTorch 2.7.1
 under CUDA 12.9, and video processing and motion estimation were carried out
 using OpenCV 4.11 (CPU-only).
 
@@ -905,6 +905,8 @@ motion as a sole proxy for scene informativeness.
 \input{./3.fig/fig_quality_failure.tex}
 ```
 <!-- !END_SYNC_BLOCK -->
+
+#### Eager Mode: Recovery of Missed Cases
 
 **Fix for slow-onset smoke:** We intro the skip module with eager mode and
 periodically check for specific scences

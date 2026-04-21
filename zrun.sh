@@ -19,8 +19,9 @@ DEFAULT_CFG_SANITY="$CFG_DIR/zrun_cfg_opt_test.yaml"
 DEFAULT_CFG_VAL="$CFG_DIR/zrun_cfg_opt_val.yaml"
 
 DEFAULT_PRECOM_SANITY="./zout/zoptim_sanity/MainPC__ds_UFireIndoor2__mt_no_temp_method__af4b0d32a3d2__20260316.172122"
-DEFAULT_PRECOM_VAL="./zout/zoptim_val/MainPC__ds_UFireIndoorVal__mt_no_temp_method__af4b0d32a3d2__20260327.162459"
-DEFAULT_PRECOM_TEST="./zout/zruns/MainPC__ds_UFireIndoorTest__mt_no_temp_method__af4b0d32a3d2__20260330.205208"
+DEFAULT_PRECOM_VAL="./zout/zruns/_precomputed_NoTemp/MainPC__ds_UFireIndoorVal__mt_no_temp_method__af4b0d32a3d2__20260421.140547"
+DEFAULT_PRECOM_TEST="./zout/zruns/_precomputed_NoTemp/MainPC__ds_UFireIndoorTest__mt_no_temp_method__af4b0d32a3d2__20260330.205208"
+
 
 DEFAULT_OUTDIR_SANITY="zout/zoptim_sanity"
 DEFAULT_OUTDIR_VAL="zout/zoptim_val"

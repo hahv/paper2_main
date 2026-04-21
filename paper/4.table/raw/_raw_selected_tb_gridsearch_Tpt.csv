@@ -1,4 +1,0 @@
-experiment;window_size;persist_thres;metric_recall (tpr);metric_fpr (false alarm rate);Recall_Drop;FAR_drop;delta_R;metric_accuracy;metric_f1_score;metric_fps;metric_precision
-Big Model without Skip Module (Baseline);;;0.943473816;0.00740287;0;;;0.982602656;0.956648588;24.05961037;0.970196605
-TPT method (Conservative: safety-first);5;0.2;0.942171991;0.007385369;0.001301825;1.7501E-05;0.015;0.98235172;0.955992758;24.05574036;0.970225096
-TPT method (Balanced between Recall Drop and FAR decrease gain);10;0.5;0.936964691;0.007315366;0.006509125;8.7504E-05;0.015;0.981348038;0.953360319;24.05550003;0.970339894
