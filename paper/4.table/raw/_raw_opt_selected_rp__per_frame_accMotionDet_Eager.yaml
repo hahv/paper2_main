@@ -1,0 +1,158 @@
+input: raw/_raw_opt_selected_rp__per_frame_accMotionDet_Eager.csv
+output: output/
+sep: ";"
+prepend_lines:
+  - "Method;Parameters;; Metrics;;;;Ranking Score" # ← raw group header row
+
+steps:
+  # ── 1. CLEAN UP COLUMN NAMES
+  - type: rename
+    mapping:
+      "experiment": "Experiment"
+      "skip_proc.name": "Method"
+      "Combined_Score": "Combined Score"
+      "metric_recall (tpr)": "Recall"
+      "metric_fpr (false alarm rate)": "FPR"
+      "metric_accuracy": "Accuracy"
+      "metric_f1_score": "F1_Score"
+      "metric_fps": "FPS"
+      "metric_precision": "Precision"
+      "w_S": "Weight Skip"
+      "w_F": "Weight FAR"
+      "w_R": "Weight Recall"
+      "delta_R": "Recall Delta"
+      "skip_rate": "Skip Rate"
+      "skip_proc.params.n_chk": "N_chk"
+      "skip_proc.params.w_clr": "W_clr"
+      "Recall_Drop" : "Recall Drop"
+
+  #  2. DROP JUNK COLUMNS
+  - type: drop
+    columns:
+      - skip_proc.params.motion.name # Redundant (always acc_motion_det)
+
+  #  3. FILTER SELECTED ROWS
+  - type: filter
+    conditions:
+      - { column: select, op: "==", value: "x" }
+
+  #  4. ROUND METRICS
+  # Using add_column to round floats so the CSV is readable
+  - type: add_column
+    cols:
+      - name: Combined Score
+        expr: "df['Combined Score'].round(4).replace(-1.0, 9999)" # Replace -1 with 9999 for better sorting (since -1 means invalid/failed config)
+      - name: Recall
+        expr: "(df['Recall'] * 100).round(2)" # Convert to percentage
+      - name: FPR
+        expr: "(df['FPR'] * 100).round(3)" # Convert to percentage
+      - name: Accuracy
+        expr: "(df['Accuracy'] * 100).round(2)"
+      - name: F1_Score
+        expr: "df['F1_Score'].round(2)"
+      - name: Precision
+        expr: "(df['Precision'] * 100).round(2)"
+      - name: FPS
+        expr: "df['FPS'].round(1)"
+      - name: Skip Rate
+        expr: "(df['Skip Rate'] * 100).round(2)"
+      - name: "Exp."
+        expr: "df['Experiment'].str.replace('.*mt_temp_method_motion_block_eager.*', 'AccMotionDet (Eager Mode)', regex=True).str.replace('.*mt_temp_method_motion_block.*', 'AccMotionDet', regex=True).str.replace('.*mt_no_temp_method.*', 'Baseline (No Skip module)', regex=True)"
+      - name: "Recall Drop"
+        expr: "(df['Recall Drop'] * 100).round(2)" # Convert to percentage
+
+  #  5. REORDER & SELECT COLUMNS
+  - type: rename
+    mapping:
+      "N_chk": "$N_{chk}$"
+      "W_clr": "$W_{clr}$"
+      "Skip Rate": "Skip Rate (\\%)"
+      "Recall": "Recall (\\%)"
+      "FPR": "FPR (\\%)"
+
+  - type: select
+    columns:
+      # Identification
+      - Exp.
+      # Hyperparameters
+      - "$N_{chk}$"
+      - "$W_{clr}$"
+
+      # Primary Metrics
+      - "Recall (\\%)"
+      - "FPR (\\%)"
+      - "Skip Rate (\\%)"
+      - FPS
+      - Combined Score
+      - "Recall Drop"
+      # Detailed
+      # - recall_retention
+      # - far_reduction_norm
+      # - Skip Rate
+      # - Weight Skip
+      # - Weight FAR
+      # - Weight Recall
+      # - Recall Delta
+
+      # Secondary Metrics
+      # - F1_Score
+      # - Accuracy
+      # - Precision
+
+  #  6. SORT
+  # Sort by highest score first
+  - type: sort
+    by: ["Combined Score"]
+    ascending: [false]
+  #  7. REPLACE SENTINEL → DISPLAY VALUE   ← ADD THIS
+  - type: add_column
+    cols:
+    - name: Combined Score
+      expr: "df['Combined Score'].apply(lambda x: '-' if x >= 9997 else f'{x:.4f}')"
+  - type: fillna
+    mapping:
+      "$N_{chk}$": "-"
+      "$W_{clr}$": "-"
+      "Skip Rate (\\%)": "-"
+      "Combined Score": "-"
+
+  #  8. STAMP ARROWS
+  - type: header_arrow
+    columns:
+      "Recall (\\%)":       up
+      "Skip Rate (\\%)":    up
+      "FPR (\\%)":          down
+      FPS:                  up
+      "Combined Score":     up
+
+  #  9. HIGHLIGHT BEST
+  - type: highlight_best
+    best:         [bold, color]
+    second:       [underline, color]
+    best_color:   black
+    second_color: black
+    skip_rows: 0
+    strict: false
+
+  #  10. APPEND DROP SUFFIX (after highlighting)
+  - type: add_column
+    cols:
+      - name: "Recall (\\%) $\\uparrow$"
+        expr: >
+          df.apply(lambda x:
+            str(x["Recall (\\%) $\\uparrow$"])
+            if pd.isna(x["Recall Drop"])
+            else str(x["Recall (\\%) $\\uparrow$"]) + " (-" + f"{x['Recall Drop']:.2f}" + ")",
+            axis=1)
+
+  #  11. DROP HELPER COLUMN
+  - type: drop
+    columns:
+      - "Recall Drop"
+
+  #  12. CLEAN NAN VALUES
+  - type: add_column
+    cols:
+      - name: "Combined Score $\\uparrow$"
+        expr: >
+          df["Combined Score $\\uparrow$"].replace('nan', '-')

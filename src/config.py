@@ -206,6 +206,7 @@ class MethodSelector(BaseSelectorCfg[MethodCfg]):
     method_used: Optional[MethodCfg] = None
 
     def post_init(self):
+        # pprint(self.list_methods)
         self.method_used = self._resolve_selection(
             self.list_methods,
             self.selected_method,  # ty:ignore[invalid-argument-type]

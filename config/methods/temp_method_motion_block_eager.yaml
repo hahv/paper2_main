@@ -1,0 +1,21 @@
+# ! prof. rule
+extra_cfgs:
+  result_proc:
+    video: [video_block_skip_rs_proc, fgmask_block_skip_rs_proc]
+  skip_proc:
+    name: motion_only_block_skip_proc_eager # no_skip_proc, rand_skip_proc
+    params:
+      scale_factor: 0.5
+      block_size_orig: 32
+      block_ratio_th: 0.05
+      motion:
+        name: acc_motion_det.AccMotionDet
+        params:
+          diff_frame_th: 5
+          impact_plus_one: 5
+          mask_th: 5
+          max_val: 15
+          decay: 1
+      n_chk: 30 # forced check interval (skip state -> eager state transition)
+      w_clr: 5 # eager exit window (frames) - number of consecutive clear frames to exit eager state and reset skip proc
+
