@@ -16,8 +16,11 @@ class MotionOnlyBlockSkipProcEager(BaseBlockSkipProc):
 
         # Eager mode state — start True (skipping must be earned)
         self.eager_mode: bool = True
-        self.non_firemmoke_streak: int = 0
+        self.nonfire_streak: int = 0
         self.skip_streak: int = 0
+
+        self.fire_confirm_k: int = self.params.get("fire_confirm_k", 2)
+        self.fire_streak: int = 0
         # self.min_roi_ratio = self.params.get("min_roi_ratio")
 
     def should_skip(
@@ -107,20 +110,23 @@ class MotionOnlyBlockSkipProcEager(BaseBlockSkipProc):
 
         if pred_label.lower() in fire_smoke_label:
             # Fire detected — enter/stay in eager mode, reset clear counter
-            self.eager_mode = True
-            self.no_fire_streak = 0
+            self.nonfire_streak = 0
+            self.fire_streak += 1
+            if self.fire_streak >= self.fire_confirm_k:  # confirmed
+                self.eager_mode = True
         else:
             # No fire — count toward eager exit
+            self.fire_streak = 0  # single normal frame resets streak
             if self.eager_mode:
-                self.no_fire_streak += 1
-                if self.no_fire_streak >= self.w_clr:
+                self.nonfire_streak += 1
+                if self.nonfire_streak >= self.w_clr:
                     self.eager_mode = False
-                    self.no_fire_streak = 0
+                    self.nonfire_streak = 0
                     self.skip_streak = 0  # fresh start after eager exit
 
     def reset(self):
         """Reset all state at video boundary."""
         super().reset()  # resets motion_det
         self.eager_mode = True  # start each video in eager mode
-        self.no_fire_streak = 0
+        self.nonfire_streak = 0
         self.skip_streak = 0
