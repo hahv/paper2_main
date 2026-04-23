@@ -2,6 +2,34 @@ import os
 import glob
 from tap import Tap
 
+"""
+Combine multiple CSV files into a single plain-text report.
+
+This script scans an input directory for ``.csv`` files, sorts them
+alphabetically, and writes their raw contents into one output text file.
+Each CSV block is preceded by a banner line in the format:
+
+    ===FILE_NAME: <csv_filename>===
+
+Features:
+- Deterministic ordering (alphabetical by filename)
+- Configurable CSV separator and text encoding via CLI arguments
+- Graceful handling when no CSV files are found
+
+CLI arguments (Tap):
+- input_dir (str): Directory containing source CSV files.
+- output_file (str): Destination text file path.
+  Default: ``combined_output.txt``
+- separator (str): Declared CSV delimiter (default ``;``).
+  Note: current implementation copies raw file text and does not parse rows.
+- encoding (str): File encoding for reading/writing text.
+  Default: ``utf-8``
+
+Primary function:
+- combine_csv_files(args: Args) -> None
+  Reads all CSV files in ``args.input_dir`` and appends them to
+  ``args.output_file`` with per-file header banners and blank-line separation.
+"""
 
 class Args(Tap):
     input_dir: str  # Path to the folder containing CSV files

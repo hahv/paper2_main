@@ -1,4 +1,4 @@
-dir_path: datasets/UFireIndoor2
+dir_path: datasets/UFireIndoor1
 extra_cfgs:
   ds_metric_src: csv_metric_src
   ds_recursive: true
