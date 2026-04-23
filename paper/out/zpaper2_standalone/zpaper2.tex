@@ -153,7 +153,7 @@
 \title{Efficient Real-Time Fire Surveillance: A Lightweight
 Motion-Heuristic Skip Module for Accelerated Inference}
 \author{Hoang Van-Ha, Jong Weon Lee, Park Chun-Su}
-\date{2026.04.20}
+\date{2026.04.21}
 
 \begin{document}
 \maketitle
@@ -969,11 +969,11 @@ well-suited for deployment in our target environment.
 
 \textbf{Implementation Details}: Unless otherwise specified, all
 experiments were conducted on a workstation equipped with an Intel Core
-i9-12900K CPU, 64 GB DDR5 system memory, and an NVIDIA GeForce RTX 3090
-GPU (24 GB VRAM), running Windows 10 Pro (build 19044). Deep learning
-inference was performed using PyTorch 2.7.1 under CUDA 12.9, and video
-processing and motion estimation were carried out using OpenCV 4.11
-(CPU-only).
+i9-10900K CPU, 64 GB DDR4 system memory, and an NVIDIA GeForce RTX 3090
+GPU (24 GB VRAM), running Windows 10 Pro (22H2, build 19045). Deep
+learning inference was performed using PyTorch 2.7.1 under CUDA 12.9,
+and video processing and motion estimation were carried out using OpenCV
+4.11 (CPU-only).
 
 \subsection{Results}\label{results}
 
@@ -1518,23 +1518,24 @@ achieve a recall of 98.7\%.
     \label{tb:cmp_other_temp}
     \csvreader[separator=semicolon,
         no head,
-        range=1-,
+        range=1-5, % first 5 rows, exclude the eager mode results
         centered tabularray = {
-        colspec = {X[2,c]X[c]X[c]X[c]X[c]X[c]X[c]},
+        colspec = {X[2,c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]},
         colsep = {3pt},
         hlines,
         vlines,
         cells = {font = \small, halign = c, valign = m},
         row{1} = {font = \bfseries\small},
     },
-    ]{4.table/tb_cmp_other_temp.csv}{}{
+    ]{4.table/tb_cmp_other_temp_with_eager.csv}{}{
         \csvexpval\csvcoli &
         \csvexpval\csvcolii &
         \csvexpval\csvcoliii &
         \csvexpval\csvcoliv &
         \csvexpval\csvcolv &
         \csvexpval\csvcolvi &
-        \csvexpval\csvcolvii
+        \csvexpval\csvcolvii &
+        \csvexpval\csvcolviii
     }
 \end{table*}
 
@@ -1584,6 +1585,8 @@ quiescence in the target indoor surveillance setting.
   \caption{Qualitative results illustrating successful skip module operations. (a) Static backgrounds are correctly skipped ($s_t = 0$), saving computation. (b) and (c) Active fire and smoke scenes trigger the motion accumulator, correctly prompting the full deep learning model to evaluate the frame ($s_t = 1$).}\label{fig:qualitative_success}
 \end{figure}
 
+\textbf{Failure Cases}
+
 The bottom row exposes two structural limitations of the motion-based
 gating approach. First, in a slow-onset smoke video, the initial frames
 of smoke diffusion produce minimal inter-frame pixel change --- below
@@ -1607,6 +1610,160 @@ informativeness.
   \includegraphics[width=\linewidth,keepaspectratio]{3.fig/fig_qualitative_failure.pdf}
   \caption{Qualitative results illustrating skip module failure cases. (a) Slowly developing smoke is wrongly skipped because the subtle motion fails to trigger the accumulator. (b) Persistent non-fire motion (e.g., a walking person) saturates the accumulator, forcing continuous wasted inferences. (c) A frame is correctly passed to the deep learning model, but the model incorrectly predicts the label (a false positive or false negative).}\label{fig:qualitative_failure}
 \end{figure}
+
+\paragraph{Eager Mode: Recovery of Missed
+Cases}\label{eager-mode-recovery-of-missed-cases}
+
+\textbf{Fix for slow-onset smoke:} We intro the skip module with eager
+mode and periodically check for specific scences
+
+\begin{algorithm}[ht]
+\caption{Skip Module $\mathcal{S}$ with Eager Mode and Periodic Forced Check}
+\label{alg:skipmodule_eager}
+\begin{algorithmic}[1]
+
+% Extends Algorithm~\ref{alg:skipmodule} with two additional parameters:
+\Require Same inputs as Algorithm~\ref{alg:skipmodule},
+plus forced check interval $N_{\text{chk}}$,
+clear confirmation window $W_{\text{clr}}$
+
+\Ensure Skip decisions $\{s_1, s_2, \dots\}$, where $s_t \in \{0,1\}$
+
+\State $f_{\text{prev}} \leftarrow \text{null}$
+\State $\textit{eager\_mode} \leftarrow \textsc{True}$    \Comment{Start in eager mode — skipping must be earned}
+\State $\textit{non\_firesmoke\_streak} \leftarrow 0$            \Comment{Must reach $W_{\text{clr}}$ before first skip is allowed}
+\State $\textit{skip\_streak} \leftarrow 0$               \Comment{Consecutive skipped frames — forced check trigger}
+
+\For{each incoming frame $f_t$}
+
+    \Statex \hspace{1.5em} \textbf{Step 1: Pre-process}
+    \State \textit{(Same as Algorithm~\ref{alg:skipmodule}, Step 1)}
+
+    \Statex \hspace{1.5em} \textbf{Step 2: Eager Mode Override} \hfill \textit{(new)}
+    \If{$\textit{eager\_mode} = \textsc{True}$}
+        \State $s_t \leftarrow 1$  \Comment{Skip disabled — always run DL inference}
+        \State $\hat{y}_t \leftarrow \textsc{RunDL}(f_t)$
+        \If{$\hat{y}_t = \text{fire\_smoke}$}
+            \State $\textit{non\_firesmoke\_streak} \leftarrow 0$  \Comment{Fire still present — stay in eager mode}
+        \Else
+            \State $\textit{non\_firesmoke\_streak} \leftarrow \textit{no\_fire\_streak} + 1$
+            \If{$\textit{non\_firesmoke\_streak} \geq W_{\text{clr}}$}
+                \State $\textit{eager\_mode} \leftarrow \textsc{False}$  \Comment{Scene confirmed clear — exit eager mode}
+                \State $\textit{non\_firesmoke\_streak} \leftarrow 0$
+                \State $\textit{skip\_streak} \leftarrow 0$
+            \EndIf
+        \EndIf
+        \State $f_{\text{prev}} \leftarrow \tilde{f}_t$
+        \State \textbf{continue}
+    \EndIf
+
+    \Statex \hspace{1.5em} \textbf{Step 3: Periodic Forced Check} \hfill \textit{(new)}
+    \If{$\textit{skip\_streak} \geq N_{\text{chk}}$}
+        \State $s_t \leftarrow 1$  \Comment{Force-run DL — motion gate overridden}
+        \State $\hat{y}_t \leftarrow \textsc{RunDL}(f_t)$
+        \State $\textit{skip\_streak} \leftarrow 0$
+        \If{$\hat{y}_t = \text{fire\_smoke}$}
+            \State $\textit{eager\_mode} \leftarrow \textsc{True}$  \Comment{Forced check detected fire — enter eager mode}
+            \State $\textit{non\_firesmoke\_streak} \leftarrow 0$
+        \EndIf
+        \State $f_{\text{prev}} \leftarrow \tilde{f}_t$
+        \State \textbf{continue}
+    \EndIf
+
+    \Statex \hspace{1.5em} \textbf{Step 4: Compute Foreground Mask}
+    \State \textit{(Same as Algorithm~\ref{alg:skipmodule}, Step 2)}
+
+    \Statex \hspace{1.5em} \textbf{Step 5: Gate Decision}
+    \If{any active block exists}
+        \State $s_t \leftarrow 1$;\ \ $\hat{y}_t \leftarrow \textsc{RunDL}(f_t)$
+        \State $\textit{skip\_streak} \leftarrow 0$
+        \If{$\hat{y}_t = \text{fire\_smoke}$}
+            \State $\textit{eager\_mode} \leftarrow \textsc{True}$  \Comment{Motion gate detected fire — enter eager mode}
+            \State $\textit{non\_firesmoke\_streak} \leftarrow 0$
+        \EndIf
+    \Else
+        \State $s_t \leftarrow 0$  \Comment{No motion — skip}
+        \State $\textit{skip\_streak} \leftarrow \textit{skip\_streak} + 1$
+    \EndIf
+
+    \State $f_{\text{prev}} \leftarrow \tilde{f}_t$
+    \State \textbf{yield} $s_t$
+
+\EndFor
+
+\end{algorithmic}
+\end{algorithm}
+
+We do hyper-parameter search on \(D_\text{val}\) to find the optimal
+params for this eager mode.
+
+\begin{table*}[hbtp]
+    \caption{Validation-set performance and hyperparameter configurations for
+    Accumulation Motion Detector in Eager Mode (AccMotionDet Eager). Note that the
+    ``Recall (\%)'' column displays the retained recall alongside the absolute
+    recall drop relative to the baseline in parentheses, i.e., Recall (-Recall
+    Drop). The best and second-best results for each metric are highlighted in
+    \textbf{bold} and \textit{\underline{italic underline}}, respectively.
+    }
+    \label{tb:tb_val_results_accMotionDetEager}
+    \csvreader[separator=semicolon,
+    no head,
+    range=1-,
+    centered tabularray = {
+        width = \textwidth,
+        colspec = {X[2.5,c]X[c]X[c]X[1.5,c]X[c]X[1.5,c]X[c]X[1.5,c]},
+        colsep = {1pt},
+        hlines,
+        vlines,
+        cells = {font = \scriptsize, halign = c, valign = m},
+        row{1} = {font = \bfseries\scriptsize},
+        row{2} = {font = \bfseries\tiny},
+        % ↓ configure multi-span header lines
+        cell{1}{1} = {r=2}{c},   % Exp. (Method)
+        cell{1}{2} = {c=2}{c},   % Parameters
+        cell{1}{4} = {c=4}{c},   % Metrics
+        cell{1}{8} = {r=2}{c},   % Combined Score
+    },
+    ]{4.table/opt_selected_rp__per_frame_accMotionDet_Eager.csv}{}{
+    \csvexpval\csvcoli &
+    \csvexpval\csvcolii &
+    \csvexpval\csvcoliii &
+    \csvexpval\csvcoliv &
+    \csvexpval\csvcolv &
+    \csvexpval\csvcolvi &
+    \csvexpval\csvcolvii &
+    \csvexpval\csvcolviii
+    }
+\end{table*}
+
+
+we Compare again on test set
+
+\begin{table*}[htbp]
+    \caption{Comparison of Video-level performance metrics, measuring the delay and initial detection speed. The best and second-best results for each metric are highlighted in \textbf{bold} and \textit{\underline{italic underline}}, respectively.}
+    \label{tb:cmp_other_temp}
+    \csvreader[separator=semicolon,
+        no head,
+        range=1-,
+        centered tabularray = {
+        colspec = {X[2,c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]},
+        colsep = {3pt},
+        hlines,
+        vlines,
+        cells = {font = \small, halign = c, valign = m},
+        row{1} = {font = \bfseries\small},
+    },
+    ]{4.table/tb_cmp_other_temp_with_eager.csv}{}{
+        \csvexpval\csvcoli &
+        \csvexpval\csvcolii &
+        \csvexpval\csvcoliii &
+        \csvexpval\csvcoliv &
+        \csvexpval\csvcolv &
+        \csvexpval\csvcolvi &
+        \csvexpval\csvcolvii &
+        \csvexpval\csvcolviii
+    }
+\end{table*}
 
 \section{Conclusion}\label{sec:conclusion}
 
