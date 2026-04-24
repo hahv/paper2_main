@@ -153,7 +153,7 @@
 \title{Efficient Real-Time Fire Surveillance: A Lightweight
 Motion-Heuristic Skip Module for Accelerated Inference}
 \author{Hoang Van-Ha, Jong Weon Lee, Park Chun-Su}
-\date{2026.04.21}
+\date{2026.04.24}
 
 \begin{document}
 \maketitle
@@ -992,23 +992,6 @@ limitation of using inter-frame motion as a sole proxy for scene
 informativeness.
 
 \input{./3.fig/fig_quality_failure.tex}
-
-\paragraph{Eager Mode: Recovery of Missed
-Cases}\label{eager-mode-recovery-of-missed-cases}
-
-\textbf{Fix for slow-onset smoke:} We intro the skip module with eager
-mode and periodically check for specific scences
-
-\input{./6.algo/skip_module_period_check.tex}
-
-We do hyper-parameter search on \(D_\text{val}\) to find the optimal
-params for this eager mode.
-
-\input{./4.table/tb_gridsearch_accMotionDetEager.tex}
-
-we Compare again on test set
-
-\input{./4.table/tb_cmp_other_temp_eager.tex}
 
 \section{Conclusion}\label{sec:conclusion}
 

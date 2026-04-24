@@ -4,7 +4,7 @@
 <!-- TARGET_PROJECT: G:\My Drive\1_PhD\Obsidian\Home\3. Writing\paperfire2 -->
 <!-- SYNC_TARGET_FILE: 00_Meta_Abstract.md-->
 <!-- BLOCK_ID: abstract -->
-date: 2026.04.21
+date: 2026.04.24
 title: "Efficient Real-Time Fire Surveillance: A Lightweight Motion-Heuristic
 Skip Module for Accelerated Inference"
 abstract: "Conventional deep learning (DL)-based fire and smoke detection systems process
@@ -906,7 +906,7 @@ motion as a sole proxy for scene informativeness.
 ```
 <!-- !END_SYNC_BLOCK -->
 
-#### Eager Mode: Recovery of Missed Cases
+<!-- #### Eager Mode: Recovery of Missed Cases
 
 **Fix for slow-onset smoke:** We intro the skip module with eager mode and
 periodically check for specific scences
@@ -923,7 +923,7 @@ this eager mode.
 we Compare again on test set
 ```{=latex}
 \input{./4.table/tb_cmp_other_temp_eager.tex}
-```
+``` -->
 
 # Conclusion {#sec:conclusion label="Conclusion"}
 
