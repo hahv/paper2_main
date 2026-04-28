@@ -152,17 +152,17 @@ findings and discusses limitations and future research directions.
 
 **Fire and Smoke Detection in Images and Videos**: Automated fire and smoke
 detection has attracted considerable research interest, with deep learning
-emerging as the dominant paradigm. [@cheng2024visual] provide a comprehensive
-survey of visual fire detection methods, highlighting the rapid adoption of
-DL-based approaches in this domain. The majority of these methods formulate the
-problem as image-level binary classification (fire/smoke vs. none) or object
-detection, in which a model receives a single RGB image and outputs either a
-class label with confidence score or localized bounding boxes [@geng2024yolofm;
-@khan2025optimized]. Research efforts have primarily focused on improving model
-accuracy and inference speed through architectural modifications and advanced
-training strategies. In video-based deployments, these image classifiers are
-applied directly to each frame, enabling integration with existing pipelines
-without architectural changes.
+emerging as the dominant paradigm. The work [@cheng2024visual] provides a
+comprehensive survey of visual fire detection methods, highlighting the rapid
+adoption of DL-based approaches in this domain. The majority of these methods
+formulate the problem as image-level binary classification (fire/smoke vs. none)
+or object detection, in which a model receives a single RGB image and outputs
+either a class label with confidence score or localized bounding boxes
+[@geng2024yolofm; @khan2025optimized]. Research efforts have primarily focused
+on improving model accuracy and inference speed through architectural
+modifications and advanced training strategies. In video-based deployments,
+these image classifiers are applied directly to each frame, enabling integration
+with existing pipelines without architectural changes.
 
 Relying exclusively on individual frames, however, discards temporal information
 inherent in video data that is potentially informative for detection.
@@ -182,14 +182,15 @@ every frame, regardless of scene content.
 
 Across both paradigms, the dominant deployment pattern applies DL inference to
 each frame or short clip, without considering whether inference is warranted
-given the frame content. In static surveillance scenarios, particularly indoors,
+given the frame content. In surveillance scenarios, particularly **indoors**,
 video streams frequently consist of purely background frames with no motion, in
 which fire or smoke is a priori unlikely. Motivated by this observation, we
 propose a skip-module that filters such low-activity frames prior to DL
-inference, reducing computational cost while preserving detection reliability.
-The module prioritizes retaining positive frames (fire/smoke present) while
-skipping negative frames (background only), functioning as a complementary
-accelerator for any existing frame-wise detection pipeline.
+inference, reducing computational cost while with minimal degradation in
+detection reliability. The module prioritizes retaining positive frames
+(fire/smoke present) while skipping negative frames (background only),
+functioning as a complementary accelerator for any existing frame-wise detection
+pipeline.
 
 **Motion Detection and The proposed Skip Module**: The skip decision in our
 module relies on motion estimation, which connects to the well-studied problem
@@ -200,19 +201,16 @@ approaches. More robust methods such as MOG2 and KNN [@zivkovic2006efficient]
 model the scene background statistically and are resilient to gradual
 illumination changes; however, they introduce non-trivial memory overhead and
 initialization latency. As the skip-module is designed primarily as a fast,
-lightweight gate, we instead adopt frame differencing --- computing the absolute
-per-pixel intensity change between consecutive frames --- which offers minimal
-computational overhead and requires no background model initialization.
+lightweight gate, we instead adopt motion estimation based on frame
+differencing, which offers minimal computational overhead and requires no
+background model initialization.
 
-While classical motion detection provides an efficient means of identifying
-scene activity, it has not been systematically exploited to gate DL inference in
-fire and smoke detection pipelines. Existing efficient video inference methods,
-such as FrameExit [@ghodrati2021frameexit], address per-frame redundancy but
-require joint training of the gating mechanism and the underlying classifier,
-limiting plug-and-play applicability to pre-trained models. This study bridges
-this gap by integrating lightweight frame-differencing-based motion estimation
-as a training-free gate for a high-capacity classifier, as described in Section
-\ref{sec:method}.
+Existing efficient video inference methods, such as FrameExit
+[@ghodrati2021frameexit], employ learned gating mechanisms to selectively
+process frames based on prediction confidence, thereby reducing redundant
+inference; however, they require joint training of the gating mechanism and the
+underlying classifier, limiting plug-and-play applicability to pre-trained
+models. In contrast, this study adopts a training-free approach by integrating lightweight frame-differencing-based motion estimation as a plug-and-play gate, requiring no retraining of the underlying classifier, as described in Section \ref{sec:method}.
 
 <!-- !END_SYNC_BLOCK -->
 
@@ -375,48 +373,50 @@ Quantitative results are reported using standard classification metrics — accu
 
 ## Models and Implementation Details
 
-**Baseline Models**: To demonstrate both the superiority of the high-capacity
-classifier over lightweight alternatives and the effectiveness of the proposed
-skip module in accelerating its inference, we evaluate the following baseline
-models alongside our BIG model:
+**Baseline Models**: To demonstrate both the superiority of the high-capacity classifier over lightweight alternatives and the effectiveness of the proposed skip module in accelerating its inference, we evaluate the following baseline models alongside our BIG model:
 
 - **MobileNet** [@mukhopadhyay2019fpga]: A modified MobileNet architecture
   fine-tuned for fire and smoke detection.
 
-- **FireNet** [@jadon2019firenet]: A lightweight CNN-based image classifier
-  comprising 14 layers, with a model size of 7.5 MB and approximately 650k
-  trainable parameters.
+- **FireNet** [@jadon2019firenet]: A lightweight CNN-based image classifier comprising 14 layers, with a model size of 7.5 MB and approximately 650k trainable parameters.
 
 - **YOLOv5s** [@de2023hybrid]: A lightweight object detector based on YOLOv5
   [@JocherYOLOv5byUltralytics2020], trained with hyperparameters selected via
   grid search on the D-Fire dataset [@dfiredataset].
 
-- **YOLOv5l** [@de2023hybrid]: A heavier variant of the above, based on the
-  larger YOLOv5l architecture, offering higher capacity at increased
-  computational cost.
+- **YOLOv5l** [@de2023hybrid]: A heavier variant of the above, based on the larger YOLOv5l architecture, offering higher capacity at increased computational cost.
 
-**Proposed Classifier (BIG Model - HGNetV2)**: The BIG model is obtained by
-fine-tuning a pretrained High-Performance GPU Network v2 (HGNetV2),
-specifically the \texttt{hgnetv2\_b5.ssld\_stage2\_ft\_in1k} checkpoint
-[@hgnetv2timm:online] from the Timm library [@rw2019timm], which was
-originally trained using SSLD knowledge distillation [@cui2021beyond]. HGNetV2
-[@hgnetv2PaddleCl7:online] is a high-capacity CNN architecture designed to
-achieve substantially higher accuracy than models of comparable inference
-speed on NVIDIA GPUs, making it well-suited for deployment in our target
-environment. \textcolor{red}{For fine-tuning, we compiled a dataset of
+**Proposed Classifier (BIG Model $\mathcal{M}$ — HGNetV2)**: The BIG model
+$\mathcal{M}$ is obtained by fine-tuning a pretrained High-Performance GPU
+Network v2 (HGNetV2), specifically the
+\texttt{hgnetv2\_b5.ssld\_stage2\_ft\_in1k} checkpoint [@hgnetv2timm:online]
+from the Timm library [@rw2019timm], which was originally trained using SSLD
+knowledge distillation [@cui2021beyond]. HGNetV2 [@hgnetv2PaddleCl7:online] is a
+high-capacity CNN architecture designed to achieve substantially higher accuracy
+than models of comparable inference speed on NVIDIA GPUs, making it well-suited
+for deployment in our target environment. For fine-tuning, we compiled a dataset
+of over 1 million fire and smoke images collected from internet sources,
+partitioned into training (80%) and test (20%) subsets. The model was trained
+using the Adam optimizer with an initial learning rate of $1 \times 10^{-4}$, a
+weight decay of $1 \times 10^{-5}$, a batch size of 32, and 100 epochs. On the
+held-out test set, the final model achieved an accuracy of 98.66%. The model
+accepts inputs of size $3 \times 360 \times 640$.
+
+<!-- !! MUST update with Prof. Park -->
+ <!-- \textcolor{red}{For fine-tuning, we compiled a dataset of
 1,000,000 fire and smoke images collected from internet sources, partitioned
 into training (80\%) and test (20\%) subsets. The model was optimized using
 Adam with an initial learning rate of $1 \times 10^{-4}$ and weight decay of
 $1 \times 10^{-5}$ for 100 epochs with a batch size of 32. On the held-out
 test set, the final model achieved a recall of xx.xx\% and a false alarm rate
-of xx.xx\%.}. We use input size INPUT_SIZE = (3, 360, 640)
+of xx.xx\%.}. The model accepts inputs of size $3 \times 360 \times 640$. -->
 
-**Implementation Details**: Unless otherwise specified, all experiments were
-conducted on a workstation equipped with an Intel Core i9-10900K CPU, 64 GB DDR4
-system memory, and an NVIDIA GeForce RTX 3090 GPU (24 GB VRAM), running Windows
-10 Pro (22H2, build 19045). Deep learning inference was performed using PyTorch
-2.7.1 under CUDA 12.9, and video processing and motion estimation were carried
-out using OpenCV 4.11 (CPU-only).
+**Implementation Details**: All experiments were conducted on a workstation
+equipped with an Intel Core i9-10900K CPU, 64 GB DDR4 system memory, and an
+NVIDIA GeForce RTX 3090 GPU (24 GB VRAM), running Windows 10 Pro (22H2, build
+19045). Deep learning inference was performed using PyTorch 2.7.1 under CUDA
+12.9, and video processing and motion estimation were carried out using OpenCV
+4.11 (CPU-only).
 
 ## Results
 
