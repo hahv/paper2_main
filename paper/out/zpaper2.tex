@@ -141,7 +141,7 @@
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \urlstyle{same}
 \hypersetup{
-  pdftitle={Efficient Real-Time Fire Surveillance: A Lightweight Motion-Heuristic Skip Module for Accelerated Inference},
+  pdftitle={Efficient Real-Time Fire Surveillance: A Lightweight Motion-Heuristic Skip Module for Accelerated Inference in Indoor Environments},
   pdfauthor={Hoang Van-Ha, Jong Weon Lee, Park Chun-Su},
   colorlinks=true,
   linkcolor={Maroon},
@@ -151,9 +151,10 @@
   pdfcreator={LaTeX via pandoc}}
 
 \title{Efficient Real-Time Fire Surveillance: A Lightweight
-Motion-Heuristic Skip Module for Accelerated Inference}
+Motion-Heuristic Skip Module for Accelerated Inference in Indoor
+Environments}
 \author{Hoang Van-Ha, Jong Weon Lee, Park Chun-Su}
-\date{2026.04.24}
+\date{2026.04.28}
 
 \begin{document}
 \maketitle
@@ -180,11 +181,11 @@ for real-time fire and smoke surveillance systems.
 \section{Introduction}\label{sec:introduction}
 
 Fires and wildfires, if not detected and controlled in their early
-stages, can quickly escalate --- especially under dry and windy
-conditions --- resulting in catastrophic consequences including loss of
-life, destruction of property, and damage to natural ecosystems. For
-instance, in 2017, urban fires and wildfires in California, USA, caused
-an estimated economic loss of 10 billion USD
+stages, can quickly escalate, especially under dry and windy conditions,
+resulting in catastrophic consequences, including loss of life,
+destruction of property, and damage to natural ecosystems. For instance,
+in 2017, urban fires and wildfires in California, USA, caused an
+estimated economic loss of 10 billion USD
 \citeproc{ref-californiafire:online}{{[}1{]}}. More recently, in 2025, a
 forest fire in Gyeongsang Province, South Korea, burned approximately
 90,000 acres, resulting in at least 27 fatalities and the evacuation of
@@ -201,21 +202,21 @@ classifiers or object detectors perform inference on each frame
 individually. Although this frame-wise paradigm is straightforward to
 implement, it exhibits two key limitations. First, it relies exclusively
 on spatial information within individual frames, neglecting temporal
-cues --- such as motion --- inherent in video data. Second, in
-surveillance scenarios, particularly in indoor environments, consecutive
+cues, such as motion, inherent in video data. Second, in surveillance
+scenarios, particularly in \textbf{indoor} environments, consecutive
 frames often exhibit minimal variation due to static scene content.
 Applying a DL model indiscriminately to every frame under such
 conditions is computationally redundant, increasing processing cost and
 latency without contributing to detection performance. This inefficiency
-is further compounded by the well-known accuracy--efficiency trade-off
-in DL: more accurate models are generally more computationally
-intensive, and redundant frame processing amplifies these demands,
-rendering real-time performance difficult to achieve.
+is further compounded by the well-known accuracy-efficiency trade-off in
+DL: more accurate models are generally more computationally intensive,
+and redundant frame processing amplifies these demands, rendering
+real-time performance difficult to achieve.
 
 A common strategy to reduce inference cost is to substitute a heavy,
 high-accuracy DL model with a lighter alternative; however, this
-typically degrades detection reliability --- an unacceptable compromise
-in safety-critical applications such as fire and smoke detection. This
+typically degrades detection reliability, an unacceptable compromise in
+safety-critical applications such as fire and smoke detection. This
 study takes a complementary approach: rather than replacing the
 classifier, we introduce a lightweight skip-module that acts as a
 computational gate, selectively forwarding only frames with significant
@@ -231,22 +232,22 @@ In particular, our main contributions are summarized as follows:
 \item
   \textbf{Skip-Module Mechanism:} We propose a lightweight skip-module
   that exploits motion estimation via frame differencing to identify
-  static scenes and bypass DL inference on non-informative frames,
-  reducing computational cost without modifying the underlying
-  classifier. The module is designed as a plug-and-play component
-  compatible with existing fire and smoke detection pipelines. To
-  identify the optimal operating configuration, we further develop a
-  systematic hyperparameter optimization procedure that maximizes
-  throughput while preserving detection performance.
+  static scenes and bypass DL inference on static frames, reducing
+  computational cost without modifying the underlying classifier. The
+  module is designed as a plug-and-play component compatible with
+  existing fire and smoke detection pipelines. To identify the optimal
+  operating configuration, we further develop a systematic
+  hyperparameter optimization procedure that maximizes throughput while
+  preserving detection performance.
 \item
   \textbf{Indoor Fire and Smoke Video Dataset:} We construct an
-  annotated dataset comprising 150 indoor fire and smoke videos ---
-  including fire, smoke, and background-only classes --- captured by
-  static surveillance cameras at resolutions from 720p to 1080p. The
-  dataset covers diverse environments such as warehouses, parking areas,
-  and offices under varying lighting conditions, providing a realistic
-  benchmark for evaluating detection systems in static surveillance
-  scenarios.
+  annotated dataset comprising 150 indoor fire and smoke videos
+  (including fire, smoke, and background-only classes) captured by
+  static surveillance cameras at resolutions ranging from
+  \(814 \times 720\) to \(3840 \times 2160\). The dataset covers diverse
+  environments such as warehouses, parking areas, and offices under
+  varying lighting conditions, providing a realistic benchmark for
+  evaluating detection systems in static surveillance scenarios.
 \item
   \textbf{Comprehensive System Evaluation:} We integrate the skip-module
   with a high-capacity DL classifier (BIG model) and evaluate the
@@ -430,19 +431,17 @@ Dataset}\label{fire-and-smoke-indoor-video-dataset}
 
  \input{./4.table/tb_ufireindoor.tex}
 
-Publicly available video datasets for fire and smoke detection using
-static cameras remain scarce. While several existing benchmarks address
-this detection task --- including FireNet
-\citeproc{ref-jadon2019firenet}{{[}16{]}}, Firesense
+Several existing benchmarks address this detection task, including
+FireNet \citeproc{ref-jadon2019firenet}{{[}16{]}}, Firesense
 \citeproc{ref-Firesens4:online}{{[}17{]}}, FiSmo
 \citeproc{ref-cazzolato2017fismo}{{[}18{]}}, and FURG
-\citeproc{ref-steffens2015unconstrained}{{[}19{]}} --- these were
+\citeproc{ref-steffens2015unconstrained}{{[}19{]}}. However, these were
 recorded with moving cameras and are therefore unsuitable for static
 surveillance scenarios. Static-camera datasets such as DFire
 \citeproc{ref-dfiredataset}{{[}20{]}}, VisiFire Bilkent
 \citeproc{ref-VisiFireBilkent:online}{{[}21{]}}, KMU Fire and Smoke
-\citeproc{ref-KMUFireSmokeDataset}{{[}22{]}}, Mivia Fire and Smoke
-\citeproc{ref-foggia2015real}{{[}23{]}}, and USTC Smoke
+\citeproc{ref-KMUFireSmokeDataset}{{[}22{]}}, Mivia Fire and Mivia Smoke
+datasets \citeproc{ref-foggia2015real}{{[}23{]}}, and USTC Smoke
 \citeproc{ref-lin2017smoke}{{[}24{]}} do exist; however, they
 collectively suffer from several limitations: a predominance of outdoor
 scenes, a small number of video samples, low spatial resolution, and
@@ -453,27 +452,29 @@ To address these deficiencies, we constructed a dedicated static indoor
 video dataset by aggregating clips from multiple heterogeneous sources.
 Fire and smoke samples were sourced from the Korea AI Fire Dataset
 \citeproc{ref-AIHub87:online}{{[}25{]}}, the USTC Smoke Dataset
-\citeproc{ref-lin2017smoke}{{[}24{]}}, and the VSD3K Dataset
+\citeproc{ref-lin2017smoke}{{[}24{]}}, and the VDS3 Dataset
 \citeproc{ref-huang2022fire}{{[}26{]}}, supplemented by videos collected
 from open online platforms (Pexels, Pixabay, and YouTube).
 Non-fire/smoke (negative) samples were compiled from self-recorded
 footage captured by real CCTV cameras in various indoor environments
-(e.g., parking areas), along with the Safe \& Unsafe Behavior in
-Workplaces dataset \citeproc{ref-onal2024video}{{[}27{]}}, the Indoor
-Action dataset \citeproc{ref-deniz2024optimized}{{[}28{]}}, the MPII
-Cooking 2 Dataset \citeproc{ref-rohrbach2016recognizing}{{[}29{]}}, and
-the WiseNet dataset \citeproc{ref-marroquin2019wisenet}{{[}30{]}}. Table
-\ref{tb:videodb} summarizes the properties of the self-collected video
-dataset alongside a comparison with existing benchmark datasets, and
-Figure \ref{fig:videodb} presents representative sample frames.
+(e.g., parking areas), along with videos from the Safe \& Unsafe
+Behavior in Workplaces dataset \citeproc{ref-onal2024video}{{[}27{]}},
+the Indoor Action dataset \citeproc{ref-deniz2024optimized}{{[}28{]}},
+the MPII Cooking 2 Dataset
+\citeproc{ref-rohrbach2016recognizing}{{[}29{]}}, and the WiseNet
+dataset \citeproc{ref-marroquin2019wisenet}{{[}30{]}}. Table
+\ref{tb:ufireindoor} summarizes the properties of the self-collected
+video dataset alongside a comparison with existing datasets, and Figure
+\ref{fig:videodb} presents representative sample frames from our
+dataset.
 
 For the hyperparameter optimization described in Section
 \ref{sec:hyperparam}, the video dataset was further partitioned into a
 validation set, \(D_{\text{val}}\) (46 videos), used to select the
 optimal skip-module hyperparameters, and a test set, \(D_{\text{test}}\)
-(104 videos), used for the final evaluation of the skip-enabled system
-against the baseline and existing methods. The split followed a 30:70
-ratio (validation:test), following the protocol of
+(104 videos), used for the final evaluation of the proposed system
+against the baseline and existing methods. The partition adhered to a
+30:70 ratio (validation:test), following the protocol of
 \citeproc{ref-de2023hybrid}{{[}10{]}}, and was performed using
 stratified sampling to preserve balanced class distributions in both
 subsets.
@@ -774,11 +775,13 @@ baseline system (no skip module) achieves a recall of 94.35\% at
 \subsubsection{Selected Configuration}\label{selected-configuration}
 
 The optimal configuration (Exp.\textasciitilde1) uses a half-resolution
-scale (\(\alpha = 0.5\)), coarse block size (\(B = 32\)), conservative
-block-active threshold (\(\tau = 0.05\)), moderate pixel sensitivity
-(\(\tau_d = 5\)), low activation threshold (\(\tau_m = 5\)), and a small
-accumulation cap (\(K_{\max} = 15\)). This configuration achieves a skip
-rate of \textbf{44.39\%} and a recall of \textbf{93.90\%}
+scale (\(\alpha =
+0.5\)), coarse block size (\(B = 32\)), conservative block-active
+threshold (\(\tau
+= 0.05\)), moderate pixel sensitivity (\(\tau_d = 5\)), low activation
+threshold (\(\tau_m = 5\)), and a small accumulation cap
+(\(K_{\max} = 15\)). This configuration achieves a skip rate of
+\textbf{44.39\%} and a recall of \textbf{93.90\%}
 (\(\Delta = -0.45\%\)), well within the tolerance \(\delta_R = 0.015\).
 The resulting FPS improves from 24.1 to \textbf{36.6}, a \textbf{52\%
 throughput gain}, with no change in FPR (0.74\% throughout).
@@ -787,11 +790,11 @@ throughput gain}, with no change in FPR (0.74\% throughout).
 Analysis}\label{hyperparameter-sensitivity-analysis}
 
 \textbf{Scale factor \(\alpha\).} All top-10 configurations consistently
-use \(\alpha = 0.5\) (half resolution). Full-resolution processing
-(\(\alpha = 1.0\)) does not appear in any feasible high-scoring
-configuration, confirming that downscaling reduces sensitivity to
-high-frequency pixel noise while lowering skip-module latency --- both
-effects are beneficial.
+use \(\alpha =
+0.5\) (half resolution). Full-resolution processing (\(\alpha = 1.0\))
+does not appear in any feasible high-scoring configuration, confirming
+that downscaling reduces sensitivity to high-frequency pixel noise while
+lowering skip-module latency --- both effects are beneficial.
 
 \textbf{Block size \(B\).} \(B = 32\) dominates the top-10 rankings,
 with only one entry using \(B = 16\) (Exp.\textasciitilde10, score
@@ -820,14 +823,15 @@ larger recall drop (up to \(-0.53\%\)), reducing the recall retention
 term in \(\Phi\).
 
 \textbf{Accumulation cap \(K_{\max}\).} Across all three values
-evaluated (\(K_{\max} \in \{15, 25, 35\}\)), the skip rate decreases
-monotonically with increasing \(K_{\max}\) (e.g., 44.39\% \(\to\)
-42.89\% \(\to\) 42.38\% for Exp.\textasciitilde1--3). A lower cap allows
-the accumulator to reset more readily after high-motion periods,
-enabling faster recognition of subsequent static frames and thus higher
-skip rates. The difference in combined score across the three values is
-small (\(\leq 0.007\)), indicating low sensitivity to this parameter
-within the evaluated range.
+evaluated (\(K_{\max}
+\in \{15, 25, 35\}\)), the skip rate decreases monotonically with
+increasing \(K_{\max}\) (e.g., 44.39\% \(\to\) 42.89\% \(\to\) 42.38\%
+for Exp.\textasciitilde1--3). A lower cap allows the accumulator to
+reset more readily after high-motion periods, enabling faster
+recognition of subsequent static frames and thus higher skip rates. The
+difference in combined score across the three values is small (\(\leq
+0.007\)), indicating low sensitivity to this parameter within the
+evaluated range.
 
 \subsubsection{Comparison with
 FrameDiffDet}\label{comparison-with-framediffdet}
@@ -1255,8 +1259,10 @@ face.''} Sep. 2025. Available:
 
 \bibitem[\citeproctext]{ref-rw2019timm}
 \CSLLeftMargin{{[}35{]} }%
-\CSLRightInline{R. Wightman, {``PyTorch image models (timm).''} 2019.
-Available: \url{https://github.com/rwightman/pytorch-image-models}}
+\CSLRightInline{R. Wightman, {``PyTorch image models,''} \emph{GitHub
+repository}. \url{https://github.com/rwightman/pytorch-image-models};
+GitHub, 2019. doi:
+\href{https://doi.org/10.5281/zenodo.4414861}{10.5281/zenodo.4414861}}
 
 \bibitem[\citeproctext]{ref-cui2021beyond}
 \CSLLeftMargin{{[}36{]} }%

@@ -1,23 +1,16 @@
 \begin{table*}[htbp]
-    \caption{Comparison of existing fire and smoke video datasets with
-        the proposed dataset (150 videos; static CCTV cameras; diverse
-        indoor environments). Unlike most existing benchmarks, 143 out of
-        150 videos are recorded at HD resolution (1280$\times$720) or above,
-        matching commercial surveillance camera quality.
-        }
+    \caption{Comparison of existing fire and smoke video datasets with the proposed dataset (150 videos; static CCTV cameras; diverse indoor environments). Unlike most existing datasets, 143 out of 150 videos are recorded at HD resolution (1280$\times$720) or above, matching commercial surveillance camera standards.}
     \label{tb:ufireindoor}
     \csvreader[separator=semicolon,
     no head,
     range=2-,
     centered tabularray = {
     width = \textwidth,
-    colspec = {X[2,c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]},
+    colspec = {X[2.5,c]X[1.6,c]X[0.6,c]X[c]X[c]X[0.9,c]X[0.65,c]X[0.65,c]X[0.7,c]},
     colsep = {3pt},
     hlines,
     vlines,
     cells = {font = \small, halign = c, valign = m},
-    cell{1}{1} = {halign = l},
-    cell{1}{2} = {halign = l},
     row{1} = {font = \bfseries\scriptsize},
     },
     ]{./4.table/out/tb_ufireindoor.csv}{}{

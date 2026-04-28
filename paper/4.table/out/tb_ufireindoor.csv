@@ -1,14 +1,14 @@
 1;3;2;4;5;6;7;8;9;10
 2;Model;Category;Videos;Resolution Min;Resolution Max;FireSmoke;Normal;Indoor;Outdoor
-3;FireSense (2010) \citeproc{ref-dfiredataset}{{[}xx{]}};Moving camera;49;$300 \times 240$;$1600 \times 1200$;24;25;10;39
-4;KMU (2011) \citeproc{ref-dfiredataset}{{[}xx{]}};Static camera;38;$320 \times 240$;$320 \times 240$;28;10;10;28
-5;VisiFireBilkent (2015) \citeproc{ref-VisiFireBilkent:online}{{[}xx{]}};Static camera;39;$320 \times 240$;$720 \times 576$;38;1;6;32
-6;Mivia FIRE (2015) \citeproc{ref-dfiredataset}{{[}xx{]}};Static camera;31;$320 \times 240$;$800 \times 600$;28;3;4;27
-7;Mivia SMOKE (2015) \citeproc{ref-dfiredataset}{{[}xx{]}};Static camera;149;$292 \times 240$;$292 \times 240$;76;73;0;149
-8;FURG (2015) \citeproc{ref-dfiredataset}{{[}xx{]}};Moving camera;22;$240 \times 344$;$1920 \times 1080$;17;5;3;19
-9;USTC Smoke (2017) \citeproc{ref-dfiredataset}{{[}xx{]}};Static camera;30;$1920 \times 1080$;$1920 \times 1080$;22;8;30;0
-10;FireNet (2019) \citeproc{ref-dfiredataset}{{[}xx{]}};Moving camera;62;$352 \times 222$;$1920 \times 1080$;46;16;30;32
-11;FiSmo (2020) \citeproc{ref-dfiredataset}{{[}xx{]}};Moving camera;88;$320 \times 240$;$1920 \times 1080$;80;8;0;88
-12;D-Fire (2021) \citeproc{ref-dfiredataset}{{[}xx{]}};Static camera;100;$1280 \times 720$;$1280 \times 720$;50;50;0;100
-13;VSD3 (2022) \citeproc{ref-dfiredataset}{{[}xx{]}};Mix camera;20;$352 \times 288$;$2048 \times 1536$;8;12;6;14
+3;FireSense (2010) \citeproc{ref-Firesens4:online}{{[}17{]}};Moving camera;49;$300 \times 240$;$1600 \times 1200$;24;25;10;39
+4;KMU (2011) \citeproc{ref-KMUFireSmokeDataset}{{[}22{]}};Static camera;38;$320 \times 240$;$320 \times 240$;28;10;10;28
+5;VisiFireBilkent (2015) \citeproc{ref-VisiFireBilkent:online}{{[}21{]}};Static camera;39;$320 \times 240$;$720 \times 576$;38;1;6;32
+6;Mivia FIRE (2015) \citeproc{ref-foggia2015real}{{[}23{]}};Static camera;31;$320 \times 240$;$800 \times 600$;28;3;4;27
+7;Mivia SMOKE (2015) \citeproc{ref-foggia2015real}{{[}23{]}};Static camera;149;$292 \times 240$;$292 \times 240$;76;73;0;149
+8;FURG (2015) \citeproc{ref-steffens2015unconstrained}{{[}19{]}};Moving camera;22;$240 \times 344$;$1920 \times 1080$;17;5;3;19
+9;USTC Smoke (2017) \citeproc{ref-lin2017smoke}{{[}24{]}};Static camera;30;$1920 \times 1080$;$1920 \times 1080$;22;8;30;0
+10;FireNet (2019) \citeproc{ref-jadon2019firenet}{{[}16{]}};Moving camera;62;$352 \times 222$;$1920 \times 1080$;46;16;30;32
+11;FiSmo (2020) \citeproc{ref-cazzolato2017fismo}{{[}18{]}};Moving camera;88;$320 \times 240$;$1920 \times 1080$;80;8;0;88
+12;D-Fire (2021) \citeproc{ref-dfiredataset}{{[}20{]}};Static camera;100;$1280 \times 720$;$1280 \times 720$;50;50;0;100
+13;VDS3 (2022) \citeproc{ref-huang2022fire}{{[}26{]}};Mix camera;20;$352 \times 288$;$2048 \times 1536$;8;12;6;14
 14;Ours (2026) - This work;Static camera;150;$814 \times 720$;$3840 \times 2160$;75;75;150;0
