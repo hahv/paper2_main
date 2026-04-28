@@ -270,6 +270,17 @@ class BaseMethod(ABC):
                         print(f"Worker failed with error: {e}")
 
             self.after_infer_video_dir(video_dir)
+            if self.cfg.methodCfg.get_name() == "temp_method_motion_block_haze":
+                # Save the logged haze scores for no-motion frames to a CSV for analysis
+                from ..methods.skip.motion_only_block_skip_proc_haze import MotionOnlyBlockSkipProcHaze
+                no_motion_haze_scores = MotionOnlyBlockSkipProcHaze.NO_MOTION_HAZE_SCORE_LIST
+                # print the scores mean and std for quick analysis
+                if no_motion_haze_scores:
+                    mean_score = np.mean(no_motion_haze_scores)
+                    std_score = np.std(no_motion_haze_scores)
+                    console.rule("No-motion frame haze score summary")
+                    pprint(f"No-motion frame haze scores: mean={mean_score:.4f}, std={std_score:.4f}")
+
 
     def _infer_video_worker(self, video_path: str, video_idx: int, total_videos: int):
         """

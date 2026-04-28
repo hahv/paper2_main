@@ -57,32 +57,140 @@ from halib import *
 
 #     return float(np.mean(dark))
 
+# def dark_channel_score(img: np.ndarray, small_width: int = 480) -> float:
+#     """
+#     Traditional Dark Channel Prior haze score.
+#         1. Downsample to small_size for speed (~0.3-0.5 ms)
+#         2. Pixel-wise min across B, G, R channels
+#         3. Patch-wise min via 5x5 erosion
+#         4. Return mean score normalised to [0.0, 1.0]
+#     """
+#     aspect_ratio = img.shape[1] / img.shape[0]
+#     small_height = int(small_width / aspect_ratio)
+#     small_size = (small_width, small_height)
+#     small = cv2.resize(img, small_size, interpolation=cv2.INTER_NEAREST)
+#     pixel_min = np.min(small, axis=2)
+#     kernel = np.ones((5, 5), np.uint8)
+#     dark_channel = cv2.erode(pixel_min, kernel)
+#     return float(np.mean(dark_channel) / 255.0)
 
-def dark_channel_score(
-    frame_bgr: np.ndarray, resize_w: int = 80, patch_size: int = 5
-) -> float:
-    """
-    Compute the mean dark channel of a BGR frame.
-    Higher score = more haze / whitish content.
+# def dark_channel_score(frame, threshold=180, density_limit=0.15):
+# def dark_channel_score(frame, small_width=480):
 
-    Args:
-        frame_bgr  : input BGR frame (any resolution)
-        resize_w   : width to downsample to before computing (smaller = faster)
-                     Recommended: 80 (~0.3-0.5ms), 160 (~1ms), 320 (~4ms)
-        patch_size : erosion kernel size for neighbourhood minimum
-                     Recommended: 5 for resize_w=80, 15 for resize_w=320
-    """
-    small_frame = cv2.resize(frame_bgr, (64, 36), interpolation=cv2.INTER_NEAREST)
+#     # 1. Resize first - this is the "Nature" of the fast check
+#     # 160x90 is enough to see 'spread' smoke
+#     aspect_ratio = frame.shape[1] / frame.shape[0]
+#     small_height = int(small_width / aspect_ratio)
+#     small_size = (small_width, small_height)
+#     small = cv2.resize(frame, small_size, interpolation=cv2.INTER_NEAREST)
 
-    # 2. Get the minimum value across the color channels (axis=2)
-    # This creates our approximated "Dark Channel"
-    dark_channel = np.min(small_frame, axis=2)
+#     # 2. Single value transformation: Get the min of B, G, R for every pixel
+#     # In white-ish regions, min(BGR) will be high.
+#     # In colored regions (red/blue), min(BGR) will be very low.
+#     min_channel_img = np.min(small, axis=2)
+#     return np.mean(min_channel_img)
 
-    # 3. The single score is the average of this dark channel.
-    # Range is 0.0 to 255.0
-    haze_score = np.mean(dark_channel)
+# !compute_smoke_score
+# def dark_channel_score(frame_bgr, size=(96, 96), eps=1e-6):
+#     small = cv2.resize(frame_bgr, size, interpolation=cv2.INTER_AREA)
 
-    return haze_score
+#     hsv = cv2.cvtColor(small, cv2.COLOR_BGR2HSV)
+#     gray = cv2.cvtColor(small, cv2.COLOR_BGR2GRAY)
+
+#     s = hsv[:, :, 1].astype(np.float32) / 255.0
+#     v = hsv[:, :, 2].astype(np.float32) / 255.0
+
+#     mean_s = float(np.mean(s))
+#     mean_v = float(np.mean(v))
+
+#     lap_var = float(cv2.Laplacian(gray, cv2.CV_32F).var())
+
+#     blur_term = lap_var / (lap_var + 100.0)
+
+#     score = mean_v * (1.0 - mean_s) * (1.0 - blur_term)
+#     return score
+
+
+def dark_channel_score(frame, small_width=480):
+
+    # 1. Resize first - this is the "Nature" of the fast check
+    # 160x90 is enough to see 'spread' smoke
+    aspect_ratio = frame.shape[1] / frame.shape[0]
+    small_height = int(small_width / aspect_ratio)
+    small_size = (small_width, small_height)
+    small_frame = cv2.resize(frame, small_size, interpolation=cv2.INTER_NEAREST)
+
+    # 2. Convert to HSV
+    hsv = cv2.cvtColor(small_frame, cv2.COLOR_BGR2HSV)
+    # S = hsv[:, :, 1]
+    # V = hsv[:, :, 2]
+    S = hsv[:, :, 1].astype(np.float32) / 255.0
+    V = hsv[:, :, 2].astype(np.float32) / 255.0
+
+
+    # 3. Calculate global stats (very fast on 128x72 array)
+    var_v = np.var(V)
+    var_s = np.var(S)
+    mean_s = np.mean(S)
+
+    # 4. Calculate final single value
+    # You may need to apply a scaling weight (w1, w2) based on your camera's baseline
+    score = var_v + var_s + mean_s
+    return float(score)
+
+
+# def compute_settled_smoke_score(
+#     frame_bgr, color_size=(96, 96), grad_size=(192, 192), alpha=8.0
+# ):
+#     small_c = cv2.resize(frame_bgr, color_size, interpolation=cv2.INTER_AREA)
+#     small_g = cv2.resize(frame_bgr, grad_size, interpolation=cv2.INTER_AREA)
+
+#     hsv = cv2.cvtColor(small_c, cv2.COLOR_BGR2HSV)
+#     gray = cv2.cvtColor(small_g, cv2.COLOR_BGR2GRAY)
+
+#     mean_v = hsv[:, :, 2].mean() / 255.0
+#     mean_s = hsv[:, :, 1].mean() / 255.0
+
+#     gx = cv2.Sobel(gray, cv2.CV_32F, 1, 0, ksize=3)
+#     gy = cv2.Sobel(gray, cv2.CV_32F, 0, 1, ksize=3)
+#     grad = cv2.magnitude(gx, gy)
+#     G = float(np.mean(grad)) / 255.0
+
+#     score = mean_v * (1.0 - mean_s) / (1.0 + alpha * G)
+
+#     return score
+
+# def smoke_score_single(rgb):
+#     small = cv2.resize(rgb, (128, 72), interpolation=cv2.INTER_AREA)
+#     hsv = cv2.cvtColor(small, cv2.COLOR_RGB2HSV).astype(np.float32)
+#     s = hsv[..., 1] / 255.0
+#     return float(1.0 - s.mean())
+
+# def dark_channel_score(
+#     frame_bgr: np.ndarray, resize_w: int = 80, patch_size: int = 5
+# ) -> float:
+#     """
+#     Compute the mean dark channel of a BGR frame.
+#     Higher score = more haze / whitish content.
+
+#     Args:
+#         frame_bgr  : input BGR frame (any resolution)
+#         resize_w   : width to downsample to before computing (smaller = faster)
+#                      Recommended: 80 (~0.3-0.5ms), 160 (~1ms), 320 (~4ms)
+#         patch_size : erosion kernel size for neighbourhood minimum
+#                      Recommended: 5 for resize_w=80, 15 for resize_w=320
+#     """
+#     small_frame = cv2.resize(frame_bgr, (64, 36), interpolation=cv2.INTER_NEAREST)
+
+#     # 2. Get the minimum value across the color channels (axis=2)
+#     # This creates our approximated "Dark Channel"
+#     dark_channel = np.min(small_frame, axis=2)
+
+#     # 3. The single score is the average of this dark channel.
+#     # Range is 0.0 to 255.0
+#     haze_score = np.mean(dark_channel)
+
+#     return haze_score
 
 
 # --------------------------------------------------------------------------- #
@@ -222,10 +330,19 @@ def process_video(
 
         # -- Haze score -------------------------------------------------------
         t0 = time.perf_counter()
+        # haze_score = dark_channel_score(
+        #     frame, resize_w=haze_resize, patch_size=haze_patch
+        # )
+
+        # haze_score = smoke_score_single(frame)
         haze_score = dark_channel_score(
-            frame, resize_w=haze_resize, patch_size=haze_patch
+            frame, small_width=haze_resize
         )
+        # haze_score = compute_settled_smoke_score(frame)
+        time_elapsed = time.perf_counter() - t0
         haze_times.append((time.perf_counter() - t0) * 1000.0)
+        # !DEBUG
+        # pprint(f"Haze score: {haze_score:.3f} | Time: {time_elapsed * 1000:.2f} ms")
         # running_avg_ms = float(np.mean(haze_times))
 
         is_hazy = haze_score > haze_thresh
@@ -312,19 +429,19 @@ def main():
     parser.add_argument(
         "--diff_thresh",
         type=int,
-        default=15,
+        default=5,
         help="FrameDiff pixel-difference threshold",
     )
     parser.add_argument(
         "--haze_thresh",
         type=float,
-        default=60.0,
+        default=0.3,
         help="Dark-channel haze score threshold for HAZE DETECTED",
     )
     parser.add_argument(
         "--haze_resize",
         type=int,
-        default=80,
+        default=120,
         help="Width (px) to downsample frame before dark channel "
         "[80=fastest ~0.3ms | 160=~1ms | 320=~4ms]",
     )
@@ -395,6 +512,9 @@ def main():
         rows.append(row)
     dfmk.insert_rows("haze_videos", rows)
     dfmk.fill_table_from_row_pool("haze_videos")
+    dfmk["haze_videos"].drop(
+        columns=["total_hazy_frames", "video_type"], inplace=True
+    )  # optional: remove video_type column
     dfmk["haze_videos"].to_csv(
         os.path.join(in_dir, "haze_video_summary.csv"),
         sep=";",

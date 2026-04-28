@@ -7,6 +7,7 @@ from src.methods.skip.base_block_skip_proc import BaseBlockSkipProc
 
 # ! @Also see: src/methods/skip/__prof_skip_meta.md for further details.
 class MotionOnlyBlockSkipProcHaze(BaseBlockSkipProc):
+    NO_MOTION_HAZE_SCORE_LIST = []  # for logging haze scores of frames that had no motion
     def __init__(self, cfg: Config):
         super().__init__(cfg)
         self.block_ratio_th = self.params.get("block_ratio_th")
@@ -79,7 +80,6 @@ class MotionOnlyBlockSkipProcHaze(BaseBlockSkipProc):
                 {"block_id": (int(r), int(c)), "percent_active_pixels": percent_pixels}
             )
         # --------------------------
-
         has_motion = len(active_indices) > 0
         should_skip = not has_motion
 
@@ -87,12 +87,19 @@ class MotionOnlyBlockSkipProcHaze(BaseBlockSkipProc):
         #    If tau_dark is set and the frame looks hazy -> override skip to False
         haze_score = None
         haze_triggered = False
-
+        # pprint("In motion_only_block_skip_proc_haze.should_skip:")
+        # pprint(f"  - Motion detected? {has_motion}")
+        # pprint(f'tau_dark: {self.tau_dark}, haze_score: {haze_score}, haze_triggered: {haze_triggered}')
         if should_skip and self.tau_dark is not None:
             haze_score = self._detect_haze_dcp(frame)
+            MotionOnlyBlockSkipProcHaze.NO_MOTION_HAZE_SCORE_LIST.append(
+                haze_score
+            )  # log haze score for frames that had no motion
             haze_triggered = haze_score >= self.tau_dark
             if haze_triggered:
                 should_skip = False  # rescue frame: force DL inference
+
+            pprint(f'[AFTER] ⏩tau_dark: {self.tau_dark}, haze_score: {haze_score}, haze_triggered: {"🔴" if haze_triggered else "🟢"}, final should_skip: {should_skip}')
 
         meta_data = {
             "mt_proc": {
