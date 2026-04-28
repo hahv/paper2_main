@@ -5,7 +5,7 @@ sys.path.append("E:/Dev/__halib")
 from halib import *
 from halib.exp.viz.plot import PlotHelper as plth
 
-BASE_DIR = r"E:/SyncData/paper2_main/zout/reports/viz/vdb_screenshots"
+BASE_DIR = r"E:\SyncData\paper2_main\paper\3.fig\videodb"
 df = plth.get_img_grid_df(f"{BASE_DIR}/src")
 df.columns = [f"sample_{i}" for i in range(len(df.columns))]
 df.to_csv(f"{BASE_DIR}/vdb_grid_input.csv", index=False, encoding="utf-8", sep=";")
