@@ -30,3 +30,4 @@ uv.lock
 *.synctex.gz
 
 paper/3.fig/quality_analyses/src/unified_df.csv
+zextra/z_haze_error

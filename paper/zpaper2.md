@@ -4,9 +4,9 @@
 <!-- TARGET_PROJECT: G:\My Drive\1_PhD\Obsidian\Home\3. Writing\paperfire2 -->
 <!-- SYNC_TARGET_FILE: 00_Meta_Abstract.md-->
 <!-- BLOCK_ID: abstract -->
-date: 2026.04.21
+date: 2026.04.28
 title: "Efficient Real-Time Fire Surveillance: A Lightweight Motion-Heuristic
-Skip Module for Accelerated Inference"
+Skip Module for Accelerated Inference in Indoor Environments"
 abstract: "Conventional deep learning (DL)-based fire and smoke detection systems process
 every frame of a video stream through a computationally intensive model to classify the
 presence of fire or smoke. However, in surveillance scenarios — particularly indoor
@@ -56,8 +56,8 @@ eqnPrefix:
 <!-- !Why matter -->
 
 Fires and wildfires, if not detected and controlled in their early stages, can
-quickly escalate --- especially under dry and windy conditions --- resulting in
-catastrophic consequences including loss of life, destruction of property, and
+quickly escalate, especially under dry and windy conditions, resulting in
+catastrophic consequences, including loss of life, destruction of property, and
 damage to natural ecosystems. For instance, in 2017, urban fires and wildfires
 in California, USA, caused an estimated economic loss of 10 billion USD
 [@californiafire:online]. More recently, in 2025, a forest fire in Gyeongsang
@@ -74,13 +74,13 @@ practical deployments, these systems are commonly applied to CCTV video streams,
 where DL-based classifiers or object detectors perform inference on each frame
 individually. Although this frame-wise paradigm is straightforward to implement,
 it exhibits two key limitations. First, it relies exclusively on spatial
-information within individual frames, neglecting temporal cues --- such as
-motion --- inherent in video data. Second, in surveillance scenarios,
-particularly in indoor environments, consecutive frames often exhibit minimal
+information within individual frames, neglecting temporal cues, such as
+motion, inherent in video data. Second, in surveillance scenarios,
+particularly in **indoor** environments, consecutive frames often exhibit minimal
 variation due to static scene content. Applying a DL model indiscriminately to
 every frame under such conditions is computationally redundant, increasing
 processing cost and latency without contributing to detection performance. This
-inefficiency is further compounded by the well-known accuracy--efficiency
+inefficiency is further compounded by the well-known accuracy-efficiency
 trade-off in DL: more accurate models are generally more computationally
 intensive, and redundant frame processing amplifies these demands, rendering
 real-time performance difficult to achieve.
@@ -89,7 +89,7 @@ real-time performance difficult to achieve.
 
 A common strategy to reduce inference cost is to substitute a heavy,
 high-accuracy DL model with a lighter alternative; however, this typically
-degrades detection reliability --- an unacceptable compromise in safety-critical
+degrades detection reliability, an unacceptable compromise in safety-critical
 applications such as fire and smoke detection. This study takes a complementary
 approach: rather than replacing the classifier, we introduce a lightweight
 skip-module that acts as a computational gate, selectively forwarding only
@@ -105,7 +105,7 @@ In particular, our main contributions are summarized as follows:
 
 - **Skip-Module Mechanism:** We propose a lightweight skip-module that exploits
   motion estimation via frame differencing to identify static scenes and bypass
-  DL inference on non-informative frames, reducing computational cost without
+  DL inference on static frames, reducing computational cost without
   modifying the underlying classifier. The module is designed as a plug-and-play
   component compatible with existing fire and smoke detection pipelines. To
   identify the optimal operating configuration, we further develop a systematic
@@ -113,12 +113,12 @@ In particular, our main contributions are summarized as follows:
   preserving detection performance.
 
 - **Indoor Fire and Smoke Video Dataset:** We construct an annotated dataset
-  comprising 150 indoor fire and smoke videos --- including fire, smoke, and
-  background-only classes --- captured by static surveillance cameras at
-  resolutions from 720p to 1080p. The dataset covers diverse environments such
-  as warehouses, parking areas, and offices under varying lighting conditions,
-  providing a realistic benchmark for evaluating detection systems in static
-  surveillance scenarios.
+  comprising 150 indoor fire and smoke videos (including fire, smoke, and
+  background-only classes) captured by static surveillance cameras at
+  resolutions ranging from $814 \times 720$ to $3840 \times 2160$. The dataset
+  covers diverse environments such as warehouses, parking areas, and offices
+  under varying lighting conditions, providing a realistic benchmark for
+  evaluating detection systems in static surveillance scenarios.
 
 - **Comprehensive System Evaluation:** We integrate the skip-module with a
   high-capacity DL classifier (BIG model) and evaluate the combined system on
@@ -316,41 +316,42 @@ algorithms are described in the Algorithm \ref{alg:skipmodule}.
 ```
 
 
-Publicly available video datasets for fire and smoke detection using static
-cameras remain scarce. While several existing benchmarks address this detection
-task — including FireNet [@jadon2019firenet], Firesense [@Firesens4:online],
-FiSmo [@cazzolato2017fismo], and FURG [@steffens2015unconstrained] — these were
-recorded with moving cameras and are therefore unsuitable for static
-surveillance scenarios. Static-camera datasets such as DFire [@dfiredataset],
-VisiFire Bilkent [@VisiFireBilkent:online], KMU Fire and Smoke
-[@KMUFireSmokeDataset], Mivia Fire and Smoke [@foggia2015real], and USTC Smoke
-[@lin2017smoke] do exist; however, they collectively suffer from several
-limitations: a predominance of outdoor scenes, a small number of video samples,
-low spatial resolution, and insufficient diversity in fire/smoke appearances and
+Several existing benchmarks address this detection task, including FireNet
+[@jadon2019firenet], Firesense [@Firesens4:online], FiSmo [@cazzolato2017fismo],
+and FURG [@steffens2015unconstrained]. However, these were recorded with moving
+cameras and are therefore unsuitable for static surveillance scenarios.
+Static-camera datasets such as DFire [@dfiredataset], VisiFire Bilkent
+[@VisiFireBilkent:online], KMU Fire and Smoke [@KMUFireSmokeDataset], Mivia Fire
+and Mivia Smoke datasets [@foggia2015real], and USTC Smoke [@lin2017smoke] do
+exist; however, they collectively suffer from several limitations: a
+predominance of outdoor scenes, a small number of video samples, low spatial
+resolution, and insufficient diversity in fire/smoke appearances and
 environmental conditions.
 
 To address these deficiencies, we constructed a dedicated static indoor video
 dataset by aggregating clips from multiple heterogeneous sources. Fire and smoke
 samples were sourced from the Korea AI Fire Dataset [@AIHub87:online], the USTC
-Smoke Dataset [@lin2017smoke], and the VSD3K Dataset [@huang2022fire],
+Smoke Dataset [@lin2017smoke], and the VDS3 Dataset [@huang2022fire],
 supplemented by videos collected from open online platforms (Pexels, Pixabay,
 and YouTube). Non-fire/smoke (negative) samples were compiled from self-recorded
 footage captured by real CCTV cameras in various indoor environments (e.g.,
-parking areas), along with the Safe & Unsafe Behavior in Workplaces dataset
-[@onal2024video], the Indoor Action dataset [@deniz2024optimized], the MPII
-Cooking 2 Dataset [@rohrbach2016recognizing], and the WiseNet dataset
-[@marroquin2019wisenet]. Table \ref{tb:videodb} summarizes the properties of the
-self-collected video dataset alongside a comparison with existing benchmark
-datasets, and Figure \ref{fig:videodb} presents representative sample frames.
+parking areas), along with videos from the Safe & Unsafe Behavior in Workplaces
+dataset [@onal2024video], the Indoor Action dataset [@deniz2024optimized], the
+MPII Cooking 2 Dataset [@rohrbach2016recognizing], and the WiseNet dataset
+[@marroquin2019wisenet]. Table \ref{tb:ufireindoor} summarizes the properties of the
+self-collected video dataset alongside a comparison with existing datasets, and
+Figure \ref{fig:videodb} presents representative sample frames from our dataset.
+
 
 For the hyperparameter optimization described in Section \ref{sec:hyperparam},
 the video dataset was further partitioned into a validation set,
 $D_{\text{val}}$ (46 videos), used to select the optimal skip-module
 hyperparameters, and a test set, $D_{\text{test}}$ (104 videos), used for the
-final evaluation of the skip-enabled system against the baseline and existing
-methods. The split followed a 30:70 ratio (validation:test), following the
-protocol of  [@de2023hybrid], and was performed using stratified sampling to
+final evaluation of the proposed system against the baseline and existing
+methods. The partition adhered to a 30:70 ratio (validation:test), following the
+protocol of [@de2023hybrid], and was performed using stratified sampling to
 preserve balanced class distributions in both subsets.
+
 
 ## Evaluation Metrics {#sec:metrics label="metrics"}
 
@@ -419,35 +420,30 @@ models alongside our BIG model:
 **Implementation Details**: Unless otherwise specified, all experiments were
 conducted on a workstation equipped with an Intel Core i9-10900K CPU, 64 GB DDR4
 system memory, and an NVIDIA GeForce RTX 3090 GPU (24 GB VRAM), running Windows
-10 Pro (22H2, build 19045). Deep learning inference was performed using PyTorch 2.7.1
-under CUDA 12.9, and video processing and motion estimation were carried out
-using OpenCV 4.11 (CPU-only).
+10 Pro (22H2, build 19045). Deep learning inference was performed using PyTorch
+2.7.1 under CUDA 12.9, and video processing and motion estimation were carried
+out using OpenCV 4.11 (CPU-only).
 
 ## Results
 
 ### Hyperparameter Optimization Results
 
-The recall tolerance is set to $\delta_R = 0.015$, permitting an absolute
-recall drop of at most $1.5\%$ relative to the baseline.
-This value is chosen to reflect the safety requirement of the application:
-at the baseline recall of approximately $95\%$, a tolerance of $1.5\%$
-ensures that the worst-case deployed system retains a recall of at least
-$93.5\%$ --- a level consistent with operational fire and smoke detection
-standards --- while providing the hyperparameter search sufficient
-flexibility to identify configurations with meaningful efficiency gains.
+The recall tolerance is set to $\delta_R = 0.015$, permitting an absolute recall
+drop of at most $1.5\%$ relative to the baseline. This value is chosen to
+reflect the safety requirement of the application: at the baseline recall of
+approximately $95\%$, a tolerance of $1.5\%$ ensures that the worst-case
+deployed system retains a recall of at least $93.5\%$ --- a level consistent
+with operational fire and smoke detection standards --- while providing the
+hyperparameter search sufficient flexibility to identify configurations with
+meaningful efficiency gains.
 
-In this work, we set
-\[
-    w_S = 0.70, \qquad w_R = 0.30,
-\]
-reflecting that skip rate is the primary optimization objective ---
-as it directly determines throughput gain --- while recall retention
-serves as a secondary criterion that fine-tunes selection among
-configurations of comparable efficiency.
-The recall hard constraint already screens all unsafe candidates
-prior to ranking; $w_R > 0$ ensures that within the feasible set,
-configurations closer to baseline recall are preferred as a
-conservative tie-breaking rule.
+In this work, we set \[ w_S = 0.70, \qquad w_R = 0.30, \] reflecting that skip
+rate is the primary optimization objective --- as it directly determines
+    throughput gain --- while recall retention serves as a secondary criterion
+that fine-tunes selection among configurations of comparable efficiency. The
+recall hard constraint already screens all unsafe candidates prior to ranking;
+$w_R > 0$ ensures that within the feasible set, configurations closer to
+baseline recall are preferred as a conservative tie-breaking rule.
 
 
 **Frame Diff Parameter Grid Search:**
@@ -526,30 +522,26 @@ improving operational false alarm behavior.
 ```
 
 Table~\ref{tb:val_results_frameDiff} reveals a fundamental limitation of the
-\textsc{FrameDiffDet} skip module: it fails to deliver meaningful
-throughput improvement under the safety constraint $\delta_R = 0.015$.
-Among all 48 evaluated configurations, only four satisfy the hard recall
-constraint, and the best feasible configuration
-($\alpha{=}1.0,\ B{=}16,\ \tau{=}0.05,\ \tau_d{=}3$) achieves a skip
-rate of merely $0.72\%$ --- meaning the module bypasses fewer than
-$1$ in $100$ background frames.
-As a direct consequence, the FPS of the top-ranked configuration
-($22.4$ FPS) is actually \emph{lower} than the no-skip baseline
-($24.1$ FPS), indicating that the skip module introduces measurable
-overhead without delivering any compensating efficiency gain.
-This behavior stems from the intrinsic sensitivity of naive frame
-differencing: ambient illumination fluctuations, sensor noise, and
-subtle background variations continuously produce non-zero inter-frame
-pixel differences, causing the detector to classify nearly every frame
-as motion-active and trigger inference regardless.
-Configurations that do achieve substantial skip rates --- reaching
-$47$--$60\%$ at higher $\tau_d$ values --- do so only at the cost of
-severe recall degradation of $5$--$10\%$, a level entirely
-incompatible with fire and smoke safety requirements.
-The results collectively demonstrate that \textsc{FrameDiffDet}, without
-temporal smoothing or accumulation, lacks the noise robustness required
-to operate effectively as a skip gate in real indoor surveillance
-conditions.
+\textsc{FrameDiffDet} skip module: it fails to deliver meaningful throughput
+improvement under the safety constraint $\delta_R = 0.015$. Among all 48
+evaluated configurations, only four satisfy the hard recall constraint, and the
+best feasible configuration ($\alpha{=}1.0,\ B{=}16,\ \tau{=}0.05,\ \tau_d{=}3$)
+achieves a skip rate of merely $0.72\%$ --- meaning the module bypasses fewer
+than $1$ in $100$ background frames. As a direct consequence, the FPS of the
+top-ranked configuration ($22.4$ FPS) is actually \emph{lower} than the no-skip
+baseline ($24.1$ FPS), indicating that the skip module introduces measurable
+overhead without delivering any compensating efficiency gain. This behavior
+stems from the intrinsic sensitivity of naive frame differencing: ambient
+illumination fluctuations, sensor noise, and subtle background variations
+continuously produce non-zero inter-frame pixel differences, causing the
+detector to classify nearly every frame as motion-active and trigger inference
+regardless. Configurations that do achieve substantial skip rates --- reaching
+$47$--$60\%$ at higher $\tau_d$ values --- do so only at the cost of severe
+recall degradation of $5$--$10\%$, a level entirely incompatible with fire and
+smoke safety requirements. The results collectively demonstrate that
+\textsc{FrameDiffDet}, without temporal smoothing or accumulation, lacks the
+noise robustness required to operate effectively as a skip gate in real indoor
+surveillance conditions.
 
 #### Hyperparameter Search Space for the AccMotionDet Skip Module
 
@@ -622,86 +614,83 @@ the effect of the remaining hyperparameters.
 <!-- ! Analysis the hyperparameters search results of AccMotionDet -->
 ## Hyperparameter Optimization Results: AccMotionDet
 
-Table \ref{tb:val_results_accMotionDet} shows the top-10 ranked configurations for the AccMotionDet
-skip module on the validation set $\mathcal{D}_\text{val}$, ordered by combined score $\Phi$.
-The baseline system (no skip module) achieves a recall of 94.35\% at 24.1~FPS.
+Table \ref{tb:val_results_accMotionDet} shows the top-10 ranked configurations
+for the AccMotionDet skip module on the validation set $\mathcal{D}_\text{val}$,
+ordered by combined score $\Phi$. The baseline system (no skip module) achieves
+a recall of 94.35\% at 24.1~FPS.
 
 ### Selected Configuration
 
-The optimal configuration (Exp.~1) uses a half-resolution scale ($\alpha = 0.5$), coarse
-block size ($B = 32$), conservative block-active threshold ($\tau = 0.05$), moderate pixel
-sensitivity ($\tau_d = 5$), low activation threshold ($\tau_m = 5$), and a small accumulation
-cap ($K_{\max} = 15$).
-This configuration achieves a skip rate of **44.39\%** and a recall of **93.90\%**
-($\Delta = -0.45\%$), well within the tolerance $\delta_R = 0.015$.
-The resulting FPS improves from 24.1 to **36.6**, a **52\% throughput gain**, with no change
-in FPR (0.74\% throughout).
+The optimal configuration (Exp.~1) uses a half-resolution scale ($\alpha =
+0.5$), coarse block size ($B = 32$), conservative block-active threshold ($\tau
+= 0.05$), moderate pixel sensitivity ($\tau_d = 5$), low activation threshold
+($\tau_m = 5$), and a small accumulation cap ($K_{\max} = 15$). This
+configuration achieves a skip rate of **44.39\%** and a recall of **93.90\%**
+($\Delta = -0.45\%$), well within the tolerance $\delta_R = 0.015$. The
+resulting FPS improves from 24.1 to **36.6**, a **52\% throughput gain**, with
+no change in FPR (0.74\% throughout).
 
 ### Hyperparameter Sensitivity Analysis
 
-**Scale factor $\alpha$.**
-All top-10 configurations consistently use $\alpha = 0.5$ (half resolution).
-Full-resolution processing ($\alpha = 1.0$) does not appear in any feasible high-scoring
-configuration, confirming that downscaling reduces sensitivity to high-frequency pixel noise
-while lowering skip-module latency --- both effects are beneficial.
+**Scale factor $\alpha$.** All top-10 configurations consistently use $\alpha =
+0.5$ (half resolution). Full-resolution processing ($\alpha = 1.0$) does not
+appear in any feasible high-scoring configuration, confirming that downscaling
+reduces sensitivity to high-frequency pixel noise while lowering skip-module
+latency --- both effects are beneficial.
 
-**Block size $B$.**
-$B = 32$ dominates the top-10 rankings, with only one entry using $B = 16$ (Exp.~10,
-score 0.4906).
-Coarser blocks aggregate motion evidence spatially, providing greater robustness to isolated
-pixel-level disturbances that could otherwise trigger unnecessary inference calls.
-The result confirms the prior expectation in Section~\ref{secmethod} that temporal
-accumulation already suppresses transient noise, making fine-grained $B = 16$ blocks
-less necessary for AccMotionDet.
+**Block size $B$.** $B = 32$ dominates the top-10 rankings, with only one entry
+using $B = 16$ (Exp.~10, score 0.4906). Coarser blocks aggregate motion evidence
+spatially, providing greater robustness to isolated pixel-level disturbances
+that could otherwise trigger unnecessary inference calls. The result confirms
+the prior expectation in Section~\ref{secmethod} that temporal accumulation
+already suppresses transient noise, making fine-grained $B = 16$ blocks less
+necessary for AccMotionDet.
 
-**Block active threshold $\tau$.**
-Configurations with $\tau = 0.05$ yield the highest skip rates (42--44\%), while
-$\tau = 0.10$ achieves slightly lower skip rates (39--40\%) but marginally better
-recall retention.
-The top-ranked configuration (score 0.5203) uses $\tau = 0.05$, confirming that a
-conservative trigger policy --- requiring only sparse motion evidence before invoking
-inference --- is preferred for maximizing the combined score under the recall constraint.
+**Block active threshold $\tau$.** Configurations with $\tau = 0.05$ yield the
+highest skip rates (42--44\%), while $\tau = 0.10$ achieves slightly lower skip
+rates (39--40\%) but marginally better recall retention. The top-ranked
+configuration (score 0.5203) uses $\tau = 0.05$, confirming that a conservative
+trigger policy --- requiring only sparse motion evidence before invoking
+inference --- is preferred for maximizing the combined score under the recall
+constraint.
 
-**Activation threshold $\tau_m$.**
-Configurations with $\tau_m = 5$ (Exp.~1--6) consistently outscore those with
-$\tau_m = 10$ (Exp.~7--8).
-A higher activation threshold $\tau_m = 10$ requires stronger sustained motion before
-triggering inference, which slightly improves the skip rate but incurs a larger recall
-drop (up to $-0.53\%$), reducing the recall retention term in $\Phi$.
+**Activation threshold $\tau_m$.** Configurations with $\tau_m = 5$ (Exp.~1--6)
+consistently outscore those with $\tau_m = 10$ (Exp.~7--8). A higher activation
+threshold $\tau_m = 10$ requires stronger sustained motion before triggering
+inference, which slightly improves the skip rate but incurs a larger recall drop
+(up to $-0.53\%$), reducing the recall retention term in $\Phi$.
 
-**Accumulation cap $K_{\max}$.**
-Across all three values evaluated ($K_{\max} \in \{15, 25, 35\}$), the skip rate
-decreases monotonically with increasing $K_{\max}$
-(e.g., 44.39\% $\to$ 42.89\% $\to$ 42.38\% for Exp.~1--3).
-A lower cap allows the accumulator to reset more readily after high-motion periods,
-enabling faster recognition of subsequent static frames and thus higher skip rates.
-The difference in combined score across the three values is small ($\leq 0.007$),
-indicating low sensitivity to this parameter within the evaluated range.
+**Accumulation cap $K_{\max}$.** Across all three values evaluated ($K_{\max}
+\in \{15, 25, 35\}$), the skip rate decreases monotonically with increasing
+$K_{\max}$ (e.g., 44.39\% $\to$ 42.89\% $\to$ 42.38\% for Exp.~1--3). A lower
+cap allows the accumulator to reset more readily after high-motion periods,
+enabling faster recognition of subsequent static frames and thus higher skip
+rates. The difference in combined score across the three values is small ($\leq
+0.007$), indicating low sensitivity to this parameter within the evaluated
+range.
 
 ### Comparison with FrameDiffDet
 
-A fundamental contrast emerges when comparing AccMotionDet and FrameDiffDet on the
-validation set (Table @tbl:frameDiff-val).
-All feasible FrameDiffDet configurations --- those satisfying $\Delta R \leq \delta_R$
---- achieve skip rates below **1.4\%**, yielding no meaningful FPS improvement over
-the baseline (22.4--23.5~FPS vs.\ 24.1~FPS baseline).
-This reveals a structural limitation of naive frame differencing: in the static indoor
-surveillance setting, the per-pixel sensitivity required to safely detect slow-onset
-smoke events forces the threshold $\tau_d$ to remain low (i.e., $\tau_d = 3$), which
-in turn flags even subtle illumination changes as motion, suppressing skip decisions
-on nearly all frames.
-By contrast, the temporal accumulation in AccMotionDet absorbs transient pixel
-fluctuations over multiple frames, enabling confident skip decisions on genuinely
-static frames while preserving sensitivity to sustained motion signatures
-characteristic of fire and smoke.
-This results in a **30$\times$ higher skip rate** (44.39\% vs.\ 0.72\%) and a
-**63\% higher FPS** (36.6 vs.\ 22.4) for the respective best configurations, at a
-comparable recall cost ($-0.45\%$ vs.\ $-0.17\%$).
-FrameDiffDet achieves high skip rates only at the cost of severe recall degradation
-($\geq 5.5\%$ for skip rates $\geq 47\%$), confirming that it lacks the temporal
-smoothing necessary for safe operation in this domain.
-AccMotionDet is therefore selected as the skip module for all subsequent
-system-level evaluations.
+A fundamental contrast emerges when comparing AccMotionDet and FrameDiffDet on
+the validation set (Table @tbl:frameDiff-val). All feasible FrameDiffDet
+configurations --- those satisfying $\Delta R \leq \delta_R$ --- achieve skip
+rates below **1.4\%**, yielding no meaningful FPS improvement over the baseline
+(22.4--23.5~FPS vs.\ 24.1~FPS baseline). This reveals a structural limitation of
+naive frame differencing: in the static indoor surveillance setting, the
+per-pixel sensitivity required to safely detect slow-onset smoke events forces
+the threshold $\tau_d$ to remain low (i.e., $\tau_d = 3$), which in turn flags
+even subtle illumination changes as motion, suppressing skip decisions on nearly
+all frames. By contrast, the temporal accumulation in AccMotionDet absorbs
+transient pixel fluctuations over multiple frames, enabling confident skip
+decisions on genuinely static frames while preserving sensitivity to sustained
+motion signatures characteristic of fire and smoke. This results in a
+**30$\times$ higher skip rate** (44.39\% vs.\ 0.72\%) and a **63\% higher FPS**
+(36.6 vs.\ 22.4) for the respective best configurations, at a comparable recall
+cost ($-0.45\%$ vs.\ $-0.17\%$). FrameDiffDet achieves high skip rates only at
+the cost of severe recall degradation ($\geq 5.5\%$ for skip rates $\geq 47\%$),
+confirming that it lacks the temporal smoothing necessary for safe operation in
+this domain. AccMotionDet is therefore selected as the skip module for all
+subsequent system-level evaluations.
 
 
 ### System-Level Performance: Frame-Based Efficiency {#sec:e2e-perf}
@@ -718,8 +707,7 @@ accuracy/latency), also comparing against the baseline system without skipping.
 ```{=latex}
 \input{./4.table/tb_perf_per_frame.tex}
 ```
-FLOPs (small s) static complexity of a model
-FlOPs = Floating-Point Operations
+FLOPs (small s) static complexity of a model FlOPs = Floating-Point Operations
 MFLOPs = $10^6$ FLOPs, GFLOPs = $10^9$ FLOPs
 
 Obviously, the baseline system (BIG MODEL only) achieves the best performance
@@ -743,21 +731,21 @@ Baseline's 98.5% F1-Score.
 video-level processing. The M3 baseline reduces false alarms by executing
 majority voting across a 30-frame window. While highly accurate, this
 architectural choice introduces significant latency. -->
-Temporal baseline MEthod: Temporal Persistence Thresholding [@de2023hybrid]: The temporal baseline method, referred to as Temporal Persistence Thresholding (TPT),
-augments the standard per-frame inference pipeline with a lightweight post-processing
-stage designed to suppress isolated false alarms.
-Unlike the proposed skip module, TPT does not reduce the number of frames forwarded
-to the classifier --- every frame is still processed by the full BIG model.
-Instead, a circular boolean buffer of length $W$ records the raw per-frame predictions
-over a rolling window.
-When the classifier predicts fire or smoke on a given frame, the detection is
-confirmed only if the fraction of positive predictions within the buffer exceeds a
-persistence threshold $\tau_\text{persist}$; otherwise, the prediction is suppressed
-and the frame is relabelled as background.
-This mechanism filters out transient, single-frame activations caused by brief
-illumination changes or camera artefacts, trading a fixed minimum detection latency
-of $\lceil \tau_\text{persist} \times W \rceil$ frames for a reduction in false
-alarm rate.
+Temporal baseline MEthod: Temporal Persistence Thresholding [@de2023hybrid]: The
+temporal baseline method, referred to as Temporal Persistence Thresholding
+(TPT), augments the standard per-frame inference pipeline with a lightweight
+post-processing stage designed to suppress isolated false alarms. Unlike the
+proposed skip module, TPT does not reduce the number of frames forwarded to the
+classifier --- every frame is still processed by the full BIG model. Instead, a
+circular boolean buffer of length $W$ records the raw per-frame predictions over
+a rolling window. When the classifier predicts fire or smoke on a given frame,
+the detection is confirmed only if the fraction of positive predictions within
+the buffer exceeds a persistence threshold $\tau_\text{persist}$; otherwise, the
+prediction is suppressed and the frame is relabelled as background. This
+mechanism filters out transient, single-frame activations caused by brief
+illumination changes or camera artefacts, trading a fixed minimum detection
+latency of $\lceil \tau_\text{persist} \times W \rceil$ frames for a reduction
+in false alarm rate.
 
 We follow the implementation and hyperparameter selection protocol of
 [@de2023hybrid] on our validation set $\mathcal{D}_\text{val}$, and get two
@@ -856,23 +844,18 @@ did not match the chromatic signatures of either fire or smoke. -->
 
 #### Qualitative Analysis
 
-Figure~\ref{fig:qualitative} illustrates representative success and
-failure cases of the AccMotionDet skip module on the test set
-$\mathcal{D}_\text{test}$.
+Figure~\ref{fig:qualitative} illustrates representative success and failure
+cases of the AccMotionDet skip module on the test set $\mathcal{D}_\text{test}$.
 
-**Success cases.**
-The top row shows two canonical scenarios where $\mathcal{S}$ operates
-as intended.
-In the first case, a static indoor background frame --- with no
-inter-frame motion --- is correctly skipped ($s_t = 0$), avoiding an
-unnecessary invocation of $\mathcal{M}$ and contributing directly to
-the 44.39\% skip rate reported in
-Table~\ref{tb:val_results_accMotionDet}.
-In the second case, a frame containing active fire (left) and smoke
-(right) exhibits sufficient accumulated motion to trigger inference
-($s_t = 1$), and $\mathcal{M}$ correctly raises an alarm.
-These cases confirm that $\mathcal{S}$ reliably distinguishes
-scene-level activity from quiescence in the target indoor
+**Success cases.** The top row shows two canonical scenarios where $\mathcal{S}$
+operates as intended. In the first case, a static indoor background frame ---
+with no inter-frame motion --- is correctly skipped ($s_t = 0$), avoiding an
+unnecessary invocation of $\mathcal{M}$ and contributing directly to the 44.39\%
+skip rate reported in Table~\ref{tb:val_results_accMotionDet}. In the second
+case, a frame containing active fire (left) and smoke (right) exhibits
+sufficient accumulated motion to trigger inference ($s_t = 1$), and
+$\mathcal{M}$ correctly raises an alarm. These cases confirm that $\mathcal{S}$
+reliably distinguishes scene-level activity from quiescence in the target indoor
 surveillance setting.
 
 ```{=latex}
@@ -881,32 +864,28 @@ surveillance setting.
 
 **Failure Cases**
 
-The bottom row exposes two structural limitations of the motion-based
-gating approach.
-First, in a slow-onset smoke video, the initial frames of smoke
-diffusion produce minimal inter-frame pixel change --- below the
-activation threshold $\tau_m$ of the AccMotionDet accumulator ---
-causing $\mathcal{S}$ to skip these frames and delay the first alarm.
-This represents the primary recall risk identified in
-Section~\ref{sec:hyperparam}: the skip module is conservative by
-design, but gradual diffusion events are the edge case where this
-conservatism incurs a safety cost.
-Second, in a scene containing continuous background motion
-(e.g., a person walking repeatedly through the frame), $\mathcal{S}$
-assigns $s_t = 1$ to nearly every frame, reducing the skip rate to
-near zero and negating the computational efficiency gain for that
-video.
-Both failure modes are consistent with the motion-only design of
-$\mathcal{S}$: they arise not from classification errors in
-$\mathcal{M}$, but from the inherent limitation of using inter-frame
-motion as a sole proxy for scene informativeness.
+The bottom row exposes two structural limitations of the motion-based gating
+approach. First, in a slow-onset smoke video, the initial frames of smoke
+diffusion produce minimal inter-frame pixel change --- below the activation
+threshold $\tau_m$ of the AccMotionDet accumulator --- causing $\mathcal{S}$ to
+skip these frames and delay the first alarm. This represents the primary recall
+risk identified in Section~\ref{sec:hyperparam}: the skip module is conservative
+by design, but gradual diffusion events are the edge case where this
+conservatism incurs a safety cost. Second, in a scene containing continuous
+background motion (e.g., a person walking repeatedly through the frame),
+$\mathcal{S}$ assigns $s_t = 1$ to nearly every frame, reducing the skip rate to
+near zero and negating the computational efficiency gain for that video. Both
+failure modes are consistent with the motion-only design of $\mathcal{S}$: they
+arise not from classification errors in $\mathcal{M}$, but from the inherent
+limitation of using inter-frame motion as a sole proxy for scene
+informativeness.
 
 ```{=latex}
 \input{./3.fig/fig_quality_failure.tex}
 ```
 <!-- !END_SYNC_BLOCK -->
 
-#### Eager Mode: Recovery of Missed Cases
+<!-- #### Eager Mode: Recovery of Missed Cases
 
 **Fix for slow-onset smoke:** We intro the skip module with eager mode and
 periodically check for specific scences
@@ -923,7 +902,7 @@ this eager mode.
 we Compare again on test set
 ```{=latex}
 \input{./4.table/tb_cmp_other_temp_eager.tex}
-```
+``` -->
 
 # Conclusion {#sec:conclusion label="Conclusion"}
 
