@@ -154,7 +154,7 @@
 Motion-Heuristic Skip Module for Accelerated Inference in Indoor
 Environments}
 \author{Hoang Van-Ha, Jong Weon Lee, Park Chun-Su}
-\date{2026.04.28}
+\date{2026.04.29}
 
 \begin{document}
 \maketitle
@@ -321,7 +321,7 @@ reliability. The module prioritizes retaining positive frames
 functioning as a complementary accelerator for any existing frame-wise
 detection pipeline.
 
-\textbf{Motion Detection and The proposed Skip Module}: The skip
+\textbf{Motion Detection and the Proposed Skip Module}: The skip
 decision in our module relies on motion estimation, which connects to
 the well-studied problem of background subtraction.
 \citeproc{ref-sobral2014comprehensive}{{[}12{]}} and
@@ -337,16 +337,15 @@ fast, lightweight gate, we instead adopt motion estimation based on
 frame differencing, which offers minimal computational overhead and
 requires no background model initialization.
 
-While classical motion detection provides an efficient means of
-identifying scene activity, it has not been systematically exploited to
-gate DL inference in fire and smoke detection pipelines. Existing
-efficient video inference methods, such as FrameExit
-\citeproc{ref-ghodrati2021frameexit}{{[}15{]}}, address per-frame
-redundancy but require joint training of the gating mechanism and the
-underlying classifier, limiting plug-and-play applicability to
-pre-trained models. This study bridges this gap by integrating
-lightweight frame-differencing-based motion estimation as a
-training-free gate for a high-capacity classifier, as described in
+Existing efficient video inference methods, such as FrameExit
+\citeproc{ref-ghodrati2021frameexit}{{[}15{]}}, employ learned gating
+mechanisms to selectively process frames based on prediction confidence,
+thereby reducing redundant inference; however, they require joint
+training of the gating mechanism and the underlying classifier, limiting
+plug-and-play applicability to pre-trained models. In contrast, this
+study adopts a training-free approach by integrating lightweight
+frame-differencing-based motion estimation as a plug-and-play gate,
+requiring no retraining of the underlying classifier, as described in
 Section \ref{sec:method}.
 
 \section{The proposed method}\label{sec:method}

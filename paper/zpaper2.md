@@ -4,7 +4,7 @@
 <!-- TARGET_PROJECT: G:\My Drive\1_PhD\Obsidian\Home\3. Writing\paperfire2 -->
 <!-- SYNC_TARGET_FILE: 00_Meta_Abstract.md-->
 <!-- BLOCK_ID: abstract -->
-date: 2026.04.28
+date: 2026.04.29
 title: "Efficient Real-Time Fire Surveillance: A Lightweight Motion-Heuristic
 Skip Module for Accelerated Inference in Indoor Environments"
 abstract: "Conventional deep learning (DL)-based fire and smoke detection systems process
@@ -192,7 +192,7 @@ detection reliability. The module prioritizes retaining positive frames
 functioning as a complementary accelerator for any existing frame-wise detection
 pipeline.
 
-**Motion Detection and The proposed Skip Module**: The skip decision in our
+**Motion Detection and the Proposed Skip Module**: The skip decision in our
 module relies on motion estimation, which connects to the well-studied problem
 of background subtraction. [@sobral2014comprehensive] and
 [@garcia2020background] provide comprehensive reviews of background subtraction
