@@ -375,9 +375,11 @@ classifier:
 evaluates \(f_t\) using inter-frame motion cues or other information and
 outputs a binary gate decision \(s_t\). The full system output becomes:
 
-\[\hat{y}_t = \begin{cases} \mathcal{M}(f_t) & \text{if } s_t = 1 \quad
+\[
+\hat{y}_t = \begin{cases} \mathcal{M}(f_t) & \text{if } s_t = 1 \quad
 \text{(run inference)} \\ 0 & \text{if } s_t = 0 \quad \text{(skip, label as
-negative)} \end{cases}\]
+negative)} \end{cases}
+\]
 
 In this work, \(\mathcal{S}\) derives \(s_t\) from the motion estimated
 between \(f_t\) and the previous frame \(f_{t-1}\). Frames with little
@@ -481,16 +483,12 @@ subsets.
 
 \subsection{Evaluation Metrics}\label{sec:metrics}
 
-Performance is evaluated under both \textbf{frame-level} and
-\textbf{video-level} protocols, which are commonly used in fire and
-smoke video analysis \citeproc{ref-dfiredataset}{{[}20{]}},
+Performance is evaluated under \textbf{frame-level} evaluation,
+following the standard protocol for fire and smoke detection in videos
 \citeproc{ref-steffens2016non}{{[}31{]}}. Frame-level evaluation
 measures detection performance for each individual frame, providing a
-strict assessment of classification accuracy. Video-level evaluation
-aggregates predictions over entire video sequences, offering a coarser
-but practically relevant measure for continuous surveillance scenarios.
-
-The following label definitions apply to both evaluation protocols:
+strict assessment of classification accuracy. The following label
+definitions apply to this evaluation protocol:
 
 \begin{itemize}
 \tightlist
@@ -503,8 +501,7 @@ The following label definitions apply to both evaluation protocols:
   False Positive (\(FP\)): Incorrect detection of fire or smoke when
   none is present.
 \item
-  False Negative (\(FN\)): Failure to detect fire or smoke when it is
-  present.
+  False Negative (\(FN\)): Failure to detect fire or smoke when present.
 \end{itemize}
 
 Quantitative results are reported using standard classification metrics
@@ -554,12 +551,12 @@ architecture designed to achieve substantially higher accuracy than
 models of comparable inference speed on NVIDIA GPUs, making it
 well-suited for deployment in our target environment.
 \textcolor{red}{For fine-tuning, we compiled a dataset of
-  1,000,000 fire and smoke images collected from internet sources, partitioned
-  into training (80\%) and test (20\%) subsets. The model was optimized using
-  Adam with an initial learning rate of $1 \times 10^{-4}$ and weight decay of
-  $1 \times 10^{-5}$ for 100 epochs with a batch size of 32. On the held-out
-  test set, the final model achieved a recall of xx.xx\% and a false alarm rate
-  of xx.xx\%.}. We use input size INPUT\_SIZE = (3, 360, 640)
+1,000,000 fire and smoke images collected from internet sources, partitioned
+into training (80\%) and test (20\%) subsets. The model was optimized using
+Adam with an initial learning rate of $1 \times 10^{-4}$ and weight decay of
+$1 \times 10^{-5}$ for 100 epochs with a batch size of 32. On the held-out
+test set, the final model achieved a recall of xx.xx\% and a false alarm rate
+of xx.xx\%.}. We use input size INPUT\_SIZE = (3, 360, 640)
 
 \textbf{Implementation Details}: Unless otherwise specified, all
 experiments were conducted on a workstation equipped with an Intel Core
@@ -766,9 +763,9 @@ remaining hyperparameters.
 \subsection{Hyperparameter Optimization Results:
 AccMotionDet}\label{hyperparameter-optimization-results-accmotiondet}
 
-Table \ref{tb:val_results_accMotionDet} shows the top-10 ranked
+Table \ref{tb:val*results_accMotionDet} shows the top-10 ranked
 configurations for the AccMotionDet skip module on the validation set
-\(\mathcal{D}_\text{val}\), ordered by combined score \(\Phi\). The
+\(\mathcal{D}*\text{val}\), ordered by combined score \(\Phi\). The
 baseline system (no skip module) achieves a recall of 94.35\% at
 24.1\textasciitilde FPS.
 
