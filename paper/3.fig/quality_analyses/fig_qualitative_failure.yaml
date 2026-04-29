@@ -3,11 +3,11 @@ outfile_name: fig_qualitative_failure
 target_fmt: [pdf] # png
 # pad_top=0, pad_bottom=70, pad_left=100, pad_right=0
 canvas_padding:
-  left: 120
+  left: 140
   right: 0
   top: 0
-  bottom: 90
-font_size: 20
+  bottom: 140
+font_size: 30
 font_family: "CMU Serif"
 
 left_most_anno:

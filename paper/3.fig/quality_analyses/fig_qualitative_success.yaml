@@ -3,26 +3,26 @@ outfile_name: fig_qualitative_success
 target_fmt: [pdf] # png
 # pad_top=0, pad_bottom=70, pad_left=100, pad_right=0
 canvas_padding:
-  left: 120
+  left: 140
   right: 0
   top: 0
-  bottom: 70
-font_size: 20
+  bottom: 90
+font_size: 30
 font_family: "CMU Serif"
 
 left_most_anno:
   - text: 'Frame<br>Type'
-    x: 0.035
+    x: 0.04
     y: 0.95
     bold: true
     color: "#a80319" # #035922
   - text: "RGB"
-    x: 0.035
+    x: 0.04
     y: 0.76
     bold: true
     color: "#a80319"
   - text: "Motion<br>Mask"
-    x: 0.035
+    x: 0.05
     y: 0.35
     bold: true
     color: "#a80319"
