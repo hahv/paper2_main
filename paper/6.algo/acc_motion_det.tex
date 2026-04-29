@@ -1,23 +1,24 @@
 \noindent
-The details of the AccMotionDet algorithm are outlined in
-Algorithm~\ref{alg:acc_motion_det}. Let $F_t$ denote the grayscale frame at time
-$t$, converted from the
-downsampled input $\tilde{f}_t$, and $\mathbf{K}_t \in [0, K_{\max}]$
-the per-pixel \textit{accumulated motion mask}.
-Upon detection, $\mathbf{K}_t$ is incremented by $\omega$ and decays
-by $\delta$ each frame, bounded at $K_{\max}$ to prevent indefinite
-accumulation of stale evidence.
-A pixel is declared active only when $\mathbf{K}_t \geq \tau_m$,
-suppressing transient noise and single-frame flicker.
-The binary output $\mathbf{M}_t \in \{0, 255\}$ is consistent with
-the interface expected by the skip module $\mathcal{S}$.
+Let $F_t$ and $F_{\text{prev}}$ denote the grayscale frames converted from the
+downsampled inputs $\tilde{f}_t$ and $\tilde{f}_{\text{prev}}$, respectively, and let
+$\mathbf{K}_{t-1} \in [0, K_{\max}]$ denote the per-pixel
+\textit{accumulated motion mask} from the previous frame. The detector takes
+two consecutive downsampled frames and $\mathbf{K}_{t-1}$ as input, and
+produces a binary foreground mask $\mathbf{M}_t \in \{0, 255\}$ and the
+updated mask $\mathbf{K}_t$ as output. $\mathbf{K}_t$ is incremented by
+$\omega$ when the inter-frame pixel difference exceeds $\tau_d$, and decays
+by $\delta$ each frame, bounded at $K_{\max}$ to prevent unbounded growth
+under persistent motion. A pixel is marked active (255) only when
+$\mathbf{K}_t \geq \tau_m$, suppressing transient noise and single-frame
+flicker, and inactive (0) otherwise. The procedure is formalized in
+Algorithm~\ref{alg:acc_motion_det}.
 
 \begin{algorithm}[ht]
 \caption{Accumulation Motion Detector (AccMotionDet)}
 \label{alg:acc_motion_det}
 \begin{algorithmic}[1]
 
-\Require Downsampled frames $\tilde{f}_t,\, f_{\text{prev}}$;
+\Require Downsampled frames $\tilde{f}_t,\, \tilde{f}_{\text{prev}}$;
          accumulated mask $\mathbf{K}_{t-1}$ (initialized to $\mathbf{0}$)
 \Require $\tau_d$: pixel difference sensitivity,\;
          $\omega$: motion increment,\;
@@ -29,7 +30,7 @@ the interface expected by the skip module $\mathcal{S}$.
 
 \Statex
 
-\State Convert $\tilde{f}_t$ and $f_{\text{prev}}$ to grayscale: $F_t,\, F_{\text{prev}}$
+\State Convert $\tilde{f}_t$ and $\tilde{f}_{\text{prev}}$ to grayscale: $F_t,\, F_{\text{prev}}$
 
 \Statex
 

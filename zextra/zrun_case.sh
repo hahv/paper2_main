@@ -39,7 +39,12 @@
 
 # ./zrun.sh -p test -opt
 
+# python ./zbin/run_multi.py \
+#     --base_yaml "config/zruns/run_base.yaml" \
+#     --sweep_yaml "config/zruns/select_ds_ufire_haze.yaml" \
+#     -pc "zout/zruns/_precomputed_NoTemp/MainPC__ds_UFireIndoorTest__mt_no_temp_method__af4b0d32a3d2__20260330.205208"
+
 python ./zbin/run_multi.py \
     --base_yaml "config/zruns/run_base.yaml" \
-    --sweep_yaml "config/zruns/select_ds_ufire_haze.yaml" \
+    --sweep_yaml "config/zruns/select_ds_ufire_quality.yaml" \
     -pc "zout/zruns/_precomputed_NoTemp/MainPC__ds_UFireIndoorTest__mt_no_temp_method__af4b0d32a3d2__20260330.205208"

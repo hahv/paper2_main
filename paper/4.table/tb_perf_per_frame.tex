@@ -1,5 +1,12 @@
 \begin{table}[htbp]
-    \caption{End-to-End System Performance Comparison on Test Set. Recall, FAR, Accuracy, Precision are reported in percentage (\%). FPS is reported in frames per second, averaged across the entire frames of the videos in the test set. The best and second-best results for each metric are highlighted in \textbf{bold} and \textit{\underline{italic underline}}, respectively.}
+    \caption{Frame-level accuracy and throughput of the proposed pipeline
+    against lightweight fire-and-smoke detectors on the test set. ``Our Big
+    Model (with Skip Module)'' refers to the full proposed pipeline. Recall,
+    FAR, Accuracy, and Precision are reported in percentage (\%); FPS is
+    averaged across all frames in the test videos. GFLOPs denotes the static
+    per-frame floating-point operations ($10^9$) of the detection model. The
+    best and second-best values per metric are highlighted in \textbf{bold} and
+    \underline{\textit{italic underline}}, respectively.}
     \label{tb:perf_per_frame}
     \csvreader[separator=semicolon,
         no head,

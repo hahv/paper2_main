@@ -44,6 +44,8 @@ class CustomArgs(Tap):
             "-i", "--yaml_file", type=str, help="Path to the YAML configuration file."
         )
 
+SUB_FIG_SIZE_W = 640
+SUB_FIG_SIZE_H = 480
 
 def main():
     # Parse arguments
@@ -77,11 +79,11 @@ def main():
         fig = plth.plot_image_grid(
             df,
             # save_path=outfile,
-            img_width=300,
-            img_height=300,
+            img_width=SUB_FIG_SIZE_W,
+            img_height=SUB_FIG_SIZE_H,
             img_stack_padding_px=5,
             img_stack_direction="horizontal",
-            img_scale_mode="fit",
+            img_scale_mode="fill",
             fig_margin=dict(l=0, r=10, t=10, b=10),
             outline_color="#000000",
             outline_size=2,

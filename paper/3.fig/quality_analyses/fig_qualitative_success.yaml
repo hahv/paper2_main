@@ -7,22 +7,22 @@ canvas_padding:
   right: 0
   top: 0
   bottom: 70
-font_size: 16
+font_size: 20
 font_family: "CMU Serif"
 
 left_most_anno:
   - text: 'Frame<br>Type'
-    x: 0.05
+    x: 0.035
     y: 0.95
     bold: true
     color: "#a80319" # #035922
   - text: "RGB"
-    x: 0.05
+    x: 0.035
     y: 0.76
     bold: true
     color: "#a80319"
-  - text: "Foreground<br>Mask"
-    x: 0.06
+  - text: "Motion<br>Mask"
+    x: 0.035
     y: 0.35
     bold: true
     color: "#a80319"
@@ -32,15 +32,15 @@ bottom_most_anno:
     y: 0.02
     bold: true
     color: "#a80319" # #035922
-  - x: 0.35
+  - x: 0.4
     y: 0.02
     bold: true
     color: "#a80319"
-  - x: 0.53
+  - x: 0.65
     y: 0.02
     bold: true
     color: "#a80319"
-  - x: 0.71
+  - x: 0.9
     y: 0.02
     bold: true
     color: "#a80319"
