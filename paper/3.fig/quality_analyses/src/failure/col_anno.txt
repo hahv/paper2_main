@@ -1,5 +1,5 @@
 col_1---a) WRONGLY SKIPPED <br> Slow Smoke <br> (✗ MISSED)
 col_2---b) WASTED INFER <br> Incorrect Motion Detection <br> (✗ NO SAVINGS)
 col_3---c) WASTED INFER <br> Persistent Motion <br>(✗ NO SAVINGS)
-col_4---d) WRONG PREDICTION <br> Properly Infer <br> But Wrongly Predicted <br> (✗ BIG MODEl ERROR)
-col_5---e) WRONG PREDICTION <br> Properly Infer <br> But Wrongly Predicted <br> (✗ BIG MODEl ERROR)
+col_4---d) WRONG PREDICTION <br> Properly Infer <br> But Wrongly Predicted <br> (✗ BIG MODEL ERROR)
+col_5---e) WRONG PREDICTION <br> Properly Infer <br> But Wrongly Predicted <br> (✗ BIG MODEL ERROR)
