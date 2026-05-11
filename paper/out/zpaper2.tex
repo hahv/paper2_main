@@ -154,7 +154,7 @@
 Motion-Heuristic Skip Module for Accelerated Inference in Indoor
 Environments}
 \author{Hoang Van-Ha, Jong Weon Lee, Park Chun-Su}
-\date{2026.04.30}
+\date{2026.05.11}
 
 \begin{document}
 \maketitle
@@ -892,6 +892,40 @@ cases, which can be grouped into three categories:
   label, especially when the target occupies only a small portion of the
   frame.
 \end{itemize}
+
+\paragraph{Eager Mode: Recall--FAR
+Trade-off}\label{eager-mode-recallfar-trade-off}
+
+A key failure mode of the skip module, illustrated in Figure
+\ref{fig:qualitative_failure}a, is the missed detection of slowly
+developing or settling smoke, whose subtle inter-frame motion falls
+below the activation threshold of \textsc{AccMotionDet}. To address
+this, we augment the skip module with an \emph{eager mode}: once the Big
+Model \(\mathcal{M}\) produces a fire or smoke prediction on
+\(K_{\text{confirm}}\) consecutive non-skipped frames, the module enters
+eager mode and suppresses all skip decisions until the scene is declared
+safe again (i.e., \(\mathcal{M}\) returns a negative prediction for
+\(W_{\text{clr}}\) consecutive frames). This mechanism ensures that
+frames immediately following a confirmed detection are always forwarded
+to \(\mathcal{M}\), recovering recall on slow-developing smoke events.
+
+Table\textasciitilde{}\ref{tb:cmp_other_temp} reports the effect of
+eager mode. Recall is recovered from \(94.38\%\) (skip only) to
+\(95.51\%\), matching the baseline within \(0.11\) percentage points,
+while the skip rate is marginally reduced from \(34.93\%\) to
+\(34.21\%\). However, eager mode also partially negates the FAR
+improvement: FAR rises from \(0.136\%\) (skip only) back toward the
+baseline value of \(0.251\%\). This outcome reflects a fundamental
+structural trade-off: eager mode cannot distinguish static
+false-alarm-prone scenes --- which the Big Model persistently
+misclassifies --- from genuine slow-smoke events, as both exhibit
+near-zero inter-frame motion. Consequently, the two operating modes of
+the skip module serve complementary deployment objectives: the
+\emph{skip-only} configuration prioritises false alarm reduction (FAR
+\(\downarrow\) 46\%, FPS \(\uparrow\) 29\%), while the
+\emph{skip + eager} configuration prioritises recall preservation at
+full baseline performance (recall \(\geq 95.5\%\), FPS \(\uparrow\)
+29\%).
 
 \section{Conclusion}\label{sec:conclusion}
 

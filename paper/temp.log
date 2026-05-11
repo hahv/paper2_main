@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999994 (TeX Live 2022) (preloaded format=xelatex 2022.7.18)  20 APR 2026 14:48
+This is XeTeX, Version 3.141592653-2.6-0.999994 (TeX Live 2022) (preloaded format=xelatex 2022.7.18)  11 MAY 2026 21:13
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1249,45 +1249,115 @@ ilable
 (Font)              Font shape `TU/UnBatang.ttf(0)/b/n' tried instead on input 
 line 12.
 
-(./6.algo/skip_module_period_check.tex
-Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on in
-put line 2.
-LaTeX Font Info:    Font shape `TU/UnBatang.ttf(0)/bx/n' in size <10> not avail
-able
-(Font)              Font shape `TU/UnBatang.ttf(0)/b/n' tried instead on input 
-line 2.
-LaTeX Font Info:    Trying to load font information for U+dutchcal on input lin
-e 2.
+(./6.algo/eager_mode.tex
 
+! LaTeX Error: Can be used only in preamble.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.1 \usepackage
+               {tikz}
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+
+(d:/Program Files/texlive/2022/texmf-dist/tex/generic/pgf/frontendlayer/tikz/li
+braries/tikzlibraryautomata.code.tex
+File: tikzlibraryautomata.code.tex 2021/05/15 v3.1.9a (3.1.9a)
+
+(d:/Program Files/texlive/2022/texmf-dist/tex/generic/pgf/frontendlayer/tikz/li
+braries/tikzlibraryshapes.multipart.code.tex
+File: tikzlibraryshapes.multipart.code.tex 2021/05/15 v3.1.9a (3.1.9a)
+
+(d:/Program Files/texlive/2022/texmf-dist/tex/generic/pgf/libraries/shapes/pgfl
+ibraryshapes.multipart.code.tex
+File: pgflibraryshapes.multipart.code.tex 2021/05/15 v3.1.9a (3.1.9a)
+\pgfnodepartlowerbox=\box98
+\pgfnodeparttwobox=\box99
+\pgfnodepartthreebox=\box100
+\pgfnodepartfourbox=\box101
+\pgfnodeparttwentybox=\box102
+\pgfnodepartnineteenbox=\box103
+\pgfnodeparteighteenbox=\box104
+\pgfnodepartseventeenbox=\box105
+\pgfnodepartsixteenbox=\box106
+\pgfnodepartfifteenbox=\box107
+\pgfnodepartfourteenbox=\box108
+\pgfnodepartthirteenbox=\box109
+\pgfnodeparttwelvebox=\box110
+\pgfnodepartelevenbox=\box111
+\pgfnodeparttenbox=\box112
+\pgfnodepartninebox=\box113
+\pgfnodeparteightbox=\box114
+\pgfnodepartsevenbox=\box115
+\pgfnodepartsixbox=\box116
+\pgfnodepartfivebox=\box117
+)))
+(d:/Program Files/texlive/2022/texmf-dist/tex/generic/pgf/frontendlayer/tikz/li
+braries/tikzlibrarypositioning.code.tex
+File: tikzlibrarypositioning.code.tex 2021/05/15 v3.1.9a (3.1.9a)
+)
+(d:/Program Files/texlive/2022/texmf-dist/tex/generic/pgf/libraries/pgflibrarya
+rrows.meta.code.tex
+File: pgflibraryarrows.meta.code.tex 2021/05/15 v3.1.9a (3.1.9a)
+\pgfarrowinset=\dimen345
+\pgfarrowlength=\dimen346
+\pgfarrowwidth=\dimen347
+\pgfarrowlinewidth=\dimen348
+)
+(d:/Program Files/texlive/2022/texmf-dist/tex/generic/pgf/frontendlayer/tikz/li
+braries/tikzlibraryfit.code.tex
+File: tikzlibraryfit.code.tex 2021/05/15 v3.1.9a (3.1.9a)
+)
+(d:/Program Files/texlive/2022/texmf-dist/tex/generic/pgf/frontendlayer/tikz/li
+braries/tikzlibrarybackgrounds.code.tex
+File: tikzlibrarybackgrounds.code.tex 2021/05/15 v3.1.9a (3.1.9a)
+\pgf@layerbox@background=\box118
+\pgf@layerboxsaved@background=\box119
+)
+LaTeX Font Info:    Font shape `TU/UnBatang.ttf(0)/bx/n' in size <9> not availa
+ble
+(Font)              Font shape `TU/UnBatang.ttf(0)/b/n' tried instead on input 
+line 16.
+
+
+LaTeX Font Warning: Font shape `TU/UnBatang.ttf(0)/m/it' undefined
+(Font)              using `TU/UnBatang.ttf(0)/m/n' instead on input line 25.
+
+LaTeX Font Info:    Font shape `TU/UnBatang.ttf(0)/bx/n' in size <8> not availa
+ble
+(Font)              Font shape `TU/UnBatang.ttf(0)/b/n' tried instead on input 
+line 43.
+LaTeX Font Info:    Trying to load font information for U+dutchcal on input lin
+e 53.
 (d:/Program Files/texlive/2022/texmf-dist/tex/latex/dutchcal/udutchcal.fd
 File: udutchcal.fd 2011/06/16 Fontinst v1.933 font definitions for U/dutchcal.
 )
 LaTeX Font Info:    Font shape `U/dutchcal/m/n' will be
-(Font)              scaled to size 10.0pt on input line 2.
+(Font)              scaled to size 8.0pt on input line 53.
 LaTeX Font Info:    Font shape `U/dutchcal/m/n' will be
-(Font)              scaled to size 7.0pt on input line 2.
+(Font)              scaled to size 6.0pt on input line 53.
 LaTeX Font Info:    Font shape `U/dutchcal/m/n' will be
-(Font)              scaled to size 5.0pt on input line 2.
+(Font)              scaled to size 5.0pt on input line 53.
 
-
-LaTeX Warning: Reference `alg:skipmodule' on page 1 undefined on input line 7.
-
-
-LaTeX Font Warning: Font shape `TU/UnBatang.ttf(0)/m/it' undefined
-(Font)              using `TU/UnBatang.ttf(0)/m/n' instead on input line 14.
+Underfull \hbox (badness 10000) in paragraph at lines 82--84
+[]|\TU/lmr/m/n/8 Skip decision from $\U/dutchcal/m/n/8 S$\TU/lmr/m/n/8 : $\OML/
+cmm/m/it/8 s[][]\OT1/cmr/m/n/8 0$ \TU/lmr/m/n/8 no motion detected \TU/UnBatang
+.ttf(0)/m/it/8 (\TU/lmr/m/n/8 skip inference\TU/UnBatang.ttf(0)/m/it/8 ); $\OML
+/cmm/m/it/8 s[][]\OT1/cmr/m/n/8 1$ \TU/lmr/m/n/8 mo-
+ []
 
 
 LaTeX Font Warning: Font shape `TU/UnBatang.ttf(0)/m/sc' undefined
-(Font)              using `TU/UnBatang.ttf(0)/m/n' instead on input line 14.
+(Font)              using `TU/UnBatang.ttf(0)/m/n' instead on input line 91.
 
-
-LaTeX Warning: Reference `alg:skipmodule' on page 1 undefined on input line 21.
-
-
-
-LaTeX Warning: Reference `alg:skipmodule' on page 1 undefined on input line 55.
-
-
+LaTeX Font Info:    Font shape `U/dutchcal/m/n' will be
+(Font)              scaled to size 10.0pt on input line 113.
+LaTeX Font Info:    Font shape `U/dutchcal/m/n' will be
+(Font)              scaled to size 7.0pt on input line 113.
 ) [1
 
 ]
@@ -1300,19 +1370,16 @@ Package fancyhdr Warning: \footskip is too small (10.0pt):
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
-
-LaTeX Warning: There were undefined references.
-
 Package rerunfilecheck Info: File `temp.out' has not changed.
 (rerunfilecheck)             Checksum: E6F93436FA3A73B5DD03917E5C22888C;88.
  ) 
 Here is how much of TeX's memory you used:
- 34220 strings out of 475865
- 666243 string characters out of 5799410
- 982341 words of memory out of 5000000
- 54696 multiletter control sequences out of 15000+600000
- 485174 words of font info for 122 fonts, out of 8000000 for 9000
+ 35354 strings out of 475865
+ 702250 string characters out of 5799410
+ 1016723 words of memory out of 5000000
+ 55803 multiletter control sequences out of 15000+600000
+ 485744 words of font info for 125 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
- 120i,11n,121p,459b,2709s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 120i,17n,121p,862b,2709s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
 Output written on temp.pdf (2 pages).
