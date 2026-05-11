@@ -1,0 +1,6 @@
+video_name;video_type;total_frames;no_motion_frames;force_probe_frames;probe_rate_pct;avg_drift_ms
+aihub__lb_none__0175.mp4;safe_video;360;360;0;0.0;0.1423
+aihub__lb_smoke__0208.mp4;firesmoke_video;360;360;0;0.0;0.1474
+aihub__lb_smoke__3049.mp4;firesmoke_video;360;360;0;0.0;0.1441
+aihub__lb_smoke__5078.mp4;firesmoke_video;360;360;0;0.0;0.1484
+aihub__lb_smoke__6170.mp4;firesmoke_video;360;360;0;0.0;0.1491

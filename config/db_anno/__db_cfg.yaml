@@ -2,7 +2,8 @@
 dataset_name: NewDB
 # dataset_path: /mnt/d/ZDev/__new_dataset/dataset_all
 # dataset_path: /mnt/e/SyncData/paper2_main/datasets/UFireIndoor
-dataset_path: /mnt/e/SyncData/paper2_main/datasets/UFireReplace
+# dataset_path: /mnt/e/SyncData/paper2_main/datasets/UFireReplace
+dataset_path: /mnt/e/SyncData/paper2_main/datasets/UFireHaze
 label_file_posfix: __labels
 search_recursive: true
 skip_existing: true
