@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999994 (TeX Live 2022) (preloaded format=xelatex 2022.7.18)  12 MAY 2026 14:08
+This is XeTeX, Version 3.141592653-2.6-0.999994 (TeX Live 2022) (preloaded format=xelatex 2022.7.18)  12 MAY 2026 14:13
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -537,40 +537,40 @@ LaTeX Font Info:    ... okay on input line 6.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 6.
 LaTeX Font Info:    ... okay on input line 6.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 31.
+(Font)              <8> on input line 32.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 31.
+(Font)              <6> on input line 32.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 31.
+(Font)              <5> on input line 32.
 
-Underfull \hbox (badness 10000) in paragraph at lines 111--114
+Underfull \hbox (badness 10000) in paragraph at lines 113--116
 []\TU/lmr/m/n/8 Skip module $\OMS/cmsy/m/n/8 S$ \TU/lmr/m/n/8 is \TU/lmr/bx/n/8
  active\TU/lmr/m/n/8 : static frames are skipped; $\OMS/cmsy/m/n/8 M$ \TU/lmr/m
 /n/8 is invoked only when
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 116--118
+Underfull \hbox (badness 10000) in paragraph at lines 119--121
 []\TU/lmr/m/n/8 Skip module $\OMS/cmsy/m/n/8 S$ \TU/lmr/m/n/8 is \TU/lmr/bx/n/8
  bypassed\TU/lmr/m/n/8 : $\OMS/cmsy/m/n/8 M$ \TU/lmr/m/n/8 runs on \TU/lmr/m/it
 /8 every \TU/lmr/m/n/8 frame to prevent missed
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 120--122
+Underfull \hbox (badness 10000) in paragraph at lines 123--125
 []\TU/lmr/m/n/8 Skip decision from $\OMS/cmsy/m/n/8 S$\TU/lmr/m/n/8 : $\OML/cmm
-/m/it/8 s[][]\OT1/cmr/m/n/8 0$ \TU/lmr/m/n/8 no motion detected (skip candidate
+/m/it/8 s[][]\OT1/cmr/m/n/8 0$ \TU/lmr/m/n/8 no motion detected (skip inference
 ); $\OML/cmm/m/it/8 s[][]\OT1/cmr/m/n/8 1$ \TU/lmr/m/n/8 motion
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 128--130
+Underfull \hbox (badness 10000) in paragraph at lines 131--133
 []\TU/lmr/m/n/8 Consecutive fire/smoke predictions in \TU/lmr/m/sc/8 Normal \TU
 /lmr/m/n/8 mode (reset to $\OT1/cmr/m/n/8 0$ \TU/lmr/m/n/8 on any
  []
 
 
-Overfull \hbox (1.66245pt too wide) in paragraph at lines 106--140
+Overfull \hbox (1.66245pt too wide) in paragraph at lines 107--143
 [][][]  
  []
 
