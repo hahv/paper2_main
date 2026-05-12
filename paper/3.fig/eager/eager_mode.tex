@@ -1,4 +1,4 @@
-\documentclass[tikz,border=12pt]{standalone}
+\documentclass[tikz,border=5pt]{standalone}
 \usepackage{tikz}
 \usepackage{fontawesome5}
 \usepackage{booktabs}
@@ -105,17 +105,17 @@
         text width=13.2cm,
     font=\footnotesize] (legend)
     {
-        \begin{tabular}{@{}lp{10.5cm}@{}}
-            \textbf{Symbol / Mode} & \textbf{Description} \\
+        \begin{tabular}{@{}cp{10.5cm}@{}}
+            \textbf{Symbol} & \textbf{Description} \\
             \midrule
-            \tikz\draw[fill=blue!35,   draw=black] (0,0) circle
-            (0.5em);~\textbf{NORMAL}
+            \tikz\draw[fill=blue!35, draw=black] (0,0) circle
+            (0.4em);~\textbf{NORMAL}
             & Skip module $\mathcal{S}$ is \textbf{active}:
             static frames are skipped;
             $\mathcal{M}$ is invoked only when motion is detected
             or $c_{\mathrm{skip}} \geq N_{\mathrm{chk}}$ \\[4pt]
             \tikz\draw[fill=orange!35, draw=black] (0,0) circle
-            (0.5em); ~\textbf{EAGER}
+            (0.4em); ~\textbf{EAGER}
             & Skip module $\mathcal{S}$ is \textbf{bypassed}:
             $\mathcal{M}$ runs on \textit{every} frame
             to prevent missed detections \\[6pt]

@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999994 (TeX Live 2022) (preloaded format=xelatex 2022.7.18)  12 MAY 2026 14:13
+This is XeTeX, Version 3.141592653-2.6-0.999994 (TeX Live 2022) (preloaded format=xelatex 2022.7.18)  12 MAY 2026 14:18
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -569,21 +569,16 @@ Underfull \hbox (badness 10000) in paragraph at lines 131--133
 /lmr/m/n/8 mode (reset to $\OT1/cmr/m/n/8 0$ \TU/lmr/m/n/8 on any
  []
 
-
-Overfull \hbox (1.66245pt too wide) in paragraph at lines 107--143
-[][][]  
- []
-
 [1
 
 ] (./eager_mode.aux) ) 
 Here is how much of TeX's memory you used:
  14986 strings out of 475865
  318840 string characters out of 5799410
- 620745 words of memory out of 5000000
+ 620770 words of memory out of 5000000
  35789 multiletter control sequences out of 15000+600000
  471162 words of font info for 44 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
- 115i,16n,118p,421b,1182s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 115i,16n,118p,421b,1180s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
 Output written on eager_mode.pdf (1 page).
