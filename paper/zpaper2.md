@@ -4,7 +4,7 @@
 <!-- TARGET_PROJECT: G:\My Drive\1_PhD\Obsidian\Home\3. Writing\paperfire2 -->
 <!-- SYNC_TARGET_FILE: 00_Meta_Abstract.md-->
 <!-- BLOCK_ID: abstract -->
-date: 2026.05.11
+date: 2026.05.12
 title: "Efficient Real-Time Fire Surveillance: A Lightweight Motion-Heuristic
 Skip Module for Accelerated Inference in Indoor Environments"
 abstract: "Conventional deep learning (DL)-based fire and smoke detection systems process
@@ -765,6 +765,10 @@ Figure \ref{fig:qualitative_failure} shows five representative failure cases, wh
 <!-- !END_SYNC_BLOCK -->
 #### Eager Mode: Recall--FAR Trade-off
 
+```{=latex}
+\input{./3.fig/fig_eager_mode.tex}
+```
+
 A key failure mode of the skip module, illustrated in Figure
 \ref{fig:qualitative_failure}a, is the missed detection of slowly
 developing or settling smoke, whose subtle inter-frame motion falls
@@ -778,7 +782,36 @@ for $W_{\text{clr}}$ consecutive frames). This mechanism ensures that
 frames immediately following a confirmed detection are always forwarded
 to $\mathcal{M}$, recovering recall on slow-developing smoke events.
 
-Table~\ref{tb:cmp_other_temp} reports the effect of eager mode. Recall
+Figure \ref{fig:eager_mode} shows the state machine of eager mode with the
+transition conditions and corresponding actions for each state and how states
+transition during system operation.
+
+```{=latex}
+\input{./4.table/tb_gridsearch_accMotionDetEager.tex}
+```
+
+To find the optimal hyperparameters for eager mode, we perform a grid search
+over a list of candidate values as follows:
+
++ **Confirmation window ($K_{\text{confirm}} \in \{3, 5\}$)**: This parameter defines the number of consecutive positive predictions required to trigger eager mode. A smaller value (e.g., $K_{\text{confirm}} = 3$) allows for quicker activation of eager mode, potentially recovering more slow-developing smoke cases, but may also increase false alarms. A larger value (e.g., $K_{\text{confirm}} = 5$) provides a more conservative trigger, reducing false alarms at the risk of missing some slow-onset events.
+
++ **Clearance window ($W_{\text{clr}} \in \{5, 10\}$)**: This parameter defines the number of consecutive negative predictions required to exit eager mode and resume normal skip operation. A shorter clearance window (e.g., $W_{\text{clr}} = 5$) allows the system to return to normal operation more quickly after a confirmed detection, but may also lead to premature exit from eager mode if there are intermittent false negatives. A longer clearance window (e.g., $W_{\text{clr}} = 10$) provides a more robust exit condition, ensuring that the system remains in eager mode until the scene is consistently declared safe, but may also delay the return to normal operation.
+
++ **Period check interval ($n_\text{check} \in \{10, 20\}$)**: This parameter defines how frequently the system checks for the conditions to enter or exit eager mode. A shorter interval (e.g., $n_\text{check} = 10$) allows for more responsive transitions between modes, but may also increase computational overhead. A longer interval (e.g., $n_\text{check} = 20$) reduces the frequency of checks, lowering overhead but potentially delaying mode transitions.
+
+We also follow the same hyperparameter selection protocol as described in
+Section \ref{sec:hyperparam} to selected the optimal configuration on the
+validation set $\mathcal{D}_\text{val}$, and the results are shown in Table
+\ref{tb:gridsearch_accMotionDetEager}.
+
+
+
+The best-ranked configuration ($K_{\text{confirm}} = 3,\ W_{\text{clr}} = 10,\
+n_\text{check} = 10$) then evaluated on the test set $\mathcal{D}_\text{test}$
+and compared against the skip-only configuration in Table
+\ref{tb:cmp_other_temp_eager}.
+
+Table~\ref{tb:cmp_other_temp_eager} reports the effect of eager mode. Recall
 is recovered from $94.38\%$ (skip only) to $95.51\%$, matching the
 baseline within $0.11$ percentage points, while the skip rate is
 marginally reduced from $34.93\%$ to $34.21\%$. However, eager mode
@@ -794,24 +827,10 @@ $\downarrow$ 46\%, FPS $\uparrow$ 29\%), while the
 \emph{skip + eager} configuration prioritises recall preservation at
 full baseline performance (recall $\geq 95.5\%$, FPS $\uparrow$ 29\%).
 
-<!-- #### Eager Mode: Recovery of Missed Cases
-
-**Fix for slow-onset smoke:** We intro the skip module with eager mode and
-periodically check for specific scences
-
-```{=latex}
-\input{./6.algo/skip_module_period_check.tex}
-```
-
-We do hyper-parameter search on $D_\text{val}$ to find the optimal params for
-this eager mode.
-```{=latex}
-\input{./4.table/tb_gridsearch_accMotionDetEager.tex}
-```
-we Compare again on test set
 ```{=latex}
 \input{./4.table/tb_cmp_other_temp_eager.tex}
-``` -->
+```
+
 
 # Conclusion {#sec:conclusion label="Conclusion"}
 
