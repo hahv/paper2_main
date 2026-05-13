@@ -1,0 +1,163 @@
+\documentclass[tikz,border=5pt]{standalone}
+\usepackage{tikz}
+\usepackage{fontawesome5}
+\usepackage{booktabs}
+\usetikzlibrary{automata, positioning, arrows.meta, fit, backgrounds}
+\begin{document}
+\begin{tikzpicture}[
+        node distance=7cm,
+        every state/.style={draw, rounded corners, minimum width=2.4cm,
+        minimum height=1.2cm, font=\small\bfseries},
+        thick,
+        >={Stealth[length=8pt, width=6pt]},
+        auto,
+        label style/.style={font=\footnotesize, align=center}
+    ]
+
+    %% ── States ───────────────────────────────────────────────────────
+    \node[state, fill=blue!35, align=center]
+        (normal) {NORMAL};
+    \node[state, initial, initial where=left,
+        initial text={\textbf{Start}},
+        right of=normal, xshift=1cm,
+        fill=orange!35, align=center]
+        (eager) {EAGER};
+
+    %% ── NORMAL → EAGER (T1) ──────────────────────────────────────────
+    \draw[->, line width=1.5pt] (normal) edge[bend left=30]
+        node[above, align=center]{%
+            \footnotesize \textit{if:}\;
+            $c_{\mathrm{fire}} \geq W_{\mathrm{fire}}$\\
+            \footnotesize \textit{then:}\;
+            $c_{\mathrm{clear}} \leftarrow 0$}
+        (eager);
+    %% ── EAGER → NORMAL (T2) ──────────────────────────────────────────
+    \draw[->, line width=1.5pt] (eager) edge[bend left=30]
+        node[below]{%
+            \footnotesize
+            \begin{tabular}[t]{@{}l@{}}
+                \textit{if:}\; $c_{\mathrm{clear}} \geq W_{\mathrm{clr}}$ \\[2pt]
+                \textit{then:}\; $c_{\mathrm{skip}} \leftarrow 0$,\;
+                    $c_{\mathrm{fire}} \leftarrow 0$
+            \end{tabular}}
+        (normal);
+
+    % %% TOP ── NORMAL self-loop: CASE 1 — SKIP (M not invoked) ─────────────
+    % \draw[->] (normal) edge[loop above, looseness=6]
+    %     node[above, align=center]{%
+    %         \footnotesize \textit{if:}\;
+    %         $s_t = 0$ \textbf{and} $c_{\mathrm{skip}} < N_{\mathrm{chk}}$\\[2pt]
+    %         \footnotesize \textit{then:}\;
+    %         $c_{\mathrm{skip}} \mathrel{+}= 1$}
+    %     (normal);
+
+    %% TOP ── NORMAL self-loop: CASE 1 — SKIP (M not invoked) ─────────────
+    \draw[->] (normal) edge[loop above, looseness=6]
+        node[above, align=center]{%
+            \footnotesize \textit{if:}\;
+            $s_t = 0$ \textbf{and} $c_{\mathrm{skip}} < N_{\mathrm{chk}}$\\[2pt]
+            \footnotesize \textit{then:}\;
+            $c_{\mathrm{skip}} \mathrel{+}= 1$,\;
+            $c_{\mathrm{fire}} \leftarrow 0$}
+        (normal);
+
+    %% LEFT── NORMAL self-loop: CASE 3 — MOTION (M invoked) ───────────────
+    \draw[->, red!70!black] (normal) edge[loop left, looseness=6]
+        node[left, align=left]{%
+            \footnotesize \textit{if:}\; $s_t = 1$\\[2pt]
+            \footnotesize \textit{then:}\; $c_{\mathrm{skip}} \leftarrow 0$\\[1pt]
+            \footnotesize \quad \textit{if}\; $\hat{y}_t = 1$:\;
+                $c_{\mathrm{fire}} \mathrel{+}= 1$\\
+            \footnotesize \quad \textit{else}:\;
+                $c_{\mathrm{fire}} \leftarrow 0$}
+        (normal);
+
+    %% BELOW── NORMAL self-loop: CASE 2 — FORCED CHECK (M invoked) ─────────
+    \draw[->, red!70!black] (normal) edge[loop below, looseness=6]
+        node[below, align=left]{%
+            \footnotesize \textit{if:}\;
+            $s_t = 0$ \textbf{and} $c_{\mathrm{skip}} \geq N_{\mathrm{chk}}$\\[2pt]
+            \footnotesize \textit{then:}\; $c_{\mathrm{skip}} \leftarrow 0$\\[1pt]
+            \footnotesize \quad \textit{if}\; $\hat{y}_t = 1$:\;
+                $c_{\mathrm{fire}} \mathrel{+}= 1$\\
+            \footnotesize \quad \textit{else}:\;
+                $c_{\mathrm{fire}} \leftarrow 0$}
+        (normal);
+
+    %% ── EAGER self-loop: positive prediction (M always invoked) ──────
+    \draw[->, red!70!black] (eager) edge[loop above, looseness=6]
+        node[above, align=center]{%
+            \footnotesize \textit{if:}\; $\hat{y}_t = 1$\\[2pt]
+            \footnotesize \textit{then:}\;
+            $c_{\mathrm{clear}} \leftarrow 0$}
+        (eager);
+
+    %% ── EAGER self-loop: negative prediction (M always invoked) ──────
+    \draw[->, red!70!black] (eager) edge[loop below, looseness=6]
+        node[below, align=center]{%
+            \footnotesize \textit{if:}\;
+            $\hat{y}_t = 0$ \textbf{and}
+            $c_{\mathrm{clear}} < W_{\mathrm{clr}}$\\[2pt]
+            \footnotesize \textit{then:}\;
+            $c_{\mathrm{clear}} \mathrel{+}= 1$}
+        (eager);
+
+    %% ── Legend ───────────────────────────────────────────────────────
+    \node[draw, rounded corners, fill=gray!8,
+        below=3.8cm of normal, anchor=north west,
+        xshift=-4.0cm,
+        text width=13.5cm,
+        font=\footnotesize] (legend)
+    {
+        \begin{tabular}{@{}cp{10.5cm}@{}}
+            \multicolumn{1}{c}{\textbf{Symbol / Mode}} & \textbf{Description} \\
+            \midrule
+            \tikz\draw[fill=blue!35, draw=black] (0,0) circle (0.4em);
+            ~\textbf{NORMAL}
+                & Skip module $\mathcal{S}$ is \textbf{active}:
+                  static frames are skipped; $\mathcal{M}$ is invoked only
+                  when motion is detected ($s_t{=}1$) or
+                  $c_{\mathrm{skip}} \geq N_{\mathrm{chk}}$ \\[4pt]
+            \tikz\draw[fill=orange!35, draw=black] (0,0) circle (0.4em);
+            ~\textbf{EAGER}
+                & Skip module $\mathcal{S}$ is \textbf{bypassed}:
+                  $\mathcal{M}$ runs on \textit{every} frame to prevent
+                  missed detections.
+                  \textit{Each video initializes in this mode.} \\[6pt]
+            \midrule
+            \tikz\draw[->, red!70!black, thick] (0,0) -- (0.6,0);
+                & $\mathcal{M}(f_t)$ \textbf{is invoked} on this transition
+                (either motion detected or forced call) \\[4pt]
+            \tikz\draw[->, black, thick] (0,0) -- (0.6,0);
+                & $\mathcal{M}(f_t)$ is \textbf{not} invoked
+                  (frame skipped) \\[6pt]
+            \midrule
+            $s_t \in \{0,1\}$
+                & Output of $\mathcal{S}$:
+                  $s_t{=}0$ no motion (skip);\;
+                  $s_t{=}1$ motion detected (run $\mathcal{M}$) \\[4pt]
+            $\hat{y}_t \in \{0,1\}$
+                & Output of $\mathcal{M}$:
+                  $\hat{y}_t{=}1$ fire/smoke;\;
+                  $\hat{y}_t{=}0$ negative \\[4pt]
+            $c_{\mathrm{skip}}$
+                & Consecutive skipped frames; reset to $0$ on any
+                  $\mathcal{M}$ call \\[4pt]
+            $c_{\mathrm{fire}}$
+                & Consecutive fire/smoke predictions in \textsc{Normal};
+                  reset to $0$ on any negative \textbf{or} on exiting \textsc{Eager} mode \\[4pt]
+            $c_{\mathrm{clear}}$
+                & Consecutive negative predictions in \textsc{Eager};
+                reset to $0$ on any positive prediction \textbf{or} on entering
+                \textsc{Eager} mode \\[4pt]
+            $W_{\mathrm{fire}}$
+                & Streak threshold to enter \textsc{Eager} \\[4pt]
+            $W_{\mathrm{clr}}$
+                & Streak threshold to exit \textsc{Eager} \\[4pt]
+            $N_{\mathrm{chk}}$
+                & Max consecutive skips before forced $\mathcal{M}$ call \\
+        \end{tabular}
+    };
+
+\end{tikzpicture}
+\end{document}

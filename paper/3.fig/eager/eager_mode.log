@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999994 (TeX Live 2022) (preloaded format=xelatex 2022.7.18)  13 MAY 2026 18:27
+This is XeTeX, Version 3.141592653-2.6-0.999994 (TeX Live 2022) (preloaded format=xelatex 2022.7.18)  13 MAY 2026 19:15
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -401,43 +401,6 @@ File: tikzlibrarytopaths.code.tex 2021/05/15 v3.1.9a (3.1.9a)
 )))
 \sa@box=\box62
 )
-(d:/Program Files/texlive/2022/texmf-dist/tex/latex/fontawesome5/fontawesome5.s
-ty (d:/Program Files/texlive/2022/texmf-dist/tex/latex/l3kernel/expl3.sty
-Package: expl3 2022-07-15 L3 programming layer (loader) 
-
-(d:/Program Files/texlive/2022/texmf-dist/tex/latex/l3backend/l3backend-xetex.d
-ef
-File: l3backend-xetex.def 2022-07-01 L3 backend support: XeTeX
-\g__graphics_track_int=\count280
-\l__pdf_internal_box=\box63
-\g__pdf_backend_object_int=\count281
-\g__pdf_backend_annotation_int=\count282
-\g__pdf_backend_link_int=\count283
-))
-Package: fontawesome5 2022/05/02 v5.15.4 Font Awesome 5
-
-(d:/Program Files/texlive/2022/texmf-dist/tex/latex/l3packages/l3keys2e/l3keys2
-e.sty
-Package: l3keys2e 2022-06-22 LaTeX2e option processing using LaTeX3 keys
-)
-(d:/Program Files/texlive/2022/texmf-dist/tex/latex/l3packages/xparse/xparse.st
-y
-Package: xparse 2022-06-22 L3 Experimental document command parser
-)
-(d:/Program Files/texlive/2022/texmf-dist/tex/latex/fontawesome5/fontawesome5-u
-tex-helper.sty
-Package: fontawesome5-utex-helper 2022/05/02 v5.15.4 uTeX helper for fontawesom
-e5
-LaTeX Font Info:    Trying to load font information for TU+fontawesomefree on i
-nput line 69.
-
-(d:/Program Files/texlive/2022/texmf-dist/tex/latex/fontawesome5/tufontawesomef
-ree.fd)
-LaTeX Font Info:    Trying to load font information for TU+fontawesomebrands on
- input line 70.
-
-(d:/Program Files/texlive/2022/texmf-dist/tex/latex/fontawesome5/tufontawesomeb
-rands.fd)))
 (d:/Program Files/texlive/2022/texmf-dist/tex/latex/booktabs/booktabs.sty
 Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
 \heavyrulewidth=\dimen191
@@ -450,12 +413,12 @@ Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
 \cmidrulesep=\dimen198
 \cmidrulekern=\dimen199
 \defaultaddspace=\dimen256
-\@cmidla=\count284
-\@cmidlb=\count285
+\@cmidla=\count280
+\@cmidlb=\count281
 \@aboverulesep=\dimen257
 \@belowrulesep=\dimen258
-\@thisruleclass=\count286
-\@lastruleclass=\count287
+\@thisruleclass=\count282
+\@lastruleclass=\count283
 \@thisrulewidth=\dimen259
 )
 (d:/Program Files/texlive/2022/texmf-dist/tex/generic/pgf/frontendlayer/tikz/li
@@ -469,26 +432,26 @@ File: tikzlibraryshapes.multipart.code.tex 2021/05/15 v3.1.9a (3.1.9a)
 (d:/Program Files/texlive/2022/texmf-dist/tex/generic/pgf/libraries/shapes/pgfl
 ibraryshapes.multipart.code.tex
 File: pgflibraryshapes.multipart.code.tex 2021/05/15 v3.1.9a (3.1.9a)
-\pgfnodepartlowerbox=\box64
-\pgfnodeparttwobox=\box65
-\pgfnodepartthreebox=\box66
-\pgfnodepartfourbox=\box67
-\pgfnodeparttwentybox=\box68
-\pgfnodepartnineteenbox=\box69
-\pgfnodeparteighteenbox=\box70
-\pgfnodepartseventeenbox=\box71
-\pgfnodepartsixteenbox=\box72
-\pgfnodepartfifteenbox=\box73
-\pgfnodepartfourteenbox=\box74
-\pgfnodepartthirteenbox=\box75
-\pgfnodeparttwelvebox=\box76
-\pgfnodepartelevenbox=\box77
-\pgfnodeparttenbox=\box78
-\pgfnodepartninebox=\box79
-\pgfnodeparteightbox=\box80
-\pgfnodepartsevenbox=\box81
-\pgfnodepartsixbox=\box82
-\pgfnodepartfivebox=\box83
+\pgfnodepartlowerbox=\box63
+\pgfnodeparttwobox=\box64
+\pgfnodepartthreebox=\box65
+\pgfnodepartfourbox=\box66
+\pgfnodeparttwentybox=\box67
+\pgfnodepartnineteenbox=\box68
+\pgfnodeparteighteenbox=\box69
+\pgfnodepartseventeenbox=\box70
+\pgfnodepartsixteenbox=\box71
+\pgfnodepartfifteenbox=\box72
+\pgfnodepartfourteenbox=\box73
+\pgfnodepartthirteenbox=\box74
+\pgfnodeparttwelvebox=\box75
+\pgfnodepartelevenbox=\box76
+\pgfnodeparttenbox=\box77
+\pgfnodepartninebox=\box78
+\pgfnodeparteightbox=\box79
+\pgfnodepartsevenbox=\box80
+\pgfnodepartsixbox=\box81
+\pgfnodepartfivebox=\box82
 )))
 (d:/Program Files/texlive/2022/texmf-dist/tex/generic/pgf/frontendlayer/tikz/li
 braries/tikzlibrarypositioning.code.tex
@@ -502,83 +465,63 @@ File: pgflibraryarrows.meta.code.tex 2021/05/15 v3.1.9a (3.1.9a)
 \pgfarrowwidth=\dimen262
 \pgfarrowlinewidth=\dimen263
 )
-(d:/Program Files/texlive/2022/texmf-dist/tex/generic/pgf/frontendlayer/tikz/li
-braries/tikzlibraryfit.code.tex
-File: tikzlibraryfit.code.tex 2021/05/15 v3.1.9a (3.1.9a)
-)
-(d:/Program Files/texlive/2022/texmf-dist/tex/generic/pgf/frontendlayer/tikz/li
-braries/tikzlibrarybackgrounds.code.tex
-File: tikzlibrarybackgrounds.code.tex 2021/05/15 v3.1.9a (3.1.9a)
-\pgf@layerbox@background=\box84
-\pgf@layerboxsaved@background=\box85
+(d:/Program Files/texlive/2022/texmf-dist/tex/latex/l3backend/l3backend-xetex.d
+ef
+File: l3backend-xetex.def 2022-07-01 L3 backend support: XeTeX
+\g__graphics_track_int=\count284
+\l__pdf_internal_box=\box83
+\g__pdf_backend_object_int=\count285
+\g__pdf_backend_annotation_int=\count286
+\g__pdf_backend_link_int=\count287
 ) (./eager_mode.aux)
 \openout1 = `eager_mode.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 6.
-LaTeX Font Info:    ... okay on input line 6.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 6.
-LaTeX Font Info:    ... okay on input line 6.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 6.
-LaTeX Font Info:    ... okay on input line 6.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 6.
-LaTeX Font Info:    ... okay on input line 6.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 6.
-LaTeX Font Info:    Trying to load font information for TS1+cmr on input line 6
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 5.
+LaTeX Font Info:    ... okay on input line 5.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 5.
+LaTeX Font Info:    ... okay on input line 5.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 5.
+LaTeX Font Info:    ... okay on input line 5.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 5.
+LaTeX Font Info:    ... okay on input line 5.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 5.
+LaTeX Font Info:    Trying to load font information for TS1+cmr on input line 5
 .
 
 (d:/Program Files/texlive/2022/texmf-dist/tex/latex/base/ts1cmr.fd
 File: ts1cmr.fd 2019/12/16 v2.5j Standard LaTeX font definitions
 )
-LaTeX Font Info:    ... okay on input line 6.
-LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 6.
-LaTeX Font Info:    ... okay on input line 6.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 6.
-LaTeX Font Info:    ... okay on input line 6.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 6.
-LaTeX Font Info:    ... okay on input line 6.
+LaTeX Font Info:    ... okay on input line 5.
+LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 5.
+LaTeX Font Info:    ... okay on input line 5.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 5.
+LaTeX Font Info:    ... okay on input line 5.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 5.
+LaTeX Font Info:    ... okay on input line 5.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 33.
+(Font)              <8> on input line 31.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 33.
+(Font)              <6> on input line 31.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 33.
+(Font)              <5> on input line 31.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <7> on input line 31.
 
-Underfull \hbox (badness 10000) in paragraph at lines 117--120
-[]\TU/lmr/m/n/8 Skip module $\OMS/cmsy/m/n/8 S$ \TU/lmr/m/n/8 is \TU/lmr/bx/n/8
- active\TU/lmr/m/n/8 : static frames are skipped; $\OMS/cmsy/m/n/8 M$ \TU/lmr/m
-/n/8 is invoked only when
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 123--126
-[]\TU/lmr/m/n/8 Skip module $\OMS/cmsy/m/n/8 S$ \TU/lmr/m/n/8 is \TU/lmr/bx/n/8
- bypassed\TU/lmr/m/n/8 : $\OMS/cmsy/m/n/8 M$ \TU/lmr/m/n/8 runs on \TU/lmr/m/it
-/8 every \TU/lmr/m/n/8 frame to prevent missed detec-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 147--148
-[]\TU/lmr/m/n/8 Consecutive fire/smoke predictions in \TU/lmr/m/sc/8 Normal\TU/
-lmr/m/n/8 ; reset to $\OT1/cmr/m/n/8 0$ \TU/lmr/m/n/8 on any negative \TU/lmr/b
-x/n/8 or \TU/lmr/m/n/8 on
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 150--152
-[]\TU/lmr/m/n/8 Consecutive negative predictions in \TU/lmr/m/sc/8 Eager\TU/lmr
-/m/n/8 ; reset to $\OT1/cmr/m/n/8 0$ \TU/lmr/m/n/8 on any positive prediction
+Underfull \hbox (badness 10000) in paragraph at lines 111--113
+[]$\OMS/cmsy/m/n/8 S$ \TU/lmr/m/n/8 (motion sensor) active. Frames skipped unle
+ss motion detected or silence limit
  []
 
 [1
 
 ] (./eager_mode.aux) ) 
 Here is how much of TeX's memory you used:
- 14981 strings out of 475865
- 318737 string characters out of 5799410
- 625500 words of memory out of 5000000
- 35784 multiletter control sequences out of 15000+600000
- 471162 words of font info for 44 fonts, out of 8000000 for 9000
+ 13178 strings out of 475865
+ 291744 string characters out of 5799410
+ 596495 words of memory out of 5000000
+ 34013 multiletter control sequences out of 15000+600000
+ 471154 words of font info for 43 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
- 115i,16n,118p,421b,1382s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 115i,16n,118p,421b,1388s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
 Output written on eager_mode.pdf (1 page).
