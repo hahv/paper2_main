@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999994 (TeX Live 2022) (preloaded format=xelatex 2022.7.18)  13 MAY 2026 17:24
+This is XeTeX, Version 3.141592653-2.6-0.999994 (TeX Live 2022) (preloaded format=xelatex 2022.7.18)  13 MAY 2026 17:57
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -537,27 +537,27 @@ LaTeX Font Info:    ... okay on input line 6.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 6.
 LaTeX Font Info:    ... okay on input line 6.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 34.
+(Font)              <8> on input line 33.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 34.
+(Font)              <6> on input line 33.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 34.
+(Font)              <5> on input line 33.
 
-Underfull \hbox (badness 10000) in paragraph at lines 110--113
+Underfull \hbox (badness 10000) in paragraph at lines 107--110
 []\TU/lmr/m/n/8 Skip module $\OMS/cmsy/m/n/8 S$ \TU/lmr/m/n/8 is \TU/lmr/bx/n/8
  active\TU/lmr/m/n/8 : static frames are skipped; $\OMS/cmsy/m/n/8 M$ \TU/lmr/m
 /n/8 is invoked only when
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 116--119
+Underfull \hbox (badness 10000) in paragraph at lines 113--116
 []\TU/lmr/m/n/8 Skip module $\OMS/cmsy/m/n/8 S$ \TU/lmr/m/n/8 is \TU/lmr/bx/n/8
  bypassed\TU/lmr/m/n/8 : $\OMS/cmsy/m/n/8 M$ \TU/lmr/m/n/8 runs on \TU/lmr/m/it
 /8 every \TU/lmr/m/n/8 frame to prevent missed detec-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 140--141
+Underfull \hbox (badness 10000) in paragraph at lines 137--138
 []\TU/lmr/m/n/8 Consecutive fire/smoke predictions in \TU/lmr/m/sc/8 Normal\TU/
 lmr/m/n/8 ; reset to $\OT1/cmr/m/n/8 0$ \TU/lmr/m/n/8 on any negative \TU/lmr/b
 x/n/8 or \TU/lmr/m/n/8 on
@@ -569,7 +569,7 @@ x/n/8 or \TU/lmr/m/n/8 on
 Here is how much of TeX's memory you used:
  14981 strings out of 475865
  318737 string characters out of 5799410
- 625513 words of memory out of 5000000
+ 624494 words of memory out of 5000000
  35784 multiletter control sequences out of 15000+600000
  471162 words of font info for 44 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191

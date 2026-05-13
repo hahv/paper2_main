@@ -29,20 +29,18 @@
             \footnotesize \textit{if:}\;
             $c_{\mathrm{fire}} \geq W_{\mathrm{fire}}$\\
             \footnotesize \textit{then:}\;
-            $c_{\mathrm{fire}} \leftarrow 0$,\;
             $c_{\mathrm{clear}} \leftarrow 0$}
         (eager);
     %% ── EAGER → NORMAL (T2) ──────────────────────────────────────────
     \draw[->, line width=1.5pt] (eager) edge[bend left=30]
-    node[below]{%
-        \footnotesize
-        \begin{tabular}[t]{@{}l@{}}
-            \textit{if:}\; $c_{\mathrm{clear}} \geq W_{\mathrm{clr}}$ \\[2pt]
-            \textit{then:}\; $c_{\mathrm{clear}} \leftarrow 0$ \\
-            \phantom{\textit{then:}\;} $c_{\mathrm{skip}} \leftarrow 0$ \\
-            \phantom{\textit{then:}\;} $c_{\mathrm{fire}} \leftarrow 0$
-        \end{tabular}}
-    (normal);
+        node[below]{%
+            \footnotesize
+            \begin{tabular}[t]{@{}l@{}}
+                \textit{if:}\; $c_{\mathrm{clear}} \geq W_{\mathrm{clr}}$ \\[2pt]
+                \textit{then:}\; $c_{\mathrm{skip}} \leftarrow 0$,\;
+                    $c_{\mathrm{fire}} \leftarrow 0$
+            \end{tabular}}
+        (normal);
 
     %% TOP ── NORMAL self-loop: CASE 1 — SKIP (M not invoked) ─────────────
     \draw[->] (normal) edge[loop above, looseness=6]
@@ -50,7 +48,6 @@
             \footnotesize \textit{if:}\;
             $s_t = 0$ \textbf{and} $c_{\mathrm{skip}} < N_{\mathrm{chk}}$\\[2pt]
             \footnotesize \textit{then:}\;
-            $\hat{y}_t \leftarrow 0$,\;
             $c_{\mathrm{skip}} \mathrel{+}= 1$}
         (normal);
 
