@@ -23,43 +23,43 @@
     \draw[->, line width=1.5pt] (eager) edge[bend left=25]
         node[below, align=center]{%
             \footnotesize
-            $c_{\mathrm{clear}} \geq W_{\mathrm{clr}}$
-            consecutive negatives \\[2pt]
-            \textit{reset:}\;
+            \textit{if:}\; $c_{\mathrm{clear}} \geq W_{\mathrm{clr}}$\\[2pt]
+            \textit{then:}\;
             $c_{\mathrm{fire}} \leftarrow 0,\;
              c_{\mathrm{skip}} \leftarrow 0$}
         (normal);
 
-    %% ── T2: NORMAL → EAGER via motion streak ─────────────────────────
+    %% ── T2: NORMAL → EAGER ───────────────────────────────────────────
     \draw[->, line width=1.5pt, red!70!black] (normal) edge[bend left=25]
         node[above, align=center]{%
             \footnotesize
-            \textbf{[Motion path]}\;
-            $c_{\mathrm{fire}} \geq W_{\mathrm{fire}}$
-            consecutive positives \\[2pt]
-            \textit{reset:}\;
-            $c_{\mathrm{clear}} \leftarrow 0$}
+            \textit{if:}\; $c_{\mathrm{fire}} \geq W_{\mathrm{fire}}$ \\[2pt]
+            \textit{then:}\; $c_{\mathrm{clear}} \leftarrow 0$}
         (eager);
 
     %% ── NORMAL top loop: skip ────────────────────────────────────────
     \draw[->] (normal) edge[loop above, looseness=5]
-        node[above, align=center]{%
-            \footnotesize
-            \textbf{Skip:}\;
-            $s_t{=}0$ \textbf{and}
-            $c_{\mathrm{skip}} < N_{\mathrm{chk}}$ \\[2pt]
-            $c_{\mathrm{skip}} \mathrel{+}= 1$}
-        (normal);
+    node[above, align=center]{%
+        \footnotesize
+        \textit{if:}\;
+        $s_t{=}0$ \textbf{and}
+        $c_{\mathrm{skip}} < N_{\mathrm{chk}}$ \\[2pt]
+        \textit{then:}\; $c_{\mathrm{skip}} \mathrel{+}= 1$,\;
+        $c_{\mathrm{fire}} \leftarrow 0$
+        }
+    (normal);
 
     %% ── NORMAL left loop: motion (M invoked) ────────────────────────
     \draw[->, red!70!black] (normal) edge[loop left, looseness=5]
         node[left, align=right]{%
             \footnotesize
-            \textbf{Motion:}\; $s_t{=}1$ \\[2pt]
-            $c_{\mathrm{skip}} \leftarrow 0$ \\[1pt]
-            $\hat{y}_t{=}1$:\;
+            \textit{if:}\; $s_t{=}1$ \\[2pt]
+            \textit{then:}\; $c_{\mathrm{skip}} \leftarrow 0$ \\[1pt]
+            \phantom{\textit{then:}\;}
+                $\hat{y}_t{=}1$:\;
                 $c_{\mathrm{fire}} \mathrel{+}= 1$ \\[1pt]
-            $\hat{y}_t{=}0$:\;
+            \phantom{\textit{then:}\;}
+                $\hat{y}_t{=}0$:\;
                 $c_{\mathrm{fire}} \leftarrow 0$}
         (normal);
 
@@ -67,40 +67,36 @@
     \draw[->, red!70!black] (normal) edge[loop below, looseness=5]
         node[below, align=center]{%
             \footnotesize
-            \textbf{Forced burst:}\;
-            $s_t{=}0$ \textbf{and}
-            $c_{\mathrm{skip}} \geq N_{\mathrm{chk}}$ \\[2pt]
-            Run $\mathcal{M}$ on next $W_{\mathrm{fire}}$
-            consecutive frames \\[2pt]
-            \textit{all positive}:\;
-            $\to$ \textbf{EAGER}
-            \quad
-            \textit{any negative}:\;
-            $c_{\mathrm{skip}} \leftarrow 0,\;
-             c_{\mathrm{fire}} \leftarrow 0$}
+            \textbf{Forced burst:}\\[2pt]
+            \textit{if:}\; $s_t{=}0$ \textbf{and}
+                $c_{\mathrm{skip}} \geq N_{\mathrm{chk}}$ \\[2pt]
+            \textit{then:}\; $c_{\mathrm{skip}} \leftarrow 0$;\;
+                run $\mathcal{M}$ on up to $W_{\mathrm{fire}}$ frames \\[1pt]
+            \phantom{\textit{then:}\;}
+                \textit{(as if $s_t{=}1$; enter \textbf{EAGER} early if $c_{\mathrm{fire}}$ reaches $W_{\mathrm{fire}}$)}}
         (normal);
 
-    %% ── EAGER top loop: positive (stay alert) ───────────────────────
+    %% ── EAGER top loop: positive ─────────────────────────────────────
     \draw[->, red!70!black] (eager) edge[loop above, looseness=5]
         node[above, align=center]{%
             \footnotesize
-            $\hat{y}_t{=}1$ \\[2pt]
-            $c_{\mathrm{clear}} \leftarrow 0$}
+            \textit{if:}\; $\hat{y}_t{=}1$ \\[2pt]
+            \textit{then:}\; $c_{\mathrm{clear}} \leftarrow 0$}
         (eager);
 
-    %% ── EAGER bottom loop: negative (counting clears) ───────────────
+    %% ── EAGER bottom loop: negative ──────────────────────────────────
     \draw[->] (eager) edge[loop below, looseness=5]
         node[below, align=center]{%
             \footnotesize
-            $\hat{y}_t{=}0$ \textbf{and}
+            \textit{if:}\; $\hat{y}_t{=}0$ \textbf{and}
             $c_{\mathrm{clear}} < W_{\mathrm{clr}}$ \\[2pt]
-            $c_{\mathrm{clear}} \mathrel{+}= 1$}
+            \textit{then:}\; $c_{\mathrm{clear}} \mathrel{+}= 1$}
         (eager);
 
     %% ── Legend ───────────────────────────────────────────────────────
     \node[draw, rounded corners, fill=gray!8,
-          below=2.8cm of normal,
-          anchor=north west, xshift=-4.5cm,
+          below=3.2cm of normal,
+          anchor=north west, xshift=-5.0cm,
           text width=14cm, font=\footnotesize] (legend) {%
         \begin{tabular}{@{}lp{11cm}@{}}
             \multicolumn{2}{l}{\textbf{Modes}} \\
@@ -131,17 +127,16 @@
             $\hat{y}_t \in \{0,1\}$
                 & $\mathcal{M}$ output: $1$=fire/smoke,\; $0$=safe \\[3pt]
             $c_{\mathrm{fire}}$
-                & Consecutive positive $\mathcal{M}$ results on motion
-                  path; reset on any negative or T1 exit \\[3pt]
+                & Consecutive positive $\mathcal{M}$ results; shared by
+                  both motion and forced burst; reset on any negative \\[3pt]
             $c_{\mathrm{clear}}$
                 & Consecutive negative $\mathcal{M}$ results in
                   \textsc{Eager}; reset on any positive or T2 entry \\[3pt]
             $c_{\mathrm{skip}}$
                 & Consecutive skipped frames in \textsc{Normal};
-                  reset on any $\mathcal{M}$ call \\[3pt]
+                  reset at start of any $\mathcal{M}$ call sequence \\[3pt]
             $W_{\mathrm{fire}}$
-                & (1)~Motion streak length to enter \textsc{Eager};\;
-                  (2)~Burst size for forced check \\[3pt]
+                & Streak length to enter \textsc{Eager} (motion or burst) \\[3pt]
             $W_{\mathrm{clr}}$
                 & Consecutive negatives in \textsc{Eager} needed to exit \\[3pt]
             $N_{\mathrm{chk}}$
