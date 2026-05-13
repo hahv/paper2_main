@@ -64,17 +64,15 @@
         (normal);
 
     %% ── NORMAL bottom loop: forced burst ────────────────────────────
+    %% ── NORMAL bottom loop: forced burst ────────────────────────────
     \draw[->, red!70!black] (normal) edge[loop below, looseness=5]
         node[below, align=center]{%
             \footnotesize
             \textbf{Forced burst:}\\[2pt]
             \textit{if:}\; $c_{\mathrm{skip}} \geq N_{\mathrm{chk}}$ \\[2pt]
             \textit{then:}\; $c_{\mathrm{skip}} \leftarrow 0$;\;
-                run $\mathcal{M}$ on up to $W_{\mathrm{fire}}$ frames \\[1pt]
-            \phantom{\textit{then:}\;}
-                \textit{(as if $s_t{=}1$; enter \textbf{EAGER} early if $c_{\mathrm{fire}}$ reaches $W_{\mathrm{fire}}$)}}
+                process $W_{\mathrm{fire}}$ frames as if $s_t{=}1$}
         (normal);
-
     %% ── EAGER top loop: positive ─────────────────────────────────────
     \draw[->, red!70!black] (eager) edge[loop above, looseness=5]
         node[above, align=center]{%
