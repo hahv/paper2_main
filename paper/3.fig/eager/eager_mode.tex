@@ -30,7 +30,7 @@
         (normal);
 
     %% ── T2: NORMAL → EAGER ───────────────────────────────────────────
-    \draw[->, line width=1.5pt, red!70!black] (normal) edge[bend left=25]
+    \draw[->, line width=1.5pt] (normal) edge[bend left=25]
         node[above, align=center]{%
             \footnotesize
             \textit{if:}\; $c_{\mathrm{fire}} \geq W_{\mathrm{fire}}$ \\[2pt]
@@ -64,7 +64,6 @@
         (normal);
 
     %% ── NORMAL bottom loop: forced burst ────────────────────────────
-    %% ── NORMAL bottom loop: forced burst ────────────────────────────
     \draw[->, red!70!black] (normal) edge[loop below, looseness=5]
         node[below, align=center]{%
             \footnotesize
@@ -73,7 +72,8 @@
             \textit{then:}\; $c_{\mathrm{skip}} \leftarrow 0$;\;
                 process $W_{\mathrm{fire}}$ frames as if $s_t{=}1$}
         (normal);
-    %% ── EAGER top loop: positive ─────────────────────────────────────
+
+        %% ── EAGER top loop: positive ─────────────────────────────────────
     \draw[->, red!70!black] (eager) edge[loop above, looseness=5]
         node[above, align=center]{%
             \footnotesize
@@ -82,7 +82,7 @@
         (eager);
 
     %% ── EAGER bottom loop: negative ──────────────────────────────────
-    \draw[->] (eager) edge[loop below, looseness=5]
+    \draw[->, red!70!black] (eager) edge[loop below, looseness=5]
         node[below, align=center]{%
             \footnotesize
             \textit{if:}\; $\hat{y}_t{=}0$ \textbf{and}
