@@ -945,20 +945,20 @@ search over a list of candidate values as follows:
 \item
   \textbf{Forced-check interval
   \(N_{\mathrm{chk}} \in \{10, 20, 30, 50\}\)}: defines the maximum
-  number of consecutive frames that may be skipped in \textsc{Normal}
-  mode before the system forces an inference call, regardless of the
-  skip module decision. This serves as a safety net for false negative
-  cases, e.g., slow-developing smoke produces too little motion to
-  trigger \(\mathcal{S}\), causing the scene to be treated as static and
-  inference to be skipped indefinitely. If the forced call yields a
-  positive prediction, the system may transition into \textsc{Eager}
-  mode upon satisfying \(W_{\mathrm{fire}}\). Smaller values provide
-  more frequent safety checks at the cost of unnecessary inference on
-  truly static scenes; larger values reduce this overhead but increase
-  the worst-case delay before a missed detection is recovered. The
-  selected range provides a systematic sweep from aggressive checking
-  (\(N_{\mathrm{chk}} = 10\)) to infrequent checking
-  (\(N_{\mathrm{chk}} =
+  number of consecutive skipped frames that may be skipped in
+  \textsc{Normal} mode before the system forces an inference call,
+  regardless of the skip module decision. This serves as a safety net
+  for false negative cases, e.g., slow-developing smoke produces too
+  little motion to trigger \(\mathcal{S}\), causing the scene to be
+  treated as static and inference to be skipped indefinitely. If the
+  forced call yields a positive prediction, the system may transition
+  into \textsc{Eager} mode upon satisfying \(W_{\mathrm{fire}}\).
+  Smaller values provide more frequent safety checks at the cost of
+  unnecessary inference on truly static scenes; larger values reduce
+  this overhead but increase the worst-case delay before a missed
+  detection is recovered. The selected range provides a systematic sweep
+  from aggressive checking (\(N_{\mathrm{chk}} = 10\)) to infrequent
+  checking (\(N_{\mathrm{chk}} =
   50\)).
 \end{itemize}
 

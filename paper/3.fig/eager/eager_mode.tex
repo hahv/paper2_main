@@ -42,13 +42,23 @@
             \end{tabular}}
         (normal);
 
+    % %% TOP ── NORMAL self-loop: CASE 1 — SKIP (M not invoked) ─────────────
+    % \draw[->] (normal) edge[loop above, looseness=6]
+    %     node[above, align=center]{%
+    %         \footnotesize \textit{if:}\;
+    %         $s_t = 0$ \textbf{and} $c_{\mathrm{skip}} < N_{\mathrm{chk}}$\\[2pt]
+    %         \footnotesize \textit{then:}\;
+    %         $c_{\mathrm{skip}} \mathrel{+}= 1$}
+    %     (normal);
+
     %% TOP ── NORMAL self-loop: CASE 1 — SKIP (M not invoked) ─────────────
     \draw[->] (normal) edge[loop above, looseness=6]
         node[above, align=center]{%
             \footnotesize \textit{if:}\;
             $s_t = 0$ \textbf{and} $c_{\mathrm{skip}} < N_{\mathrm{chk}}$\\[2pt]
             \footnotesize \textit{then:}\;
-            $c_{\mathrm{skip}} \mathrel{+}= 1$}
+            $c_{\mathrm{skip}} \mathrel{+}= 1$,\;
+            $c_{\mathrm{fire}} \leftarrow 0$}
         (normal);
 
     %% LEFT── NORMAL self-loop: CASE 3 — MOTION (M invoked) ───────────────
@@ -135,10 +145,11 @@
                   $\mathcal{M}$ call \\[4pt]
             $c_{\mathrm{fire}}$
                 & Consecutive fire/smoke predictions in \textsc{Normal};
-                  reset to $0$ on any negative \textbf{or} on T2 exit \\[4pt]
+                  reset to $0$ on any negative \textbf{or} on exiting \textsc{Eager} mode \\[4pt]
             $c_{\mathrm{clear}}$
                 & Consecutive negative predictions in \textsc{Eager};
-                  reset to $0$ on any positive prediction \\[4pt]
+                reset to $0$ on any positive prediction \textbf{or} on entering
+                \textsc{Eager} mode \\[4pt]
             $W_{\mathrm{fire}}$
                 & Streak threshold to enter \textsc{Eager} \\[4pt]
             $W_{\mathrm{clr}}$

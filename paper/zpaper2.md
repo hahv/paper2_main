@@ -713,7 +713,7 @@ over a list of candidate values as follows:
   mode and resume normal skip operation. The range is deliberately set larger than that of $W_{\mathrm{fire}}$, reflecting an asymmetric cost structure: a premature exit risks missed detections, whereas a delayed exit only causes the system to run unnecessary inference on a few extra frames — a minor and acceptable efficiency loss.
 
 - **Forced-check interval $N_{\mathrm{chk}} \in \{10, 20, 30, 50\}$**: defines
-  the maximum number of consecutive frames that may be skipped in
+  the maximum number of consecutive skipped frames that may be skipped in
   \textsc{Normal} mode before the system forces an inference call, regardless of
   the skip module decision. This serves as a safety net for false negative
 cases, e.g., slow-developing smoke produces too little motion to trigger
