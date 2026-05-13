@@ -15,130 +15,144 @@
     ]
 
     %% ── States ───────────────────────────────────────────────────────
-    \node[state, initial, initial where=left, initial
-    text={\textbf{Start}}, fill=blue!35, align=center]
-    (normal) {NORMAL};
-    \node[state, right of=normal, xshift=1cm, fill=orange!35, align=center]
-    (eager) {EAGER};
+    \node[state, initial, initial where=left,
+        initial text={\textbf{Start}},
+        fill=blue!35, align=center]
+        (normal) {NORMAL};
+    \node[state, right of=normal, xshift=1cm,
+        fill=orange!35, align=center]
+        (eager) {EAGER};
 
     %% ── NORMAL → EAGER ───────────────────────────────────────────────
     \draw[->, line width=1.5pt] (normal) edge[bend left=30]
-    node[above, align=center]{%
-        \footnotesize \textit{if:}\;
-        $c_{\mathrm{fire}} \geq W_{\mathrm{fire}}$\\
-        \footnotesize \textit{then:}\;
-        $c_{\mathrm{fire}} \leftarrow 0$,\;
-    $c_{\mathrm{clear}} \leftarrow 0$}
-    (eager);
+        node[above, align=center]{%
+            \footnotesize \textit{if:}\;
+            $c_{\mathrm{fire}} \geq W_{\mathrm{fire}}$\\
+            \footnotesize \textit{then:}\;
+            $c_{\mathrm{fire}} \leftarrow 0$,\;
+            $c_{\mathrm{clear}} \leftarrow 0$}
+        (eager);
 
     %% ── EAGER → NORMAL ───────────────────────────────────────────────
     \draw[->, line width=1.5pt] (eager) edge[bend left=30]
-    node[below, align=center]{%
-        \footnotesize \textit{if:}\;
-        $c_{\mathrm{clear}} \geq W_{\mathrm{clr}}$\\
-        \footnotesize \textit{then:}\;
-        $c_{\mathrm{clear}} \leftarrow 0$,\;
-    $c_{\mathrm{skip}} \leftarrow 0$}
-    (normal);
+        node[below, align=center]{%
+            \footnotesize \textit{if:}\;
+            $c_{\mathrm{clear}} \geq W_{\mathrm{clr}}$\\
+            \footnotesize \textit{then:}\;
+            $c_{\mathrm{clear}} \leftarrow 0$,\;
+            $c_{\mathrm{skip}} \leftarrow 0$}
+        (normal);
 
-    %% ── NORMAL self-loop: SKIP ───────────────────────────────────────
+    %% ── NORMAL self-loop: CASE 1 — SKIP (no M invoked) ──────────────
     \draw[->] (normal) edge[loop above, looseness=6]
-    node[above, align=center]{%
-        \footnotesize \textit{if:}\;
-        $s_t = 0$ \textbf{and} $c_{\mathrm{skip}} < N_{\mathrm{chk}}$\\
-        \footnotesize \textit{then:}\;
-        $\hat{y}_t \leftarrow 0$,\;
-    $c_{\mathrm{skip}} \mathrel{+}= 1$}
-    (normal);
+        node[above, align=center]{%
+            \footnotesize \textit{if:}\;
+            $s_t = 0$ \textbf{and} $c_{\mathrm{skip}} < N_{\mathrm{chk}}$\\
+            \footnotesize \textit{then:}\;
+            $\hat{y}_t \leftarrow 0$,\;
+            $c_{\mathrm{skip}} \mathrel{+}= 1$}
+        (normal);
 
-    %% ── NORMAL self-loop: FORCED CHECK ───────────────────────────────
-    \draw[->] (normal) edge[loop below, looseness=6]
-    node[below, align=center]{%
-        \footnotesize \textit{if:}\;
-        $s_t = 0$ \textbf{and} $c_{\mathrm{skip}} \geq N_{\mathrm{chk}}$\\
-        \footnotesize \textit{then:}\;
-        run $\mathcal{M}(f_t)$,\;
-    $c_{\mathrm{skip}} \leftarrow 0$}
-    (normal);
+    %% ── NORMAL self-loop: CASE 2 — FORCED CHECK (M invoked) ─────────
+    \draw[->, red!70!black] (normal) edge[loop below, looseness=6]
+        node[below, align=center]{%
+            \footnotesize \textit{if:}\;
+            $s_t = 0$ \textbf{and} $c_{\mathrm{skip}} \geq N_{\mathrm{chk}}$\\
+            \footnotesize \textit{then:}\;
+            run $\mathcal{M}(f_t)$,\;
+            $c_{\mathrm{skip}} \leftarrow 0$}
+        (normal);
 
-    %% ── NORMAL self-loop: ACCUMULATE fire streak ─────────────────────
-    \draw[->] (normal) edge[loop right, looseness=6]
-    node[right, align=center]{%
-        \footnotesize \textit{if:}\;
-        $\hat{y}_t = 1$ \textbf{and}
-        $c_{\mathrm{fire}} < W_{\mathrm{fire}}$\\
-        \footnotesize \textit{then:}\;
-    $c_{\mathrm{fire}} \mathrel{+}= 1$}
-    (normal);
+    %% ── NORMAL self-loop: CASE 3 — MOTION + positive (M invoked) ────
+    \draw[->, red!70!black] (normal) edge[loop right, looseness=6]
+        node[right, align=center]{%
+            \footnotesize \textit{if:}\;
+            $\hat{y}_t = 1$ \textbf{and}
+            $c_{\mathrm{fire}} < W_{\mathrm{fire}}$\\
+            \footnotesize \textit{then:}\;
+            $c_{\mathrm{fire}} \mathrel{+}= 1$}
+        (normal);
 
-    %% ── NORMAL self-loop: reset fire streak on negative ──────────────
-    \draw[->] (normal) edge[loop left, looseness=10]
-    node[left, align=center]{%
-        \footnotesize \textit{if:}\;
-        $\hat{y}_t = 0$\\
-        \footnotesize \textit{then:}\;
-    $c_{\mathrm{fire}} \leftarrow 0$}
-    (normal);
+    %% ── NORMAL self-loop: CASE 4 — MOTION + negative (M invoked) ────
+    \draw[->, red!70!black] (normal) edge[loop left, looseness=10]
+        node[left, align=center]{%
+            \footnotesize \textit{if:}\;
+            $\hat{y}_t = 0$\\
+            \footnotesize \textit{then:}\;
+            $c_{\mathrm{fire}} \leftarrow 0$}
+        (normal);
 
-    %% ── EAGER self-loop: fire continues ──────────────────────────────
-    \draw[->] (eager) edge[loop above, looseness=6]
-    node[above, align=center]{%
-        \footnotesize \textit{if:}\; $\hat{y}_t = 1$\\
-        \footnotesize \textit{then:}\;
-    $c_{\mathrm{clear}} \leftarrow 0$}
-    (eager);
+    %% ── EAGER self-loop: positive prediction (M always invoked) ──────
+    \draw[->, red!70!black] (eager) edge[loop above, looseness=6]
+        node[above, align=center]{%
+            \footnotesize \textit{if:}\; $\hat{y}_t = 1$\\
+            \footnotesize \textit{then:}\;
+            $c_{\mathrm{clear}} \leftarrow 0$}
+        (eager);
 
-    %% ── EAGER self-loop: counting clears ─────────────────────────────
-    \draw[->] (eager) edge[loop below, looseness=6]
-    node[below, align=center]{%
-        \footnotesize \textit{if:}\;
-        $\hat{y}_t = 0$ \textbf{and}
-        $c_{\mathrm{clear}} < W_{\mathrm{clr}}$\\
-        \footnotesize \textit{then:}\;
-    $c_{\mathrm{clear}} \mathrel{+}= 1$}
-    (eager);
+    %% ── EAGER self-loop: negative prediction (M always invoked) ──────
+    \draw[->, red!70!black] (eager) edge[loop below, looseness=6]
+        node[below, align=center]{%
+            \footnotesize \textit{if:}\;
+            $\hat{y}_t = 0$ \textbf{and}
+            $c_{\mathrm{clear}} < W_{\mathrm{clr}}$\\
+            \footnotesize \textit{then:}\;
+            $c_{\mathrm{clear}} \mathrel{+}= 1$}
+        (eager);
 
     %% ── Legend ───────────────────────────────────────────────────────
     \node[draw, rounded corners, fill=gray!8,
         below=2.8cm of normal, anchor=north west,
-        xshift=-4.2cm,
-        text width=13.2cm,
-    font=\footnotesize] (legend)
+        xshift=-4.0cm,
+        text width=13.5cm,
+        font=\footnotesize] (legend)
     {
         \begin{tabular}{@{}cp{10.5cm}@{}}
-            \textbf{Symbol} & \textbf{Description} \\
+            \multicolumn{1}{c}{\textbf{Symbol / Mode}} & \textbf{Description} \\
             \midrule
-            \tikz\draw[fill=blue!35, draw=black] (0,0) circle
-            (0.4em);~\textbf{NORMAL}
-            & Skip module $\mathcal{S}$ is \textbf{active}:
-            static frames are skipped;
-            $\mathcal{M}$ is invoked only when motion is detected
-            or $c_{\mathrm{skip}} \geq N_{\mathrm{chk}}$ \\[4pt]
-            \tikz\draw[fill=orange!35, draw=black] (0,0) circle
-            (0.4em); ~\textbf{EAGER}
-            & Skip module $\mathcal{S}$ is \textbf{bypassed}:
-            $\mathcal{M}$ runs on \textit{every} frame
-            to prevent missed detections \\[6pt]
+            \tikz\draw[fill=blue!35, draw=black] (0,0) circle (0.4em);
+            ~\textbf{NORMAL}
+                & Skip module $\mathcal{S}$ is \textbf{active}:
+                  static frames are skipped; $\mathcal{M}$ is invoked only
+                  when motion is detected ($s_t{=}1$) or
+                  $c_{\mathrm{skip}} \geq N_{\mathrm{chk}}$ \\[4pt]
+            \tikz\draw[fill=orange!35, draw=black] (0,0) circle (0.4em);
+            ~\textbf{EAGER}
+                & Skip module $\mathcal{S}$ is \textbf{bypassed}:
+                  $\mathcal{M}$ runs on \textit{every} frame
+                  to prevent missed detections \\[6pt]
             \midrule
-            $s_t \in \{0,1\}$       & Skip decision from $\mathcal{S}$:
-            $s_t{=}0$ no motion detected (skip inference);\;
-            $s_t{=}1$ motion detected (run inference) \\[4pt]
-            $\hat{y}_t \in \{0,1\}$ & Prediction from $\mathcal{M}$:
-            $\hat{y}_t{=}1$ fire/smoke;\;
-            $\hat{y}_t{=}0$ negative \\[4pt]
-            $c_{\mathrm{skip}}$     & Consecutive skipped frames
-            (reset to $0$ on any inference call) \\[4pt]
-            $c_{\mathrm{fire}}$     & Consecutive fire/smoke predictions
-            in \textsc{Normal} mode
-            (reset to $0$ on any negative) \\[4pt]
-            $c_{\mathrm{clear}}$    & Consecutive negative predictions
-            in \textsc{Eager} mode \\[4pt]
-            $W_{\mathrm{fire}}$     & Fire streak length required
-            to enter \textsc{Eager} mode \\[4pt]
-            $W_{\mathrm{clr}}$      & Clear streak length required
-            to exit \textsc{Eager} mode \\[4pt]
-            $N_{\mathrm{chk}}$      & Maximum consecutive skips before
-            a forced inference check \\
+            \tikz\draw[->, red!70!black, thick]
+                (0,0) -- (0.6,0);
+            & $\mathcal{M}(f_t)$ is invoked on this transition \\[4pt]
+            \tikz\draw[->, black, thick]
+                (0,0) -- (0.6,0);
+            & $\mathcal{M}(f_t)$ is \textbf{not} invoked
+              (frame skipped) \\[6pt]
+            \midrule
+            $s_t \in \{0,1\}$
+                & Skip decision from $\mathcal{S}$:
+                  $s_t{=}0$ no motion detected (skip inference);\;
+                  $s_t{=}1$ motion detected (run $\mathcal{M}$) \\[4pt]
+            $\hat{y}_t \in \{0,1\}$
+                & Prediction from $\mathcal{M}$:
+                  $\hat{y}_t{=}1$ fire/smoke;\;
+                  $\hat{y}_t{=}0$ negative \\[4pt]
+            $c_{\mathrm{skip}}$
+                & Consecutive skipped frames
+                  (reset to $0$ on any inference call) \\[4pt]
+            $c_{\mathrm{fire}}$
+                & Consecutive fire/smoke predictions in \textsc{Normal} mode
+                  (reset to $0$ on any negative prediction) \\[4pt]
+            $c_{\mathrm{clear}}$
+                & Consecutive negative predictions in \textsc{Eager} mode
+                  (reset to $0$ on any positive prediction) \\[4pt]
+            $W_{\mathrm{fire}}$
+                & Fire streak length required to enter \textsc{Eager} mode \\[4pt]
+            $W_{\mathrm{clr}}$
+                & Clear streak length required to exit \textsc{Eager} mode \\[4pt]
+            $N_{\mathrm{chk}}$
+                & Maximum consecutive skips before a forced inference check \\
         \end{tabular}
     };
 

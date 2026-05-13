@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999994 (TeX Live 2022) (preloaded format=xelatex 2022.7.18)  12 MAY 2026 14:18
+This is XeTeX, Version 3.141592653-2.6-0.999994 (TeX Live 2022) (preloaded format=xelatex 2022.7.18)  13 MAY 2026 16:12
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -537,48 +537,54 @@ LaTeX Font Info:    ... okay on input line 6.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 6.
 LaTeX Font Info:    ... okay on input line 6.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 32.
+(Font)              <8> on input line 34.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 32.
+(Font)              <6> on input line 34.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 32.
+(Font)              <5> on input line 34.
 
-Underfull \hbox (badness 10000) in paragraph at lines 113--116
+Underfull \hbox (badness 10000) in paragraph at lines 115--118
 []\TU/lmr/m/n/8 Skip module $\OMS/cmsy/m/n/8 S$ \TU/lmr/m/n/8 is \TU/lmr/bx/n/8
  active\TU/lmr/m/n/8 : static frames are skipped; $\OMS/cmsy/m/n/8 M$ \TU/lmr/m
 /n/8 is invoked only when
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 119--121
+Underfull \hbox (badness 10000) in paragraph at lines 121--123
 []\TU/lmr/m/n/8 Skip module $\OMS/cmsy/m/n/8 S$ \TU/lmr/m/n/8 is \TU/lmr/bx/n/8
  bypassed\TU/lmr/m/n/8 : $\OMS/cmsy/m/n/8 M$ \TU/lmr/m/n/8 runs on \TU/lmr/m/it
 /8 every \TU/lmr/m/n/8 frame to prevent missed
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 123--125
+Underfull \hbox (badness 10000) in paragraph at lines 134--136
 []\TU/lmr/m/n/8 Skip decision from $\OMS/cmsy/m/n/8 S$\TU/lmr/m/n/8 : $\OML/cmm
 /m/it/8 s[][]\OT1/cmr/m/n/8 0$ \TU/lmr/m/n/8 no motion detected (skip inference
 ); $\OML/cmm/m/it/8 s[][]\OT1/cmr/m/n/8 1$ \TU/lmr/m/n/8 motion
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 131--133
+Underfull \hbox (badness 10000) in paragraph at lines 145--146
 []\TU/lmr/m/n/8 Consecutive fire/smoke predictions in \TU/lmr/m/sc/8 Normal \TU
-/lmr/m/n/8 mode (reset to $\OT1/cmr/m/n/8 0$ \TU/lmr/m/n/8 on any
+/lmr/m/n/8 mode (reset to $\OT1/cmr/m/n/8 0$ \TU/lmr/m/n/8 on any negative
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 148--149
+[]\TU/lmr/m/n/8 Consecutive negative predictions in \TU/lmr/m/sc/8 Eager \TU/lm
+r/m/n/8 mode (reset to $\OT1/cmr/m/n/8 0$ \TU/lmr/m/n/8 on any positive
  []
 
 [1
 
 ] (./eager_mode.aux) ) 
 Here is how much of TeX's memory you used:
- 14986 strings out of 475865
- 318840 string characters out of 5799410
- 620770 words of memory out of 5000000
- 35789 multiletter control sequences out of 15000+600000
+ 14989 strings out of 475865
+ 318893 string characters out of 5799410
+ 625269 words of memory out of 5000000
+ 35792 multiletter control sequences out of 15000+600000
  471162 words of font info for 44 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
- 115i,16n,118p,421b,1180s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 115i,16n,118p,421b,1382s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
 Output written on eager_mode.pdf (1 page).

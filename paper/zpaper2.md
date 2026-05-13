@@ -545,88 +545,6 @@ configurations that failed to bridge the throughput gap, the
 constraint $\delta_R = 0.015$, confirming that temporal accumulation is
 requisite for robust motion-based gating.
 
-<!-- ! Analysis the hyperparameters search results of AccMotionDet -->
-
-<!-- ## Hyperparameter Optimization Results: AccMotionDet
-
-Table \ref{tb:val*results_accMotionDet} shows the top-10 ranked configurations
-for the AccMotionDet skip module on the validation set $\mathcal{D}*\text{val}$,
-ordered by combined score $\Phi$. The baseline system (no skip module) achieves
-a recall of 94.35\% at 24.1~FPS.
-
-### Selected Configuration
-
-The optimal configuration (Exp.~1) uses a half-resolution scale ($\alpha =
-0.5$), coarse block size ($B = 32$), conservative block-active threshold ($\tau
-= 0.05$), moderate pixel sensitivity ($\tau_d = 5$), low activation threshold
-($\tau_m = 5$), and a small accumulation cap ($K_{\max} = 15$). This
-configuration achieves a skip rate of **44.39\%** and a recall of **93.90\%**
-($\Delta = -0.45\%$), well within the tolerance $\delta_R = 0.015$. The
-resulting FPS improves from 24.1 to **36.6**, a **52\% throughput gain**, with
-no change in FPR (0.74\% throughout).
-
-### Hyperparameter Sensitivity Analysis
-
-**Scale factor $\alpha$.** All top-10 configurations consistently use $\alpha =
-0.5$ (half resolution). Full-resolution processing ($\alpha = 1.0$) does not
-appear in any feasible high-scoring configuration, confirming that downscaling
-reduces sensitivity to high-frequency pixel noise while lowering skip-module
-latency --- both effects are beneficial.
-
-**Block size $B$.** $B = 32$ dominates the top-10 rankings, with only one entry
-using $B = 16$ (Exp.~10, score 0.4906). Coarser blocks aggregate motion evidence
-spatially, providing greater robustness to isolated pixel-level disturbances
-that could otherwise trigger unnecessary inference calls. The result confirms
-the prior expectation in Section~\ref{secmethod} that temporal accumulation
-already suppresses transient noise, making fine-grained $B = 16$ blocks less
-necessary for AccMotionDet.
-
-**Block active threshold $\tau$.** Configurations with $\tau = 0.05$ yield the
-highest skip rates (42--44\%), while $\tau = 0.10$ achieves slightly lower skip
-rates (39--40\%) but marginally better recall retention. The top-ranked
-configuration (score 0.5203) uses $\tau = 0.05$, confirming that a conservative
-trigger policy --- requiring only sparse motion evidence before invoking
-inference --- is preferred for maximizing the combined score under the recall
-constraint.
-
-**Activation threshold $\tau_m$.** Configurations with $\tau_m = 5$ (Exp.~1--6)
-consistently outscore those with $\tau_m = 10$ (Exp.~7--8). A higher activation
-threshold $\tau_m = 10$ requires stronger sustained motion before triggering
-inference, which slightly improves the skip rate but incurs a larger recall drop
-(up to $-0.53\%$), reducing the recall retention term in $\Phi$.
-
-**Accumulation cap $K_{\max}$.** Across all three values evaluated ($K_{\max}
-\in \{15, 25, 35\}$), the skip rate decreases monotonically with increasing
-$K_{\max}$ (e.g., 44.39\% $\to$ 42.89\% $\to$ 42.38\% for Exp.~1--3). A lower
-cap allows the accumulator to reset more readily after high-motion periods,
-enabling faster recognition of subsequent static frames and thus higher skip
-rates. The difference in combined score across the three values is small ($\leq
-0.007$), indicating low sensitivity to this parameter within the evaluated
-range. -->
-
-<!-- ### Comparison with FrameDiffDet
-
-A fundamental contrast emerges when comparing AccMotionDet and FrameDiffDet on
-the validation set (Table @tbl:frameDiff-val). All feasible FrameDiffDet
-configurations --- those satisfying $\Delta R \leq \delta_R$ --- achieve skip
-rates below **1.4\%**, yielding no meaningful FPS improvement over the baseline
-(22.4--23.5~FPS vs.\ 24.1~FPS baseline). This reveals a structural limitation of
-naive frame differencing: in the static indoor surveillance setting, the
-per-pixel sensitivity required to safely detect slow-onset smoke events forces
-the threshold $\tau_d$ to remain low (i.e., $\tau_d = 3$), which in turn flags
-even subtle illumination changes as motion, suppressing skip decisions on nearly
-all frames. By contrast, the temporal accumulation in AccMotionDet absorbs
-transient pixel fluctuations over multiple frames, enabling confident skip
-decisions on genuinely static frames while preserving sensitivity to sustained
-motion signatures characteristic of fire and smoke. This results in a
-**30$\times$ higher skip rate** (44.39\% vs.\ 0.72\%) and a **63\% higher FPS**
-(36.6 vs.\ 22.4) for the respective best configurations, at a comparable recall
-cost ($-0.45\%$ vs.\ $-0.17\%$). FrameDiffDet achieves high skip rates only at
-the cost of severe recall degradation ($\geq 5.5\%$ for skip rates $\geq 47\%$),
-confirming that it lacks the temporal smoothing necessary for safe operation in
-this domain. AccMotionDet is therefore selected as the skip module for all
-subsequent system-level evaluations. -->
-
 ### Frame-Level Performance and Throughput: Baselines and Skip Module {#sec:e2e-perf}
 
 ```{=latex}
@@ -788,19 +706,33 @@ transition during system operation.
 To find the optimal hyperparameters for eager mode, we perform a grid search
 over a list of candidate values as follows:
 
-+ **Confirmation window ($K_{\text{confirm}} \in \{3, 5\}$)**: This parameter defines the number of consecutive positive predictions required to trigger eager mode. A smaller value (e.g., $K_{\text{confirm}} = 3$) allows for quicker activation of eager mode, potentially recovering more slow-developing smoke cases, but may also increase false alarms. A larger value (e.g., $K_{\text{confirm}} = 5$) provides a more conservative trigger, reducing false alarms at the risk of missing some slow-onset events.
++ **Confirmation window $W_{\mathrm{fire}} \in \{1, 2, 3\}$**: defines the number of consecutive positive predictions required to trigger a transition into \textsc{Eager} mode. A deliberately small range is chosen to ensure the system reacts swiftly to early signs of fire or smoke.
 
-+ **Clearance window ($W_{\text{clr}} \in \{5, 10\}$)**: This parameter defines the number of consecutive negative predictions required to exit eager mode and resume normal skip operation. A shorter clearance window (e.g., $W_{\text{clr}} = 5$) allows the system to return to normal operation more quickly after a confirmed detection, but may also lead to premature exit from eager mode if there are intermittent false negatives. A longer clearance window (e.g., $W_{\text{clr}} = 10$) provides a more robust exit condition, ensuring that the system remains in eager mode until the scene is consistently declared safe, but may also delay the return to normal operation.
++ **Clearance window $W_{\mathrm{clr}} \in \{3, 5, 7\}$**: This parameter
+  defines the number of consecutive negative predictions required to exit eager
+  mode and resume normal skip operation. The range is deliberately set larger than that of $W_{\mathrm{fire}}$, reflecting an asymmetric cost structure: a premature exit risks missed detections, whereas a delayed exit only causes the system to run unnecessary inference on a few extra frames — a minor and acceptable efficiency loss.
 
-+ **Period check interval ($n_\text{check} \in \{10, 20\}$)**: This parameter defines how frequently the system checks for the conditions to enter or exit eager mode. A shorter interval (e.g., $n_\text{check} = 10$) allows for more responsive transitions between modes, but may also increase computational overhead. A longer interval (e.g., $n_\text{check} = 20$) reduces the frequency of checks, lowering overhead but potentially delaying mode transitions.
+- **Forced-check interval $N_{\mathrm{chk}} \in \{10, 20, 30, 50\}$**: defines
+  the maximum number of consecutive frames that may be skipped in
+  \textsc{Normal} mode before the system forces an inference call, regardless of
+  the skip module decision. This serves as a safety net for false negative
+cases, e.g., slow-developing smoke produces too little motion to trigger
+$\mathcal{S}$, causing the scene to be treated as static and inference to be
+skipped indefinitely. If the forced call yields a positive prediction, the
+system may transition into \textsc{Eager} mode upon satisfying
+$W_{\mathrm{fire}}$. Smaller values provide more frequent safety checks at the
+cost of unnecessary inference on truly static scenes; larger values reduce this
+overhead but increase the worst-case delay before a missed detection is
+recovered. The selected range provides a systematic sweep from aggressive
+checking ($N_{\mathrm{chk}} = 10$) to infrequent checking ($N_{\mathrm{chk}} =
+50$).
 
-We also follow the same hyperparameter selection protocol as described in
-Section \ref{sec:hyperparam} to selected the optimal configuration on the
-validation set $\mathcal{D}_\text{val}$, and the results are shown in Table
-\ref{tb:gridsearch_accMotionDetEager}.
+We follow the same hyperparameter selection protocol described in
+Section~\ref{sec:hyperparam} to identify the optimal \textsc{Eager} mode
+configuration on the validation set $\mathcal{D}_{\mathrm{val}}$, with
+results reported in Table~\ref{tb:gridsearch_accMotionDetEager}.
 
-
-
+<!-- !TODO: rewrite -->
 The best-ranked configuration ($K_{\text{confirm}} = 3,\ W_{\text{clr}} = 10,\
 n_\text{check} = 10$) then evaluated on the test set $\mathcal{D}_\text{test}$
 and compared against the skip-only configuration in Table
