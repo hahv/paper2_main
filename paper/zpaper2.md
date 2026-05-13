@@ -4,7 +4,7 @@
 <!-- TARGET_PROJECT: G:\My Drive\1_PhD\Obsidian\Home\3. Writing\paperfire2 -->
 <!-- SYNC_TARGET_FILE: 00_Meta_Abstract.md-->
 <!-- BLOCK_ID: abstract -->
-date: 2026.05.12
+date: 2026.05.13
 title: "Efficient Real-Time Fire Surveillance: A Lightweight Motion-Heuristic
 Skip Module for Accelerated Inference in Indoor Environments"
 abstract: "Conventional deep learning (DL)-based fire and smoke detection systems process
@@ -394,29 +394,24 @@ from the Timm library [@rw2019timm], which was originally trained using SSLD
 knowledge distillation [@cui2021beyond]. HGNetV2 [@hgnetv2PaddleCl7:online] is a
 high-capacity CNN architecture designed to achieve substantially higher accuracy
 than models of comparable inference speed on NVIDIA GPUs, making it well-suited
-for deployment in our target environment. For fine-tuning, we compiled a dataset
-of over 1 million fire and smoke images collected from internet sources,
-partitioned into training (80%) and test (20%) subsets. The model was trained
-using the Adam optimizer with an initial learning rate of $1 \times 10^{-4}$, a
-weight decay of $1 \times 10^{-5}$, a batch size of 32, and 100 epochs. On the
-held-out test set, the final model achieved an accuracy of 98.66%. The model
-accepts inputs of size $3 \times 360 \times 640$.
+for real-life deployment. For fine-tuning, a dataset of 253,325
+fire/smoke/normal images was compiled from internet sources and partitioned into
+training (90%) and validation (10%) subsets. The model was trained for 100
+epochs with a batch size of 64 using the Adam optimizer [@kingma2014adam],
+configured with a learning rate of 0.003, weight decay of 0.05, and a warmup
+over the first 5 epochs. The training was conducted on a single NVIDIA RTX 5090
+GPU (32 GB VRAM) paired with an Intel Core Ultra 9 285K processor and 128 GB of
+system RAM, running PyTorch 2.7.1 with CUDA Toolkit 12.8. All input images were
+preprocessed by resizing to $3 \times 360 \times 640 (C \times H \times W)$. The
+fine-tuned model achieved a classification accuracy of 98.34% and a high recall
+of 98.12% on the validation set.
 
-<!-- !! MUST update with Prof. Park -->
- <!-- \textcolor{red}{For fine-tuning, we compiled a dataset of
-1,000,000 fire and smoke images collected from internet sources, partitioned
-into training (80\%) and test (20\%) subsets. The model was optimized using
-Adam with an initial learning rate of $1 \times 10^{-4}$ and weight decay of
-$1 \times 10^{-5}$ for 100 epochs with a batch size of 32. On the held-out
-test set, the final model achieved a recall of xx.xx\% and a false alarm rate
-of xx.xx\%.}. The model accepts inputs of size $3 \times 360 \times 640$. -->
-
-**Implementation Details**: All experiments were conducted on a workstation
-equipped with an Intel Core i9-10900K CPU, 64 GB DDR4 system memory, and an
-NVIDIA GeForce RTX 3090 GPU (24 GB VRAM), running Windows 10 Pro (22H2, build
-19045). Deep learning inference was performed using PyTorch 2.7.1 under CUDA
-12.9, and video processing and motion estimation were carried out using OpenCV
-4.11 (CPU-only).
+**Implementation Details**: Unless stated otherwise, all experiments were
+conducted on a workstation equipped with an Intel Core i9-10900K CPU, 64 GB DDR4
+system memory, and an NVIDIA GeForce RTX 3090 GPU (24 GB VRAM), running Windows
+10 Pro (22H2, build 19045). Deep learning inference was performed using PyTorch
+2.7.1 under CUDA 12.9, and video processing and motion estimation were carried
+out using OpenCV 4.11 (CPU-only).
 
 ## Results
 

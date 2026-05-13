@@ -154,7 +154,7 @@
 Motion-Heuristic Skip Module for Accelerated Inference in Indoor
 Environments}
 \author{Hoang Van-Ha, Jong Weon Lee, Park Chun-Su}
-\date{2026.05.12}
+\date{2026.05.13}
 
 \begin{document}
 \maketitle
@@ -553,21 +553,27 @@ SSLD knowledge distillation \citeproc{ref-cui2021beyond}{{[}36{]}}.
 HGNetV2 \citeproc{ref-hgnetv2PaddleCl7:online}{{[}37{]}} is a
 high-capacity CNN architecture designed to achieve substantially higher
 accuracy than models of comparable inference speed on NVIDIA GPUs,
-making it well-suited for deployment in our target environment. For
-fine-tuning, we compiled a dataset of over 1 million fire and smoke
-images collected from internet sources, partitioned into training (80\%)
-and test (20\%) subsets. The model was trained using the Adam optimizer
-with an initial learning rate of \(1 \times 10^{-4}\), a weight decay of
-\(1 \times 10^{-5}\), a batch size of 32, and 100 epochs. On the
-held-out test set, the final model achieved an accuracy of 98.66\%. The
-model accepts inputs of size \(3 \times 360 \times 640\).
+making it well-suited for real-life deployment. For fine-tuning, a
+dataset of 253,325 fire/smoke/normal images was compiled from internet
+sources and partitioned into training (90\%) and validation (10\%)
+subsets. The model was trained for 100 epochs with a batch size of 64
+using the Adam optimizer \citeproc{ref-kingma2014adam}{{[}38{]}},
+configured with a learning rate of 0.003, weight decay of 0.05, and a
+warmup over the first 5 epochs. The training was conducted on a single
+NVIDIA RTX 5090 GPU (32 GB VRAM) paired with an Intel Core Ultra 9 285K
+processor and 128 GB of system RAM, running PyTorch 2.7.1 with CUDA
+Toolkit 12.8. All input images were preprocessed by resizing to
+\(3 \times 360 \times 640 (C \times H \times W)\). The fine-tuned model
+achieved a classification accuracy of 98.34\% and a high recall of
+98.12\% on the validation set.
 
-\textbf{Implementation Details}: All experiments were conducted on a
-workstation equipped with an Intel Core i9-10900K CPU, 64 GB DDR4 system
-memory, and an NVIDIA GeForce RTX 3090 GPU (24 GB VRAM), running Windows
-10 Pro (22H2, build 19045). Deep learning inference was performed using
-PyTorch 2.7.1 under CUDA 12.9, and video processing and motion
-estimation were carried out using OpenCV 4.11 (CPU-only).
+\textbf{Implementation Details}: Unless stated otherwise, all
+experiments were conducted on a workstation equipped with an Intel Core
+i9-10900K CPU, 64 GB DDR4 system memory, and an NVIDIA GeForce RTX 3090
+GPU (24 GB VRAM), running Windows 10 Pro (22H2, build 19045). Deep
+learning inference was performed using PyTorch 2.7.1 under CUDA 12.9,
+and video processing and motion estimation were carried out using OpenCV
+4.11 (CPU-only).
 
 \subsection{Results}\label{results}
 
@@ -739,9 +745,9 @@ lightweight fire-and-smoke detectors, described in Section
 achieves the highest recall (95.62\%), accuracy (98.77\%), and F1-score
 (0.97), substantially outperforming all lightweight alternatives. This
 gap reflects the consequences of neural scaling laws
-\citeproc{ref-hestness2017deep}{{[}38{]}},
-\citeproc{ref-alabdulmohsin2022revisiting}{{[}39{]}},
-\citeproc{ref-bahri2024explaining}{{[}40{]}}: the BIG model benefits
+\citeproc{ref-hestness2017deep}{{[}39{]}},
+\citeproc{ref-alabdulmohsin2022revisiting}{{[}40{]}},
+\citeproc{ref-bahri2024explaining}{{[}41{]}}: the BIG model benefits
 from both a more expressive architecture and a significantly larger
 training dataset. Notably, MobileNet and FireNet exhibit near-degenerate
 recall of 5.84\% and 34.1\%, respectively, rendering them unsuitable for
@@ -1268,21 +1274,26 @@ f1233c18455b8acde4fc42ab0bea575fa06daa8e · PaddlePaddle/PaddleClas.''}
 Available:
 \url{https://github.com/PaddlePaddle/PaddleClas/blob/f1233c18455b8acde4fc42ab0bea575fa06daa8e/docs/en/models/PP-HGNetV2_en.md?plain=1\#L33}}
 
-\bibitem[\citeproctext]{ref-hestness2017deep}
+\bibitem[\citeproctext]{ref-kingma2014adam}
 \CSLLeftMargin{{[}38{]} }%
+\CSLRightInline{D. P. Kingma and J. Ba, {``Adam: A method for stochastic
+optimization,''} \emph{arXiv preprint arXiv:1412.6980}, 2014.}
+
+\bibitem[\citeproctext]{ref-hestness2017deep}
+\CSLLeftMargin{{[}39{]} }%
 \CSLRightInline{J. Hestness \emph{et al.}, {``Deep learning scaling is
 predictable, empirically,''} \emph{arXiv preprint arXiv:1712.00409},
 2017.}
 
 \bibitem[\citeproctext]{ref-alabdulmohsin2022revisiting}
-\CSLLeftMargin{{[}39{]} }%
+\CSLLeftMargin{{[}40{]} }%
 \CSLRightInline{I. M. Alabdulmohsin, B. Neyshabur, and X. Zhai,
 {``Revisiting neural scaling laws in language and vision,''}
 \emph{Advances in Neural Information Processing Systems}, vol. 35, pp.
 22300--22312, 2022.}
 
 \bibitem[\citeproctext]{ref-bahri2024explaining}
-\CSLLeftMargin{{[}40{]} }%
+\CSLLeftMargin{{[}41{]} }%
 \CSLRightInline{Y. Bahri, E. Dyer, J. Kaplan, J. Lee, and U. Sharma,
 {``Explaining neural scaling laws,''} \emph{Proceedings of the National
 Academy of Sciences}, vol. 121, no. 27, p. e2311878121, 2024.}
