@@ -35,6 +35,14 @@ class BaseMotionDet(ABC):
         """Returns a binary foreground mask (255=motion, 0=static)."""
         pass
 
+    def peek(self, frame_bgr: np.ndarray) -> None:
+        """
+        Advance internal state for a frame that is NOT being evaluated
+        for motion (e.g., EAGER mode). Default: no-op.
+        Override in detectors that maintain temporal state.
+        """
+        pass
+
     @abstractmethod
     def reset(self):
         """Reset any internal state."""

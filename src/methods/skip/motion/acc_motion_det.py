@@ -59,6 +59,24 @@ class AccMotionDet(BaseMotionDet):
         self.prev_frame = None
         self.delta_mask = None
 
+    # ! Add to support for EAGER mode (peek() to advance prev_frame)
+    def peek(self, frame_bgr: np.ndarray) -> None:
+        """
+        Advance the internal prev_frame reference WITHOUT updating the
+        accumulation mask. Call this on every frame that bypasses apply()
+        (e.g., EAGER mode frames) so that when NORMAL mode resumes, the
+        first absdiff() is computed against a fresh reference frame —
+        not a stale one from N frames ago.
+        """
+        gray = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2GRAY)
+        if self.prev_frame is None:
+            self.delta_mask = np.zeros_like(gray, dtype=np.uint8)
+        self.prev_frame = gray.copy()
+        # delta_mask is intentionally NOT updated — no accumulation signal
+        # on skipped frames, just keep the decay going naturally
+        if self.delta_mask is not None:
+            self.delta_mask = cv2.subtract(self.delta_mask, self.decay)
+
     def apply(
         self,
         frame_bgr: np.ndarray,

@@ -39,6 +39,7 @@ class MotionOnlyBlockSkipProcEager(BaseBlockSkipProc):
 
         # ── EAGER mode: bypass skip module entirely ───────────────────────────
         if self.eager_mode:
+            self.motion_det.peek(scaled_padded_frame)
             meta_data = {
                 "mt_proc": {
                     "resized_frame": scaled_padded_frame,
@@ -62,6 +63,8 @@ class MotionOnlyBlockSkipProcEager(BaseBlockSkipProc):
         if self.c_burst > 0:
             # Force inference — motion gate overridden
             # c_burst decremented in update_eager_state after DL result
+            if self.motion_det is not None:
+                self.motion_det.peek(scaled_padded_frame)  # ← ADD THIS
             meta_data = {
                 "mt_proc": {
                     "resized_frame": scaled_padded_frame,
