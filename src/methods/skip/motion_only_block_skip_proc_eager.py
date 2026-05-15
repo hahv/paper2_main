@@ -1,3 +1,4 @@
+# ===============src/methods/skip/motion_only_block_skip_proc_eager.py===============#
 from halib import *  # noqa: F403
 from typing import Tuple, Dict, Any
 
@@ -5,31 +6,38 @@ from src.config import Config
 from src.methods.skip.base_block_skip_proc import BaseBlockSkipProc
 
 
-# ! @Also see: src/methods/skip/__prof_skip_meta.md for further details.
 class MotionOnlyBlockSkipProcEager(BaseBlockSkipProc):
     def __init__(self, cfg: Config):
         super().__init__(cfg)
         self.block_ratio_th = self.params.get("block_ratio_th")
-        # Eager mode params
-        self.n_chk: int = self.params.get("n_chk", 30)  # forced check interval
-        self.w_clr: int = self.params.get("w_clr", 10)  # eager exit window
 
-        # Eager mode state — start True (skipping must be earned)
+        # --- FSM Parameters ---
+        # N_chk: max skipped frames before burst trigger
+        self.n_chk: int = self.params.get("n_chk", 30)
+        # W_clr: consecutive safe frames needed to exit EAGER
+        self.w_clr: int = self.params.get("w_clr", 10)
+        # W_fire: consecutive positives needed to enter EAGER;
+        #         ALSO the burst window size (c_burst ← W_fire)
+        self.w_fire: int = self.params.get("fire_confirm_k", 2)
+
+        # --- FSM State (start in EAGER — skipping must be earned) ---
         self.eager_mode: bool = True
-        self.nonfire_streak: int = 0
-        self.skip_streak: int = 0
 
-        self.fire_confirm_k: int = self.params.get("fire_confirm_k", 2)
-        self.fire_streak: int = 0
-        # self.min_roi_ratio = self.params.get("min_roi_ratio")
+        # c_fire: consecutive positive detections (NORMAL mode)
+        self.c_fire: int = 0
+        # c_clear: consecutive safe frames (EAGER mode)
+        self.c_clear: int = 0
+        # c_skip: consecutive skipped frames (NORMAL mode)
+        self.c_skip: int = 0
+        # c_burst: remaining forced-inference frames (NORMAL mode)
+        self.c_burst: int = 0
 
     def should_skip(
         self, frame_idx: int, frame: np.ndarray
     ) -> Tuple[bool, Dict[str, Any]]:
-        original_h, original_w = frame.shape[:2]
         scaled_padded_frame = self.resize_and_pad(frame)
 
-        # ── Step 2: Eager Mode Override ───────────────────────────────────────
+        # ── EAGER mode: bypass skip module entirely ───────────────────────────
         if self.eager_mode:
             meta_data = {
                 "mt_proc": {
@@ -40,23 +48,32 @@ class MotionOnlyBlockSkipProcEager(BaseBlockSkipProc):
                     "eager_mode": True,
                 }
             }
-            return False, meta_data  # never skip in eager mode
+            return False, meta_data  # never skip in EAGER
 
-        # ── Step 3: Periodic Forced Check ─────────────────────────────────────
-        if self.skip_streak >= self.n_chk:
-            self.skip_streak = 0
+        # ── NORMAL mode ───────────────────────────────────────────────────────
+
+        # ── Burst trigger: c_skip >= N_chk → set c_burst ← W_fire ───────────
+        # (zero-inference step per FSM: handled before computing motion)
+        if self.c_skip >= self.n_chk:
+            self.c_skip = 0
+            self.c_burst = self.w_fire  # arm the burst window
+
+        # ── Burst active OR motion check ──────────────────────────────────────
+        if self.c_burst > 0:
+            # Force inference — motion gate overridden
+            # c_burst decremented in update_eager_state after DL result
             meta_data = {
                 "mt_proc": {
                     "resized_frame": scaled_padded_frame,
                     "fgmask_frame": None,
                     "block_info": [],
-                    "is_forced_check": True,  # flag for TempMethod
+                    "is_forced_check": True,
                     "eager_mode": False,
                 }
             }
-            return False, meta_data  # force DL, motion gate overridden
+            return False, meta_data
 
-        # ── Step 4: Compute Foreground Mask (normal motion gate) ──────────────
+        # ── Normal motion gate ────────────────────────────────────────────────
         fgmask = self.motion_det.apply(scaled_padded_frame)
 
         H_scaled, W_scaled = fgmask.shape
@@ -83,11 +100,14 @@ class MotionOnlyBlockSkipProcEager(BaseBlockSkipProc):
 
         has_motion = len(active_indices) > 0
 
-        # ── Step 5: Gate Decision ─────────────────────────────────────────────
         if has_motion:
-            self.skip_streak = 0
+            # Motion detected (s_t = 1): run inference, reset c_skip
+            # c_fire updated in update_eager_state after DL result
+            self.c_skip = 0
         else:
-            self.skip_streak += 1
+            # No motion (s_t = 0): skip, increment c_skip, RESET c_fire
+            self.c_skip += 1
+            self.c_fire = 0  # ← FSM: skip loop resets c_fire
 
         should_skip = not has_motion
         meta_data = {
@@ -102,31 +122,51 @@ class MotionOnlyBlockSkipProcEager(BaseBlockSkipProc):
         return should_skip, meta_data
 
     def update_eager_state(self, pred_label: str) -> None:
-        """Called by TempMethod after every DL inference result is known."""
-        fire_smoke_label = ["Fire", "SmokeOnly"]  # match your cfg class name
-        fire_smoke_label = [
-            lbl.lower() for lbl in fire_smoke_label
-        ]  # case-insensitive match
+        """
+        Called by TempMethod after every DL inference result is known.
+        Implements the FSM update for both EAGER and NORMAL modes.
+        """
+        fire_smoke_labels = {"fire", "smokeonly"}
+        is_fire = pred_label.lower() in fire_smoke_labels  # ŷ_t = 1 or 0
 
-        if pred_label.lower() in fire_smoke_label:
-            # Fire detected — enter/stay in eager mode, reset clear counter
-            self.nonfire_streak = 0
-            self.fire_streak += 1
-            if self.fire_streak >= self.fire_confirm_k:  # confirmed
-                self.eager_mode = True
-        else:
-            # No fire — count toward eager exit
-            self.fire_streak = 0  # single normal frame resets streak
-            if self.eager_mode:
-                self.nonfire_streak += 1
-                if self.nonfire_streak >= self.w_clr:
+        if self.eager_mode:
+            # ── EAGER mode updates ────────────────────────────────────────────
+            if is_fire:
+                # ŷ_t = 1: reset c_clear
+                self.c_clear = 0
+            else:
+                # ŷ_t = 0: increment c_clear
+                if self.c_clear < self.w_clr:
+                    self.c_clear += 1
+                # T1: EAGER → NORMAL when c_clear >= W_clr
+                if self.c_clear >= self.w_clr:
                     self.eager_mode = False
-                    self.nonfire_streak = 0
-                    self.skip_streak = 0  # fresh start after eager exit
+                    self.c_fire = 0  # reset per FSM T1
+                    self.c_skip = 0  # reset per FSM T1
+                    self.c_clear = 0  # clean slate
+
+        else:
+            # ── NORMAL mode updates (inference ran: s_t=1 or burst active) ───
+            # Decrement burst countdown
+            if self.c_burst > 0:
+                self.c_burst = max(0, self.c_burst - 1)
+
+            # Update c_fire
+            if is_fire:
+                self.c_fire += 1
+            else:
+                self.c_fire = 0  # single non-fire resets streak
+
+            # T2: NORMAL → EAGER when c_fire >= W_fire
+            if self.c_fire >= self.w_fire:
+                self.eager_mode = True
+                self.c_clear = 0  # reset per FSM T2
 
     def reset(self):
-        """Reset all state at video boundary."""
+        """Reset all FSM state at video boundary."""
         super().reset()  # resets motion_det
-        self.eager_mode = True  # start each video in eager mode
-        self.nonfire_streak = 0
-        self.skip_streak = 0
+        self.eager_mode = True  # start each video in EAGER
+        self.c_fire = 0
+        self.c_clear = 0
+        self.c_skip = 0
+        self.c_burst = 0
