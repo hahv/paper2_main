@@ -1,6 +1,6 @@
 Method;Recall (\%) $\uparrow$;FAR (\%) $\downarrow$;Accuracy (\%) $\uparrow$;Precision (\%) $\uparrow$;F1 Score $\uparrow$;Skip Rate (\%) $\uparrow$;FPS $\uparrow$
 Baseline (notemp);\textbf{\textcolor{black}{95.616}};0.251;\textbf{\textcolor{black}{98.767}};99.166;\textbf{\textcolor{black}{0.9736}};0.0;24.97
-$\text{TPT}_\text{strict} (W = 5,\ \tau_\text{persist} = 0.2)$;\underline{\textcolor{black}{95.519}};0.25;\underline{\textcolor{black}{98.745}};99.168;\underline{\textcolor{black}{0.9731}};0.0;24.96
-$\text{TPT}_\text{balanced} (W = 10,\ \tau_\text{persist} = 0.5)$;95.123;\underline{\textcolor{black}{0.247}};98.653;\underline{\textcolor{black}{99.174}};0.9711;0.0;24.96
+$\text{TPT}_\text{strict} \newline (W = 5,\ \tau_\text{persist} = 0.2)$;95.519;0.25;98.745;99.168;0.9731;0.0;24.96
+$\text{TPT}_\text{strict} \newline (W = 10,\ \tau_\text{persist} = 0.5)$;95.123;\underline{\textcolor{black}{0.247}};98.653;\underline{\textcolor{black}{99.174}};0.9711;0.0;24.96
 Big Model with Skip module (AccMotionDet);94.384;\textbf{\textcolor{black}{0.136}};98.562;\textbf{\textcolor{black}{99.541}};0.9689;\textbf{\textcolor{black}{34.93}};\underline{\textcolor{black}{32.32}}
-Big Model with Skip module (AccMotionDet + Eager $N_{\text{chk}}, W_{\text{clr}}$);95.515;0.251;98.743;99.165;\underline{\textcolor{black}{0.9731}};\underline{\textcolor{black}{34.37}};\textbf{\textcolor{black}{32.47}}
+Big Model with Skip module \newline (AccMotionDet + Eager $N_{\text{chk}}=50, W_{\text{clr}}=7, W_{\text{fire}}=1$);\underline{\textcolor{black}{95.565}};0.251;\underline{\textcolor{black}{98.755}};99.166;\underline{\textcolor{black}{0.9733}};\underline{\textcolor{black}{34.31}};\textbf{\textcolor{black}{32.54}}
