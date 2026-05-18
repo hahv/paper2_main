@@ -14,7 +14,7 @@ extra_cfgs:
           mask_th: 5
           max_val: 15
           decay: 1
-      n_chk: [10, 20, 30, 50] # forced check interval (skip state -> eager state transition)
-      w_clr: [3, 5, 7] # eager exit window (frames) - number of consecutive clear frames to exit eager state and reset skip proc
-      fire_confirm_k: [1, 2, 3] # number of consecutive motion frames to confirm fire state and exit eager state
+      w_fire: [1, 2, 3, 5]
+      w_clr: [3, 5, 7, 10]
+      n_chk: [10, 20, 30, 50]
 

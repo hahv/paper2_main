@@ -109,7 +109,6 @@ class BaseMethod(ABC):
         self.precomputed_rs_proc = None
         if getattr(self.cfg.inferCfg, "pre_computed_no_skip_dir", None):
             from src.methods.precomputed import PrecomputedRsProc
-
             self.precomputed_rs_proc = PrecomputedRsProc(self.cfg)
 
     @abstractmethod
@@ -350,6 +349,7 @@ class BaseMethod(ABC):
             hasattr(self, "precomputed_rs_proc")
             and self.precomputed_rs_proc is not None
         ):
+            # pprint(f"📽 Loading precomputed results: {video_path}")
             self.precomputed_rs_proc.load_video_data(video_path)
 
         if not SKIP_INFER:

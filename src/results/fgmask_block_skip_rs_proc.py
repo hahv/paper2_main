@@ -13,7 +13,11 @@ class FgmaskBlockSkipRsProc(VideoBlockSkipRsProc):
     def get_vis_frame(self, frame_bgr, frame_rs_dict: dict):
         mt_proc = frame_rs_dict["infer_rs"]["mt_proc"]
         fg_mask = mt_proc.get("fgmask_frame")
-        # If the mask is single channel (H, W), convert to (H, W, 3)
+
+        if fg_mask is None:
+            h, w = frame_bgr.shape[:2]
+            return np.zeros((h, w, 3), dtype=np.uint8)
+
         if len(fg_mask.shape) == 2:
             fg_mask_bgr = cv2.cvtColor(fg_mask, cv2.COLOR_GRAY2BGR)
         else:

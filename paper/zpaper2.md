@@ -402,7 +402,7 @@ configured with a learning rate of 0.003, weight decay of 0.05, and a warmup
 over the first 5 epochs. The training was conducted on a single NVIDIA RTX 5090
 GPU (32 GB VRAM) paired with an Intel Core Ultra 9 285K processor and 128 GB of
 system RAM, running PyTorch 2.7.1 with CUDA Toolkit 12.8. All input images were
-preprocessed by resizing to $3 \times 360 \times 640 (C \times H \times W)$. The
+preprocessed by resizing to $3 \times 360 \times 640$ $(C \times H \times W)$. The
 fine-tuned model achieved a classification accuracy of 98.34% and a high recall
 of 98.12% on the validation set.
 

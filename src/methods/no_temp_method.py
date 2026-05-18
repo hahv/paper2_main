@@ -48,7 +48,8 @@ class NoTempMethod(BaseMethod):
 
     def infer_frame(self, frame, frame_idx: int) -> dict:
         """Perform inference on the pre-processed frame."""
-        # 0. Check if we have precomputed results for this frame to bypass the heavy model
+        # 0. Check if we have precomputed results for this frame to bypass the
+        #    heavy model
         if (
             hasattr(self, "precomputed_rs_proc")
             and self.precomputed_rs_proc is not None

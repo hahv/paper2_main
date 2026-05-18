@@ -46,7 +46,9 @@ class PrecomputedRsProc:
             self.precomputes.set_index(GlobalConst.COL_FRAME_IDX, inplace=True)
 
     def get_frame_data(self, frame_idx: int) -> Optional[Dict[str, Any]]:
-        """Returns the pre-computed results for a given frame index, if available."""
+        """Returns the pre-computed results for a given frame index, if
+        available."""
+        # print(f"Looking up precomputed results for frame_idx: {frame_idx}")
         if self.precomputes is None:
             return None
 
