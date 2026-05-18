@@ -1,38 +1,43 @@
 \begin{table*}[hbtp]
     \caption{Validation-set performance and hyperparameter configurations for
-    Accumulation Motion Detector in Eager Mode (AccMotionDet Eager). Note that the
-    ``Recall (\%)'' column displays the retained recall alongside the absolute
-    recall drop relative to the baseline in parentheses, i.e., Recall (-Recall
-    Drop). The best and second-best results for each metric are highlighted in
-    \textbf{bold} and \textit{\underline{italic underline}}, respectively.
+        Accumulation Motion Detector in Eager Mode (AccMotionDet
+        Eager). Note that the
+        ``Recall (\%)'' column displays the retained recall alongside
+        the absolute
+        recall drop relative to the baseline in parentheses, i.e.,
+        Recall (-Recall
+        Drop). The best and second-best results for each metric are
+        highlighted in
+        \textbf{bold} and \textit{\underline{italic underline}}, respectively.
     }
     \label{tb:tb_val_results_accMotionDetEager}
     \csvreader[separator=semicolon,
-    no head,
-    range=1-,
-    centered tabularray = {
-        width = \textwidth,
-        colspec = {X[2.5,c]X[c]X[c]X[1.5,c]X[c]X[1.5,c]X[c]X[1.5,c]},
-        colsep = {1pt},
-        hlines,
-        vlines,
-        cells = {font = \scriptsize, halign = c, valign = m},
-        row{1} = {font = \bfseries\scriptsize},
-        row{2} = {font = \bfseries\tiny},
-        % ↓ configure multi-span header lines
-        cell{1}{1} = {r=2}{c},   % Exp. (Method)
-        cell{1}{2} = {c=2}{c},   % Parameters
-        cell{1}{4} = {c=4}{c},   % Metrics
-        cell{1}{8} = {r=2}{c},   % Combined Score
-    },
+        no head,
+        range=1-,
+        centered tabularray = {
+            width = \textwidth,
+            colspec = {X[2.5,c]X[c]X[c]X[c]X[1.5,c]X[c]X[1.5,c]X[c]X[1.5,c]},
+            colsep = {1pt},
+            hlines,
+            vlines,
+            cells = {font = \scriptsize, halign = c, valign = m},
+            row{1} = {font = \bfseries\scriptsize},
+            row{2} = {font = \bfseries\tiny},
+            % ↓ configure multi-span header lines
+            cell{1}{1} = {r=2}{c},   % Exp. (Method)
+            cell{1}{2} = {c=3}{c},   % Parameters
+            cell{1}{5} = {c=4}{c},   % Metrics
+            cell{1}{9} = {r=2}{c},   % Combined Score
+        },
     ]{./4.table/out/opt_selected_rp__per_frame_accMotionDet_Eager.csv}{}{
-    \csvexpval\csvcoli &
-    \csvexpval\csvcolii &
-    \csvexpval\csvcoliii &
-    \csvexpval\csvcoliv &
-    \csvexpval\csvcolv &
-    \csvexpval\csvcolvi &
-    \csvexpval\csvcolvii &
-    \csvexpval\csvcolviii
+        \csvexpval\csvcoli &
+        \csvexpval\csvcolii &
+        \csvexpval\csvcoliii &
+        \csvexpval\csvcoliv &
+        \csvexpval\csvcolv &
+        \csvexpval\csvcolvi &
+        \csvexpval\csvcolvii &
+        \csvexpval\csvcolviii &
+        \csvexpval\csvcolix
     }
 \end{table*}

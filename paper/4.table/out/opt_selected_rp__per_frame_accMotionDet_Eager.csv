@@ -1,15 +1,15 @@
-Method;Parameters;; Metrics;;;;Ranking Score
-Exp.;$N_{chk}$;$W_{clr}$;Recall (\%) $\uparrow$;FPR (\%) $\downarrow$;Skip Rate (\%) $\uparrow$;FPS $\uparrow$;Combined Score $\uparrow$
-Baseline (No Skip module);-;-;\textbf{\textcolor{black}{94.35}} (-0.00);\underline{\textcolor{black}{0.74}};0.0;24.1;-
-AccMotionDet;-;-;\underline{\textcolor{black}{93.9}} (-0.00);\textbf{\textcolor{black}{0.737}};\textbf{\textcolor{black}{44.39}};\underline{\textcolor{black}{36.6}};-
-AccMotionDet (Eager Mode);50;3;\textbf{\textcolor{black}{94.35}} (-0.00);\underline{\textcolor{black}{0.74}};\underline{\textcolor{black}{43.78}};\textbf{\textcolor{black}{36.7}};\textbf{\textcolor{black}{0.7000}}
-AccMotionDet (Eager Mode);50;5;\textbf{\textcolor{black}{94.35}} (-0.00);\underline{\textcolor{black}{0.74}};43.75;\textbf{\textcolor{black}{36.7}};\underline{\textcolor{black}{0.6931}}
-AccMotionDet (Eager Mode);50;7;\textbf{\textcolor{black}{94.35}} (-0.00);\underline{\textcolor{black}{0.74}};43.72;\textbf{\textcolor{black}{36.7}};0.6866
-AccMotionDet (Eager Mode);50;10;\textbf{\textcolor{black}{94.35}} (-0.00);\underline{\textcolor{black}{0.74}};43.66;\underline{\textcolor{black}{36.6}};0.6746
-AccMotionDet (Eager Mode);30;3;\textbf{\textcolor{black}{94.35}} (-0.00);\underline{\textcolor{black}{0.74}};43.38;36.5;0.6128
-AccMotionDet (Eager Mode);30;5;\textbf{\textcolor{black}{94.35}} (-0.00);\underline{\textcolor{black}{0.74}};43.35;36.5;0.6059
-AccMotionDet (Eager Mode);30;7;\textbf{\textcolor{black}{94.35}} (-0.00);\underline{\textcolor{black}{0.74}};43.33;36.5;0.6005
-AccMotionDet (Eager Mode);30;10;\textbf{\textcolor{black}{94.35}} (-0.00);\underline{\textcolor{black}{0.74}};43.26;36.5;0.5863
-AccMotionDet (Eager Mode);20;3;\textbf{\textcolor{black}{94.35}} (-0.00);\underline{\textcolor{black}{0.74}};42.53;36.1;0.4261
-AccMotionDet (Eager Mode);20;5;\textbf{\textcolor{black}{94.35}} (-0.00);\underline{\textcolor{black}{0.74}};42.5;36.1;0.4195
-AccMotionDet (Eager Mode);20;7;\textbf{\textcolor{black}{94.35}} (-0.00);\underline{\textcolor{black}{0.74}};42.47;36.1;0.4134
+Method;Parameters;;; Metrics;;;;Ranking Score
+Exp.;$N_{chk}$;$W_{clr}$;$W_{fire}$;Recall (\%) $\uparrow$;FAR (\%) $\downarrow$;Skip Rate (\%) $\uparrow$;FPS $\uparrow$;Combined Score $\uparrow$
+Baseline (No Skip module);-;-;-;\textbf{\textcolor{black}{94.35}} (-0.00);\underline{\textcolor{black}{0.74}};0.0;24.7;-
+AccMotionDet;-;-;-;\underline{\textcolor{black}{93.9}};\textbf{\textcolor{black}{0.737}};\textbf{\textcolor{black}{44.39}};\textbf{\textcolor{black}{36.6}};-
+AccMotionDet (Eager Mode);50.0;7.0;1.0;\textbf{\textcolor{black}{94.35}} (-0.00);\underline{\textcolor{black}{0.74}};\underline{\textcolor{black}{43.72}};\underline{\textcolor{black}{36.4}};\textbf{\textcolor{black}{0.9946}}
+AccMotionDet (Eager Mode);30.0;7.0;1.0;\textbf{\textcolor{black}{94.35}} (-0.00);\underline{\textcolor{black}{0.74}};43.35;36.3;\underline{\textcolor{black}{0.9637}}
+AccMotionDet (Eager Mode);50.0;3.0;2.0;\textbf{\textcolor{black}{94.35}} (-0.00);\textbf{\textcolor{black}{0.737}};43.25;36.2;0.9553
+AccMotionDet (Eager Mode);50.0;7.0;2.0;\textbf{\textcolor{black}{94.35}} (-0.00);\underline{\textcolor{black}{0.74}};43.19;36.2;0.9501
+AccMotionDet (Eager Mode);50.0;3.0;3.0;\textbf{\textcolor{black}{94.35}} (-0.00);\textbf{\textcolor{black}{0.737}};42.72;36.0;0.9115
+AccMotionDet (Eager Mode);50.0;7.0;3.0;\textbf{\textcolor{black}{94.35}} (-0.00);\underline{\textcolor{black}{0.74}};42.67;35.9;0.9067
+AccMotionDet (Eager Mode);20.0;7.0;1.0;\textbf{\textcolor{black}{94.35}} (-0.00);\underline{\textcolor{black}{0.74}};42.57;35.9;0.8985
+AccMotionDet (Eager Mode);30.0;3.0;2.0;\textbf{\textcolor{black}{94.35}} (-0.00);\textbf{\textcolor{black}{0.737}};42.54;35.9;0.8958
+AccMotionDet (Eager Mode);30.0;7.0;2.0;\textbf{\textcolor{black}{94.35}} (-0.00);\underline{\textcolor{black}{0.74}};42.47;35.9;0.8905
+AccMotionDet (Eager Mode);30.0;3.0;3.0;\textbf{\textcolor{black}{94.35}} (-0.00);\textbf{\textcolor{black}{0.737}};41.72;35.6;0.8275
+AccMotionDet (Eager Mode);30.0;7.0;3.0;\textbf{\textcolor{black}{94.35}} (-0.00);\underline{\textcolor{black}{0.74}};41.65;35.5;0.8221
