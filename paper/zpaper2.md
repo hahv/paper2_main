@@ -757,7 +757,11 @@ full baseline performance (recall $\geq 95.5\%$, FPS $\uparrow$ 29\%).
 ```{=latex}
 \input{./4.table/tb_cmp_other_temp_eager.tex}
 ```
-
+One drawback of eager mode is that it may case the increase of false alarms, in
+the scenes where the Big Model persistently misclassifies as fire/smoke (even
+though the scene is static as indicated by the skip module), because eager mode
+cannot distinguish these false-alarm-prone scenes from genuine slow-smoke
+events, as both exhibit near-zero inter-frame motion. This drawback is any open research question for future work to address, e.g., by designing a more sophisticated skip module that can leverage additional cues (e.g., color, texture, or learned features) to distinguish these two types of scenes.
 
 # Conclusion {#sec:conclusion label="Conclusion"}
 
