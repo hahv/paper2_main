@@ -1,44 +1,43 @@
 \begin{table*}[hbtp]
-    \caption{Validation-set performance and hyperparameter configurations for
-    Accumulation Motion Detector (AccMotionDet) combinations. Note that the
-    ``Recall (\%)'' column displays the retained recall alongside the absolute
-    recall drop relative to the baseline in parentheses, i.e., Recall (-Recall
-    Drop). The best and second-best results for each metric are highlighted in
-    \textbf{bold} and \textit{\underline{italic underline}}, respectively.
-    Note that Motion increment $\omega=5$ and Decay rate $\delta=0.1$ are fixed
-    across all configurations.
-    }
+    \caption{Representative \textsc{AccMotionDet} hyperparameter configurations
+        and their corresponding validation-set performance. Note that the
+        ``Recall (\%)'' column displays the retained recall alongside the
+        absolute recall drop relative to the baseline in parentheses, i.e.,
+        Recall (-Recall Drop). The best and second-best results for each metric
+        are highlighted in \textbf{bold} and \textit{\underline{italic
+        underline}}, respectively. Note that Motion increment $\omega=5$ and
+        Decay rate $\delta=0.1$ are fixed across all configurations. }
     \label{tb:val_results_accMotionDet}
     \csvreader[separator=semicolon,
-    no head,
-    range=1-,
-    centered tabularray = {
-        width = \textwidth,
-        colspec = {X[2,c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]},
-        colsep = {1pt},
-        hlines,
-        vlines,
-        cells = {font = \scriptsize, halign = c, valign = m},
-        row{1} = {font = \bfseries\scriptsize},
-        row{2} = {font = \bfseries\tiny},
-        % ↓ only 3 new lines needed
-        cell{1}{1} = {r=2}{c},   % Exp. spans rows 1-2
-        cell{1}{2} = {c=8}{c},   % Parameters spans cols 2-9
-        cell{1}{8} = {c=4}{c},  % Metrics spans cols 10-13
-        cell{1}{12} = {r=2}{c},  % Combined Score spans rows 1-2
-    },
+        no head,
+        range=1-,
+        centered tabularray = {
+            width = \textwidth,
+            colspec = {X[2,c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]},
+            colsep = {1pt},
+            hlines,
+            vlines,
+            cells = {font = \scriptsize, halign = c, valign = m},
+            row{1} = {font = \bfseries\scriptsize},
+            row{2} = {font = \bfseries\tiny},
+            % ↓ only 3 new lines needed
+            cell{1}{1} = {r=2}{c},   % Exp. spans rows 1-2
+            cell{1}{2} = {c=8}{c},   % Parameters spans cols 2-9
+            cell{1}{8} = {c=4}{c},  % Metrics spans cols 10-13
+            cell{1}{12} = {r=2}{c},  % Combined Score spans rows 1-2
+        },
     ]{./4.table/out/opt_selected_rp__per_frame_accMotionDet.csv}{}{
-    \csvexpval\csvcoli &
-    \csvexpval\csvcolii &
-    \csvexpval\csvcoliii &
-    \csvexpval\csvcoliv &
-    \csvexpval\csvcolv &
-    \csvexpval\csvcolvi &
-    \csvexpval\csvcolvii &
-    \csvexpval\csvcolviii &
-    \csvexpval\csvcolix &
-    \csvexpval\csvcolx &
-    \csvexpval\csvcolxi &
-    \csvexpval\csvcolxii
+        \csvexpval\csvcoli &
+        \csvexpval\csvcolii &
+        \csvexpval\csvcoliii &
+        \csvexpval\csvcoliv &
+        \csvexpval\csvcolv &
+        \csvexpval\csvcolvi &
+        \csvexpval\csvcolvii &
+        \csvexpval\csvcolviii &
+        \csvexpval\csvcolix &
+        \csvexpval\csvcolx &
+        \csvexpval\csvcolxi &
+        \csvexpval\csvcolxii
     }
 \end{table*}

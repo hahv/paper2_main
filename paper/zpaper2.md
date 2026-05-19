@@ -705,8 +705,8 @@ states transition during system operation.
 
 As eager mode operates as a complementary mechanism to the skip module, its
 hyperparameters are optimized by fixing the skip module to the best-performing
-configuration identified in the previous section (i.e., $\alpha{=}0.5,\ B{=}32,\
-\tau{=}0.05,\ \tau_d{=}5,\ \tau_m{=}5,\ K_{\max}{=}15$) and conducting a grid
+configuration identified in the previous section (i.e., $\alpha{=}0.5,
+B{=}32,\tau{=}0.05,\tau_d{=}5,\tau_m{=}5,\newline K_{\max}{=}15$) and conducting a grid
 search over the eager mode parameters. The grid search is performed over the
 following candidate values:
 
@@ -720,7 +720,7 @@ following candidate values:
   mode and resume normal skip operation. The range is deliberately set larger than that of $W_{\mathrm{fire}}$, reflecting an asymmetric cost structure: a premature exit risks missed detections, whereas a delayed exit only causes the system to run unnecessary inference on a few extra frames — a minor and acceptable efficiency loss.
 
 - **Forced-check interval $N_{\mathrm{chk}} \in \{10, 20, 30, 50\}$**: defines
-  the maximum number of consecutive frames that may be skipped in \textsc{Normal}
+  the maximum number of consecutive frames that are skipped in \textsc{Normal}
   mode before the system forces an inference call, irrespective of the skip module
   decision. This serves as a safety net against false negatives --- for instance,
   slowly developing or settled smoke may produce insufficient inter-frame motion to
@@ -745,13 +745,13 @@ and compared against the skip-only configuration in Table \ref{tb:cmp_other_temp
 ```{=latex}
 \input{./4.table/tb_cmp_other_temp_eager.tex}
 ```
-Table~\ref{tb:cmp_other_temp_eager} reports the effect of \textsc{Eager} mode
+Table \ref{tb:cmp_other_temp_eager} reports the effect of \textsc{Eager} mode
 on system performance. \textsc{Eager} mode successfully recovers recall on
-slow-developing and settling smoke scenarios, increasing from $94.384\%$
+slow-developing or settled smoke scenarios, increasing from $94.384\%$
 (\textsc{AccMotionDet} only) to $95.565\%$ (\textsc{AccMotionDet} +
 \textsc{Eager}), nearly matching the baseline recall of $95.616\%$ (Big Model
 without skip module) --- a recovery of critical importance in safety-critical
-applications. However, this improvement incurs two costs: the skip rate slightly
+applications. However, this improvement comes with two costs: the skip rate slightly
 decreases from $34.93\%$ to $34.21\%$, and the false alarm rate (FAR) increases from $0.136\%$ to $0.251\%$.
 
 Despite the reduced skip rate, overall throughput marginally increases from
@@ -786,14 +786,15 @@ or learned features) to discriminate between these scene types.
 
 We propose a lightweight, plug-and-play skip module $\mathcal{S}$ designed to
 accelerate real-time fire and smoke detection in indoor surveillance scenarios.
-Operating at a negligible fraction (${\approx}4.5\%$) of the computational cost of the
-DL classifier $\mathcal{M}$, the skip module $\mathcal{S}$ efficiently filters
-out static background frames before they reach $\mathcal{M}$, reducing
+Operating at a negligible fraction (${\approx}4.5\%$) of the computational cost
+of the DL classifier $\mathcal{M}$, the skip module $\mathcal{S}$ efficiently
+filters out static background frames before they reach $\mathcal{M}$, reducing
 unnecessary inference overhead. Experiments on a real-world video dataset
-demonstrate that the proposed approach yields a throughput improvement of
-approximately 30\% in frames per second while sustaining high detection recall
-above 94%.
-
+demonstrate that the proposed approach achieves approximately $30\%$ throughput
+improvement while sustaining high detection recall, with a recall drop of only
+$1.23\%$ relative to the baseline. When augmented with \textsc{Eager} mode, the
+recall drop is further reduced to $0.05\%$, nearly fully recovering baseline
+performance.
 <!-- !END_SYNC_BLOCK -->
 
 <!-- !START_SYNC_BLOCK -->

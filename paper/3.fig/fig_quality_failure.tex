@@ -1,11 +1,12 @@
 \begin{figure}[htbp]
-  \centering
-  \includegraphics[width=\linewidth,keepaspectratio]{./3.fig/quality_analyses/fig_qualitative_failure.pdf}
-  \caption{Qualitative analysis of skip module failure modes. (a) Missed
-  detection: slow-onset smoke fails to trigger the motion accumulator. (b--c)
-  Wasted inferences: inaccurate motion detection OR persistent motion (e.g.,
-  human activity) saturates the accumulator, preventing frame skipping. (d--e)
-  Big Model error: frames are correctly passed to the deep learning model, yet
-  the model produces incorrect predictions.}
-  \label{fig:qualitative_failure}
+    \centering
+    \includegraphics[width=\linewidth,keepaspectratio]{./3.fig/quality_analyses/fig_qualitative_failure.pdf}
+    \caption{Qualitative analysis of skip module failure modes. (a) Missed
+        detection: slow-developing or settled smoke fails to trigger the motion
+        accumulator. (b--c) Wasted inferences: inaccurate motion detection OR
+        persistent motion (e.g., human activity) saturates the accumulator,
+        preventing frame skipping. (d--e) Big Model error: frames are correctly
+        passed to the deep learning model, yet the model produces incorrect
+        predictions.}
+    \label{fig:qualitative_failure}
 \end{figure}

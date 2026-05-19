@@ -1,41 +1,42 @@
 \begin{table*}[hbtp]
-    \caption{Representative hyperparameter configurations for \textsc{FrameDiffDet}
-    on the validation set, illustrating the recall--efficiency trade-off across
-    the full search space of 48 configurations (not all shown for brevity).
-    Configurations with a ranking score of ``-'' violate the recall constraint
-    ($\delta_R = 0.015$) and are included solely to illustrate the trade-off at
-    higher skip rates. Recall (\%) reports the retained recall with the absolute
-    drop relative to the baseline in parentheses, i.e., $R\ (-\Delta R)$. The
-    best and second-best values per metric are highlighted in \textbf{bold} and
-    \underline{\textit{italic underline}}, respectively.}
+    \caption{Representative \textsc{FrameDiffDet} hyperparameter configurations
+        evaluated on the validation set, illustrating the recall--efficiency
+        trade-off across the full search space of 48 configurations (subset
+        shown for brevity). Configurations with a ranking score of ``-'' violate
+        the recall constraint ($\delta_R = 0.015$) and are included solely to
+        illustrate the trade-off at higher skip rates. Recall (\%) reports the
+        retained recall with the absolute drop relative to the baseline in
+        parentheses, i.e., $R\ (-\Delta R)$. The best and second-best values per
+        metric are highlighted in \textbf{bold} and \underline{\textit{italic
+        underline}}, respectively.}
     \label{tb:val_results_frameDiff}
     \csvreader[separator=semicolon,
-    no head,
-    range=1-,
-    centered tabularray = {
-        width = \textwidth,
-        colspec = {X[2,c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]},
-        colsep = {1pt},
-        hlines,
-        vlines,
-        cells = {font = \scriptsize, halign = c, valign = m},
-        row{1} = {font = \bfseries\scriptsize},
-        row{2} = {font = \bfseries\scriptsize},
-        cell{1}{1}  = {r=2}{c},  % Exp. spans rows 1-2
-        cell{1}{2}  = {c=4}{c},  % Parameters spans cols 2-5
-        cell{1}{6}  = {c=4}{c},  % Metrics spans cols 6-9
-        cell{1}{10} = {r=2}{c},  % Combined Score spans rows 1-2
-    },
+        no head,
+        range=1-,
+        centered tabularray = {
+            width = \textwidth,
+            colspec = {X[2,c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]},
+            colsep = {1pt},
+            hlines,
+            vlines,
+            cells = {font = \scriptsize, halign = c, valign = m},
+            row{1} = {font = \bfseries\scriptsize},
+            row{2} = {font = \bfseries\scriptsize},
+            cell{1}{1}  = {r=2}{c},  % Exp. spans rows 1-2
+            cell{1}{2}  = {c=4}{c},  % Parameters spans cols 2-5
+            cell{1}{6}  = {c=4}{c},  % Metrics spans cols 6-9
+            cell{1}{10} = {r=2}{c},  % Combined Score spans rows 1-2
+        },
     ]{./4.table/out/opt_selected_rp__per_frame_frameDiff.csv}{}{%
-    \csvexpval\csvcoli   &
-    \csvexpval\csvcolii  &
-    \csvexpval\csvcoliii &
-    \csvexpval\csvcoliv  &
-    \csvexpval\csvcolv   &
-    \csvexpval\csvcolvi  &
-    \csvexpval\csvcolvii &
-    \csvexpval\csvcolviii &
-    \csvexpval\csvcolix  &
-    \csvexpval\csvcolx
+        \csvexpval\csvcoli   &
+        \csvexpval\csvcolii  &
+        \csvexpval\csvcoliii &
+        \csvexpval\csvcoliv  &
+        \csvexpval\csvcolv   &
+        \csvexpval\csvcolvi  &
+        \csvexpval\csvcolvii &
+        \csvexpval\csvcolviii &
+        \csvexpval\csvcolix  &
+        \csvexpval\csvcolx
     }
 \end{table*}
