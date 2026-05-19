@@ -300,6 +300,8 @@ are described in the following subsections.
 ```
 
 ### AccMotionDet — Motion Detection with Accumulation
+Inspired by [@yu2013real], we design the lightweight motion detector
+\textsc{AccMotionDet} as follows:
 
 ```{=latex}
 \input{6.algo/acc_motion_det.tex}
