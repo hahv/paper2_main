@@ -168,15 +168,16 @@ motion or relevant events, rendering per-frame inference redundant and
 wasteful of computational resources. To address this limitation, this
 study proposes a novel skip-module mechanism that leverages motion
 detection to selectively bypass DL inference on non-informative frames
-in fire and smoke classification pipelines. Evaluation on a large-scale
-dataset comprising 150 indoor videos demonstrates that the proposed
-method substantially improves processing throughput while preserving
-detection performance. Specifically, the skip module enable the system a
-nearly 30\% increase in frames per second (FPS) while incurring a
-marginal relative recall reduction of less than 1.5\% relative to the
-baseline (recall ≥ 94\%), demonstrating the feasibility of plug-and-play
-inference acceleration for real-time fire and smoke surveillance
-systems.
+in fire and smoke classification pipelines.The skip module is further
+augmented with Eager mode to recover recall on slow-developing or
+settling smoke events. Evaluation on a large-scale dataset comprising
+150 indoor videos demonstrates that the proposed skip module achieves
+approximately 30\% throughput improvement in frames per second with a
+recall drop of only 1.23\% relative to the baseline; when augmented with
+Eager mode, the recall drop is further reduced to 0.05\%, nearly fully
+recovering baseline detection performance. These results demonstrate the
+feasibility of plug-and-play inference acceleration for real-time fire
+and smoke surveillance systems.
 \end{abstract}
 
 \section{Introduction}\label{sec:introduction}

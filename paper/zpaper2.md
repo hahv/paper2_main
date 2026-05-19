@@ -7,19 +7,22 @@
 date: 2026.05.19
 title: "Efficient Real-Time Fire Surveillance: A Lightweight Motion-Heuristic
 Skip Module for Accelerated Inference in Indoor Environments"
-abstract: "Conventional deep learning (DL)-based fire and smoke detection systems process
-every frame of a video stream through a computationally intensive model to classify the
+abstract: "Conventional deep learning (DL)-based fire and smoke detection systems process every frame
+of a video stream through a computationally intensive model to classify the
 presence of fire or smoke. However, in surveillance scenarios — particularly indoor
 environments — video streams frequently contain static, background-only frames devoid of
 motion or relevant events, rendering per-frame inference redundant and wasteful of
 computational resources. To address this limitation, this study proposes a novel
 skip-module mechanism that leverages motion detection to selectively bypass DL inference
-on non-informative frames in fire and smoke classification pipelines. Evaluation on a
-large-scale dataset comprising 150 indoor videos demonstrates that the proposed method
-substantially improves processing throughput while preserving detection performance.
-Specifically, the skip module enable the system a nearly 30% increase in frames per second (FPS)
-while incurring a marginal relative recall reduction of less than 1.5% relative to the baseline (recall ≥ 94%),
-demonstrating the feasibility of plug-and-play inference acceleration for real-time fire
+on non-informative frames in fire and smoke classification pipelines.The skip module is
+further augmented with Eager mode to recover recall on slow-developing or settling smoke
+events. Evaluation on a large-scale dataset comprising 150 indoor videos demonstrates
+that the proposed skip module achieves approximately 30% throughput
+improvement in frames per second with a recall drop of only 1.23% relative
+to the baseline; when augmented with Eager mode, the recall drop is
+further reduced to 0.05%, nearly fully recovering baseline detection
+performance. These results
+demonstrate the feasibility of plug-and-play inference acceleration for real-time fire
 and smoke surveillance systems."
 
 # <!-- !END_SYNC_BLOCK -->
@@ -482,7 +485,7 @@ Table \ref{tb:val_results_frameDiff} presents representative configurations
 illustrating the recall--efficiency trade-off; the full search space of 48
 configurations is omitted for brevity. The results reveal a fundamental
 limitation of \textsc{FrameDiffDet}: it fails to deliver meaningful throughput
-improvement under the safety constraint $\delta_R = 0.015$. 
+improvement under the safety constraint $\delta_R = 0.015$.
 
 Among all 48 evaluated configurations, only three satisfy the recall constraint,
 all requiring the lowest sensitivity setting $\tau_d = 3$. The best-ranked
