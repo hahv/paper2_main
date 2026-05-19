@@ -1,6 +1,6 @@
 order;Method;metric_accuracy;metric_f1_score;metric_fpr (false alarm rate);metric_fps;metric_precision;metric_recall (tpr);Skip Rate
 1;Baseline (notemp);0.987672687;0.973587275;0.002505816;24.96905518;0.991661489;0.956160128;0
 2;$\text{TPT}_\text{strict} \newline (W = 5,\ \tau_\text{persist} = 0.2)$;0.987448275;0.973092854;0.002498636;24.96043015;0.991676807;0.955192566;0
-3;$\text{TPT}_\text{strict} \newline (W = 10,\ \tau_\text{persist} = 0.5)$;0.986528635;0.971061707;0.002469916;24.960886;0.991737723;0.951230168;0
+3;$\text{TPT}_\text{balanced} \newline (W = 10,\ \tau_\text{persist} = 0.5)$;0.986528635;0.971061707;0.002469916;24.960886;0.991737723;0.951230168;0
 4;Big Model with Skip module (AccMotionDet);0.985619962;0.968935847;0.001357018;32.31794;0.995408058;0.943835258;0.349314
 5;Big Model with Skip module \newline (AccMotionDet + Eager $N_{\text{chk}}=50, W_{\text{clr}}=7, W_{\text{fire}}=1$);0.987552285;0.973322392;0.002505816;32.53782654;0.991657078;0.95565331;0.343139
