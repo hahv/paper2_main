@@ -1,16 +1,13 @@
 \begin{table*}[hbtp]
-    \caption{Validation-set performance and hyperparameter configurations for
-        Accumulation Motion Detector in Eager Mode (AccMotionDet
-        Eager). Note that the
-        ``Recall (\%)'' column displays the retained recall alongside
-        the absolute
-        recall drop relative to the baseline in parentheses, i.e.,
-        Recall (-Recall
-        Drop). The best and second-best results for each metric are
-        highlighted in
-        \textbf{bold} and \textit{\underline{italic underline}}, respectively.
-    }
-    \label{tb:tb_val_results_accMotionDetEager}
+    \caption{Validation-set grid search results for \textsc{AccMotionDet}
+    (optimal configuration from Section~\ref{sec:hyperparam}) augmented
+    with \textsc{Eager} mode. The ``Recall (\%)'' column reports retained recall
+    with the absolute drop relative to the baseline in parentheses (i.e.,
+    Recall $-$ Recall Drop). The best and second-best results per metric are
+    highlighted in \textbf{bold} and \textit{\underline{italic underline}},
+    respectively.
+}
+    \label{tb:gridsearch_accMotionDetEager}
     \csvreader[separator=semicolon,
         no head,
         range=1-,

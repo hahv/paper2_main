@@ -118,9 +118,9 @@
             \multicolumn{2}{l}{\textbf{Variables \& Parameters}} \\
             \midrule
             $s_t \in \{0,1\}$
-                & Motion sensor ($\mathcal{S}$) prediction ($1$: motion, $0$: static). \\[3pt]
+                & Skip module ($\mathcal{S}$) prediction ($1$: motion, $0$: static). \\[3pt]
             $\hat{y}_t \in \{0,1\}$
-                & Fire model ($\mathcal{M}$) prediction ($1$: fire/smoke, $0$: safe). \\[3pt]
+                & Classification model ($\mathcal{M}$) prediction ($1$: fire/smoke, $0$: safe). \\[3pt]
             $c_{\mathrm{fire}}$
                 & Counter for consecutive positive detections ($\hat{y}_t=1$). \\[3pt]
             $c_{\mathrm{clear}}$

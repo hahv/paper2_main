@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999994 (TeX Live 2022) (preloaded format=xelatex 2022.7.18)  19 MAY 2026 09:53
+This is XeTeX, Version 3.141592653-2.6-0.999994 (TeX Live 2022) (preloaded format=xelatex 2022.7.18)  19 MAY 2026 09:52
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1167,7 +1167,7 @@ File: bkm-dvipdfm.def 2020-11-06 v1.29 bookmark driver for dvipdfm (HO)
 ))
 Package hyperref Info: Option `colorlinks' set `true' on input line 151.
 
-(./zpaper2.aux)
+No file zpaper2.aux.
 \openout1 = `zpaper2.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 159.
@@ -1462,7 +1462,6 @@ Package microtype Info: Applying patch `item' on input line 159.
 Package microtype Info: Applying patch `toc' on input line 159.
 Package microtype Info: Applying patch `eqnum' on input line 159.
 
-
 Package microtype Warning: Unable to apply patch `footnote' on input line 159.
 
 Package microtype Info: Character protrusion enabled (level 2).
@@ -1618,6 +1617,9 @@ dflt;extend=1.05;"
 (fontspec)             =0\fontdimen 4\font 
 
 Package hyperref Info: Link coloring ON on input line 159.
+
+Package hyperref Warning: Rerun to get /PageLabels entry.
+
 Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: float package is loaded.
 Package caption Info: rotating package is loaded.
@@ -1722,9 +1724,28 @@ LaTeX Font Info:    Font shape `TU/UnBatang.ttf(0)/b/n' will be
 LaTeX Font Info:    Font shape `TU/UnBatang.ttf(0)/bx/n' in size <10> not avail
 able
 (Font)              Font shape `TU/UnBatang.ttf(0)/b/n' tried instead on input 
-line 207.
+line 190.
 LaTeX Font Info:    Font shape `TU/UnBatang.ttf(0)/b/n' will be
-(Font)              scaled to size 8.79166pt on input line 207.
+(Font)              scaled to size 8.79166pt on input line 190.
+
+LaTeX Warning: Citation `ref-californiafire:online' on page 1 undefined on inpu
+t line 190.
+
+
+LaTeX Warning: Citation `ref-southkoreafire:online' on page 1 undefined on inpu
+t line 193.
+
+
+LaTeX Warning: Citation `ref-cheng2024visual' on page 1 undefined on input line
+ 199.
+
+
+LaTeX Warning: Citation `ref-gragnaniello2024fire' on page 1 undefined on input
+ line 200.
+
+
+LaTeX Warning: Reference `fig:pipeline' on page 1 undefined on input line 225.
+
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
 (Font)              scaled to size 7.0pt on input line 248.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
@@ -1744,368 +1765,98 @@ LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
 [1
 
 ]
+
+LaTeX Warning: Reference `sec:relatedWork' on page 2 undefined on input line 26
+3.
+
+
+LaTeX Warning: Reference `sec:method' on page 2 undefined on input line 266.
+
+
+LaTeX Warning: Reference `sec:results' on page 2 undefined on input line 269.
+
+
+LaTeX Warning: Reference `sec:conclusion' on page 2 undefined on input line 271
+.
+
+
+LaTeX Warning: Citation `ref-cheng2024visual' on page 2 undefined on input line
+ 279.
+
+
+LaTeX Warning: Citation `ref-geng2024yolofm' on page 2 undefined on input line 
+285.
+
+
+LaTeX Warning: Citation `ref-khan2025optimized' on page 2 undefined on input li
+ne 286.
+
+
+LaTeX Warning: Citation `ref-khan2025beyond' on page 2 undefined on input line 
+295.
+
+
+LaTeX Warning: Citation `ref-cao2019attention' on page 2 undefined on input lin
+e 298.
+
+
+LaTeX Warning: Citation `ref-ali2025toward' on page 2 undefined on input line 3
+00.
+
+
+LaTeX Warning: Citation `ref-de2023hybrid' on page 2 undefined on input line 30
+7.
+
+
+LaTeX Warning: Citation `ref-gragnaniello2025flame' on page 2 undefined on inpu
+t line 309.
+
+
+LaTeX Warning: Citation `ref-sobral2014comprehensive' on page 2 undefined on in
+put line 328.
+
+
+LaTeX Warning: Citation `ref-garcia2020background' on page 2 undefined on input
+ line 329.
+
+
+LaTeX Warning: Citation `ref-zivkovic2006efficient' on page 2 undefined on inpu
+t line 333.
+
+
+LaTeX Warning: Citation `ref-ghodrati2021frameexit' on page 2 undefined on inpu
+t line 342.
+
+
+LaTeX Warning: Reference `sec:method' on page 2 undefined on input line 350.
+
 LaTeX Font Info:    Font shape `TU/UnBatang.ttf(0)/bx/n' in size <12> not avail
 able
 (Font)              Font shape `TU/UnBatang.ttf(0)/b/n' tried instead on input 
 line 354.
 LaTeX Font Info:    Font shape `TU/UnBatang.ttf(0)/b/n' will be
 (Font)              scaled to size 10.54999pt on input line 354.
- (./3.fig/fig_pipeline.tex
-File: ./3.fig/pipeline/fig_pipeline.pdf Graphic file (type pdf)
-<use ./3.fig/pipeline/fig_pipeline.pdf>
-)
-LaTeX Font Info:    Trying to load font information for U+dutchcal on input lin
-e 362.
 
-(d:/Program Files/texlive/2022/texmf-dist/tex/latex/dutchcal/udutchcal.fd
-File: udutchcal.fd 2011/06/16 Fontinst v1.933 font definitions for U/dutchcal.
-)
-LaTeX Font Info:    Font shape `U/dutchcal/m/n' will be
-(Font)              scaled to size 10.0pt on input line 362.
-LaTeX Font Info:    Font shape `U/dutchcal/m/n' will be
-(Font)              scaled to size 7.0pt on input line 362.
-LaTeX Font Info:    Font shape `U/dutchcal/m/n' will be
-(Font)              scaled to size 5.0pt on input line 362.
+! LaTeX Error: File `./3.fig/fig_pipeline.tex' not found.
 
+Type X to quit or <RETURN> to proceed,
+or enter new name. (Default extension: tex)
 
-Package fancyhdr Warning: \footskip is too small (10.0pt): 
-(fancyhdr)                Make it at least 12.0pt, for example:
-(fancyhdr)                \setlength{\footskip}{12.0pt}.
+Enter file name: 
+! Emergency stop.
+<read *> 
+         
+l.356 \input{./3.fig/fig_pipeline.tex}
+                                      ^^M
+*** (cannot \read from terminal in nonstop modes)
 
-[2]
-LaTeX Font Info:    Font shape `TU/UnBatang.ttf(0)/m/n' will be
-(Font)              scaled to size 6.15715pt on input line 381.
-LaTeX Font Info:    Font shape `TU/UnBatang.ttf(0)/m/n' will be
-(Font)              scaled to size 4.39796pt on input line 381.
- (./3.fig/fig_skipmodule.tex
-File: ./3.fig/skipmodule/fig_skip_module.pdf Graphic file (type pdf)
-<use ./3.fig/skipmodule/fig_skip_module.pdf>
-) (./6.algo/skip_module.tex
-Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on in
-put line 2.
-LaTeX Font Info:    Font shape `TU/UnBatang.ttf(0)/m/n' will be
-(Font)              scaled to size 7.03674pt on input line 10.
-
-
-LaTeX Font Warning: Font shape `TU/UnBatang.ttf(0)/m/it' undefined
-(Font)              using `TU/UnBatang.ttf(0)/m/n' instead on input line 27.
-
-LaTeX Font Info:    Font shape `TU/UnBatang.ttf(0)/m/it' will be
-(Font)              scaled to size 8.79593pt on input line 27.
-)
-
-Package fancyhdr Warning: \footskip is too small (10.0pt): 
-(fancyhdr)                Make it at least 12.0pt, for example:
-(fancyhdr)                \setlength{\footskip}{12.0pt}.
-
-[3] (./6.algo/frame_diff_det.tex) (./6.algo/acc_motion_det.tex)
-(./6.algo/hyperparam_algo.tex
-
-LaTeX Font Warning: Font shape `TU/UnBatang.ttf(0)/m/sc' undefined
-(Font)              using `TU/UnBatang.ttf(0)/m/n' instead on input line 11.
-
-LaTeX Font Info:    Font shape `TU/UnBatang.ttf(0)/m/sc' will be
-(Font)              scaled to size 8.79593pt on input line 11.
-
-Package fancyhdr Warning: \footskip is too small (10.0pt): 
-(fancyhdr)                Make it at least 12.0pt, for example:
-(fancyhdr)                \setlength{\footskip}{12.0pt}.
-
-[4]
-
-Package fancyhdr Warning: \footskip is too small (10.0pt): 
-(fancyhdr)                Make it at least 12.0pt, for example:
-(fancyhdr)                \setlength{\footskip}{12.0pt}.
-
-[5]) (./3.fig/fig_videodb.tex
-File: ./3.fig/videodb/fig_videodb.pdf Graphic file (type pdf)
-<use ./3.fig/videodb/fig_videodb.pdf>
-) (./4.table/tb_ufireindoor.tex
-> Step: init table outer spec.
-> Step: parse table options.
-> Step: split table.
-> Step: init table inner spec.
-> Step: parse table inner spec.
-> Step: execute table commands.
-> Step: calculate cell and line sizes.
-LaTeX Font Info:    Font shape `TU/UnBatang.ttf(0)/bx/n' in size <7> not availa
-ble
-(Font)              Font shape `TU/UnBatang.ttf(0)/b/n' tried instead on input 
-line 26.
-LaTeX Font Info:    Font shape `TU/UnBatang.ttf(0)/b/n' will be
-(Font)              scaled to size 6.15416pt on input line 26.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
-(Font)              scaled to size 9.0pt on input line 26.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
-(Font)              scaled to size 9.00082pt on input line 26.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
-(Font)              scaled to size 8.99904pt on input line 26.
-LaTeX Font Info:    Font shape `U/dutchcal/m/n' will be
-(Font)              scaled to size 9.0pt on input line 26.
-LaTeX Font Info:    Font shape `U/dutchcal/m/n' will be
-(Font)              scaled to size 6.0pt on input line 26.
-> Step: build the whole table.
-)
-
-Package fancyhdr Warning: \footskip is too small (10.0pt): 
-(fancyhdr)                Make it at least 12.0pt, for example:
-(fancyhdr)                \setlength{\footskip}{12.0pt}.
-
-[6] (./5.eq/eq_metrics.tex)
-
-Package fancyhdr Warning: \footskip is too small (10.0pt): 
-(fancyhdr)                Make it at least 12.0pt, for example:
-(fancyhdr)                \setlength{\footskip}{12.0pt}.
-
-[7]
-LaTeX Font Info:    Font shape `TU/UnDotum.ttf(1)/m/n' will be
-(Font)              scaled to size 8.48419pt on input line 549.
-
-
-LaTeX Warning: Citation `ref-kingma2014adam' on page 8 undefined on input line 
-560.
-
-(./4.table/tb_val_results_frameDiff.tex
-> Step: init table outer spec.
-> Step: parse table options.
-> Step: split table.
-> Step: init table inner spec.
-> Step: parse table inner spec.
-> Step: execute table commands.
-> Step: calculate cell and line sizes.
-> Step: build the whole table.
-)
-
-Package fancyhdr Warning: \footskip is too small (10.0pt): 
-(fancyhdr)                Make it at least 12.0pt, for example:
-(fancyhdr)                \setlength{\footskip}{12.0pt}.
-
-[8] (./4.table/tb_val_results_accMotionDet.tex
-> Step: init table outer spec.
-> Step: parse table options.
-> Step: split table.
-> Step: init table inner spec.
-> Step: parse table inner spec.
-> Step: execute table commands.
-> Step: calculate cell and line sizes.
-LaTeX Font Info:    Font shape `TU/UnBatang.ttf(0)/bx/n' in size <5> not availa
-ble
-(Font)              Font shape `TU/UnBatang.ttf(0)/b/n' tried instead on input 
-line 43.
-LaTeX Font Info:    Font shape `TU/UnBatang.ttf(0)/b/n' will be
-(Font)              scaled to size 4.39583pt on input line 43.
-> Step: build the whole table.
-)
-
-Package fancyhdr Warning: \footskip is too small (10.0pt): 
-(fancyhdr)                Make it at least 12.0pt, for example:
-(fancyhdr)                \setlength{\footskip}{12.0pt}.
-
-[9] (./4.table/tb_perf_per_frame.tex
-> Step: init table outer spec.
-> Step: parse table options.
-> Step: split table.
-> Step: init table inner spec.
-> Step: parse table inner spec.
-> Step: execute table commands.
-> Step: calculate cell and line sizes.
-> Step: build the whole table.
-)
-
-LaTeX Warning: Reference `sec:baselines' on page 10 undefined on input line 744
-.
-
-(./4.table/tb_val_results_Tpt.tex
-> Step: init table outer spec.
-> Step: parse table options.
-> Step: split table.
-> Step: init table inner spec.
-> Step: parse table inner spec.
-> Step: execute table commands.
-> Step: calculate cell and line sizes.
-LaTeX Font Info:    Font shape `TU/UnBatang.ttf(0)/m/n' will be
-(Font)              scaled to size 5.27756pt on input line 29.
-
-! Missing $ inserted.
-<inserted text> 
-                $
-l.29     }
-          
-I've inserted something that you may have forgotten.
-(See the <inserted text> above.)
-With luck, this will get me unwedged. But if you
-really didn't forget anything, try typing `2' now; then
-my insertion and my current dilemma will both disappear.
-
-! Missing $ inserted.
-<inserted text> 
-                $
-l.29     }
-          
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
-! Missing $ inserted.
-<inserted text> 
-                $
-l.29     }
-          
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
-
-Overfull \hbox (107.51854pt too wide) in paragraph at lines 29--29
- [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][]
-[][][][][][]$ 
- []
-
-> Step: build the whole table.
-! Missing $ inserted.
-<inserted text> 
-                $
-l.29     }
-          
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
-
-Overfull \hbox (107.51854pt too wide) in paragraph at lines 29--29
- [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][]
-[][][][][][]$ 
- []
-
-) (./4.table/tb_cmp_other_temp.tex
-> Step: init table outer spec.
-> Step: parse table options.
-> Step: split table.
-> Step: init table inner spec.
-> Step: parse table inner spec.
-> Step: execute table commands.
-> Step: calculate cell and line sizes.
-> Step: build the whole table.
-)
-
-Package fancyhdr Warning: \footskip is too small (10.0pt): 
-(fancyhdr)                Make it at least 12.0pt, for example:
-(fancyhdr)                \setlength{\footskip}{12.0pt}.
-
-[10]
-
-Package fancyhdr Warning: \footskip is too small (10.0pt): 
-(fancyhdr)                Make it at least 12.0pt, for example:
-(fancyhdr)                \setlength{\footskip}{12.0pt}.
-
-[11] (./3.fig/fig_fps_increase.tex
-File: ./3.fig/fps_increase/fps_increase.pdf Graphic file (type pdf)
-<use ./3.fig/fps_increase/fps_increase.pdf>
-) (./3.fig/fig_quality_success.tex
-File: ./3.fig/quality_analyses/fig_qualitative_success.pdf Graphic file (type p
-df)
-<use ./3.fig/quality_analyses/fig_qualitative_success.pdf>
-)
-
-Package fancyhdr Warning: \footskip is too small (10.0pt): 
-(fancyhdr)                Make it at least 12.0pt, for example:
-(fancyhdr)                \setlength{\footskip}{12.0pt}.
-
-[12] (./3.fig/fig_quality_failure.tex
-File: ./3.fig/quality_analyses/fig_qualitative_failure.pdf Graphic file (type p
-df)
-<use ./3.fig/quality_analyses/fig_qualitative_failure.pdf>
-) (./3.fig/fig_eager_mode.tex
-File: ./3.fig/eager/eager_mode.pdf Graphic file (type pdf)
-<use ./3.fig/eager/eager_mode.pdf>
-)
-
-Package fancyhdr Warning: \footskip is too small (10.0pt): 
-(fancyhdr)                Make it at least 12.0pt, for example:
-(fancyhdr)                \setlength{\footskip}{12.0pt}.
-
-[13]
-
-LaTeX Warning: Reference `fig:eager_mode' on page 14 undefined on input line 92
-2.
-
-(./4.table/tb_gridsearch_accMotionDetEager.tex
-> Step: init table outer spec.
-> Step: parse table options.
-> Step: split table.
-> Step: init table inner spec.
-> Step: parse table inner spec.
-> Step: execute table commands.
-> Step: calculate cell and line sizes.
-> Step: build the whole table.
-)
-Overfull \hbox (40.88582pt too wide) in paragraph at lines 929--936
-\TU/lmr/m/n/10 skip module to the best-performing configuration identified in t
-he previous section \TU/UnBatang.ttf(0)/m/sc/10 (\TU/lmr/m/n/10 i.e., $[][][][]
-[][]  [][][][][]  [][][][][][][]  [][][][][]  [][][][][]  [][][][][]$\TU/UnBata
-ng.ttf(0)/m/sc/10 )
- []
-
-
-Package fancyhdr Warning: \footskip is too small (10.0pt): 
-(fancyhdr)                Make it at least 12.0pt, for example:
-(fancyhdr)                \setlength{\footskip}{12.0pt}.
-
-[14]
-
-LaTeX Warning: Reference `tb:gridsearch_accMotionDetEager' on page 15 undefined
- on input line 976.
-
-
-LaTeX Warning: Reference `tb:cmp_other_temp_eager' on page 15 undefined on inpu
-t line 982.
-
-
-LaTeX Warning: Reference `tb:cmp_other_temp_eager' on page 15 undefined on inpu
-t line 984.
-
-(./4.table/tb_cmp_other_temp_eager.tex
-> Step: init table outer spec.
-> Step: parse table options.
-> Step: split table.
-> Step: init table inner spec.
-> Step: parse table inner spec.
-> Step: execute table commands.
-> Step: calculate cell and line sizes.
-> Step: build the whole table.
-)
-
-Package fancyhdr Warning: \footskip is too small (10.0pt): 
-(fancyhdr)                Make it at least 12.0pt, for example:
-(fancyhdr)                \setlength{\footskip}{12.0pt}.
-
-[15]
-
-Package fancyhdr Warning: \footskip is too small (10.0pt): 
-(fancyhdr)                Make it at least 12.0pt, for example:
-(fancyhdr)                \setlength{\footskip}{12.0pt}.
-
-[16]
-
-Package fancyhdr Warning: \footskip is too small (10.0pt): 
-(fancyhdr)                Make it at least 12.0pt, for example:
-(fancyhdr)                \setlength{\footskip}{12.0pt}.
-
-[17] (./zpaper2.aux)
-
-LaTeX Font Warning: Some font shapes were not available, defaults substituted.
-
-
-LaTeX Warning: There were undefined references.
-
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
- ) 
+ 
 Here is how much of TeX's memory you used:
- 41839 strings out of 475865
- 815753 string characters out of 5799410
- 1479580 words of memory out of 5000000
- 62101 multiletter control sequences out of 15000+600000
- 525133 words of font info for 180 fonts, out of 8000000 for 9000
+ 40598 strings out of 475865
+ 775332 string characters out of 5799410
+ 1229448 words of memory out of 5000000
+ 60988 multiletter control sequences out of 15000+600000
+ 499983 words of font info for 125 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
- 115i,13n,123p,1140b,2710s stack positions out of 10000i,1000n,20000p,200000b,200000s
-
-Output written on zpaper2.pdf (17 pages).
+ 115i,6n,123p,1004b,2710s stack positions out of 10000i,1000n,20000p,200000b,200000s
+Output written on zpaper2.pdf (1 page).

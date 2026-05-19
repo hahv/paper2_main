@@ -912,7 +912,7 @@ this limitation, the skip module is augmented with an
 \textsc{eager mode}. When the Big Model \(\mathcal{M}\) produces a fire/
 smoke prediction on \(W_{\text{fire}}\) consecutive non-skipped frames,
 the module enters \textbf{eager mode} and suppresses all skip decisions
-(i.e set \(s_t = 1\) -- force inference) until the scene is declared
+(i.e set \(S_t = 1\) -- force inference) until the scene is declared
 safe again - defined as \(\mathcal{M}\) returns a negative prediction
 for \(W_{\text{clr}}\) consecutive frames. This mechanism ensures that
 frames immediately following a confirmed detection are always forwarded
@@ -969,53 +969,47 @@ performed over the following candidate values:
   infrequent (\(N_{\mathrm{chk}} = 50\)) checking.
 \end{itemize}
 
-Following the hyperparameter selection protocol described in Section
-\ref{sec:hyperparam}, the optimal \textsc{Eager} mode configuration is
-identified on the validation set \(\mathcal{D}_{\mathrm{val}}\), with
-results reported in Table \ref{tb:gridsearch_accMotionDetEager}.
+Following the hyperparameter selection protocol described in
+Section\textasciitilde{}\ref{sec:hyperparam}, the optimal \textsc{Eager}
+mode configuration is identified on the validation set
+\(\mathcal{D}_{\mathrm{val}}\), with results reported in
+Table\textasciitilde{}\ref{tb:gridsearch_accMotionDetEager}.
 
 The best-ranked configuration
 (\(W_{\text{fire}} = 1, W_{\text{clr}} = 7, N_{\text{check}} = 50\)) is
 then evaluated on the test set \(\mathcal{D}_{\text{test}}\) and
-compared against the skip-only configuration in Table
-\ref{tb:cmp_other_temp_eager}.
+compared against the skip-only configuration in
+Table\textasciitilde{}\ref{tb:cmp_other_temp_eager}.
+
+Table\textasciitilde{}\ref{tb:cmp_other_temp_eager} reports the effect
+of eager mode. Recall is recovered from \(94.38\%\) (skip only) to
+\(95.51\%\), matching the baseline within \(0.11\) percentage points,
+while the skip rate is marginally reduced from \(34.93\%\) to
+\(34.21\%\). However, eager mode also partially negates the FAR
+improvement: FAR rises from \(0.136\%\) (skip only) back toward the
+baseline value of \(0.251\%\). This outcome reflects a fundamental
+structural trade-off: eager mode cannot distinguish static
+false-alarm-prone scenes --- which the Big Model persistently
+misclassifies --- from genuine slow-smoke events, as both exhibit
+near-zero inter-frame motion. Consequently, the two operating modes of
+the skip module serve complementary deployment objectives: the
+\emph{skip-only} configuration prioritises false alarm reduction (FAR
+\(\downarrow\) 46\%, FPS \(\uparrow\) 29\%), while the
+\emph{skip + eager} configuration prioritises recall preservation at
+full baseline performance (recall \(\geq 95.5\%\), FPS \(\uparrow\)
+29\%).
 
 \input{./4.table/tb_cmp_other_temp_eager.tex}
 
-Table\textasciitilde{}\ref{tb:cmp_other_temp_eager} reports the effect
-of \textsc{Eager} mode on system performance. \textsc{Eager} mode
-successfully recovers recall on slow-developing and settling smoke
-scenarios, increasing from \(94.384\%\) (\textsc{AccMotionDet} only) to
-\(95.565\%\) (\textsc{AccMotionDet} + \textsc{Eager}), nearly matching
-the baseline recall of \(95.616\%\) (Big Model without skip module) ---
-a recovery of critical importance in safety-critical applications.
-However, this improvement incurs two costs: the skip rate slightly
-decreases from \(34.93\%\) to \(34.21\%\), and the false alarm rate
-(FAR) increases from \(0.136\%\) to \(0.251\%\).
-
-Despite the reduced skip rate, overall throughput marginally increases
-from \(32.32\) to \(32.54\) FPS. This is explained by the reduced
-computational overhead in \textsc{Eager} mode: rather than executing the
-full \textsc{AccMotionDet} pipeline
-(Algorithm\textasciitilde{}\ref{alg:acc_motion_det}), our implementation
-converts each frame to grayscale, stores it for subsequent use in
-\textsc{Normal} mode, and applies only temporal decay. Consequently,
-per-frame computation in \textsc{Eager} mode is lighter than in
-\textsc{Normal} mode (where both the skip module and Big Model inference
-are active), yielding the observed FPS gain despite the lower skip rate.
-
-A notable drawback of \textsc{Eager} mode is its tendency to increase
-false alarms. Our analysis reveals that \textsc{Eager} mode cannot
-distinguish false-alarm-prone static scenes from genuine slow-developing
-or settled smoke events, as both exhibit near-zero inter-frame motion.
-In such static scenes, the Big Model may produce fire/smoke predictions
-on several consecutive frames, causing the system to enter and remain in
-\textsc{Eager} mode with prolonged forced inference and elevated FAR.
-This highlights a fundamental limitation of heuristic, motion-based skip
-logic: it is insufficient to robustly handle all scenarios. We leave
-this as an open research question, with potential directions including
-skip modules that incorporate richer cues (such as color, texture, or
-learned features) to discriminate between these scene types.
+One drawback of eager mode is that it may case the increase of false
+alarms, in the scenes where the Big Model persistently misclassifies as
+fire/smoke (even though the scene is static as indicated by the skip
+module), because eager mode cannot distinguish these false-alarm-prone
+scenes from genuine slow-smoke events, as both exhibit near-zero
+inter-frame motion. This drawback is any open research question for
+future work to address, e.g., by designing a more sophisticated skip
+module that can leverage additional cues (e.g., color, texture, or
+learned features) to distinguish these two types of scenes.
 
 \section{Conclusion}\label{sec:conclusion}
 
