@@ -49,3 +49,20 @@
 \algdef{SE}[SUBALG]{Indent}{EndIndent}{}{\algorithmicend\ }
 \algtext*{Indent}
 \algtext*{EndIndent}
+
+\newtoggle{algoAsImage}
+% ! uncomment the following line to render algorithms as images.
+% \toggletrue{algoAsImage}
+
+\newcommand{\showalgo}[2]{%
+  % #1 = path to the pre-rendered PDF image (e.g., figs/algo1.pdf)
+  % #2 = the normal algorithm environment block
+  \iftoggle{algoAsImage}{%
+    \begin{figure}[htbp]
+      \centering
+      \includegraphics[width=\linewidth, page=1]{#1}
+    \end{figure}%
+  }{%
+    #2%
+  }%
+}
