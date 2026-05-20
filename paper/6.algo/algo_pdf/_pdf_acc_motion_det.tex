@@ -1,0 +1,70 @@
+\documentclass{article}
+\input{../../0.tex/preamble.tex}
+\usepackage{unicode-math}
+\usepackage[active, tightpage]{preview}
+\setlength{\PreviewBorder}{4pt} % optional: small padding around the content
+
+\begin{document}
+
+\begin{preview}
+
+\setcounter{algorithm}{3} % sets counter to 1, so next algorithm becomes 2
+
+% ! Accumulation Motion Detector (AccMotionDet)
+\begin{algorithm}[H]
+\caption{Accumulation Motion Detector (AccMotionDet)}
+\label{alg:acc_motion_det}
+\begin{algorithmic}[1]
+
+\Require Downsampled frames $\tilde{f}_t,\, \tilde{f}_{\text{prev}}$;
+         accumulated mask $\mathbf{K}_{t-1}$ (initialized to $\mathbf{0}$)
+\Require $\tau_d$: pixel difference sensitivity,\;
+         $\omega$: motion increment,\;
+         $\tau_m$: activation threshold,\;
+         $K_{\max}$: accumulation cap,\;
+         $\delta$: decay rate
+\Ensure $\mathbf{M}_t \in \{0, 255\}$: binary foreground mask;\;
+        $\mathbf{K}_t$: updated accumulated mask
+
+\Statex
+
+\State Convert $\tilde{f}_t$ and $\tilde{f}_{\text{prev}}$ to grayscale: $F_t,\, F_{\text{prev}}$
+
+\Statex
+
+\State $\mathbf{D}_t \leftarrow \left| F_t - F_{\text{prev}} \right|$
+\Comment{Absolute inter-frame difference}
+
+\State $\symbf{\Delta}_t(i,j) \leftarrow
+\begin{cases}
+\omega & \mathbf{D}_t(i,j) > \tau_d \\
+0      & \text{otherwise}
+\end{cases}$
+\Comment{Instantaneous increment map}
+
+\Statex
+
+\State $\mathbf{K}_t \leftarrow \min\!\left(\mathbf{K}_{t-1} + \symbf{\Delta}_t,\; K_{\max}\right)$
+\Comment{Accumulate and cap}
+
+\State $\mathbf{K}_t \leftarrow \max\!\left(\mathbf{K}_t - \delta,\; 0\right)$
+\Comment{Temporal decay}
+
+\Statex
+
+\State $\mathbf{M}_t(i,j) \leftarrow
+\begin{cases}
+255 & \mathbf{K}_t(i,j) \geq \tau_m \\
+0   & \text{otherwise}
+\end{cases}$
+\Comment{Threshold to binary mask}
+
+\State \Return $\mathbf{M}_t,\; \mathbf{K}_t$
+
+\end{algorithmic}
+\end{algorithm}
+
+
+\end{preview}
+
+\end{document}

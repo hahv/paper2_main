@@ -22,4 +22,5 @@ if [[ "$1" == "-a" || "$1" == "--all" ]]; then
 else
     echo "Running standard to_pdf..."
     to_pdf ./zpaper2.md
+    # to_pdf ./zpaper2.md -fmt pdf docx
 fi

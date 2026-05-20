@@ -1,0 +1,59 @@
+\documentclass{article}
+\input{../../0.tex/preamble.tex}
+\usepackage{unicode-math}
+\usepackage[active, tightpage]{preview}
+\setlength{\PreviewBorder}{4pt} % optional: small padding around the content
+
+\begin{document}
+
+\begin{preview}
+
+\setcounter{algorithm}{0} % sets counter to 1, so next algorithm becomes 2
+
+\begin{algorithm}[H]
+    \caption{Skip Module $\mathcal{S}$: Motion-Based Frame Gating}
+    \label{alg:skipmodule}
+    \begin{algorithmic}[1]
+
+        \Require Video stream $\{f_1, f_2, \dots\}$, motion detector $\mathcal{D}$,
+        scale factor $\alpha$, block size $B$, block active threshold $\tau$
+        \Ensure Skip decisions $\{s_1, s_2, \dots\}$, where $s_t \in \{0,1\}$
+
+        \State $\tilde{f}_{\text{prev}} \leftarrow \text{null}$ \Comment{Initialize previous downsampled frame}
+
+        \For{each incoming frame $f_t$}
+
+        \Statex \hspace{1.5em} \textbf{Step 1: Pre-process}
+        \State Downsample $f_t$ by $\alpha$ to obtain $\tilde{f}_t$
+        \State Let $B_s \leftarrow B \cdot \alpha$ \Comment{Effective block size on downsampled frame}
+        \State Pad $\tilde{f}_t$ to be divisible by $B_s$
+
+        \Statex \hspace{1.5em} \textbf{Step 2: Compute Foreground Mask}
+        \If{$\tilde{f}_{\text{prev}} = \text{null}$} \Comment{No previous frame on first iteration}
+            \State $s_t \leftarrow 1$ \Comment{Run inference on first frame}
+            \State $\tilde{f}_{\text{prev}} \leftarrow \tilde{f}_t$
+            \State \textbf{continue}
+        \EndIf
+        \State $\mathbf{M}_t \leftarrow \mathcal{D}(\tilde{f}_t,\, \tilde{f}_{\text{prev}})$ \Comment{$\mathcal{D}$: e.g., FrameDiffDet or AccMotionDet}
+        \State Partition $\mathbf{M}_t$ into a grid of non-overlapping blocks of size $B_s$
+        \State Mark a block as \textit{active} if its foreground pixel ratio $> \tau$
+
+        \Statex \hspace{1.5em} \textbf{Step 3: Gating Decision}
+        \If{any active block exists}
+            \State $s_t \leftarrow 1$ \Comment{Motion detected, run DL inference}
+        \Else
+            \State $s_t \leftarrow 0$ \Comment{No motion, skip inference}
+        \EndIf
+
+        \State $\tilde{f}_{\text{prev}} \leftarrow \tilde{f}_t$ \Comment{Update previous frame for next iteration}
+        \State \textbf{yield} $s_t$
+
+        \EndFor
+
+    \end{algorithmic}
+\end{algorithm}
+
+
+\end{preview}
+
+\end{document}
