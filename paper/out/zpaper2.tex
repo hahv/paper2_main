@@ -137,6 +137,21 @@
 \algdef{SE}[SUBALG]{Indent}{EndIndent}{}{\algorithmicend\ }
 \algtext*{Indent}
 \algtext*{EndIndent}
+
+% ── Toggle ──────────────────────────────────────────
+\newtoggle{algoAsImage}
+% \toggletrue{algoAsImage}   % ON = image, OFF = native algorithm
+% ── Command ─────────────────────────────────────────
+\newcommand{\algoimgref}[3][1.0]{%
+  % #1 = scale (default 1.0)
+  % #2 = PNG path
+  % #3 = label
+  \refstepcounter{algorithm}%
+  \label{#3}%
+  \begin{center}
+    \includegraphics[width=#1\linewidth]{#2}
+  \end{center}%
+}
 \usepackage{bookmark}
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \urlstyle{same}

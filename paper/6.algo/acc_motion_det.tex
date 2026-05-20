@@ -1,6 +1,7 @@
 \noindent
 Let $F_t$ and $F_{\text{prev}}$ denote the grayscale frames converted from the
-downsampled inputs $\tilde{f}_t$ and $\tilde{f}_{\text{prev}}$, respectively, and let
+downsampled inputs $\tilde{f}_t$ and $\tilde{f}_{\text{prev}}$,
+respectively, and let
 $\mathbf{K}_{t-1} \in [0, K_{\max}]$ denote the per-pixel
 \textit{accumulated motion mask} from the previous frame. The detector takes
 two consecutive downsampled frames and $\mathbf{K}_{t-1}$ as input, and
@@ -13,55 +14,65 @@ $\mathbf{K}_t \geq \tau_m$, suppressing transient noise and single-frame
 flicker, and inactive (0) otherwise. The procedure is formalized in
 Algorithm~\ref{alg:acc_motion_det}.
 
-\begin{algorithm}[ht]
-\caption{Accumulation Motion Detector (AccMotionDet)}
-\label{alg:acc_motion_det}
-\begin{algorithmic}[1]
+% ── Algorithm as Image ──────────────────────────────────────
+\iftoggle{algoAsImage}{%
+    \algoimgref[0.8]{6.algo/algo_imgs/acc_motion_det.jpg}{alg:acc_motion_det}
+}{%
+    \begin{algorithm}[ht]
+        \caption{Accumulation Motion Detector (AccMotionDet)}
+        \label{alg:acc_motion_det}
+        \begin{algorithmic}[1]
 
-\Require Downsampled frames $\tilde{f}_t,\, \tilde{f}_{\text{prev}}$;
-         accumulated mask $\mathbf{K}_{t-1}$ (initialized to $\mathbf{0}$)
-\Require $\tau_d$: pixel difference sensitivity,\;
-         $\omega$: motion increment,\;
-         $\tau_m$: activation threshold,\;
-         $K_{\max}$: accumulation cap,\;
-         $\delta$: decay rate
-\Ensure $\mathbf{M}_t \in \{0, 255\}$: binary foreground mask;\;
-        $\mathbf{K}_t$: updated accumulated mask
+            \Require Downsampled frames $\tilde{f}_t,\,
+            \tilde{f}_{\text{prev}}$;
+            accumulated mask $\mathbf{K}_{t-1}$ (initialized to $\mathbf{0}$)
+            \Require $\tau_d$: pixel difference sensitivity,\;
+            $\omega$: motion increment,\;
+            $\tau_m$: activation threshold,\;
+            $K_{\max}$: accumulation cap,\;
+            $\delta$: decay rate
+            \Ensure $\mathbf{M}_t \in \{0, 255\}$: binary foreground mask;\;
+            $\mathbf{K}_t$: updated accumulated mask
 
-\Statex
+            \Statex
 
-\State Convert $\tilde{f}_t$ and $\tilde{f}_{\text{prev}}$ to grayscale: $F_t,\, F_{\text{prev}}$
+            \State Convert $\tilde{f}_t$ and
+            $\tilde{f}_{\text{prev}}$ to grayscale: $F_t,\, F_{\text{prev}}$
 
-\Statex
+            \Statex
 
-\State $\mathbf{D}_t \leftarrow \left| F_t - F_{\text{prev}} \right|$
-\Comment{Absolute inter-frame difference}
+            \State $\mathbf{D}_t \leftarrow \left| F_t -
+            F_{\text{prev}} \right|$
+            \Comment{Absolute inter-frame difference}
 
-\State $\symbf{\Delta}_t(i,j) \leftarrow
-\begin{cases}
-\omega & \mathbf{D}_t(i,j) > \tau_d \\
-0      & \text{otherwise}
-\end{cases}$
-\Comment{Instantaneous increment map}
+            \State $\symbf{\Delta}_t(i,j) \leftarrow
+            \begin{cases}
+                \omega & \mathbf{D}_t(i,j) > \tau_d \\
+                0      & \text{otherwise}
+            \end{cases}$
+            \Comment{Instantaneous increment map}
 
-\Statex
+            \Statex
 
-\State $\mathbf{K}_t \leftarrow \min\!\left(\mathbf{K}_{t-1} + \symbf{\Delta}_t,\; K_{\max}\right)$
-\Comment{Accumulate and cap}
+            \State $\mathbf{K}_t \leftarrow
+            \min\!\left(\mathbf{K}_{t-1} + \symbf{\Delta}_t,\; K_{\max}\right)$
+            \Comment{Accumulate and cap}
 
-\State $\mathbf{K}_t \leftarrow \max\!\left(\mathbf{K}_t - \delta,\; 0\right)$
-\Comment{Temporal decay}
+            \State $\mathbf{K}_t \leftarrow \max\!\left(\mathbf{K}_t
+            - \delta,\; 0\right)$
+            \Comment{Temporal decay}
 
-\Statex
+            \Statex
 
-\State $\mathbf{M}_t(i,j) \leftarrow
-\begin{cases}
-255 & \mathbf{K}_t(i,j) \geq \tau_m \\
-0   & \text{otherwise}
-\end{cases}$
-\Comment{Threshold to binary mask}
+            \State $\mathbf{M}_t(i,j) \leftarrow
+            \begin{cases}
+                255 & \mathbf{K}_t(i,j) \geq \tau_m \\
+                0   & \text{otherwise}
+            \end{cases}$
+            \Comment{Threshold to binary mask}
 
-\State \Return $\mathbf{M}_t,\; \mathbf{K}_t$
+            \State \Return $\mathbf{M}_t,\; \mathbf{K}_t$
 
-\end{algorithmic}
-\end{algorithm}
+        \end{algorithmic}
+    \end{algorithm}
+}
