@@ -99,5 +99,10 @@ class TempMethod(NoTempMethod):
             )
             infer_result.update(meta_data)
             # ── NEW: feed DL result back to skip proc for eager state update ──
-            self.skip_proc.update_eager_state(infer_result.get("predLabel", ""))
+            pred_info = {
+                "predLabel": infer_result.get("predLabel", ""),
+                "predProbs": infer_result.get("probs", []),
+                "predLabelIdx": infer_result.get("predLabelIdx", -1)
+            }
+            self.skip_proc.update_eager_state(pred_info)
             return infer_result

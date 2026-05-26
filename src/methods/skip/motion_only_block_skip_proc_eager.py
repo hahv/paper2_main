@@ -124,11 +124,12 @@ class MotionOnlyBlockSkipProcEager(BaseBlockSkipProc):
         }
         return should_skip, meta_data
 
-    def update_eager_state(self, pred_label: str) -> None:
+    def update_eager_state(self, pred_info: dict) -> None:
         """
         Called by TempMethod after every DL inference result is known.
         Implements the FSM update for both EAGER and NORMAL modes.
         """
+        pred_label = pred_info.get("predLabel", "")
         fire_smoke_labels = {"fire", "smokeonly"}
         is_fire = pred_label.lower() in fire_smoke_labels  # ŷ_t = 1 or 0
 
