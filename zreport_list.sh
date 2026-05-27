@@ -1,4 +1,5 @@
 # zreport.sh -opt -in "./zout/zoptim_frameDiff"
 # zreport.sh -opt -in "./zout/zoptim_motionAcc"
 # zreport.sh -opt -in "./zout/zoptim_motionAcc_eager"
-zreport.sh -opt -in "./zout/zoptim_val_eager_mode"
+# zreport.sh -opt -in "./zout/zoptim_val_eager_mode"
+zreport.sh -in "/mnt/e/SyncProf/compare_old_vs_new"
