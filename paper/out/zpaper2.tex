@@ -802,8 +802,7 @@ motion evidence over multiple frames to provide a more reliable signal
 for skip decisions, as described in the following section.
 
 \paragraph{Hyperparameter Optimization Results for the
-AccMotionDet-based Skip
-Module}\label{hyperparameter-optimization-results-for-the-accmotiondet-based-skip-module}
+AccMotionDet-based Skip Module}\label{sec:accMotionResults}
 
 \input{./4.table/tb_val_results_accMotionDet.tex}
 
@@ -953,6 +952,109 @@ limited sensitivity to the persistence threshold. Finally, the recall
 reduction of AccMotionDet is modest (95.62\% \(\to\) 94.38\%) and
 remains within the safety constraint \(\delta_R = 0.015\).
 
+\subsubsection{AccMotionDet Skip Module with Eager
+Mode}\label{accmotiondet-skip-module-with-eager-mode}
+
+\input{./4.table/tb_gridsearch_accMotionDetEager.tex}
+
+As established in Section \ref{sec:e2e-perf}, the AccMotionDet-based
+skip module achieved a throughput improvement of nearly 30\% in FPS;
+however, this came at the cost of a 1.24\% reduction in recall, which is
+likely attributable to missed detections in slow-developing or nearly
+stationary smoke scenarios. To address this limitation, the Eager mode
+is introduced as a complementary mechanism to augment the skip module
+and recover recall in such cases. In this section, the Eager mode is
+evaluated in conjunction with the AccMotionDet-based skip module, with
+its hyperparameters fixed to the optimal values identified in Section
+\ref{sec:accMotionResults}(i.e., \(\alpha{=}0.5,
+B{=}32,\tau{=}0.05,\tau_d{=}5,\tau_m{=}5,\newline K_{\max}{=}15\)). A
+grid search is then conducted over the Eager mode parameters to identify
+the optimal configuration, as follows:
+
+\begin{itemize}
+\item
+  \textbf{Confirmation window \(W_{\mathrm{fire}} \in \{1, 2, 3\}\)}:
+  defines the number of consecutive positive predictions required to
+  trigger a transition into \textsc{Eager} mode. A deliberately small
+  range is chosen to ensure the system reacts swiftly to early signs of
+  fire or smoke.
+\item
+  \textbf{Clearance window \(W_{\mathrm{clr}} \in \{3, 5, 7\}\)}: This
+  parameter defines the number of consecutive negative predictions
+  required to exit eager mode and resume normal skip operation. The
+  range is deliberately set larger than that of \(W_{\mathrm{fire}}\),
+  reflecting an asymmetric cost structure: a premature exit risks missed
+  detections, whereas a delayed exit only causes the system to run
+  unnecessary inference on a few extra frames --- a minor and acceptable
+  efficiency loss.
+\item
+  \textbf{Forced-check interval
+  \(N_{\mathrm{chk}} \in \{10, 20, 30, 50\}\)}: defines the maximum
+  number of consecutive frames that are skipped in \textsc{Normal} mode
+  before the system forces an inference call, irrespective of the skip
+  module decision. This serves as a safety net against false negatives
+  --- for instance, slowly developing or settled smoke may produce
+  insufficient inter-frame motion to trigger \(\mathcal{S}\), causing
+  the scene to be treated as static and inference to be suppressed
+  indefinitely. If the forced inference yields a positive prediction and
+  the \(W_{\mathrm{fire}}\) criterion is satisfied, the system
+  transitions into \textsc{Eager} mode. Smaller values increase check
+  frequency at the cost of redundant inference on truly static scenes,
+  whereas larger values reduce this overhead at the expense of a longer
+  worst-case recovery delay. The selected range provides a systematic
+  sweep from aggressive (\(N_{\mathrm{chk}} = 10\)) to infrequent
+  (\(N_{\mathrm{chk}} = 50\)) checking.
+\end{itemize}
+
+Following the hyperparameter selection protocol described in Section
+\ref{sec:hyperparam}, the optimal \textsc{Eager} mode configuration is
+identified on the validation set \(\mathcal{D}_{\mathrm{val}}\), with
+results reported in Table \ref{tb:gridsearch_accMotionDetEager}.
+
+The best-ranked configuration
+(\(W_{\text{fire}} = 1, W_{\text{clr}} = 7, N_{\text{check}} = 50\)) is
+then evaluated on the test set \(\mathcal{D}_{\text{test}}\) and
+compared against the skip-only configuration in Table
+\ref{tb:cmp_other_temp_eager}.
+
+\input{./4.table/tb_cmp_other_temp_eager.tex}
+
+Table \ref{tb:cmp_other_temp_eager} reports the effect of \textsc{Eager}
+mode on system performance. \textsc{Eager} mode successfully recovers
+recall on slow-developing or settled smoke scenarios, increasing from
+\(94.384\%\) (\textsc{AccMotionDet} only) to \(95.565\%\)
+(\textsc{AccMotionDet} + \textsc{Eager}), nearly matching the baseline
+recall of \(95.616\%\) (Big Model without skip module) --- a recovery of
+critical importance in safety-critical applications. However, this
+improvement comes with two costs: the skip rate slightly decreases from
+\(34.93\%\) to \(34.21\%\), and the false alarm rate (FAR) increases
+from \(0.136\%\) to \(0.251\%\) (the implications of this FAR increase
+are discussed in detail in Section \ref{sec:analysis_eager}).
+
+Despite the reduced skip rate, overall throughput marginally increases
+from \(32.32\) to \(32.54\) FPS. This is explained by the reduced
+computational overhead in \textsc{Eager} mode: rather than executing the
+full \textsc{AccMotionDet} pipeline (Algorithm
+\ref{alg:acc_motion_det}), our implementation converts each frame to
+grayscale, stores it for subsequent use in \textsc{Normal} mode, and
+applies only temporal decay. Consequently, per-frame computation in
+\textsc{Eager} mode is lighter than in \textsc{Normal} mode (where both
+the full-step \textsc{AccMotionDet} skip module and Big Model inference
+are active), yielding the observed FPS gain despite the lower skip rate.
+
+A notable drawback of \textsc{Eager} mode is its tendency to increase
+false alarms. Our analysis reveals that \textsc{Eager} mode cannot
+distinguish false-alarm-prone static scenes from genuine slow-developing
+or settled smoke events, as both exhibit near-zero inter-frame motion.
+In such static scenes, the Big Model may produce fire/smoke predictions
+on several consecutive frames, causing the system to enter and remain in
+\textsc{Eager} mode with prolonged forced inference and elevated FAR.
+This highlights a fundamental limitation of heuristic, motion-based skip
+logic: it is insufficient to robustly handle all scenarios. We leave
+this as an open research question, with potential directions including
+skip modules that incorporate richer cues (such as color, texture, or
+learned features) to discriminate between these scene types.
+
 \subsubsection{Quantitative and Qualitative
 Analysis}\label{quantitative-and-qualitative-analysis}
 
@@ -1038,97 +1140,18 @@ cases, which can be grouped into three categories:
   frame.
 \end{itemize}
 
-\paragraph{Eager Mode: Recall--FAR
-Trade-off}\label{eager-mode-recallfar-trade-off}
+\paragraph{Analysis of Eager Mode: Recall-FAR
+Trade-off}\label{sec:analysis_eager}
 
-\input{./4.table/tb_gridsearch_accMotionDetEager.tex}
-
-As eager mode operates as a complementary mechanism to the skip module,
-its hyperparameters are optimized by fixing the skip module to the
-best-performing configuration identified in the previous section (i.e.,
-\(\alpha{=}0.5,
-B{=}32,\tau{=}0.05,\tau_d{=}5,\tau_m{=}5,\newline K_{\max}{=}15\)) and
-conducting a grid search over the eager mode parameters. The grid search
-is performed over the following candidate values:
-
-\begin{itemize}
-\item
-  \textbf{Confirmation window \(W_{\mathrm{fire}} \in \{1, 2, 3\}\)}:
-  defines the number of consecutive positive predictions required to
-  trigger a transition into \textsc{Eager} mode. A deliberately small
-  range is chosen to ensure the system reacts swiftly to early signs of
-  fire or smoke.
-\item
-  \textbf{Clearance window \(W_{\mathrm{clr}} \in \{3, 5, 7\}\)}: This
-  parameter defines the number of consecutive negative predictions
-  required to exit eager mode and resume normal skip operation. The
-  range is deliberately set larger than that of \(W_{\mathrm{fire}}\),
-  reflecting an asymmetric cost structure: a premature exit risks missed
-  detections, whereas a delayed exit only causes the system to run
-  unnecessary inference on a few extra frames --- a minor and acceptable
-  efficiency loss.
-\item
-  \textbf{Forced-check interval
-  \(N_{\mathrm{chk}} \in \{10, 20, 30, 50\}\)}: defines the maximum
-  number of consecutive frames that are skipped in \textsc{Normal} mode
-  before the system forces an inference call, irrespective of the skip
-  module decision. This serves as a safety net against false negatives
-  --- for instance, slowly developing or settled smoke may produce
-  insufficient inter-frame motion to trigger \(\mathcal{S}\), causing
-  the scene to be treated as static and inference to be suppressed
-  indefinitely. If the forced inference yields a positive prediction and
-  the \(W_{\mathrm{fire}}\) criterion is satisfied, the system
-  transitions into \textsc{Eager} mode. Smaller values increase check
-  frequency at the cost of redundant inference on truly static scenes,
-  whereas larger values reduce this overhead at the expense of a longer
-  worst-case recovery delay. The selected range provides a systematic
-  sweep from aggressive (\(N_{\mathrm{chk}} = 10\)) to infrequent
-  (\(N_{\mathrm{chk}} = 50\)) checking.
-\end{itemize}
-
-Following the hyperparameter selection protocol described in Section
-\ref{sec:hyperparam}, the optimal \textsc{Eager} mode configuration is
-identified on the validation set \(\mathcal{D}_{\mathrm{val}}\), with
-results reported in Table \ref{tb:gridsearch_accMotionDetEager}.
-
-The best-ranked configuration
-(\(W_{\text{fire}} = 1, W_{\text{clr}} = 7, N_{\text{check}} = 50\)) is
-then evaluated on the test set \(\mathcal{D}_{\text{test}}\) and
-compared against the skip-only configuration in Table
-\ref{tb:cmp_other_temp_eager}.
-
-\input{./4.table/tb_cmp_other_temp_eager.tex}
-
-Table \ref{tb:cmp_other_temp_eager} reports the effect of \textsc{Eager}
-mode on system performance. \textsc{Eager} mode successfully recovers
-recall on slow-developing or settled smoke scenarios, increasing from
-\(94.384\%\) (\textsc{AccMotionDet} only) to \(95.565\%\)
-(\textsc{AccMotionDet} + \textsc{Eager}), nearly matching the baseline
-recall of \(95.616\%\) (Big Model without skip module) --- a recovery of
-critical importance in safety-critical applications. However, this
-improvement comes with two costs: the skip rate slightly decreases from
-\(34.93\%\) to \(34.21\%\), and the false alarm rate (FAR) increases
-from \(0.136\%\) to \(0.251\%\).
-
-Despite the reduced skip rate, overall throughput marginally increases
-from \(32.32\) to \(32.54\) FPS. This is explained by the reduced
-computational overhead in \textsc{Eager} mode: rather than executing the
-full \textsc{AccMotionDet} pipeline (Algorithm
-\ref{alg:acc_motion_det}), our implementation converts each frame to
-grayscale, stores it for subsequent use in \textsc{Normal} mode, and
-applies only temporal decay. Consequently, per-frame computation in
-\textsc{Eager} mode is lighter than in \textsc{Normal} mode (where both
-the full-step \textsc{AccMotionDet} skip module and Big Model inference
-are active), yielding the observed FPS gain despite the lower skip rate.
-
-A notable drawback of \textsc{Eager} mode is its tendency to increase
-false alarms. Our analysis reveals that \textsc{Eager} mode cannot
+A notable drawback of Eager mode shown in Table
+\ref{tb:cmp_other_temp_eager} is its tendency to increase false alarms
+(from 0.136\% to 0.251\%). Our analysis reveals that Eager mode cannot
 distinguish false-alarm-prone static scenes from genuine slow-developing
 or settled smoke events, as both exhibit near-zero inter-frame motion.
-In such static scenes, the Big Model may produce fire/smoke predictions
+In such static scenes, the classifier may produce fire/smoke predictions
 on several consecutive frames, causing the system to enter and remain in
-\textsc{Eager} mode with prolonged forced inference and elevated FAR.
-This highlights a fundamental limitation of heuristic, motion-based skip
+Eager mode with prolonged forced inference and elevated FAR. This
+highlights a fundamental limitation of heuristic, motion-based skip
 logic: it is insufficient to robustly handle all scenarios. We leave
 this as an open research question, with potential directions including
 skip modules that incorporate richer cues (such as color, texture, or
