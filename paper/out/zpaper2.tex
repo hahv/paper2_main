@@ -504,7 +504,7 @@ decisions.
 
 Let \(F_t\) and \(F_{\text{prev}}\) denote the grayscale frames
 converted from the downsampled frames \(\tilde{f}_t\) and
-\(\tilde{f}_{\text{prev}}\), respectively, and let
+\(\tilde{f}_{\text{prev}}\), respectively. Let
 \(\mathbf{K}_{t-1} \in [0, K_{\max}]\) denote the per-pixel
 \textit{accumulated motion mask} from the previous frame. The detector
 takes two consecutive downsampled frames and \(\mathbf{K}_{t-1}\) as
@@ -516,9 +516,47 @@ inter-frame pixel difference exceeds \(\tau_d\), and decays by
 growth under persistent motion. A pixel is marked active (255) only when
 \(\mathbf{K}_t \geq \tau_m\), suppressing transient noise and
 single-frame flicker, and inactive (0) otherwise. The procedure is
-formalized in Algorithm\textasciitilde{}\ref{alg:acc_motion_det}.
+formalized in Algorithm \ref{alg:acc_motion_det}.
 
 \input{6.algo/acc_motion_det.tex}
+
+\subsection{Eager Mode Design}\label{sec:eagerMode}
+
+\input{./3.fig/fig_eager_mode.tex}
+
+A preliminary analysis of the self-constructed indoor surveillance video
+dataset revealed that slow-developing or nearly stationary smoke events
+constitute a key challenge for the skip module. In such cases, the
+subtle inter-frame motion associated with these events may fall below
+the activation threshold of the motion detector, causing the skip module
+to incorrectly bypass frames containing actual fire or smoke activity.
+To mitigate this limitation, the proposed framework augments the skip
+module with an \textsc{Eager} mode that periodically forces inference
+updates.
+
+When the classifier \(\mathcal{M}\) produces positive fire/ smoke
+predictions on \(W_{\text{fire}}\) consecutive non-skipped frames, the
+system transition from Normal mode to \textsc{Eager} mode and suppresses
+all skip decisions by setting \(s_t = 1\), forcing inference on every
+frame. The system remains in \textsc{Eager} mode until the scene is
+declared safe again, which occurs when the classifier \(\mathcal{M}\)
+returns negative predictions for \(W_{\text{clr}}\) consecutive frames.
+At that point, the system returns to \textsc{Normal} mode with the skip
+module re-enabled.
+
+Additionally, while operating in Normal mode, the system periodically
+forces inference on \(W_{\text{fire}}\) consecutive frames after every
+\(N_{\text{chk}}\) skipped frames. This mechanism ensures the classifier
+retains opportunities to detect emerging fire or smoke activity and
+transition to \textsc{Eager} mode when necessary. Consequently, the
+proposed design improves recall for slow-developing or nearly stationary
+smoke events while preserving the throughput gains provided by the skip
+module during \textsc{Normal} mode operation.
+
+Figure \ref{fig:eager_mode} illustrates the state machine of
+\textsc{Eager} mode with the transition conditions and corresponding
+actions for each state and how states transition during system
+operation.
 
 \subsection{Skip Module Hyperparameter
 Optimization}\label{sec:hyperparam}
@@ -1002,28 +1040,6 @@ cases, which can be grouped into three categories:
 
 \paragraph{Eager Mode: Recall--FAR
 Trade-off}\label{eager-mode-recallfar-trade-off}
-
-\input{./3.fig/fig_eager_mode.tex}
-
-A key failure mode of the skip module, illustrated in Figure
-\ref{fig:qualitative_failure}a, is the missed detection of slowly
-developing or settling smoke, whose subtle inter-frame motion falls
-below the activation threshold of \textsc{AccMotionDet}. To mitigate
-this limitation, the skip module is augmented with an \textsc{Eager}
-mode. When the Big Model \(\mathcal{M}\) produces a fire/ smoke
-prediction on \(W_{\text{fire}}\) consecutive non-skipped frames, the
-module enters \textbf{eager mode} and suppresses all skip decisions (i.e
-set \(s_t = 1\) -- force inference) until the scene is declared safe
-again - defined as \(\mathcal{M}\) returns a negative prediction for
-\(W_{\text{clr}}\) consecutive frames. This mechanism ensures that
-frames immediately following a confirmed detection are always forwarded
-to \(\mathcal{M}\), thereby recovering recall on slow-developing or
-settling smoke scenarios.
-
-Figure \ref{fig:eager_mode} illustrates the state machine of
-\textsc{eager mode} with the transition conditions and corresponding
-actions for each state and how states transition during system
-operation.
 
 \input{./4.table/tb_gridsearch_accMotionDetEager.tex}
 

@@ -59,10 +59,10 @@ block active threshold $\tau$, and pixel difference sensitivity threshold
 $\tau_d$ --- that can significantly affect overall system performance. To
 identify the optimal configuration, we employ a constrained grid search over a
 validation set $D_{\text{val}}$. Let $R_{\text{base}}$ denote the baseline
-recall without skipping. For each candidate $\theta \in \Theta$, we evaluate
-the full pipeline $\text{Read} \rightarrow \mathcal{S}(\theta) \rightarrow
-[\mathcal{M}]$ and compute recall $R(\theta)$ and skip rate $S_r(\theta)$
-(see Section \ref{sec:metrics} for formal definitions).
+recall without skipping. For each candidate $\theta \in \Theta$, we evaluate the
+full pipeline (comprising the skip module $\mathcal{S}(\theta)$ followed by the
+classifier $\mathcal{M}$) on $D_{\text{val}}$ and compute recall $R(\theta)$ and
+skip rate $S_r(\theta)$ (see Section \ref{sec:metrics} for formal definitions).
 
 \textbf{Feasibility constraint.} A candidate $\theta$ is feasible only if:
 \begin{equation}
