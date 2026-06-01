@@ -849,6 +849,10 @@ Figure \ref{fig:qualitative_failure} shows five representative failure cases, wh
 <!-- !END_SYNC_BLOCK -->
 #### Analysis of Eager Mode: Recall-FAR Trade-off {#sec:analysis_eager}
 
+```{=latex}
+\input{./3.fig/fig_eager_analysis.tex}
+```
+
 A notable drawback of Eager mode shown in Table \ref{tb:cmp_other_temp_eager} is its tendency to increase false alarms (from 0.136% to 0.251%). Our analysis reveals that Eager mode cannot distinguish false-alarm-prone static scenes from genuine slow-developing or settled smoke events, as both exhibit near-zero inter-frame motion. In such static scenes, the classifier may produce fire/smoke predictions on several consecutive frames, causing the system to enter and remain in Eager mode with prolonged forced inference and elevated FAR. This highlights a fundamental limitation of heuristic, motion-based skip logic: it is insufficient to robustly handle all scenarios. We leave this as an open research question, with potential directions including skip modules that incorporate richer cues (such as color, texture, or learned features) to discriminate between these scene types.
 
 
