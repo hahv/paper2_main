@@ -719,8 +719,10 @@ this limitation, the Eager mode is introduced as a complementary mechanism to
 augment the skip module and recover recall in such cases. In this section, the
 Eager mode is evaluated in conjunction with the AccMotionDet-based skip module,
 with its hyperparameters fixed to the optimal values identified in Section
-\ref{sec:accMotionResults} (i.e., $\alpha{=}0.5,
-B{=}32,\tau{=}0.05,\tau_d{=}5,\tau_m{=}5,\newline K_{\max}{=}15$). A grid search is then conducted over the Eager mode parameters to identify the optimal configuration, as follows:
+\ref{sec:accMotionResults} (i.e.,
+$\alpha{=}0.5,B{=}32,\tau{=}0.05,\tau_d{=}5,\tau_m{=}5,K_{\max}{=}15$). A grid
+search is then conducted over the Eager mode parameters to identify the optimal
+configuration, as follows:
 
 + **Confirmation window $W_{\mathrm{fire}} \in \{1, 2, 3\}$**: defines the
   number of consecutive positive predictions required to trigger a transition
