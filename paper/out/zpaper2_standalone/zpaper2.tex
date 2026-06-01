@@ -396,7 +396,11 @@ Section \ref{sec:method}.
 
 \subsection{System Overview}\label{system-overview}
 
-\input{./3.fig/fig_pipeline.tex}
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\linewidth,keepaspectratio, scale=0.3]{3.fig/fig_pipeline.pdf}
+  \caption{Conventional frame-wise inference pipeline (top) versus the proposed skip-module-enabled pipeline (bottom) for indoor fire and smoke detection.}\label{fig:pipeline}
+\end{figure}
 
 The proposed system is a fire and smoke detection pipeline that
 processes a continuous video stream and classifies each frame as either
@@ -450,9 +454,72 @@ detection accuracy. The architecture and operation of skip module
 
 \subsection{Skip Module Design}\label{skip-module-design}
 
-\input{./3.fig/fig_skipmodule.tex}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\linewidth,keepaspectratio, scale=0.3]{3.fig/fig_skip_module.pdf}
+  \caption{Skip Module for Fire and Smoke Detection}\label{fig:skipmodule}
+\end{figure}
 
-\input{6.algo/skip_module.tex}
+% ── Algorithm as Image ──────────────────────────────────────
+\iftoggle{algoAsImage}{%
+    \algoimgref[0.7]{6.algo/algo_imgs/skip_module.jpg}{alg:skipmodule}
+}{%
+    \begin{algorithm}[ht]
+        \caption{Skip Module $\mathcal{S}$: Motion-Based Frame Gating}
+        \label{alg:skipmodule}
+        \begin{algorithmic}[1]
+
+            \Require Video stream $\{f_1, f_2, \dots\}$, motion
+            detector $\mathcal{D}$,
+            \Param scale factor $\alpha$, block size $B$, block active threshold $\tau$
+            \Ensure Skip decisions $\{s_1, s_2, \dots\}$, where $s_t
+            \in \{0,1\}$
+
+            \State $\tilde{f}_{\text{prev}} \leftarrow \text{null}$
+            \Comment{Initialize previous downsampled frame}
+
+            \For{each incoming frame $f_t$}
+
+            \Statex \hspace{1.5em} \textbf{Step 1: Pre-process}
+            \State Downsample $f_t$ by $\alpha$ to obtain $\tilde{f}_t$
+            \State Let $B_s \leftarrow B \cdot \alpha$
+            \Comment{Effective block size on downsampled frame}
+            \State Pad $\tilde{f}_t$ to be divisible by $B_s$
+
+            \Statex \hspace{1.5em} \textbf{Step 2: Compute Foreground Mask}
+            \If{$\tilde{f}_{\text{prev}} = \text{null}$} \Comment{No
+            previous frame on first iteration}
+            \State $s_t \leftarrow 1$ \Comment{Run inference on first frame}
+            \State $\tilde{f}_{\text{prev}} \leftarrow \tilde{f}_t$
+            \State \textbf{continue}
+            \EndIf
+            \State $\mathbf{M}_t \leftarrow
+            \mathcal{D}(\tilde{f}_t,\, \tilde{f}_{\text{prev}})$
+            \Comment{$\mathcal{D}$: e.g., FrameDiffDet or AccMotionDet}
+            \State Partition $\mathbf{M}_t$ into a grid of
+            non-overlapping blocks of size $B_s$
+            \State Mark a block as \textit{active} if its foreground
+            pixel ratio $> \tau$
+
+            \Statex \hspace{1.5em} \textbf{Step 3: Gating Decision}
+            \If{any active block exists}
+            \State $s_t \leftarrow 1$ \Comment{Motion detected, run
+            DL inference}
+            \Else
+            \State $s_t \leftarrow 0$ \Comment{No motion, skip inference}
+            \EndIf
+
+            \State $\tilde{f}_{\text{prev}} \leftarrow \tilde{f}_t$
+            \Comment{Update previous frame for next iteration}
+            \State \textbf{yield} $s_t$
+
+            \EndFor
+
+        \end{algorithmic}
+    \end{algorithm}
+
+}
+
 
 The proposed skip module \(\mathcal{S}\) is designed to suppress
 redundant DL inference by selectively identifying informative frames in
@@ -488,7 +555,48 @@ describe each method in detail, beginning with the simpler
 \subsubsection{FrameDiffDet --- Naive Motion
 Detection}\label{framediffdet-naive-motion-detection}
 
-\input{6.algo/frame_diff_det.tex}
+\noindent
+Let $F_t$ and $F_{\text{prev}}$ denote the grayscale frames converted from the
+downsampled inputs $\tilde{f}_t$ and $\tilde{f}_{\text{prev}}$, respectively.
+The detector takes these two consecutive downsampled frames as input
+and produces
+a binary foreground mask $\mathbf{M}_t \in \{0, 255\}$ as output, where each
+pixel is marked active (255) if the absolute inter-frame intensity difference
+exceeds a sensitivity threshold $\tau_d$, and inactive (0) otherwise. The
+procedure is formalized in Algorithm~\ref{alg:framediff_det}.
+
+% ── Algorithm as Image ──────────────────────────────────────
+\iftoggle{algoAsImage}{%
+    \algoimgref[0.7]{6.algo/algo_imgs/framediff_det.jpg}{alg:framediff_det}
+}{%
+    \begin{algorithm}[ht]
+        \caption{Frame Difference Detector (FrameDiffDet)}
+        \label{alg:framediff_det}
+        \begin{algorithmic}[1]
+
+            \Require Downsampled frames $\tilde{f}_t,\,
+            \tilde{f}_{\text{prev}}$
+            \Param $\tau_d$: pixel difference sensitivity threshold
+            \Ensure $\mathbf{M}_t \in \{0, 255\}$: binary foreground mask
+
+            \Statex
+
+            \State Convert $\tilde{f}_t$ and $\tilde{f}_{\text{prev}}$ to grayscale frames $F_t$ and $F_{\text{prev}}$
+
+            \Statex
+
+            \State $\mathbf{M}_t(i,j) \leftarrow
+            \begin{cases}
+                255 & |F_t(i,j) - F_{\text{prev}}(i,j)| > \tau_d \\
+                0   & \text{otherwise}
+            \end{cases}$
+
+            \State \Return $\mathbf{M}_t$
+
+        \end{algorithmic}
+    \end{algorithm}
+}
+
 
 \subsubsection{AccMotionDet --- Motion Detection with
 Accumulation}\label{accmotiondet-motion-detection-with-accumulation}
@@ -518,11 +626,88 @@ growth under persistent motion. A pixel is marked active (255) only when
 single-frame flicker, and inactive (0) otherwise. The procedure is
 formalized in Algorithm \ref{alg:acc_motion_det}.
 
-\input{6.algo/acc_motion_det.tex}
+% ── Algorithm as Image ──────────────────────────────────────
+\iftoggle{algoAsImage}{%
+    \algoimgref[0.8]{6.algo/algo_imgs/acc_motion_det.jpg}{alg:acc_motion_det}
+}{%
+    \begin{algorithm}[ht]
+        \caption{Accumulation Motion Detector (AccMotionDet)}
+        \label{alg:acc_motion_det}
+        \begin{algorithmic}[1]
+
+            \Require Downsampled frames $\tilde{f}_t,\,
+            \tilde{f}_{\text{prev}}$;
+            accumulated mask $\mathbf{K}_{t-1}$ (initialized to $\mathbf{0}$)
+            \Param $\tau_d$: pixel difference sensitivity,\;
+            $\omega$: motion increment,\;
+            $\tau_m$: activation threshold,\;
+            $K_{\max}$: accumulation cap,\;
+            $\delta$: decay rate
+            \Ensure $\mathbf{M}_t \in \{0, 255\}$: binary foreground mask;\;
+            $\mathbf{K}_t$: updated accumulated mask
+
+            \Statex
+
+            \State Convert $\tilde{f}_t$ and $\tilde{f}_{\text{prev}}$ to grayscale frames $F_t$ and $F_{\text{prev}}$
+
+
+            \Statex
+
+            \State $\mathbf{D}_t \leftarrow \left| F_t -
+            F_{\text{prev}} \right|$
+            \Comment{Absolute inter-frame difference}
+
+            \State $\symbf{\Delta}_t(i,j) \leftarrow
+            \begin{cases}
+                \omega & \mathbf{D}_t(i,j) > \tau_d \\
+                0      & \text{otherwise}
+            \end{cases}$
+            \Comment{Instantaneous increment map}
+
+            \Statex
+
+            \State $\mathbf{K}_t \leftarrow
+            \min\!\left(\mathbf{K}_{t-1} + \symbf{\Delta}_t,\; K_{\max}\right)$
+            \Comment{Accumulate and cap}
+
+            \State $\mathbf{K}_t \leftarrow \max\!\left(\mathbf{K}_t
+            - \delta,\; 0\right)$
+            \Comment{Temporal decay}
+
+            \Statex
+
+            \State $\mathbf{M}_t(i,j) \leftarrow
+            \begin{cases}
+                255 & \mathbf{K}_t(i,j) \geq \tau_m \\
+                0   & \text{otherwise}
+            \end{cases}$
+            \Comment{Threshold to binary mask}
+
+            \State \Return $\mathbf{M}_t,\; \mathbf{K}_t$
+
+        \end{algorithmic}
+    \end{algorithm}
+}
+
 
 \subsection{Eager Mode Design}\label{sec:eagerMode}
 
-\input{./3.fig/fig_eager_mode.tex}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\linewidth,keepaspectratio]{3.fig/eager_mode.pdf}
+    \caption{%
+        State machine of the \textsc{Eager} mode extension to the
+        \textsc{AccMotionDet}-based skip module. Transitions are annotated with
+        \textit{if} conditions and \textit{then} actions specifying variable
+        updates. In \textsc{Normal} mode, $\mathcal{S}$ operates as designed,
+        with periodic forced checks every $N_{\mathrm{chk}}$ frames. Upon
+        $W_{\mathrm{fire}}$ consecutive positive predictions, the system enters
+        \textsc{Eager} mode, bypassing $\mathcal{S}$ (i.e., $s_t = 1$) to
+        forward every frame to $\mathcal{M}$. The system returns to
+        \textsc{Normal} mode after $W_{\mathrm{clr}}$ consecutive negative
+        predictions. }\label{fig:eager_mode}
+\end{figure}
+
 
 A preliminary analysis of the self-constructed indoor surveillance video
 dataset revealed that slow-developing or nearly stationary smoke events
@@ -561,16 +746,172 @@ operation.
 \subsection{Skip Module Hyperparameter
 Optimization}\label{sec:hyperparam}
 
-\input{./6.algo/hyperparam_algo.tex}
+% ── Algorithm as Image ──────────────────────────────────────
+\iftoggle{algoAsImage}{%
+    \algoimgref[0.7]{6.algo/algo_imgs/hyperparam.jpg}{alg:hyperparam}
+}{%
+    \begin{algorithm}[htbp]
+        \caption{Skip Module Hyperparameter Selection}
+        \label{alg:hyperparam}
+        \begin{algorithmic}[1]
+
+            \Require Parameter space $\Theta$, validation set $D_{\text{val}}$,
+            DL model $\mathcal{M}$
+            \Param recall tolerance $\delta_R$,
+            weights $w_S, w_R$
+            \Ensure Optimal parameters $\theta^*$
+
+            \State baseline $\gets$
+            \textsc{EvaluatePipeline}($D_{\text{val}}$, skip=None,
+            $\mathcal{M}$)
+            \State Extract $R_{\text{base}}$ from baseline
+            \State $\Theta_{\text{feasible}} \gets \emptyset$
+
+            \Comment{\textbf{Pass 1: Collect feasible candidates}}
+            \For{each $\theta \in \Theta$}
+            \State results $\gets$
+            \textsc{EvaluatePipeline}($D_{\text{val}}$,
+            $\mathcal{S}(\theta)$, $\mathcal{M}$)
+            \State Extract $R(\theta)$, $S_r(\theta)$ from results
+            \If{$R(\theta) \geq R_{\text{base}} - \delta_R$}
+            \State $\rho(\theta) \gets 1 - \dfrac{R_{\text{base}} -
+            R(\theta)}{\delta_R}$
+            \State $\Theta_{\text{feasible}} \gets
+            \Theta_{\text{feasible}} \cup \{(\theta,\,
+            \rho(\theta),\, S_r(\theta))\}$
+            \EndIf
+            \EndFor
+
+            \Comment{\textbf{Pass 2: Range-normalize and select}}
+            \State $\tilde{\rho}(\theta) \gets \dfrac{\rho(\theta) -
+            \min_{\Theta_{\text{feasible}}}\rho}{\max_{\Theta_{\text{feasible}}}\rho
+            - \min_{\Theta_{\text{feasible}}}\rho}$ \quad for each
+            $\theta \in \Theta_{\text{feasible}}$
+            \State $\tilde{S}_r(\theta) \gets \dfrac{S_r(\theta) -
+            \min_{\Theta_{\text{feasible}}}S_r}{\max_{\Theta_{\text{feasible}}}S_r
+            - \min_{\Theta_{\text{feasible}}}S_r}$ \quad for each
+            $\theta \in \Theta_{\text{feasible}}$
+            \State $\theta^* \gets \arg\max_{\theta \in
+            \Theta_{\text{feasible}}} \bigl[
+            w_R\,\tilde{\rho}(\theta) + w_S\,\tilde{S}_r(\theta) \bigr]$
+
+            \State \Return $\theta^*$
+
+        \end{algorithmic}
+    \end{algorithm}
+}
+
+The skip module $\mathcal{S}$, as described in Algorithm \ref{alg:skipmodule},
+is governed by several hyperparameters --- including scale factor $\alpha$,
+block active threshold $\tau$, and pixel difference sensitivity threshold
+$\tau_d$ --- that can significantly affect overall system performance. To
+identify the optimal configuration, we employ a constrained grid search over a
+validation set $D_{\text{val}}$. Let $R_{\text{base}}$ denote the baseline
+recall without skipping. For each candidate $\theta \in \Theta$, we evaluate the
+full pipeline (comprising the skip module $\mathcal{S}(\theta)$ followed by the
+classifier $\mathcal{M}$) on $D_{\text{val}}$ and compute recall $R(\theta)$ and
+skip rate $S_r(\theta)$ (see Section \ref{sec:metrics} for formal definitions).
+
+\textbf{Feasibility constraint.} A candidate $\theta$ is feasible only if:
+\begin{equation}
+    R(\theta) \geq R_{\text{base}} - \delta_R,
+\end{equation}
+where $\delta_R > 0$ is the maximum allowable recall drop (e.g.,
+$\delta_R = 0.01$ permits at most a 1\% reduction relative to the baseline).
+
+\textbf{Scoring and selection.} For each feasible candidate, we compute the
+recall retention score
+\begin{equation}\label{eq:rho}
+    \rho(\theta) = 1 - \frac{R_{\text{base}} - R(\theta)}{\delta_R},
+\end{equation}
+which maps the recall drop linearly onto $[0,1]$ within the feasible region.
+Both $\rho(\theta)$ and $S_r(\theta)$ are range-normalized over
+$\Theta_{\text{feasible}}$ (Pass 2 of Algorithm \ref{alg:hyperparam}),
+yielding $\tilde{\rho}(\theta)$ and $\tilde{S}_r(\theta) \in [0,1]$, so that
+the weights $w_S$ and $w_R$ directly reflect their intended relative importance.
+The optimal configuration is then:
+\begin{equation}
+    \theta^*
+    = \arg\max_{\theta \in \Theta_{\text{feasible}}}
+    \Bigl[ w_R\,\tilde{\rho}(\theta) + w_S\,\tilde{S}_r(\theta) \Bigr],
+\end{equation}
+where $\Theta_{\text{feasible}} = \{\theta \in \Theta : R(\theta) \geq
+R_{\text{base}} - \delta_R\}$ and $w_S + w_R = 1$.
+
+\textbf{FAR guarantee and exclusion from scoring.}
+Let $FP(\theta)$ and $FP_{\text{base}}$ denote the number of false positives
+produced by the skip-enabled and baseline systems, respectively, and let
+$N_{\text{skip\_neg}}(\theta)$ denote the number of ground-truth negative frames
+skipped by the skip module $\mathcal{S}$ under configuration $\theta$ (see
+    Section \ref{sec:metrics} for definitions of $\mathrm{FAR}$, $S_r$, and
+$N_{\text{neg}}$). Since every skipped frame is labeled negative, false
+positives arise only from frames passed to classifier $\mathcal{M}$, so
+$FP(\theta) = FP_{\text{base}} - a$ for some $a \geq 0$. Because a skipped false
+positive must simultaneously be a baseline false positive and a skipped negative
+frame, $a \leq \min(FP_{\text{base}}, N_{\text{skip\_neg}})$ without any
+assumption on the relationship between the skip module $\mathcal{S}$
+and the classifier $\mathcal{M}$. Dividing
+by $N_{\text{neg}}$ and substituting $\mathrm{FAR}_{\text{base}} =
+FP_{\text{base}}/N_{\text{neg}}$ and $S_r(\theta) =
+N_{\text{skip\_neg}}/N_{\text{neg}}$ yields the assumption-free interval:
+\begin{equation}\label{eq:far_interval}
+    \mathrm{FAR}(\theta) \;\in\;
+    \Bigl[\max\!\bigl(0,\;\mathrm{FAR}_{\text{base}} - S_r(\theta)\bigr),\;
+    \mathrm{FAR}_{\text{base}}\Bigr].
+\end{equation}
+
+The upper bound confirms that the skip module cannot increase the false alarm
+rate by design; the primary safety risk is therefore recall degradation caused
+by incorrectly skipped fire/smoke frames, which motivates enforcing the recall
+constraint as a hard feasibility gate. Explicit FAR optimization is nonetheless
+unnecessary: since $\mathcal{S}$ operates solely on inter-frame motion without
+access to $\mathcal{M}$'s outputs, its hyperparameters do not directly control
+which baseline false positives are removed, and including FAR in the objective
+could favor configurations that overfit to validation-specific error patterns.
+We accordingly report $\mathrm{FAR}(\theta)$ only as an observed consequence
+metric in the results tables.
+
 
 \section{Experiments and Results}\label{sec:results}
 
 \subsection{Fire and Smoke Indoor Video
 Dataset}\label{fire-and-smoke-indoor-video-dataset}
 
-\input{./3.fig/fig_videodb.tex}
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\linewidth,keepaspectratio, scale=0.3]{3.fig/fig_videodb.pdf}
+  \caption{Representative frames extracted from the indoor fire and smoke video dataset used in this study.}\label{fig:videodb}
+\end{figure}
 
- \input{./4.table/tb_ufireindoor.tex}
+
+ \begin{table*}[htbp]
+    \caption{Comparison of existing fire and smoke video datasets with the proposed dataset (150 videos; static CCTV cameras; diverse indoor environments). Unlike most existing datasets, 143 out of 150 videos are recorded at HD resolution (1280$\times$720) or above, matching commercial surveillance camera standards.}
+    \label{tb:ufireindoor}
+    \csvreader[separator=semicolon,
+    no head,
+    range=2-,
+    centered tabularray = {
+    width = \textwidth,
+    colspec = {X[2.5,c]X[1.6,c]X[0.6,c]X[c]X[c]X[0.9,c]X[0.65,c]X[0.65,c]X[0.7,c]},
+    colsep = {3pt},
+    hlines,
+    vlines,
+    cells = {font = \small, halign = c, valign = m},
+    row{1} = {font = \bfseries\scriptsize},
+    },
+    ]{4.table/tb_ufireindoor.csv}{}{
+    \csvexpval\csvcolii &
+    \csvexpval\csvcoliii &
+    \csvexpval\csvcoliv &
+    \csvexpval\csvcolv &
+    \csvexpval\csvcolvi &
+    \csvexpval\csvcolvii &
+    \csvexpval\csvcolviii &
+    \csvexpval\csvcolix &
+    \csvexpval\csvcolx
+    }
+\end{table*}
+
 
 Several existing benchmarks address this detection task, including
 FireNet \citeproc{ref-jadon2019firenet}{{[}17{]}}, Firesense
@@ -647,7 +988,30 @@ Quantitative results are reported using standard classification metrics
 --- accuracy, recall, false alarm rate (\(\mathrm{FAR}\)), precision,
 F1-score, and frames per second (FPS) --- as defined below.
 
-\input{./5.eq/eq_metrics.tex}
+\begin{align}
+  \text{Accuracy} &= \frac{TP + TN}{TP + TN + FP + FN}, \\
+  \text{Recall (R)} &= \frac{TP}{TP + FN}, \\
+  \text{False Alarm Rate (FAR)} &= \frac{FP}{FP + TN}, \\
+  \text{Precision (P)} &= \frac{TP}{TP + FP}, \\
+  \text{F1-score} &= 2 \times \frac{P \times R}{P + R}, \\
+  \text{FPS} &= \frac{\text{Total Frames}}{\text{Total Processing Time (seconds)}},\\
+\end{align}
+where $TP$, $TN$, $FP$, and $FN$ represent True Positive, True Negative, False Positive, and False Negative, respectively.
+
+In addition to standard metrics, we report the skip rate $S_r$, a system-level
+efficiency criterion specific to the proposed skip-based framework. Skip rate
+measures the proportion of ground-truth negative frames correctly bypassed by
+the skip module $\mathcal{S}$, defined as
+\begin{align}
+  S_r = \frac{N_{\text{skip\_neg}}}{N_{\text{neg}}}
+\end{align}
+
+where $N_{\text{skip\_neg}}$ is the number of ground-truth negative frames
+assigned $s_t = 0$ by the skip module $\mathcal{S}$ (i.e., background frames
+bypassed without invoking big DL model $\mathcal{M}$), and $N_{\text{neg}}$ is
+the total number of ground-truth negative frames in the evaluated set. A higher
+$S_r$ indicates greater computational savings, while a drop in recall may
+signals unsafe skipping of fire/smoke frames.
 
 \subsection{Models and Implementation Details}\label{sec:baselines}
 
@@ -771,7 +1135,49 @@ The search space is as follows:
   (\(\tau_d = 10\), requiring strong, unambiguous motion).
 \end{itemize}
 
-\input{./4.table/tb_val_results_frameDiff.tex}
+\begin{table*}[hbtp]
+    \caption{Representative \textsc{FrameDiffDet} hyperparameter configurations
+        evaluated on the validation set, illustrating the recall--efficiency
+        trade-off across the full search space of 48 configurations (subset
+        shown for brevity). Configurations with a ranking score of ``-'' violate
+        the recall constraint ($\delta_R = 0.015$) and are included solely to
+        illustrate the trade-off at higher skip rates. Recall (\%) reports the
+        retained recall with the absolute drop relative to the baseline in
+        parentheses, i.e., $R\ (-\Delta R)$. The best and second-best values per
+        metric are highlighted in \textbf{bold} and \underline{\textit{italic
+        underline}}, respectively.}
+    \label{tb:val_results_frameDiff}
+    \csvreader[separator=semicolon,
+        no head,
+        range=1-,
+        centered tabularray = {
+            width = \textwidth,
+            colspec = {X[2,c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]},
+            colsep = {1pt},
+            hlines,
+            vlines,
+            cells = {font = \scriptsize, halign = c, valign = m},
+            row{1} = {font = \bfseries\scriptsize},
+            row{2} = {font = \bfseries\scriptsize},
+            cell{1}{1}  = {r=2}{c},  % Exp. spans rows 1-2
+            cell{1}{2}  = {c=4}{c},  % Parameters spans cols 2-5
+            cell{1}{6}  = {c=4}{c},  % Metrics spans cols 6-9
+            cell{1}{10} = {r=2}{c},  % Combined Score spans rows 1-2
+        },
+    ]{4.table/opt_selected_rp__per_frame_frameDiff.csv}{}{%
+        \csvexpval\csvcoli   &
+        \csvexpval\csvcolii  &
+        \csvexpval\csvcoliii &
+        \csvexpval\csvcoliv  &
+        \csvexpval\csvcolv   &
+        \csvexpval\csvcolvi  &
+        \csvexpval\csvcolvii &
+        \csvexpval\csvcolviii &
+        \csvexpval\csvcolix  &
+        \csvexpval\csvcolx
+    }
+\end{table*}
+
 
 Table \ref{tb:val_results_frameDiff} presents representative
 configurations illustrating the recall--efficiency trade-off; the full
@@ -804,7 +1210,50 @@ for skip decisions, as described in the following section.
 \paragraph{Hyperparameter Optimization Results for the
 AccMotionDet-based Skip Module}\label{sec:accMotionResults}
 
-\input{./4.table/tb_val_results_accMotionDet.tex}
+\begin{table*}[hbtp]
+    \caption{Representative \textsc{AccMotionDet} hyperparameter configurations
+        and their corresponding validation-set performance. Note that the
+        ``Recall (\%)'' column displays the retained recall alongside the
+        absolute recall drop relative to the baseline in parentheses, i.e.,
+        Recall (-Recall Drop). The best and second-best results for each metric
+        are highlighted in \textbf{bold} and \textit{\underline{italic
+        underline}}, respectively. Note that Motion increment $\omega=5$ and
+        Decay rate $\delta=0.1$ are fixed across all configurations. }
+    \label{tb:val_results_accMotionDet}
+    \csvreader[separator=semicolon,
+        no head,
+        range=1-,
+        centered tabularray = {
+            width = \textwidth,
+            colspec = {X[2,c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]},
+            colsep = {1pt},
+            hlines,
+            vlines,
+            cells = {font = \scriptsize, halign = c, valign = m},
+            row{1} = {font = \bfseries\scriptsize},
+            row{2} = {font = \bfseries\tiny},
+            % ↓ only 3 new lines needed
+            cell{1}{1} = {r=2}{c},   % Exp. spans rows 1-2
+            cell{1}{2} = {c=8}{c},   % Parameters spans cols 2-9
+            cell{1}{8} = {c=4}{c},  % Metrics spans cols 10-13
+            cell{1}{12} = {r=2}{c},  % Combined Score spans rows 1-2
+        },
+    ]{4.table/opt_selected_rp__per_frame_accMotionDet.csv}{}{
+        \csvexpval\csvcoli &
+        \csvexpval\csvcolii &
+        \csvexpval\csvcoliii &
+        \csvexpval\csvcoliv &
+        \csvexpval\csvcolv &
+        \csvexpval\csvcolvi &
+        \csvexpval\csvcolvii &
+        \csvexpval\csvcolviii &
+        \csvexpval\csvcolix &
+        \csvexpval\csvcolx &
+        \csvexpval\csvcolxi &
+        \csvexpval\csvcolxii
+    }
+\end{table*}
+
 
 The hyperparameter search for \textsc{AccMotionDet} is designed to
 mirror the FrameDiffDet study while accounting for the temporal
@@ -873,7 +1322,41 @@ improvement over the 24.7 FPS baseline.
 \subsubsection{Frame-Level Performance and Throughput: Baselines and
 Skip Module}\label{sec:e2e-perf}
 
-\input{./4.table/tb_perf_per_frame.tex}
+\begin{table}[htbp]
+    \caption{Frame-level performance and throughput of the proposed pipeline
+    against lightweight fire-and-smoke detectors on the test set. ``Our Big
+    Model (with Skip Module)'' refers to the full proposed pipeline. Recall,
+    FAR, Accuracy, and Precision are reported in percentage (\%); FPS is
+    averaged across all frames in the test videos. GFLOPs denotes the static
+    per-frame floating-point operations ($10^9$) of the detection model. The
+    best and second-best values per metric are highlighted in \textbf{bold} and
+    \underline{\textit{italic underline}}, respectively.}
+    \label{tb:perf_per_frame}
+    \csvreader[separator=semicolon,
+        no head,
+        range=1-,
+        centered tabularray = {
+        width = \textwidth,
+        colspec = {X[2,c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]},
+        colsep = {4pt},
+        hlines,
+        vlines,
+        cells = {font = \small, halign = c, valign = m},
+        row{1} = {font = \bfseries\small},
+    },
+    ]{4.table/tb_perf_per_frame.csv}{}{%
+    \csvexpval\csvcoli &
+    \csvexpval\csvcolii &
+    \csvexpval\csvcoliii &
+    \csvexpval\csvcoliv &
+    \csvexpval\csvcolv &
+    \csvexpval\csvcolvi &
+    \csvexpval\csvcolvii &
+    \csvexpval\csvcolviii &
+    \csvexpval\csvcolix
+    }
+\end{table}
+
 
 Table \ref{tb:perf_per_frame} benchmarks the proposed pipeline
 (\textsc{AccMotionDet} skip module with the optimal configuration paired
@@ -920,9 +1403,67 @@ fraction of positive predictions within the buffer exceeds a persistence
 threshold \(\tau_\text{persist}\); otherwise, the prediction is
 suppressed and the frame is relabelled as negative.
 
-\input{./4.table/tb_val_results_Tpt.tex}
+\begin{table*}[hbtp]
+    \caption{Representative hyperparameter grid search results for Temporal Persistence Thresholding
+    (TPT) on the validation set. The best and second-best values per metric are
+    highlighted in \textbf{bold} and \underline{\textit{italic underline}},
+    respectively.}
+    \label{tb:gridsearch_tpt}
+    \csvreader[separator=semicolon,
+    no head,
+    range=1-,
+    centered tabularray = {
+    width = \columnwidth,
+    colspec = {X[2,c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]},
+    colsep = {1pt},
+    hlines,
+    vlines,
+    cells = {font = \small, halign = c, valign = m},
+    row{1} = {font = \bfseries\scriptsize},
+    },
+    ]{4.table/selected_tb_gridsearch_Tpt.csv}{}{
+        \csvexpval\csvcoli &
+        \csvexpval\csvcolii &
+        \csvexpval\csvcoliii &
+        \csvexpval\csvcoliv &
+        \csvexpval\csvcolv &
+        \csvexpval\csvcolvi &
+        \csvexpval\csvcolvii &
+        \csvexpval\csvcolviii &
+        \csvexpval\csvcolix
+    }
+\end{table*}
 
-\input{./4.table/tb_cmp_other_temp.tex}
+
+\begin{table*}[htbp]
+    \caption{Frame-level performance comparison between the no-skip baseline,
+    TPT variants, and the proposed pipeline (Big Model with AccMotionDet skip
+    module) on the test set. The best and second-best values per metric are
+    highlighted in \textbf{bold} and \underline{\textit{italic underline}},
+    respectively.}
+    \label{tb:cmp_other_temp}
+    \csvreader[separator=semicolon,
+        no head,
+        range=1-5, % first 5 rows, exclude the eager mode results
+        centered tabularray = {
+        colspec = {X[2,c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]},
+        colsep = {3pt},
+        hlines,
+        vlines,
+        cells = {font = \small, halign = c, valign = m},
+        row{1} = {font = \bfseries\small},
+    },
+    ]{4.table/tb_cmp_other_temp_with_eager.csv}{}{
+        \csvexpval\csvcoli &
+        \csvexpval\csvcolii &
+        \csvexpval\csvcoliii &
+        \csvexpval\csvcoliv &
+        \csvexpval\csvcolv &
+        \csvexpval\csvcolvi &
+        \csvexpval\csvcolvii &
+        \csvexpval\csvcolviii
+    }
+\end{table*}
 
 We follow the hyperparameter selection protocol of
 \citeproc{ref-de2023hybrid}{{[}10{]}}, evaluating TPT on the validation
@@ -955,7 +1496,47 @@ remains within the safety constraint \(\delta_R = 0.015\).
 \subsubsection{AccMotionDet Skip Module with Eager
 Mode}\label{accmotiondet-skip-module-with-eager-mode}
 
-\input{./4.table/tb_gridsearch_accMotionDetEager.tex}
+\begin{table*}[hbtp]
+    \caption{Representative validation-set grid search results for \textsc{AccMotionDet}
+    (optimal configuration from Section~\ref{sec:hyperparam}) augmented
+    with \textsc{Eager} mode. The ``Recall (\%)'' column reports retained recall
+    with the absolute drop relative to the baseline in parentheses (i.e.,
+    Recall $-$ Recall Drop). The best and second-best results per metric are
+    highlighted in \textbf{bold} and \textit{\underline{italic underline}},
+    respectively.
+}
+    \label{tb:gridsearch_accMotionDetEager}
+    \csvreader[separator=semicolon,
+        no head,
+        range=1-,
+        centered tabularray = {
+            width = \textwidth,
+            colspec = {X[2.5,c]X[c]X[c]X[c]X[1.5,c]X[c]X[1.5,c]X[c]X[1.5,c]},
+            colsep = {1pt},
+            hlines,
+            vlines,
+            cells = {font = \scriptsize, halign = c, valign = m},
+            row{1} = {font = \bfseries\scriptsize},
+            row{2} = {font = \bfseries\tiny},
+            % ↓ configure multi-span header lines
+            cell{1}{1} = {r=2}{c},   % Exp. (Method)
+            cell{1}{2} = {c=3}{c},   % Parameters
+            cell{1}{5} = {c=4}{c},   % Metrics
+            cell{1}{9} = {r=2}{c},   % Combined Score
+        },
+    ]{4.table/opt_selected_rp__per_frame_accMotionDet_Eager.csv}{}{
+        \csvexpval\csvcoli &
+        \csvexpval\csvcolii &
+        \csvexpval\csvcoliii &
+        \csvexpval\csvcoliv &
+        \csvexpval\csvcolv &
+        \csvexpval\csvcolvi &
+        \csvexpval\csvcolvii &
+        \csvexpval\csvcolviii &
+        \csvexpval\csvcolix
+    }
+\end{table*}
+
 
 As established in Section \ref{sec:e2e-perf}, the AccMotionDet-based
 skip module achieved a throughput improvement of nearly 30\% in FPS;
@@ -1017,7 +1598,31 @@ then evaluated on the test set \(\mathcal{D}_{\text{test}}\) and
 compared against the skip-only configuration in Table
 \ref{tb:cmp_other_temp_eager}.
 
-\input{./4.table/tb_cmp_other_temp_eager.tex}
+\begin{table*}[htbp]
+    \caption{Comparison of Video-level performance metrics, measuring the delay and initial detection speed. The best and second-best results for each metric are highlighted in \textbf{bold} and \textit{\underline{italic underline}}, respectively.}
+    \label{tb:cmp_other_temp_eager}
+    \csvreader[separator=semicolon,
+        no head,
+        range=1-,
+        centered tabularray = {
+        colspec = {X[2,c]X[c]X[c]X[c]X[c]X[c]X[c]X[c]},
+        colsep = {3pt},
+        hlines,
+        vlines,
+        cells = {font = \small, halign = c, valign = m},
+        row{1} = {font = \bfseries\small},
+    },
+    ]{4.table/tb_cmp_other_temp_with_eager.csv}{}{
+        \csvexpval\csvcoli &
+        \csvexpval\csvcolii &
+        \csvexpval\csvcoliii &
+        \csvexpval\csvcoliv &
+        \csvexpval\csvcolv &
+        \csvexpval\csvcolvi &
+        \csvexpval\csvcolvii &
+        \csvexpval\csvcolviii
+    }
+\end{table*}
 
 Table \ref{tb:cmp_other_temp_eager} reports the effect of \textsc{Eager}
 mode on system performance. \textsc{Eager} mode successfully recovers
@@ -1060,7 +1665,15 @@ Analysis}\label{quantitative-and-qualitative-analysis}
 
 \paragraph{Efficiency of Skip Module}\label{efficiency-of-skip-module}
 
-\input{./3.fig/fig_fps_increase.tex}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\linewidth,keepaspectratio, scale=0.3]{3.fig/fps_increase.pdf}
+  \caption{Computational efficiency of the proposed skip-module: (a) average
+  processing time of the skip-module (1.79 ms) compared to the BIG model
+  inference time (39.88 ms), representing a $\times 22$ reduction; (b) system
+  throughput with and without the skip-module, yielding a 29.4\% improvement in
+  FPS.}\label{fig:fps_increase}
+\end{figure}
 
 To evaluate the efficiency of the skip module, the BIG model was run on
 the test set \(\mathcal{D}_\text{test}\) with and without the skip
@@ -1092,7 +1705,16 @@ categories: success cases and failure cases.
 
 \textbf{Success Cases}
 
-\input{./3.fig/fig_quality_success.tex}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\linewidth,keepaspectratio]{3.fig/fig_qualitative_success.pdf}
+  \caption{Qualitative results illustrating successful skip module operations.
+    (a) and (b) Static background frames are correctly identified and skipped,
+    avoiding unnecessary inference. (c) and (d) Frames containing active fire
+    or smoke trigger the motion accumulator, correctly prompting the full
+    deep learning model to evaluate the frame.}
+  \label{fig:qualitative_success}
+\end{figure}
 
 Figure \ref{fig:qualitative_success} shows four representative success
 cases in which the skip module \(\mathcal{S}\) operates as intended.
@@ -1116,7 +1738,19 @@ These cases can be grouped into two categories:
 
 \textbf{Failure Cases}
 
-\input{./3.fig/fig_quality_failure.tex}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\linewidth,keepaspectratio]{3.fig/fig_qualitative_failure.pdf}
+    \caption{Qualitative analysis of skip module failure modes. (a) Missed
+        detection: slow-developing or settled smoke fails to trigger the motion
+        accumulator. (b--c) Wasted inferences: inaccurate motion detection OR
+        persistent motion (e.g., human activity) saturates the accumulator,
+        preventing frame skipping. (d--e) Big Model error: frames are correctly
+        passed to the deep learning model, yet the model produces incorrect
+        predictions.}
+    \label{fig:qualitative_failure}
+\end{figure}
+
 
 Figure \ref{fig:qualitative_failure} shows five representative failure
 cases, which can be grouped into three categories:
@@ -1143,7 +1777,18 @@ cases, which can be grouped into three categories:
 \paragraph{Analysis of Eager Mode: Recall-FAR
 Trade-off}\label{sec:analysis_eager}
 
-\input{./3.fig/fig_eager_analysis.tex}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\linewidth]{3.fig/eager_timeline.png}
+    \caption{Per-frame timeline illustrating a false-alarm scenario under
+    Eager mode. Once the classifier $\mathcal{M}$ produces
+    $W_{\text{fire}}$ consecutive positive predictions on a static
+    ambiguous scene, the system enters Eager mode (orange region),
+    forcing inference on every subsequent frame and causing a sustained
+    increase in FAR until $W_{\text{clr}}$ consecutive negative
+    predictions are observed.}
+    \label{fig:eager_timeline}
+\end{figure}
 
 A notable drawback of Eager mode shown in Table
 \ref{tb:cmp_other_temp_eager} is its tendency to increase false alarms

@@ -23,21 +23,21 @@ steps:
   - type: add_column
     cols:
       - name: Recall
-        expr: "(df['Recall'] * 100).round(2)"
+        expr: "(df['Recall'] * 100).round(3)"
       - name: FAR
-        expr: "(df['FAR'] * 100).round(4)"
+        expr: "(df['FAR'] * 100).round(3)"
       - name: Accuracy
-        expr: "(df['Accuracy'] * 100).round(2)"
+        expr: "(df['Accuracy'] * 100).round(3)"
       - name: F1_Score
-        expr: "df['F1_Score'].round(4)"
+        expr: "df['F1_Score'].round(3)"
       - name: Precision
-        expr: "(df['Precision'] * 100).round(2)"
+        expr: "(df['Precision'] * 100).round(3)"
       - name: FPS
-        expr: "df['FPS'].round(4)"
+        expr: "df['FPS'].round(2)"
       - name: "Recall Drop"
-        expr: "(df['Recall Drop'] * 100).round(2)"
+        expr: "(df['Recall Drop'] * 100).round(3)"
       - name: "FAR Drop"
-        expr: "(df['FAR Drop'] * 100).round(4)"
+        expr: "(df['FAR Drop'] * 100).round(3)"
 
   # ── 3. REORDER & SELECT COLUMNS ───────────────────────────
   - type: rename
@@ -57,13 +57,24 @@ steps:
       - "Recall (\\%)"
       - "FAR (\\%)"
       - "Accuracy (\\%)"
-      - "Precision (\\%)"
       - "F1 Score"
+      - "Precision (\\%)"
       - FPS
       - "Recall Drop"
       - "FAR Drop"
 
-  # ── 4. FILLNA ───────────────────────────────────────────────
+   # ── 4a. DECIMAL FORMAT ─────────────────────────────────────
+  - type: decimal_format
+    cols:
+      "Recall (\\%)": 3        # 94.3  → 94.30
+      "FAR (\\%)": 3           # 0.74  → 0.7400
+      "Accuracy (\\%)": 3      # 98.2  → 98.20
+      "Precision (\\%)": 3     # 97.0  → 97.00
+      "F1 Score": 3            # 0.956 → 0.9560
+      FPS: 2                   # 24.6  → 24.66
+      "Window Size $W$": int   # 5.0   → 5
+      "Persist Threshold $\\tau_p$": 1  # 0.2 → 0.2 (already 1dp, keeps it consistent)
+  # ── 4b. FILLNA ───────────────────────────────────────────────
   - type: fillna
     mapping:
       "Window Size $W$": "-"
@@ -88,23 +99,23 @@ steps:
     skip_rows: 0
     strict: false
 
-  # ── 7. APPEND DROP SUFFIX (after highlighting) ───────────
-  - type: add_column
-    cols:
-      - name: "Recall (\\%) $\\uparrow$"
-        expr: >
-          df.apply(lambda x:
-            str(x["Recall (\\%) $\\uparrow$"])
-            if pd.isna(x["Recall Drop"])
-            else str(x["Recall (\\%) $\\uparrow$"]) + " (-" + f"{x['Recall Drop']:.2f}" + ")",
-            axis=1)
-      - name: "FAR (\\%) $\\downarrow$"
-        expr: >
-          df.apply(lambda x:
-            str(x["FAR (\\%) $\\downarrow$"])
-            if pd.isna(x["FAR Drop"])
-            else str(x["FAR (\\%) $\\downarrow$"]) + " (-" + f"{x['FAR Drop']:.4f}" + ")",
-            axis=1)
+  # # ── 7. APPEND DROP SUFFIX (after highlighting) ───────────
+  # - type: add_column
+  #   cols:
+  #     - name: "Recall (\\%) $\\uparrow$"
+  #       expr: >
+  #         df.apply(lambda x:
+  #           str(x["Recall (\\%) $\\uparrow$"])
+  #           if pd.isna(x["Recall Drop"])
+  #           else str(x["Recall (\\%) $\\uparrow$"]) + " (-" + f"{x['Recall Drop']:.2f}" + ")",
+  #           axis=1)
+  #     - name: "FAR (\\%) $\\downarrow$"
+  #       expr: >
+  #         df.apply(lambda x:
+  #           str(x["FAR (\\%) $\\downarrow$"])
+  #           if pd.isna(x["FAR Drop"])
+  #           else str(x["FAR (\\%) $\\downarrow$"]) + " (-" + f"{x['FAR Drop']:.4f}" + ")",
+  #           axis=1)
 
   # ── 8. DROP HELPER COLUMN ────────────────────────────────
   - type: drop

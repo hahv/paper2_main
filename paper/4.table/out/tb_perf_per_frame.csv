@@ -1,7 +1,7 @@
-Method;Recall $\uparrow$;FAR $\downarrow$;Accuracy $\uparrow$;F1-Score $\uparrow$;Precision $\uparrow$;FPS $\uparrow$;GFLOPs $\downarrow$;Model size (Mb) $\downarrow$
-MobileNet \citeproc{ref-mukhopadhyay2019fpga}{{[}33{]}};5.84;\underline{\textcolor{black}{0.18}};77.49;0.11;91.06;35.15;\underline{\textcolor{black}{1.135}};20.6
-FireNet \citeproc{ref-jadon2019firenet}{{[}17{]}};34.1;13.47;74.07;0.38;44.11;48.12;\textbf{\textcolor{black}{0.018}};\textbf{\textcolor{black}{7.45}}
-YOLOv5l \citeproc{ref-de2023hybrid}{{[}10{]}};49.36;3.61;85.22;0.61;81.0;\underline{\textcolor{black}{78.08}};107.7;88.5
-YOLOv5s \citeproc{ref-de2023hybrid}{{[}10{]}};68.58;10.39;84.61;\underline{\textcolor{black}{0.68}};67.29;\textbf{\textcolor{black}{109.94}};15.8;\underline{\textcolor{black}{13.7}}
-Our Big Model (without Skip Module) ;\textbf{\textcolor{black}{95.62}};0.25;\textbf{\textcolor{black}{98.77}};\textbf{\textcolor{black}{0.97}};\underline{\textcolor{black}{99.17}};24.97;30.61;430.0
-Our Big Model \newline (with Skip Module) ;\underline{\textcolor{black}{94.38}};\textbf{\textcolor{black}{0.14}};\underline{\textcolor{black}{98.56}};\textbf{\textcolor{black}{0.97}};\textbf{\textcolor{black}{99.54}};32.32;30.61;430.0
+Method;Recall (\%) $\uparrow$;FAR (\%) $\downarrow$;Accuracy (\%) $\uparrow$;F1 Score $\uparrow$;Precision (\%) $\uparrow$;FPS $\uparrow$;GFLOPs $\downarrow$;Model size (Mb) $\downarrow$
+MobileNet \citeproc{ref-mukhopadhyay2019fpga}{{[}xx{]}};5.840;\underline{\textcolor{black}{0.179}};77.490;0.110;91.056;35.15;\underline{\textcolor{black}{1.14}};20.60
+FireNet \citeproc{ref-jadon2019firenet}{{[}xx{]}};34.097;13.467;74.074;0.385;44.107;48.12;\textbf{\textcolor{black}{0.02}};\textbf{\textcolor{black}{7.45}}
+YOLOv5l \citeproc{ref-de2023hybrid}{{[}xx{]}};49.360;3.609;85.216;0.613;81.000;\underline{\textcolor{black}{78.08}};107.70;88.50
+YOLOv5s \citeproc{ref-de2023hybrid}{{[}xx{]}};68.584;10.392;84.612;0.679;67.287;\textbf{\textcolor{black}{109.94}};15.80;\underline{\textcolor{black}{13.70}}
+Our Big Model (without Skip Module) ;\textbf{\textcolor{black}{95.616}};0.251;\textbf{\textcolor{black}{98.767}};\textbf{\textcolor{black}{0.974}};\underline{\textcolor{black}{99.166}};24.97;30.61;430.00
+Our Big Model (with Skip Module) ;\underline{\textcolor{black}{94.384}};\textbf{\textcolor{black}{0.136}};\underline{\textcolor{black}{98.562}};\underline{\textcolor{black}{0.969}};\textbf{\textcolor{black}{99.541}};32.32;30.61;430.00

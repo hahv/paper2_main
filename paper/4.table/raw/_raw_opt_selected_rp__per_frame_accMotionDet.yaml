@@ -1,8 +1,8 @@
-input: raw/_raw_opt_selected_rp__per_frame_frameDiff.csv
+input: raw/_raw_opt_selected_rp__per_frame_accMotionDet.csv
 output: output/
 sep: ";"
 prepend_lines:
-  - "Exp.;Parameters;;;; Metrics;;;;Ranking Score" # ← raw group header row
+  - "Method;Parameters;;;;;; Metrics;;;;Ranking Score" # ← raw group header row
 
 steps:
   # ── 1. CLEAN UP COLUMN NAMES ──────────────────────────────
@@ -22,7 +22,11 @@ steps:
       "w_R": "Weight Recall"
       "delta_R": "Recall Delta"
       "skip_rate": "Skip Rate"
-      "skip_proc.params.motion.params.diff_thresh": "Diff threshold"
+      "skip_proc.params.motion.params.diff_frame_th": "Diff threshold"
+      "skip_proc.params.motion.params.impact_plus_one": "Motion increment"
+      "skip_proc.params.motion.params.mask_th": "Activation threshold"
+      "skip_proc.params.motion.params.max_val": "Accumulation cap"
+      "skip_proc.params.motion.params.decay": "Decay rate"
       "skip_proc.params.scale_factor": "Scale factor"
       "skip_proc.params.block_size_orig": "Block size"
       "skip_proc.params.block_ratio_th": "Block active threshold"
@@ -31,14 +35,12 @@ steps:
   # ── 2. DROP JUNK COLUMNS ──────────────────────────────────
   - type: drop
     columns:
-      - skip_proc.params.motion.name # Redundant (always framediff_det.FrameDiffDet)
+      - skip_proc.params.motion.name # Redundant (always acc_motion_det)
 
   # ── 3. FILTER SELECTED ROWS ───────────────────────────────
   - type: filter
     conditions:
       - { column: select, op: "==", value: "x" }
-
-  # -- drop columns
 
   # ── 4. ROUND METRICS ──────────────────────────────────────
   # Using add_column to round floats so the CSV is readable
@@ -47,82 +49,114 @@ steps:
       - name: Combined Score
         expr: "df['Combined Score'].round(4).replace(-1.0, 9999)" # Replace -1 with 9999 for better sorting (since -1 means invalid/failed config)
       - name: Recall
-        expr: "(df['Recall'] * 100).round(2)" # Convert to percentage
+        expr: "(df['Recall'] * 100).round(3)" # Convert to percentage
       - name: FPR
         expr: "(df['FPR'] * 100).round(3)" # Convert to percentage
       - name: Accuracy
-        expr: "(df['Accuracy'] * 100).round(2)"
+        expr: "(df['Accuracy'] * 100).round(3)"
       - name: F1_Score
-        expr: "df['F1_Score'].round(2)"
+        expr: "df['F1_Score'].round(3)"
       - name: Precision
-        expr: "(df['Precision'] * 100).round(2)"
+        expr: "(df['Precision'] * 100).round(3)"
       - name: FPS
-        expr: "df['FPS'].round(1)"
+        expr: "df['FPS'].round(2)"
       - name: Skip Rate
         expr: "(df['Skip Rate'] * 100).round(2)"
       - name: "Exp."
-        expr: "df['Experiment'].str.replace('.*mt_temp_method_motion_block.*', 'FrameDiff', regex=True).str.replace('.*mt_no_temp_method.*', 'Baseline (No Skip module)', regex=True)"
+        expr: "df['Experiment'].str.replace('.*mt_temp_method_motion_block.*', 'AccMotionDet', regex=True).str.replace('.*mt_no_temp_method.*', 'Baseline (No Skip module)', regex=True)"
       - name: "Recall Drop"
-        expr: "(df['Recall Drop'] * 100).round(2)" # Convert to percentage
-
+        expr: "(df['Recall Drop'] * 100).round(3)" # Convert to percentage
 
   # ── 5. REORDER & SELECT COLUMNS ───────────────────────────
   - type: rename
     mapping:
       "Diff threshold": "Diff threshold $\\tau_d$"
+      "Motion increment": "Motion increment $\\omega$"
+      "Activation threshold": "Activation threshold $\\tau_m$"
+      "Accumulation cap": "Acc. cap $K_{\\max}$"
+      "Decay rate": "Decay rate $\\delta$"
       "Scale factor": "Scale factor $\\alpha$"
       "Block size": "Block size $B$"
       "Block active threshold": "Block active threshold $\\tau$"
       "Skip Rate": "Skip Rate (\\%)"
       "Recall": "Recall (\\%)"
-      "FPR": "FPR (\\%)"
+      "FPR": "FAR (\\%)"
 
   - type: select
     columns:
       # Identification
       - Exp.
+      # - Method
       # Hyperparameters
       - "Scale factor $\\alpha$"
       - "Block size $B$"
       - "Block active threshold $\\tau$"
       - "Diff threshold $\\tau_d$"
+      # - "Motion increment $\\omega$"
+      - "Activation threshold $\\tau_m$"
+      - "Acc. cap $K_{\\max}$"
+      # - "Decay rate $\\delta$"
 
       # Primary Metrics
       - "Recall (\\%)"
       - "Skip Rate (\\%)"
-      - "FPR (\\%)"
+      - "FAR (\\%)"
       - FPS
       - Combined Score
-      - "Recall Drop"          # ← FIX: keep it through the pipeline
+      - "Recall Drop"
+      # Detailed
+      # - recall_retention
+      # - far_reduction_norm
+      # - Skip Rate
+      # - Weight Skip
+      # - Weight FAR
+      # - Weight Recall
+      # - Recall Delta
 
+      # Secondary Metrics
+      # - F1_Score
+      # - Accuracy
+      # - Precision
 
   # ── 6. SORT ───────────────────────────────────────────────
   # Sort by highest score first
   - type: sort
-    by: ["Combined Score", "Recall (\\%)", "Skip Rate (\\%)", "FPR (\\%)",  "FPS"]
-    ascending: [false, false, false, true, false]
-
+    by: ["Combined Score"]
+    ascending: [false]
   # ── 7. REPLACE SENTINEL → DISPLAY VALUE ──────────────────  ← ADD THIS
   - type: add_column
     cols:
     - name: Combined Score
       expr: "df['Combined Score'].apply(lambda x: '-' if x == 9999 else f'{x:.4f}')"
-
+    # ── 7b. DECIMAL FORMAT ────────────────────────────────────  ← INSERT HERE
+  - type: decimal_format
+    cols:
+      "Recall (\\%)": 3
+      "FAR (\\%)": 3
+      "Skip Rate (\\%)": 2
+      FPS: 2
+      "Block size $B$": int
+      "Diff threshold $\\tau_d$": int
+      "Activation threshold $\\tau_m$": int
+      "Acc. cap $K_{\\max}$": int
   - type: fillna
     mapping:
       "Scale factor $\\alpha$": "-"
       "Block size $B$": "-"
       "Block active threshold $\\tau$": "-"
       "Diff threshold $\\tau_d$": "-"
+      "Motion increment $\\omega$": "-"
+      "Activation threshold $\\tau_m$": "-"
+      "Acc. cap $K_{\\max}$": "-"
+      "Decay rate $\\delta$": "-"
       "Skip Rate (\\%)": "-"
       "Combined Score": "-"
-
   # ── 8. STAMP ARROWS ───────────────────────────────────────
   - type: header_arrow
     columns:
       "Recall (\\%)":       up
       "Skip Rate (\\%)":    up
-      "FPR (\\%)":          down
+      "FAR (\\%)":          down
       FPS:                  up
       "Combined Score":     up
 
@@ -145,16 +179,8 @@ steps:
             if pd.isna(x["Recall Drop"])
             else str(x["Recall (\\%) $\\uparrow$"]) + " (-" + f"{x['Recall Drop']:.2f}" + ")",
             axis=1)
-  # ── 12. DROP HELPER COLUMN ────────────────────────────────
-  - type: drop                 # ← FIX: clean up before writing CSV
+
+  # ── 11. DROP HELPER COLUMN ────────────────────────────────
+  - type: drop
     columns:
       - "Recall Drop"
-
-  # ── 13. CLEAN NAN VALUES ──────────────────────────────────
-  # replace all "Combined Score" (as string = "nan") with '-' for better display (since
-  # these are failed configs that shouldn't be ranked)
-  - type: add_column
-    cols:
-      - name: "Combined Score $\\uparrow$"
-        expr: >
-          df["Combined Score $\\uparrow$"].replace('nan', '-')

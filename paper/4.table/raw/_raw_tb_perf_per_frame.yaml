@@ -1,4 +1,4 @@
-input: raw/_raw_opt_selected_rp__per_frame.csv
+input: raw/_raw_tb_perf_per_frame.csv
 output: output/
 sep: ";"
 
@@ -105,27 +105,50 @@ steps:
   - type: add_column
     cols:
       - name: Recall
-        expr: "(df['Recall'] * 100).round(2)"
+        expr: "(df['Recall'] * 100).round(3)"
       - name: FAR
-        expr: "(df['FAR'] * 100).round(2)"
+        expr: "(df['FAR'] * 100).round(3)"
       - name: Accuracy
-        expr: "(df['Accuracy'] * 100).round(2)"
+        expr: "(df['Accuracy'] * 100).round(3)"
       - name: F1-Score
-        expr: "df['F1-Score'].round(2)"
+        expr: "df['F1-Score'].round(3)"
       - name: Precision
-        expr: "(df['Precision'] * 100).round(2)"
+        expr: "(df['Precision'] * 100).round(3)"
       - name: FPS
         expr: "df['FPS'].round(2)"
+      - name: GFLOPs
+        expr: "df['GFLOPs'].round(2)"
+      - name: Model size (Mb)
+        expr: "df['Model size (Mb)'].round(2)"
+
+  - type: decimal_format
+    cols:
+      Recall: 3
+      FAR: 3
+      Accuracy: 3
+      F1-Score: 3
+      Precision: 3
+      FPS: 2
+      GFLOPs: 2
+      Model size (Mb): 2
+
+  - type: rename
+    mapping:
+      "Recall": "Recall (\\%)"
+      "FAR": "FAR (\\%)"
+      "Accuracy": "Accuracy (\\%)"
+      "Precision": "Precision (\\%)"
+      "F1-Score": "F1 Score"
 
   # ── 9. STAMP ARROWS ───────────────────────────────────────
   - type: header_arrow
     columns:
-      Recall: up
-      FAR: down
-      Accuracy: up
-      "F1-Score": up
-      Precision: up
-      FPS: up
+      "Recall (\\%)": up
+      "FAR (\\%)": down
+      "Accuracy (\\%)": up
+      "F1 Score": up
+      "Precision (\\%)": up
+      "FPS": up
       GFLOPs: down
       "Model size (Mb)": down
 

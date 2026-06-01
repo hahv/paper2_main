@@ -23,7 +23,7 @@ steps:
       - name: Accuracy
         expr: "(df['Accuracy'] * 100).round(3)"
       - name: F1-Score
-        expr: "df['F1-Score'].round(4)"
+        expr: "df['F1-Score'].round(3)"
       - name: Precision
         expr: "(df['Precision'] * 100).round(3)"
       - name: FPS
@@ -31,6 +31,16 @@ steps:
       - name: "Skip Rate"
         expr: "(df['Skip Rate'] * 100).round(2)"
 
+  # ── 2b. DECIMAL FORMAT ────────────────────────────────────
+  - type: decimal_format
+    cols:
+      Recall: 3         # 95.6   → 95.600
+      FAR: 3            # 0.25   → 0.250
+      Accuracy: 3       # 98.7   → 98.700
+      Precision: 3      # 99.1   → 99.100
+      "F1-Score": 3     # 0.973  → 0.9730
+      FPS: 2            # 24.9   → 24.97
+      "Skip Rate": 2    # 34.9   → 34.93
   # ── 3. SORT & SELECT ───────────────────────────────────────
   - type: sort
     by: [Recall, FAR, FPS]
@@ -53,8 +63,8 @@ steps:
       - "Recall (\\%)"
       - "FAR (\\%)"
       - "Accuracy (\\%)"
-      - "Precision (\\%)"
       - "F1 Score"
+      - "Precision (\\%)"
       - "Skip Rate (\\%)"
       - "FPS"
 
