@@ -152,6 +152,11 @@
     \includegraphics[width=#1\linewidth]{#2}
   \end{center}%
 }
+
+\algnewcommand\algorithmparam{\textbf{Parameters:}}
+\algnewcommand\Param{\item[\algorithmparam]}
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
 \usepackage{bookmark}
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \urlstyle{same}
@@ -169,32 +174,34 @@
 Motion-Heuristic Skip Module for Accelerated Inference in Indoor
 Environments}
 \author{Hoang Van-Ha, Jong Weon Lee, Park Chun-Su}
-\date{2026.05.20}
+\date{2026.06.01}
 
 \begin{document}
 \maketitle
 \begin{abstract}
 Conventional deep learning (DL)-based fire and smoke detection systems
-process every frame of a video stream through a computationally
-intensive model to classify the presence of fire or smoke with high
-accuracy. However, in surveillance scenarios --- particularly indoor
-environments --- video streams frequently contain static,
-background-only frames lacking motion or relevant events, rendering
-per-frame inference redundant and wasteful of computational resources.
-To address this limitation, this study proposes a novel skip-module
-mechanism that leverages motion detection to selectively bypass DL
-inference on non-informative frames in fire and smoke classification
-pipelines. The skip module is further augmented with Eager mode to
-recover recall on slow-developing or settled smoke events. Evaluation on
-a large-scale dataset comprising 150 indoor videos demonstrates that the
-proposed skip module achieves nearly 30\% throughput improvement in
-frames per second with a recall drop of only 1.23\% relative to the
-baseline, defined as the classification model performing per-frame
-inference without skipping. When augmented with Eager mode, the
-throughput gain is retained while the recall drop is further reduced to
-0.05\%, nearly fully recovering baseline detection performance. These
-results demonstrate the feasibility of plug-and-play inference
-acceleration for real-time fire and smoke indoor surveillance systems.
+perform inference on every video frame using high-complexity models to
+classify the presence of fire or smoke. However, in surveillance
+scenarios, particularly indoor environments, video streams frequently
+contain long periods of static background frames with little or no
+motion, rendering per-frame inference redundant and wasteful of
+computational resources. To address this limitation, this study proposes
+an efficient inference acceleration framework for fire and smoke
+surveillance systems that combines a motion-aware skip module with an
+Eager mode for recall recovery. The skip module leverages motion
+detection to selectively bypass unnecessary DL inference on
+non-informative frames, while the Eager mode periodically forces
+inference updates to mitigate missed detections from slow-developing or
+nearly stationary smoke events. Evaluation on a large-scale dataset
+comprising 150 indoor videos demonstrates that the proposed framework
+achieves nearly 30\% higher throughput than the baseline performing
+per-frame inference, with only a 0.05\% reduction in recall. In
+contrast, using the skip module alone results in a 1.24\% recall drop,
+highlighting the effectiveness of the Eager mode in recovering detection
+performance while preserving most of the throughput gain. These results
+demonstrate that the proposed framework provides an effective
+plug-and-play inference acceleration strategy for real-time indoor fire
+and smoke surveillance systems.
 \end{abstract}
 
 \section{Introduction}\label{sec:introduction}
@@ -209,54 +216,64 @@ estimated economic loss of 10 billion USD
 forest fire in Gyeongsang Province, South Korea, burned approximately
 90,000 acres, resulting in at least 27 fatalities and the evacuation of
 nearly 40,000 residents \citeproc{ref-southkoreafire:online}{{[}2{]}}.
-Automated early-stage fire and smoke detection systems are therefore
-critical for enabling timely intervention and minimizing damage.
+These incidents highlight the critical importance of automated
+early-stage fire and smoke detection systems for enabling timely
+intervention and minimizing damage.
 
-Numerous fire and smoke detection methods leveraging deep learning (DL)
-have been proposed in recent years
+In recent years, DL-based approaches have emerged as the prevailing
+methodology in fire and smoke detection systems
 \citeproc{ref-cheng2024visual}{{[}3{]}},
 \citeproc{ref-gragnaniello2024fire}{{[}4{]}}. In practical deployments,
-these systems are commonly applied to CCTV video streams, where DL-based
-classifiers or object detectors perform inference on each frame
-individually. Although this frame-wise paradigm is straightforward to
-implement, it exhibits two key limitations. First, it relies exclusively
-on spatial information within individual frames, neglecting temporal
-cues, such as motion, inherent in video data. Second, in surveillance
-scenarios, particularly in \textbf{indoor} environments, consecutive
-frames often exhibit minimal variation due to static scene content.
-Applying a DL model indiscriminately to every frame under such
-conditions is computationally redundant, increasing processing cost and
-latency without contributing to detection performance. This inefficiency
-is further compounded by the well-known accuracy-efficiency trade-off in
-DL: more accurate models are generally more computationally intensive,
-and redundant frame processing amplifies these demands, rendering
-real-time performance difficult to achieve.
+such systems are commonly integrated into CCTV video pipelines, where
+DL-based classifiers or object detectors perform inference on every
+individual frame. While this per-frame paradigm is straightforward to
+implement, it exhibits two major limitations. First, it relies solely on
+spatial information within isolated frames, neglecting temporal cues
+like motion video sequences. Second, in surveillance scenarios,
+particularly in \textbf{indoor} environments, video streams can exhibit
+minimal visual variation across consecutive frames due to static scene
+content. Indiscriminately applying computationally intensive DL models
+to every frame under these conditions introduces significant processing
+redundancy, increasing latency and computational overhead without
+improving detection performance. This inefficiency is further amplified
+by the well-known accuracy-efficiency trade-off in DL: high-accuracy
+models typically demand substantial computational resources, and
+indiscriminate frame processing amplifies resource demands, and
+indiscriminate per-frame inference magnifies these demands, posing a
+significant barrier to real-time deployment.
 
-A common strategy to reduce inference cost is to substitute a heavy,
-high-accuracy DL model with a lighter alternative; however, this
-typically degrades detection reliability, an unacceptable compromise in
-safety-critical applications such as fire and smoke detection. This
-study takes a complementary approach: rather than replacing the
-classifier, we introduce a lightweight skip-module that acts as a
-computational gate, selectively forwarding only frames with significant
-scene activity to the high-capacity classifier while bypassing static,
-non-informative frames. As illustrated in Fig. \ref{fig:pipeline}, the
-conventional pipeline processes every frame through the classifier,
-whereas the proposed pipeline inserts the skip-module upstream to
-conditionally suppress redundant inference calls.
+A common strategy for reducing inference cost is to substitute a
+high-complexity model with a lightweight alternative; however, this
+approach typically compromises detection reliability ­ an unacceptable
+trade-off in safety-critical applications such as fire and smoke
+surveillance. This study adopts a complementary approach: rather than
+replacing the classifier, we propose an efficient inference acceleration
+framework that introduces a lightweight, motion-aware skip module acting
+as a computational gate upstream of the classifier. The skip module
+leverages frame differencing-based motion estimation to selectively
+bypass DL inference on static, non-informative frames, while forwarding
+only frames with significant scene activity to the high-capacity
+classifier. To address a key failure mode of motion-based skipping ---
+namely, missed detections arising from slow-developing or nearly
+stationary smoke events --- the framework additionally incorporates an
+Eager mode that periodically forces inference updates to recover
+detection recall. As illustrated in Fig. 1, the conventional pipeline
+processes every frame through the classifier, whereas the proposed
+pipeline adds the skip module early in the process to conditionally
+suppress redundant inference calls.
 
 In particular, our main contributions are summarized as follows:
 
 \begin{itemize}
 \item
-  \textbf{Skip-Module Mechanism:} We propose a lightweight skip-module
-  that exploits motion estimation via frame differencing to identify
-  static scenes and bypass DL inference on static frames, reducing
+  \textbf{Motion-Aware Skip Module:} A lightweight skip module is
+  proposed that exploits frame differencing-based motion estimation to
+  identify and bypass DL inference on static frames, thereby reducing
   computational cost without modifying the underlying classifier. The
-  module is designed as a plug-and-play component compatible with
-  existing fire and smoke detection pipelines. To identify the optimal
-  operating configuration, we further develop a systematic
-  hyperparameter optimization procedure that maximizes throughput while
+  proposed module is designed as a plug-and-play component compatible
+  with existing fire and smoke detection pipelines. A systematic
+  hyperparameter optimization procedure is further developed to identify
+  the optimal operating configuration for maximizing throughput while
   preserving detection performance.
 \item
   \textbf{Indoor Fire and Smoke Video Dataset:} We construct an
@@ -268,15 +285,17 @@ In particular, our main contributions are summarized as follows:
   varying lighting conditions, providing a realistic benchmark for
   evaluating detection systems in static surveillance scenarios.
 \item
-  \textbf{Comprehensive System Analysis and Evaluation:} We integrate
-  the skip-module with a high-capacity DL classifier (BIG model) and
-  evaluate the combined system on our video dataset against the baseline
-  (per-frame inference without skipping) and existing methods. Results
-  demonstrate a roughly 30\% improvement in FPS with a recall reduction
-  of less than 1.5\%. We further analyze efficiency gains, qualitatively
-  examine success and failure cases, and propose \textsc{Eager} mode to
-  recover recall on slow-developing or settled smoke events --- a key
-  failure mode of motion-based skipping.
+  \textbf{Comprehensive System Evaluation and Analysis:} The proposed
+  framework is integrated with a high-capacity DL classifier (BIG model)
+  and evaluated on the constructed dataset against a per-frame inference
+  baseline and existing methods. Results demonstrate approximately 30\%
+  higher throughput than the baseline, with a recall reduction of less
+  than 0.05\% when the Eager mode is active --- compared to a 1.24\%
+  recall drop when the skip module is used alone --- highlighting the
+  effectiveness of the Eager mode in recovering detection performance
+  while preserving most throughput gains. Beyond quantitative
+  benchmarking, a detailed efficiency analysis of the proposed system is
+  conducted, and success and failure cases.
 \end{itemize}
 
 The rest of this paper is organized as follows:
@@ -285,15 +304,15 @@ methods for video and relevant motion detection techniques,
 contextualizing the need for efficient processing in static surveillance
 scenarios. Section~\ref{sec:method} describes the proposed system
 architecture, the design of the skip-module, its integration with the
-BIG model, and the hyperparameter optimization strategy.
-Section~\ref{sec:results} presents the experimental setup, evaluation
-metrics, and performance results on our large-scale indoor video
-dataset, including comparative analyses against the baseline and an
-existing temporal-aware method, qualitative examination of success and
-failure cases, and the proposed \textsc{Eager} mode to address missed
-detection scenarios of the skip module. Finally,
-Section~\ref{sec:conclusion} summarizes the key findings and discusses
-limitations and future research directions.
+classifier, the hyperparameter optimization strategy, and the Eager mode
+proposed to address missed detections arising from slow-developing or
+nearly stationary smoke events. Section~\ref{sec:results} presents the
+experimental setup, evaluation metrics, and results on the large-scale
+indoor video dataset, including comparative analyses against the
+baseline and an existing temporally-aware method, and qualitative
+examination of success and failure cases of the proposed skip module.
+Finally, Section~\ref{sec:conclusion} summarizes the key findings and
+discusses limitations and future research directions.
 
 \section{Related Work}\label{sec:relatedWork}
 
@@ -339,7 +358,7 @@ inference is warranted given the frame content. In surveillance
 scenarios, particularly \textbf{indoors}, video streams frequently
 consist of purely background frames with no motion, in which fire or
 smoke is generally unlikely. Motivated by this observation, we propose a
-skip-module that filters such motion-free frames prior to DL inference,
+skip module that filters such motion-free frames prior to DL inference,
 reducing computational cost while with minimal degradation in detection
 reliability. The module prioritizes retaining positive frames
 (fire/smoke present) while skipping negative frames (background only),
@@ -357,7 +376,7 @@ methods such as MOG2 and KNN
 \citeproc{ref-zivkovic2006efficient}{{[}14{]}} model the scene
 background statistically and are resilient to gradual illumination
 changes; however, they introduce non-trivial memory overhead and
-initialization latency. As the skip-module is designed primarily as a
+initialization latency. As the skip module is designed primarily as a
 fast, lightweight gate, we instead adopt motion estimation based on
 frame differencing, which offers minimal computational overhead and
 requires no background model initialization.
@@ -381,27 +400,35 @@ Section \ref{sec:method}.
 
 The proposed system is a fire and smoke detection pipeline that
 processes a continuous video stream and classifies each frame as either
-containing fire/smoke or not. The core idea is to augment the
+containing fire/smoke or not. The proposed framework augments the
 conventional frame-wise inference pipeline with a lightweight skip
 module \(\mathcal{S}\), which serves as a gating mechanism that
-selectively suppresses DL inference on frames with low likelihood of
-containing fire or smoke --- most commonly, static background frames ---
-thereby reducing redundant computation and improving overall throughput.
-Formally, let \(f_t\) denote the video frame at time step \(t\),
-\(\mathcal{M}\) the DL classifier, and \(\hat{y}_t \in {0, 1}\) the
-predicted label for \(f_t\).
+selectively suppresses unnecessary DL inference on frames with low
+likelihood of containing fire or smoke --- most commonly, static
+background frames --- thereby reducing redundant computation and
+improving overall throughput. Formally, let \(f_t\) denote the video
+frame at time step \(t\), \(\mathcal{M}\) the DL classifier, and
+\(\hat{y}_t \in \{0, 1\}\) the predicted label for \(f_t\).
 
-\textbf{Baseline system.} Each frame is directly passed to the
-classifier:
+\textbf{Baseline system.} In this baseline, every frame \(f_t\) is
+unconditionally forwarded to \(\mathcal{M}\), which outputs a binary
+prediction \(\hat{y}_t \in
+\{0, 1\}\) indicating the presence or absence of fire or smoke, as
+follows:
 
 \[\hat{y}_t = \mathcal{M}(f_t)\]
 
+The classifier operates at the full frame rate without any
+pre-filtering, processing each frame independently of scene content.
+This per-frame inference pipeline serves as the performance reference
+when evaluating the proposed skip module.
+
 \textbf{Proposed system.} The skip module \(\mathcal{S}\) first
-evaluates \(f_t\) using inter-frame motion cues and outputs a binary
+evaluates \(f_t\) based on inter-frame motion cues and outputs a binary
 gate decision \(s_t\). While this work instantiates \(\mathcal{S}\)
-using motion-based cues exclusively, the formulation is general and the
-skip module can incorporate other types of cues such as color, texture,
-or learned features. The full system output becomes: \[
+solely motion-based cues, the formulation is general and can incorporate
+other types of cues such as color, texture, or learned features. The
+resulting system output is given by: \[
 \hat{y}_t = \begin{cases} \mathcal{M}(f_t) & \text{if } s_t = 1 \quad
 \text{(run inference)} \\ 0 & \text{if } s_t = 0 \quad \text{(skip, label as
 negative)} \end{cases}
@@ -411,14 +438,15 @@ In this work, skip module \(\mathcal{S}\) derives \(s_t\) from the
 motion estimated between \(f_t\) and the previous frame \(f_{t-1}\).
 Frames with little or no motion are unlikely to contain fire or smoke,
 and are therefore skipped without invoking the classifier
-\(\mathcal{M}\). The model \(\mathcal{M}\) is typically a high-capacity,
-accurate classifier but is computationally expensive. The skip module
-\(\mathcal{S}\) is deliberately designed to be computationally
-lightweight, adding negligible overhead. The goal of the skip module
-\(\mathcal{S}\) is to skip as many background/safe frames as possible
-while minimizing the risk of skipping fire/smoke frames, thus improving
-overall system throughput (FPS) while maintaining high detection
-accuracy.
+\(\mathcal{M}\). The classifier \(\mathcal{M}\) is typically a
+high-capacity and, accurate classifier but it is computationally
+expensive. In contrast, \(\mathcal{S}\) is deliberately designed to be
+computationally lightweight, introducing negligible overhead. The
+objective of \(\mathcal{S}\) is to skip as many non-event frames as
+possible while minimizing missed fire and smoke detections, thereby
+improving overall system throughput (FPS) while maintaining high
+detection accuracy. The architecture and operation of skip module
+\(\mathcal{S}\) are described in the following subsection.
 
 \subsection{Skip Module Design}\label{skip-module-design}
 
@@ -426,17 +454,36 @@ accuracy.
 
 \input{6.algo/skip_module.tex}
 
+The proposed skip module \(\mathcal{S}\) is designed to suppress
+redundant DL inference by selectively identifying informative frames in
+the continuous video stream. As illustrated in Figure
+\ref{fig:skipmodule}, each input frame \(f_t\) is first downscaled by a
+factor of \(\alpha\) and padded to ensure its dimensions are divisible
+by the effective block size \(B_s = B \cdot \alpha\), where \(B\) is the
+block size defined on the original frame. The motion detector
+\(\mathcal{D}\) then computes a binary foreground mask from consecutive
+frames, which is partitioned into non-overlapping blocks of size
+\(B_s \times B_s\). If the fraction of active pixels in any block
+exceeds the block active threshold \(\tau\), the skip module sets
+\(s_t = 1\) and forwards \(f_t\) to the classifier \(\mathcal{M}\);
+otherwise, the frame is skipped (\(s_t = 0\)). The full procedure is
+formalized in Algorithm \ref{alg:skipmodule}.
+
 As illustrated in Figure \ref{fig:skipmodule} and formalized in
 Algorithm \ref{alg:skipmodule}, the skip module \(\mathcal{S}\) can
 leverage any available information --- such as motion, color, or texture
 --- to compute the skip decision \(s_t\). In this work, we focus on
 motion information derived from consecutive frames as the primary cue.
-Specifically, we design and evaluate two motion-based approaches of
-\(\mathcal{S}\): (1) FrameDiffDet --- a frame differencing method, and
-(2) AccMotionDet --- a motion accumulation method. Both approaches are
-selected for their simplicity and low computational cost, making them
-well-suited for real-time deployment. The details of each approach are
-described in the following subsections.
+Specifically, we design and evaluate two motion-based instantiations of
+\(\mathcal{D}\): (1) \textit{FrameDiffDet} --- a lightweight method that
+estimates motion via direct inter-frame differencing, and (2)
+\textit{AccMotionDet} --- an extension that accumulates motion evidence
+over consecutive frames for a more robust skip decision. Both approaches
+are selected for their simplicity and low computational cost, making
+them well-suited for real-time deployment. The following subsections
+describe each method in detail, beginning with the simpler
+\textsc{FrameDiffDet} before introducing the accumulation-based
+\textsc{AccMotionDet}.
 
 \subsubsection{FrameDiffDet --- Naive Motion
 Detection}\label{framediffdet-naive-motion-detection}
@@ -446,8 +493,30 @@ Detection}\label{framediffdet-naive-motion-detection}
 \subsubsection{AccMotionDet --- Motion Detection with
 Accumulation}\label{accmotiondet-motion-detection-with-accumulation}
 
-Inspired by \citeproc{ref-yu2013real}{{[}16{]}}, we design the
-lightweight motion detector \textsc{AccMotionDet} as follows:
+Inspired by \citeproc{ref-yu2013real}{{[}16{]}}, we design
+\textsc{AccMotionDet} to address the key limitation of
+\textsc{FrameDiffDet}: its reliance on a single inter-frame difference
+makes it sensitive to noise and single-frame flicker, which may trigger
+unnecessary inference calls. Instead, \textsc{AccMotionDet} accumulates
+motion evidence over multiple consecutive frames, providing a more
+robust signal for motion estimation and enabling more accurate skip
+decisions.
+
+Let \(F_t\) and \(F_{\text{prev}}\) denote the grayscale frames
+converted from the downsampled frames \(\tilde{f}_t\) and
+\(\tilde{f}_{\text{prev}}\), respectively, and let
+\(\mathbf{K}_{t-1} \in [0, K_{\max}]\) denote the per-pixel
+\textit{accumulated motion mask} from the previous frame. The detector
+takes two consecutive downsampled frames and \(\mathbf{K}_{t-1}\) as
+input, and produces a binary foreground mask
+\(\mathbf{M}_t \in \{0, 255\}\) and the updated mask \(\mathbf{K}_t\) as
+output. \(\mathbf{K}_t\) is incremented by \(\omega\) when the
+inter-frame pixel difference exceeds \(\tau_d\), and decays by
+\(\delta\) each frame, bounded at \(K_{\max}\) to prevent unbounded
+growth under persistent motion. A pixel is marked active (255) only when
+\(\mathbf{K}_t \geq \tau_m\), suppressing transient noise and
+single-frame flicker, and inactive (0) otherwise. The procedure is
+formalized in Algorithm\textasciitilde{}\ref{alg:acc_motion_det}.
 
 \input{6.algo/acc_motion_det.tex}
 

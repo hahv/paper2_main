@@ -8,7 +8,8 @@
         \begin{algorithmic}[1]
 
             \Require Parameter space $\Theta$, validation set $D_{\text{val}}$,
-            DL model $\mathcal{M}$, recall tolerance $\delta_R$,
+            DL model $\mathcal{M}$
+            \Param recall tolerance $\delta_R$,
             weights $w_S, w_R$
             \Ensure Optimal parameters $\theta^*$
 
@@ -52,7 +53,7 @@
     \end{algorithm}
 }
 
-The skip module $\mathcal{S}$, as described in Algorithm~\ref{alg:skipmodule},
+The skip module $\mathcal{S}$, as described in Algorithm \ref{alg:skipmodule},
 is governed by several hyperparameters --- including scale factor $\alpha$,
 block active threshold $\tau$, and pixel difference sensitivity threshold
 $\tau_d$ --- that can significantly affect overall system performance. To
@@ -61,7 +62,7 @@ validation set $D_{\text{val}}$. Let $R_{\text{base}}$ denote the baseline
 recall without skipping. For each candidate $\theta \in \Theta$, we evaluate
 the full pipeline $\text{Read} \rightarrow \mathcal{S}(\theta) \rightarrow
 [\mathcal{M}]$ and compute recall $R(\theta)$ and skip rate $S_r(\theta)$
-(see Section~\ref{sec:metrics} for formal definitions).
+(see Section \ref{sec:metrics} for formal definitions).
 
 \textbf{Feasibility constraint.} A candidate $\theta$ is feasible only if:
 \begin{equation}
@@ -77,7 +78,7 @@ recall retention score
 \end{equation}
 which maps the recall drop linearly onto $[0,1]$ within the feasible region.
 Both $\rho(\theta)$ and $S_r(\theta)$ are range-normalized over
-$\Theta_{\text{feasible}}$ (Pass~2 of Algorithm~\ref{alg:hyperparam}),
+$\Theta_{\text{feasible}}$ (Pass 2 of Algorithm \ref{alg:hyperparam}),
 yielding $\tilde{\rho}(\theta)$ and $\tilde{S}_r(\theta) \in [0,1]$, so that
 the weights $w_S$ and $w_R$ directly reflect their intended relative importance.
 The optimal configuration is then:
@@ -94,7 +95,7 @@ Let $FP(\theta)$ and $FP_{\text{base}}$ denote the number of false positives
 produced by the skip-enabled and baseline systems, respectively, and let
 $N_{\text{skip\_neg}}(\theta)$ denote the number of ground-truth negative frames
 skipped by the skip module $\mathcal{S}$ under configuration $\theta$ (see
-    Section~\ref{sec:metrics} for definitions of $\mathrm{FAR}$, $S_r$, and
+    Section \ref{sec:metrics} for definitions of $\mathrm{FAR}$, $S_r$, and
 $N_{\text{neg}}$). Since every skipped frame is labeled negative, false
 positives arise only from frames passed to classifier $\mathcal{M}$, so
 $FP(\theta) = FP_{\text{base}} - a$ for some $a \geq 0$. Because a skipped false

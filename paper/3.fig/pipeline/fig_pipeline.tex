@@ -134,12 +134,11 @@
 
 \node[decisionnode, opacity=0.75]
     (detDec_b) at (3.0, \baseY)
-    {Detected?};
+    {Fire or Smoke \\Detected?};
 
 \node[alarmbox, opacity=0.75]
     (alarm_b) at (3.0, \baseY + 2.3)
-    {\textbf{ALARM} \Large\textbf{!}\\
-     \small Fire / Smoke};
+    {\textbf{Process} \\ \textbf{Fire/Smoke Event}};
 
 \node[nodetect, minimum width=3.5cm, opacity=0.75]
     (noDetect_b) at (8, \baseY)
@@ -149,7 +148,7 @@
 % Baseline latency note
 \node[font=\small\bfseries, text=red!60!black]
     at (-1.5, \baseY - 2.3)
-    {50\,ms/frame \textemdash\ 25 FPS (runs on \textit{every} frame)};
+    {$\sim$ 40\,ms/frame \textendash\ $\sim$25 FPS (runs on \textit{every} frame)};
 
 %=================================================================
 % BASELINE ARROWS
@@ -226,8 +225,7 @@
 %=================================================================
 \node[skipyes]
     (skipYes) at (\skipOX, \skipOY)
-    {SKIP $\checkmark$\\
-     \small Next Frame};
+    {SKIP Inference $\checkmark$};
 
 %=================================================================
 % (5b) BIG MODEL
@@ -236,25 +234,24 @@
     (bigModel) at (\bigX, \bigY)
     {\textbf{BIG Model}\\
      \textbf{Inference}\\
-     \small($\sim$50\,ms/frame)};
+     \small($\sim$40\,ms/frame)};
 
 \node[decisionnode]
-    (detDec) at (7.5, \bigY)
-    {Detected?};
+    (detDec) at (8.0, \bigY)
+    {Fire or Smoke \\Detected?};
 
 %=================================================================
 % (6a) ALARM
 %=================================================================
-\node[alarmbox]
-    (alarm) at (7.5, \bigY + 2.0)
-    {\textbf{ALARM} \Large\textbf{!}\\
-     \small Fire / Smoke};
+\node[alarmbox, opacity=0.75]
+    (alarm) at (8.0, \bigY + 2.5)
+    {\textbf{Process} \\ \texbf{Fire/Smoke Event}};
 
 %=================================================================
 % (6b) NO DETECTION
 %=================================================================
 \node[nodetect]
-    (noDetect) at (7.5, \bigY - 2.0)
+    (noDetect) at (8.0, \bigY - 2.5)
     {No Detection\\
      \small Continue};
 
@@ -317,7 +314,7 @@
 % FEEDBACK: Alarm and No Detection → Frame Reader
 %=================================================================
 \draw[-latex, line width=0.10cm, black]
-    (alarm.east) -- ++(0.5, 0.0) -- ++(0, 4.55)
+    (alarm.east) -- ++(0.5, 0.0) -- ++(0, 4.05)
     -|(frameReader.north);
 
 \draw[line width=0.10cm, black]
