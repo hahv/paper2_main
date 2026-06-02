@@ -1,0 +1,14 @@
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\linewidth]{3.fig/eager_rs_analyse/eager_timeline_sucess.png}
+    \caption{Per-frame timeline illustrating a successful recall-recovery
+    scenario under Eager mode. The skip module initially suppresses
+    inference on slow-developing smoke frames with minimal inter-frame
+    motion (grey region). Once $\mathcal{M}$ produces
+    $W_{\text{fire}}$ consecutive positive predictions on the first
+    frames forwarded by the skip module, the system transitions into
+    Eager mode (orange region), forcing inference on every subsequent
+    frame and enabling continuous smoke detection that would otherwise
+    have been missed by the skip module alone.}
+    \label{fig:eager_timeline_success}
+\end{figure}
