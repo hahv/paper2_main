@@ -54,6 +54,10 @@
 #     --base_yaml "config/zruns/run_base.yaml" \
 #     --sweep_yaml "config/zruns/select_ds_ufire_haze.yaml"
 
+# python ./zbin/run_multi.py \
+#     --base_yaml "config/zruns/run_base.yaml" \
+#     --sweep_yaml "config/zruns/select_ds_ufire_full.yaml"
+
 python ./zbin/run_multi.py \
     --base_yaml "config/zruns/run_base.yaml" \
-    --sweep_yaml "config/zruns/select_ds_ufire_full.yaml"
+    --sweep_yaml "config/zruns/select_ds_ufire_eager.yaml"

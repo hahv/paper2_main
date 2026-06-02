@@ -63,7 +63,7 @@ class BaseSkipProc(ABC):
         if self.motion_det is not None:
             self.motion_det.reset()
 
-    def update_eager_state(self, pred_info: dict) -> None:
+    def update_eager_state(self, pred_info: dict, meta_data: dict) -> None:
         """
         Called by TempMethod after DL inference completes.
         Subclasses with eager mode override this to update their internal state.

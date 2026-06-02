@@ -108,7 +108,8 @@ class MotionOnlyBlockSkipProcEager(BaseBlockSkipProc):
 
         return should_skip_frame, meta_data
 
-    def update_eager_state(self, pred_info: dict) -> None:
+    def update_eager_state(self, pred_info: dict, meta_data: dict) -> None:
+
         """
         Mirror C++ runModelSingle eager logic:
 

@@ -97,12 +97,14 @@ class TempMethod(NoTempMethod):
             assert meta_data and len(meta_data) > 0, (
                 "Meta data from skip proc is empty!"
             )
-            infer_result.update(meta_data)
-            # ── NEW: feed DL result back to skip proc for eager state update ──
+
             pred_info = {
                 "predLabel": infer_result.get("predLabel", ""),
                 "predProbs": infer_result.get("probs", []),
                 "predLabelIdx": infer_result.get("predLabelIdx", -1)
             }
-            self.skip_proc.update_eager_state(pred_info)
+            self.skip_proc.update_eager_state(pred_info, meta_data)
+            # ── NEW: feed DL result back to skip proc for eager state update
+            # pprint_box(meta_data, title="Meta Data from Skip Proc")
+            infer_result.update(meta_data)
             return infer_result

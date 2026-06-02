@@ -44,6 +44,8 @@ inferCfg:
     - probs
     - pred_label_idx
     - pred_label
+    # ! #TODO: for visualization analysis of eager mode; should disable this if do not want to save this column
+    - eager_mode
   calc_metrics: true
   log_transforms: true
   use_profiler: true

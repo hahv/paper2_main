@@ -124,7 +124,7 @@ class MotionOnlyBlockSkipProcEager(BaseBlockSkipProc):
         }
         return should_skip, meta_data
 
-    def update_eager_state(self, pred_info: dict) -> None:
+    def update_eager_state(self, pred_info: dict, meta_data: dict) -> None:
         """
         Called by TempMethod after every DL inference result is known.
         Implements the FSM update for both EAGER and NORMAL modes.
@@ -165,6 +165,11 @@ class MotionOnlyBlockSkipProcEager(BaseBlockSkipProc):
             if self.c_fire >= self.w_fire:
                 self.eager_mode = True
                 self.c_clear = 0  # reset per FSM T2
+
+        if 'mt_proc' in meta_data:
+            meta_data['mt_proc']['eager_mode'] = self.eager_mode  # update meta_data for logging
+        else:
+            meta_data['mt_proc'].update({'eager_mode': self.eager_mode})
 
     def reset(self):
         """Reset all FSM state at video boundary."""
