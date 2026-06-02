@@ -215,7 +215,7 @@ if os.path.exists(thumb_path):
 
     ax_inset.set_title(
         "Sample frame\n(video start)",
-        fontsize=13,
+        fontsize=,
         color="#444444",
         pad=3,
         loc="center",

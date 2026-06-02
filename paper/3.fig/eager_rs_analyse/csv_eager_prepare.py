@@ -161,7 +161,7 @@ os.rename(
 )
 
 # ── CASE Failure : frames 20-50 ─────────────────────────────────────────────────────
-df_case_failure = build_csv(df_b_eager, df_b_skip, frame_start=20, frame_end=50)
+df_case_failure = build_csv(df_b_eager, df_b_skip, frame_start=20, frame_end=40)
 df_case_failure.to_csv(BASE + "_eager_timeline_failure.csv", sep=";", index=False)
 print(f"[CASE A] Saved eager_timeline_failure.csv  ({len(df_case_failure)} rows)")
 extract_frame(BASE + "aihub__lb_none__0175.mp4", frame_idx=20)  # example frame
