@@ -1,8 +1,6 @@
 import os
 from glob import glob
 from rich.pretty import pprint
-from typing import List, Optional
-
 def main():
 
     # Common environment configuration

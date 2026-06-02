@@ -1,0 +1,13 @@
+Method;Parameters;;;;;; Metrics;;;;Ranking Score
+Exp.;Scale factor $\alpha$;Block size $B$;Block active threshold $\tau$;Diff threshold $\tau_d$;Activation threshold $\tau_m$;Acc. cap $K_{\max}$;Recall (\%) $\uparrow$;Skip Rate (\%) $\uparrow$;FAR (\%) $\downarrow$;FPS $\uparrow$;Combined Score $\uparrow$
+Baseline (No Skip module);-;-;-;-;-;-;\textbf{\textcolor{black}{94.347}} (-0.000);0.00;0.740;24.66;-
+AccMotionDet;0.5;32;0.05;5;5;15;93.895 (-0.452);44.39;\underline{\textcolor{black}{0.737}};36.32;\textbf{\textcolor{black}{0.8020}}
+AccMotionDet;0.5;32;0.1;5;5;25;93.326 (-1.021);\underline{\textcolor{black}{55.09}};\underline{\textcolor{black}{0.737}};\underline{\textcolor{black}{41.15}};\underline{\textcolor{black}{0.7912}}
+AccMotionDet;0.5;32;0.05;5;5;25;93.923 (-0.425);42.89;\underline{\textcolor{black}{0.737}};35.71;0.7903
+AccMotionDet;0.5;32;0.1;5;5;35;93.354 (-0.993);54.42;\underline{\textcolor{black}{0.737}};40.77;0.7898
+AccMotionDet;0.5;32;0.05;5;5;35;93.929 (-0.418);42.38;\underline{\textcolor{black}{0.737}};35.52;0.7856
+AccMotionDet;0.5;32;0.1;5;5;15;93.217 (-1.131);\textbf{\textcolor{black}{56.30}};\underline{\textcolor{black}{0.737}};\textbf{\textcolor{black}{41.79}};0.7785
+AccMotionDet;0.5;32;0.1;3;5;15;\underline{\textcolor{black}{94.019}} (-0.329);39.76;\underline{\textcolor{black}{0.737}};34.47;0.7756
+AccMotionDet;0.5;32;0.1;3;5;25;\underline{\textcolor{black}{94.019}} (-0.329);39.36;\underline{\textcolor{black}{0.737}};34.32;0.7705
+AccMotionDet;0.5;32;0.1;3;5;35;\underline{\textcolor{black}{94.019}} (-0.329);39.09;\underline{\textcolor{black}{0.737}};34.21;0.7671
+AccMotionDet;0.5;32;0.05;3;10;15;93.813 (-0.534);42.63;\textbf{\textcolor{black}{0.735}};35.69;0.7591

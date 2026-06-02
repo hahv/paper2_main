@@ -1,0 +1,15 @@
+Method;Parameters;;; Metrics;;;;Ranking Score
+Exp.;$W_{fire}$;$W_{clr}$;$N_{chk}$;Recall (\%) $\uparrow$;Skip Rate (\%) $\uparrow$;FAR (\%) $\downarrow$;FPS $\uparrow$;Combined Score $\uparrow$
+Baseline (No Skip module);-;-;-;\textbf{\textcolor{black}{94.347}} (-0.00);0.00;\underline{\textcolor{black}{0.740}};24.66;-
+AccMotionDet;-;-;-;\underline{\textcolor{black}{93.895}};\textbf{\textcolor{black}{44.39}};\textbf{\textcolor{black}{0.737}};\textbf{\textcolor{black}{36.61}};-
+AccMotionDet (Eager Mode);1;7;50;\textbf{\textcolor{black}{94.347}} (-0.00);\underline{\textcolor{black}{43.72}};\underline{\textcolor{black}{0.740}};\underline{\textcolor{black}{36.42}};\textbf{\textcolor{black}{0.9946}}
+AccMotionDet (Eager Mode);1;7;30;\textbf{\textcolor{black}{94.347}} (-0.00);43.35;\underline{\textcolor{black}{0.740}};36.26;\underline{\textcolor{black}{0.9637}}
+AccMotionDet (Eager Mode);2;3;50;\textbf{\textcolor{black}{94.347}} (-0.00);43.25;\textbf{\textcolor{black}{0.737}};36.19;0.9553
+AccMotionDet (Eager Mode);2;7;50;\textbf{\textcolor{black}{94.347}} (-0.00);43.19;\underline{\textcolor{black}{0.740}};36.18;0.9501
+AccMotionDet (Eager Mode);3;3;50;\textbf{\textcolor{black}{94.347}} (-0.00);42.72;\textbf{\textcolor{black}{0.737}};35.96;0.9115
+AccMotionDet (Eager Mode);3;7;50;\textbf{\textcolor{black}{94.347}} (-0.00);42.67;\underline{\textcolor{black}{0.740}};35.95;0.9067
+AccMotionDet (Eager Mode);1;7;20;\textbf{\textcolor{black}{94.347}} (-0.00);42.57;\underline{\textcolor{black}{0.740}};35.93;0.8985
+AccMotionDet (Eager Mode);2;3;30;\textbf{\textcolor{black}{94.347}} (-0.00);42.54;\textbf{\textcolor{black}{0.737}};35.89;0.8958
+AccMotionDet (Eager Mode);2;7;30;\textbf{\textcolor{black}{94.347}} (-0.00);42.47;\underline{\textcolor{black}{0.740}};35.89;0.8905
+AccMotionDet (Eager Mode);3;3;30;\textbf{\textcolor{black}{94.347}} (-0.00);41.72;\textbf{\textcolor{black}{0.737}};35.56;0.8275
+AccMotionDet (Eager Mode);3;7;30;\textbf{\textcolor{black}{94.347}} (-0.00);41.65;\underline{\textcolor{black}{0.740}};35.54;0.8221

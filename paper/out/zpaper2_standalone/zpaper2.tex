@@ -174,7 +174,7 @@
 Motion-Heuristic Skip Module for Accelerated Inference in Indoor
 Environments}
 \author{Hoang Van-Ha, Jong Weon Lee, Park Chun-Su}
-\date{2026.06.01}
+\date{2026.06.02}
 
 \begin{document}
 \maketitle
@@ -196,7 +196,7 @@ nearly stationary smoke events. Evaluation on a large-scale dataset
 comprising 150 indoor videos demonstrates that the proposed framework
 achieves nearly 30\% higher throughput than the baseline performing
 per-frame inference, with only a 0.05\% reduction in recall. In
-contrast, using the skip module alone results in a 1.24\% recall drop,
+contrast, using the skip module alone results in a 1.23\% recall drop,
 highlighting the effectiveness of the Eager mode in recovering detection
 performance while preserving most of the throughput gain. These results
 demonstrate that the proposed framework provides an effective
@@ -289,8 +289,8 @@ In particular, our main contributions are summarized as follows:
   framework is integrated with a high-capacity DL classifier (BIG model)
   and evaluated on the constructed dataset against a per-frame inference
   baseline and existing methods. Results demonstrate approximately 30\%
-  higher throughput than the baseline, with a recall reduction of less
-  than 0.05\% when the Eager mode is active --- compared to a 1.24\%
+  higher throughput than the baseline, with a recall reduction of
+  roughly 0.05\% when the Eager mode is active --- compared to a 1.23\%
   recall drop when the skip module is used alone --- highlighting the
   effectiveness of the Eager mode in recovering detection performance
   while preserving most throughput gains. Beyond quantitative
@@ -1192,12 +1192,12 @@ The best-ranked feasible configuration
 (\(\alpha{=}0.5,\ B{=}16,\ \tau{=}0.05,\ \tau_d{=}3\)) achieves a skip
 rate of merely \(0.94\%\), bypassing fewer than 1 in 100 background
 frames. Consequently, the FPS of all feasible configurations
-(\(22.0\)--\(23.3\)) falls below the no-skip baseline (\(24.7\)),
+(\(22.02\)--\(23.32\)) falls below the no-skip baseline (\(24.66\)),
 indicating that the skip module overhead outweighs the benefit of
 skipped inference calls. Conversely, configurations that do achieve
 substantial skip rates (reaching \(47\)--\(60\%\) at higher \(\tau_d\)
-values of 7 and 10) suffer severe recall degradation of \(5\)--\(10\%\),
-far exceeding the safety tolerance.
+values of 7 and 10) suffer severe recall degradation of
+\(5.5\)--\(10\%\), far exceeding the safety tolerance.
 
 These results demonstrate that \textsc{FrameDiffDet}, without noise
 suppression or robust sustained-motion confirmation, is unsuitable as a
@@ -1234,7 +1234,7 @@ AccMotionDet-based Skip Module}\label{sec:accMotionResults}
             row{2} = {font = \bfseries\tiny},
             % ↓ only 3 new lines needed
             cell{1}{1} = {r=2}{c},   % Exp. spans rows 1-2
-            cell{1}{2} = {c=8}{c},   % Parameters spans cols 2-9
+            cell{1}{2} = {c=6}{c},   % Parameters spans cols 2-9
             cell{1}{8} = {c=4}{c},  % Metrics spans cols 10-13
             cell{1}{12} = {r=2}{c},  % Combined Score spans rows 1-2
         },
@@ -1312,12 +1312,12 @@ configurations of the \textsc{AccMotionDet}-based skip module evaluated
 on the validation set. The results show a marked improvement over
 \textsc{FrameDiffDet}, with several configurations achieving skip rates
 of 39\%--56\% while maintaining high recall (above 93\%, relative to the
-baseline of 94.35\%), remaining within the safety constraint
+baseline of 94.347\%), remaining within the safety constraint
 \(\delta_R = 0.015\). The best-ranked configuration (\(\alpha{=}0.5,\
 B{=}32,\ \tau{=}0.05,\ \tau_d{=}5,\ \tau_m{=}5,\
 K_{\max}{=}15\)) achieves a skip rate of 44.39\% with a recall drop of
-only 0.45\%, yielding a throughput of 36.3 FPS --- a substantial
-improvement over the 24.7 FPS baseline.
+only 0.452\%, yielding a throughput of 36.32 FPS --- a substantial
+improvement over the 24.66 FPS baseline.
 
 \subsubsection{Frame-Level Performance and Throughput: Baselines and
 Skip Module}\label{sec:e2e-perf}
@@ -1380,13 +1380,14 @@ acceptable accuracy--efficiency balance on this task.
 \textbf{Effect of the Skip Module:} Integrating the skip module yields a
 consistent set of improvements across nearly all metrics. Throughput
 increases from 24.97 to 32.32 FPS, a gain of approximately 29\%, while
-the F1-score is fully preserved at 0.97. Recall drops by only 1.24
-percentage points (95.62\% \(\to\) 94.38\%), remaining within the safety
-constraint \(\delta_R = 0.015\). A less obvious but notable benefit is
-the reduction in FAR from 0.25\% to 0.14\%, accompanied by a precision
-increase from 99.17\% to 99.54\%: by suppressing inference on
-near-static background frames, the skip module also eliminates a class
-of incorrect detections that the BIG model would otherwise generate.
+the F1-score is almost fully preserved at 0.969. Recall drops by only
+1.23 percentage points (95.616\% \(\to\) 94.384\%), remaining within the
+safety constraint \(\delta_R = 0.015\). A less obvious but notable
+benefit is the reduction in FAR from 0.251\% to 0.136\%, accompanied by
+a precision increase from 99.166\% to 99.541\%: by suppressing inference
+on near-static background frames, the skip module also eliminates a
+class of incorrect detections that the BIG model would otherwise
+generate.
 
 \subsubsection{Comparison with Temporal
 Post-Processing}\label{sec:cmp-temporal}
@@ -1490,7 +1491,7 @@ the two TPT settings, \(\text{TPT}_\text{balanced}\) attains slightly
 lower recall than \(\text{TPT}_\text{strict}\) (95.123\% vs.~95.519\%)
 while producing nearly the same FAR (0.247\% vs.~0.250\%), indicating
 limited sensitivity to the persistence threshold. Finally, the recall
-reduction of AccMotionDet is modest (95.62\% \(\to\) 94.38\%) and
+reduction of AccMotionDet is modest (95.616\% \(\to\) 94.384\%) and
 remains within the safety constraint \(\delta_R = 0.015\).
 
 \subsubsection{AccMotionDet Skip Module with Eager
@@ -1540,7 +1541,7 @@ Mode}\label{accmotiondet-skip-module-with-eager-mode}
 
 As established in Section \ref{sec:e2e-perf}, the AccMotionDet-based
 skip module achieved a throughput improvement of nearly 30\% in FPS;
-however, this came at the cost of a 1.24\% reduction in recall, which is
+however, this came at the cost of a 1.23\% reduction in recall, which is
 likely attributable to missed detections in slow-developing or nearly
 stationary smoke scenarios. To address this limitation, the Eager mode
 is introduced as a complementary mechanism to augment the skip module
@@ -1632,7 +1633,7 @@ recall on slow-developing or settled smoke scenarios, increasing from
 recall of \(95.616\%\) (Big Model without skip module) --- a recovery of
 critical importance in safety-critical applications. However, this
 improvement comes with two costs: the skip rate slightly decreases from
-\(34.93\%\) to \(34.21\%\), and the false alarm rate (FAR) increases
+\(34.93\%\) to \(34.31\%\), and the false alarm rate (FAR) increases
 from \(0.136\%\) to \(0.251\%\) (the implications of this FAR increase
 are discussed in detail in Section \ref{sec:analysis_eager}).
 
@@ -1646,19 +1647,6 @@ applies only temporal decay. Consequently, per-frame computation in
 \textsc{Eager} mode is lighter than in \textsc{Normal} mode (where both
 the full-step \textsc{AccMotionDet} skip module and Big Model inference
 are active), yielding the observed FPS gain despite the lower skip rate.
-
-A notable drawback of \textsc{Eager} mode is its tendency to increase
-false alarms. Our analysis reveals that \textsc{Eager} mode cannot
-distinguish false-alarm-prone static scenes from genuine slow-developing
-or settled smoke events, as both exhibit near-zero inter-frame motion.
-In such static scenes, the Big Model may produce fire/smoke predictions
-on several consecutive frames, causing the system to enter and remain in
-\textsc{Eager} mode with prolonged forced inference and elevated FAR.
-This highlights a fundamental limitation of heuristic, motion-based skip
-logic: it is insufficient to robustly handle all scenarios. We leave
-this as an open research question, with potential directions including
-skip modules that incorporate richer cues (such as color, texture, or
-learned features) to discriminate between these scene types.
 
 \subsubsection{Quantitative and Qualitative
 Analysis}\label{quantitative-and-qualitative-analysis}

@@ -174,7 +174,7 @@
 Motion-Heuristic Skip Module for Accelerated Inference in Indoor
 Environments}
 \author{Hoang Van-Ha, Jong Weon Lee, Park Chun-Su}
-\date{2026.06.01}
+\date{2026.06.02}
 
 \begin{document}
 \maketitle
@@ -196,7 +196,7 @@ nearly stationary smoke events. Evaluation on a large-scale dataset
 comprising 150 indoor videos demonstrates that the proposed framework
 achieves nearly 30\% higher throughput than the baseline performing
 per-frame inference, with only a 0.05\% reduction in recall. In
-contrast, using the skip module alone results in a 1.24\% recall drop,
+contrast, using the skip module alone results in a 1.23\% recall drop,
 highlighting the effectiveness of the Eager mode in recovering detection
 performance while preserving most of the throughput gain. These results
 demonstrate that the proposed framework provides an effective
@@ -286,11 +286,11 @@ In particular, our main contributions are summarized as follows:
   evaluating detection systems in static surveillance scenarios.
 \item
   \textbf{Comprehensive System Evaluation and Analysis:} The proposed
-  framework is integrated with a high-capacity DL classifier (BIG model)
+  framework is integrated with a high-capacity DL classifier (BIG Model)
   and evaluated on the constructed dataset against a per-frame inference
   baseline and existing methods. Results demonstrate approximately 30\%
-  higher throughput than the baseline, with a recall reduction of less
-  than 0.05\% when the Eager mode is active --- compared to a 1.24\%
+  higher throughput than the baseline, with a recall reduction of
+  roughly 0.05\% when the Eager mode is active --- compared to a 1.23\%
   recall drop when the skip module is used alone --- highlighting the
   effectiveness of the Eager mode in recovering detection performance
   while preserving most throughput gains. Beyond quantitative
@@ -654,7 +654,7 @@ F1-score, and frames per second (FPS) --- as defined below.
 \textbf{Baseline Models}: To demonstrate both the superiority of the
 high-capacity classifier over lightweight alternatives and the
 effectiveness of the proposed skip module in accelerating its inference,
-we evaluate the following baseline models alongside our BIG model:
+we evaluate the following baseline models alongside our BIG Model:
 
 \begin{itemize}
 \item
@@ -678,7 +678,7 @@ we evaluate the following baseline models alongside our BIG model:
 \end{itemize}
 
 \textbf{Proposed Classifier (BIG Model \(\mathcal{M}\) --- HGNetV2)}:
-The BIG model \(\mathcal{M}\) is obtained by fine-tuning a pretrained
+The BIG Model \(\mathcal{M}\) is obtained by fine-tuning a pretrained
 High-Performance GPU Network v2 (HGNetV2), specifically the
 \texttt{hgnetv2\_b5.ssld\_stage2\_ft\_in1k} checkpoint
 \citeproc{ref-hgnetv2timm:online}{{[}35{]}} from the Timm library
@@ -762,7 +762,7 @@ The search space is as follows:
   responses to minor pixel-level disturbances. The three values provide
   a systematic sweep from fine to coarse sensitivity.
 \item
-  \textbf{Difference sensitivity threshold}
+  \textbf{Pixel difference sensitivity threshold}
   \(\tau_d \in \{3, 5, 7, 10\}\): defines the minimum absolute
   inter-frame intensity change required for a pixel to be declared
   active. This range is chosen to cover diverse sensitivity levels, from
@@ -786,12 +786,12 @@ The best-ranked feasible configuration
 (\(\alpha{=}0.5,\ B{=}16,\ \tau{=}0.05,\ \tau_d{=}3\)) achieves a skip
 rate of merely \(0.94\%\), bypassing fewer than 1 in 100 background
 frames. Consequently, the FPS of all feasible configurations
-(\(22.0\)--\(23.3\)) falls below the no-skip baseline (\(24.7\)),
+(\(22.02\)--\(23.32\)) falls below the no-skip baseline (\(24.66\)),
 indicating that the skip module overhead outweighs the benefit of
 skipped inference calls. Conversely, configurations that do achieve
 substantial skip rates (reaching \(47\)--\(60\%\) at higher \(\tau_d\)
-values of 7 and 10) suffer severe recall degradation of \(5\)--\(10\%\),
-far exceeding the safety tolerance.
+values of 7 and 10) suffer severe recall degradation of
+\(5.5\)--\(10\%\), far exceeding the safety tolerance.
 
 These results demonstrate that \textsc{FrameDiffDet}, without noise
 suppression or robust sustained-motion confirmation, is unsuitable as a
@@ -823,11 +823,11 @@ search space (of 96 configurations) are as follows:
   accumulation naturally suppresses false activations, rendering more
   aggressive thresholds unnecessary.
 \item
-  \textbf{Difference sensitivity threshold (\(\tau_d \in \{3, 5\}\))}:
-  Limited to the lower end of the FrameDiffDet search space, as higher
-  values were found to cause excessive frame skipping and unacceptable
-  recall degradation, as described in
-  Section~\ref{sec:frameDiffResults}.
+  \textbf{Pixel difference sensitivity threshold
+  (\(\tau_d \in \{3, 5\}\))}: Limited to the lower end of the
+  FrameDiffDet search space, as higher values were found to cause
+  excessive frame skipping and unacceptable recall degradation, as
+  described in Section~\ref{sec:frameDiffResults}.
 \item
   \textbf{Accumulation step (\(\omega=5\))} and \textbf{Decay rate
   (\(\delta=1\))}: We fix these parameters to streamline the
@@ -840,12 +840,12 @@ search space (of 96 configurations) are as follows:
   reducing the dimensionality of the search space.
 \item
   \textbf{Activation threshold (\(\tau_m \in \{5, 10\}\))}: This
-  threshold serves as the decision gate for the motion mask, labeling
-  pixels as active only when their accumulated motion score exceeds
-  \(\tau_m\). Given the fixed accumulation parameters
-  (\(\omega=5, \delta=1\)), \(\tau_m=5\) and \(\tau_m=10\) are
-  approximately equivalent to requiring motion signals over 2 and 3
-  consecutive frames, respectively.
+  activation threshold labels pixels in the motion mask as active only
+  when their accumulated motion score reaches or exceeds \(\tau_m\).
+  Given the fixed accumulation parameters (\(\omega=5, \delta=1\)),
+  \(\tau_m=5\) and \(\tau_m=10\) are approximately equivalent to
+  requiring motion signals over 2 and 3 consecutive frames,
+  respectively.
 \item
   \textbf{Accumulation cap (\(K_{\max} \in \{15, 25, 35\}\))}: This
   parameter limits the maximum accumulated motion score to prevent
@@ -863,12 +863,12 @@ configurations of the \textsc{AccMotionDet}-based skip module evaluated
 on the validation set. The results show a marked improvement over
 \textsc{FrameDiffDet}, with several configurations achieving skip rates
 of 39\%--56\% while maintaining high recall (above 93\%, relative to the
-baseline of 94.35\%), remaining within the safety constraint
+baseline of 94.347\%), remaining within the safety constraint
 \(\delta_R = 0.015\). The best-ranked configuration (\(\alpha{=}0.5,\
 B{=}32,\ \tau{=}0.05,\ \tau_d{=}5,\ \tau_m{=}5,\
 K_{\max}{=}15\)) achieves a skip rate of 44.39\% with a recall drop of
-only 0.45\%, yielding a throughput of 36.3 FPS --- a substantial
-improvement over the 24.7 FPS baseline.
+only 0.452\%, yielding a throughput of 36.32 FPS --- a substantial
+improvement over the 24.66 FPS baseline.
 
 \subsubsection{Frame-Level Performance and Throughput: Baselines and
 Skip Module}\label{sec:e2e-perf}
@@ -877,33 +877,34 @@ Skip Module}\label{sec:e2e-perf}
 
 Table \ref{tb:perf_per_frame} benchmarks the proposed pipeline
 (\textsc{AccMotionDet} skip module with the optimal configuration paired
-with the Big Model) against lightweight fire-and-smoke detectors,
+with the BIG Model) against lightweight fire-and-smoke detectors,
 described in Section \ref{sec:baselines}. The baseline BIG Model
 (without skip module) achieves the highest recall (95.62\%), accuracy
 (98.77\%), and F1-score (0.97), substantially outperforming all
 lightweight alternatives. This gap reflects the consequences of neural
 scaling laws \citeproc{ref-hestness2017deep}{{[}40{]}},
 \citeproc{ref-alabdulmohsin2022revisiting}{{[}41{]}},
-\citeproc{ref-bahri2024explaining}{{[}42{]}}: the BIG model benefits
+\citeproc{ref-bahri2024explaining}{{[}42{]}}: the BIG Model benefits
 from both a more expressive architecture and a significantly larger
 training dataset. Notably, MobileNet and FireNet exhibit near-degenerate
 recall of 5.84\% and 34.1\%, respectively, rendering them unsuitable for
 safety-critical fire and smoke detection despite their speed and
 compactness. YOLOv5s achieves the highest throughput (109.94 FPS) but
 still suffers a recall of 68.58\%, roughly 27 percentage points below
-the BIG model, confirming that no lightweight alternative achieves an
+the BIG Model, confirming that no lightweight alternative achieves an
 acceptable accuracy--efficiency balance on this task.
 
 \textbf{Effect of the Skip Module:} Integrating the skip module yields a
 consistent set of improvements across nearly all metrics. Throughput
 increases from 24.97 to 32.32 FPS, a gain of approximately 29\%, while
-the F1-score is fully preserved at 0.97. Recall drops by only 1.24
-percentage points (95.62\% \(\to\) 94.38\%), remaining within the safety
-constraint \(\delta_R = 0.015\). A less obvious but notable benefit is
-the reduction in FAR from 0.25\% to 0.14\%, accompanied by a precision
-increase from 99.17\% to 99.54\%: by suppressing inference on
-near-static background frames, the skip module also eliminates a class
-of incorrect detections that the BIG model would otherwise generate.
+the F1-score is almost fully preserved at 0.969. Recall drops by only
+1.23 percentage points (95.616\% \(\to\) 94.384\%), remaining within the
+safety constraint \(\delta_R = 0.015\). A less obvious but notable
+benefit is the reduction in FAR from 0.251\% to 0.136\%, accompanied by
+a precision increase from 99.166\% to 99.541\%: by suppressing inference
+on near-static background frames, the skip module also eliminates a
+class of incorrect detections that the BIG Model would otherwise
+generate.
 
 \subsubsection{Comparison with Temporal
 Post-Processing}\label{sec:cmp-temporal}
@@ -949,7 +950,7 @@ the two TPT settings, \(\text{TPT}_\text{balanced}\) attains slightly
 lower recall than \(\text{TPT}_\text{strict}\) (95.123\% vs.~95.519\%)
 while producing nearly the same FAR (0.247\% vs.~0.250\%), indicating
 limited sensitivity to the persistence threshold. Finally, the recall
-reduction of AccMotionDet is modest (95.62\% \(\to\) 94.38\%) and
+reduction of AccMotionDet is modest (95.616\% \(\to\) 94.384\%) and
 remains within the safety constraint \(\delta_R = 0.015\).
 
 \subsubsection{AccMotionDet Skip Module with Eager
@@ -959,7 +960,7 @@ Mode}\label{accmotiondet-skip-module-with-eager-mode}
 
 As established in Section \ref{sec:e2e-perf}, the AccMotionDet-based
 skip module achieved a throughput improvement of nearly 30\% in FPS;
-however, this came at the cost of a 1.24\% reduction in recall, which is
+however, this came at the cost of a 1.23\% reduction in recall, which is
 likely attributable to missed detections in slow-developing or nearly
 stationary smoke scenarios. To address this limitation, the Eager mode
 is introduced as a complementary mechanism to augment the skip module
@@ -1024,10 +1025,10 @@ mode on system performance. \textsc{Eager} mode successfully recovers
 recall on slow-developing or settled smoke scenarios, increasing from
 \(94.384\%\) (\textsc{AccMotionDet} only) to \(95.565\%\)
 (\textsc{AccMotionDet} + \textsc{Eager}), nearly matching the baseline
-recall of \(95.616\%\) (Big Model without skip module) --- a recovery of
+recall of \(95.616\%\) (BIG Model without skip module) --- a recovery of
 critical importance in safety-critical applications. However, this
 improvement comes with two costs: the skip rate slightly decreases from
-\(34.93\%\) to \(34.21\%\), and the false alarm rate (FAR) increases
+\(34.93\%\) to \(34.31\%\), and the false alarm rate (FAR) increases
 from \(0.136\%\) to \(0.251\%\) (the implications of this FAR increase
 are discussed in detail in Section \ref{sec:analysis_eager}).
 
@@ -1039,21 +1040,8 @@ full \textsc{AccMotionDet} pipeline (Algorithm
 grayscale, stores it for subsequent use in \textsc{Normal} mode, and
 applies only temporal decay. Consequently, per-frame computation in
 \textsc{Eager} mode is lighter than in \textsc{Normal} mode (where both
-the full-step \textsc{AccMotionDet} skip module and Big Model inference
+the full-step \textsc{AccMotionDet} skip module and BIG Model inference
 are active), yielding the observed FPS gain despite the lower skip rate.
-
-A notable drawback of \textsc{Eager} mode is its tendency to increase
-false alarms. Our analysis reveals that \textsc{Eager} mode cannot
-distinguish false-alarm-prone static scenes from genuine slow-developing
-or settled smoke events, as both exhibit near-zero inter-frame motion.
-In such static scenes, the Big Model may produce fire/smoke predictions
-on several consecutive frames, causing the system to enter and remain in
-\textsc{Eager} mode with prolonged forced inference and elevated FAR.
-This highlights a fundamental limitation of heuristic, motion-based skip
-logic: it is insufficient to robustly handle all scenarios. We leave
-this as an open research question, with potential directions including
-skip modules that incorporate richer cues (such as color, texture, or
-learned features) to discriminate between these scene types.
 
 \subsubsection{Quantitative and Qualitative
 Analysis}\label{quantitative-and-qualitative-analysis}
@@ -1062,28 +1050,28 @@ Analysis}\label{quantitative-and-qualitative-analysis}
 
 \input{./3.fig/fig_fps_increase.tex}
 
-To evaluate the efficiency of the skip module, the BIG model was run on
+To evaluate the efficiency of the skip module, the BIG Model was run on
 the test set \(\mathcal{D}_\text{test}\) with and without the skip
-module. The average processing time of the skip module, the BIG model
+module. The average processing time of the skip module, the BIG Model
 inference time, and the overall system FPS were recorded in both cases.
 The results are visualized in Figure \ref{fig:fps_increase}.
 
 As shown in Figure \ref{fig:fps_increase}, the skip module requires an
 average processing time of only 1.79 ms per frame, which is
-approximately ×22 lower than the BIG model inference time of 39.88 ms.
+approximately ×22 lower than the BIG Model inference time of 39.88 ms.
 In the best case, the skip module correctly identifies and bypasses
 negative frames, contributing only 1.79 ms of overhead. In the worst
-case, where the skip module fails to bypass a frame and the BIG model
+case, where the skip module fails to bypass a frame and the BIG Model
 inference is subsequently invoked, the additional latency introduced by
 the skip module is 1.79 ms --- a mere 4.5\% increase relative to the BIG
-model inference time. Overall, integrating the skip module improves
+Model inference time. Overall, integrating the skip module improves
 system throughput by approximately 30\% on \(\mathcal{D}_\text{test}\),
 demonstrating its effectiveness for real-time fire and smoke detection
 in indoor surveillance scenarios.
 
 \paragraph{Qualitative Analysis}\label{qualitative-analysis}
 
-To understand how the skip module operates in coordination with the Big
+To understand how the skip module operates in coordination with the BIG
 Model, we visualize the inference results of the \textsc{AccMotionDet}
 skip module on the test set \(\mathcal{D}_\text{test}\) in RGB images
 together with the corresponding foreground motion masks generated by the
@@ -1102,7 +1090,7 @@ These cases can be grouped into two categories:
 \item
   \textbf{Correctly skipped static background frames} (Fig.
   \ref{fig:qualitative_success}a,b): \textsc{AccMotionDet} identifies
-  static background frames and skips them without invoking the Big
+  static background frames and skips them without invoking the BIG
   Model. The corresponding motion masks are empty, indicating no active
   motion regions.
 \item
@@ -1133,9 +1121,9 @@ cases, which can be grouped into three categories:
   prevents background frames from being skipped, resulting in
   unnecessary inference.
 \item
-  \textbf{Incorrect Big Model predictions} (Fig.
+  \textbf{Incorrect BIG Model predictions} (Fig.
   \ref{fig:qualitative_failure}d,e): Even when fire or smoke frames are
-  correctly forwarded, the Big Model may still produce an incorrect
+  correctly forwarded, the BIG Model may still produce an incorrect
   label, especially when the target occupies only a small portion of the
   frame.
 \end{itemize}

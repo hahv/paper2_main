@@ -177,7 +177,7 @@ steps:
           df.apply(lambda x:
             str(x["Recall (\\%) $\\uparrow$"])
             if pd.isna(x["Recall Drop"])
-            else str(x["Recall (\\%) $\\uparrow$"]) + " (-" + f"{x['Recall Drop']:.2f}" + ")",
+            else str(x["Recall (\\%) $\\uparrow$"]) + " (-" + f"{x['Recall Drop']:.3f}" + ")",
             axis=1)
 
   # ── 11. DROP HELPER COLUMN ────────────────────────────────
