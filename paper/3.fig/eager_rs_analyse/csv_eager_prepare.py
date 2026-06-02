@@ -100,12 +100,12 @@ df_a_skip = pd.read_csv(BASE + "aihub__lb_none__0175_results_skipOnly.csv", sep=
 df_b_eager = pd.read_csv(BASE + "aihub__lb_smoke__0208_results_eager.csv", sep=";")
 df_b_skip = pd.read_csv(BASE + "aihub__lb_smoke__0208_results_skipOnly.csv", sep=";")
 
-# ── CASE A : frames 1-50 ─────────────────────────────────────────────────────
-df_case_a = build_csv(df_a_eager, df_a_skip, frame_start=1, frame_end=50)
+# ── CASE A : frames 20-50 ─────────────────────────────────────────────────────
+df_case_a = build_csv(df_a_eager, df_a_skip, frame_start=20, frame_end=50)
 df_case_a.to_csv(BASE + "_eager_timeline_failure.csv", sep=";", index=False)
 print(f"[CASE A] Saved eager_timeline_failure.csv  ({len(df_case_a)} rows)")
 
-# ── CASE B : frames 55-115 ───────────────────────────────────────────────────
-df_case_b = build_csv(df_b_eager, df_b_skip, frame_start=55, frame_end=115)
+# ── CASE B : frames 10–55 ───────────────────────────────────────────────────
+df_case_b = build_csv(df_b_eager, df_b_skip, frame_start=155, frame_end=205)
 df_case_b.to_csv(BASE + "_eager_timeline_success.csv", sep=";", index=False)
 print(f"[CASE B] Saved eager_timeline_success.csv  ({len(df_case_b)} rows)")

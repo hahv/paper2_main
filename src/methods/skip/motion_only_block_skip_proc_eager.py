@@ -1,4 +1,5 @@
 # ===============src/methods/skip/motion_only_block_skip_proc_eager.py===============#
+from rich.console import Console
 from halib import *  # noqa: F403
 from typing import Tuple, Dict, Any
 
@@ -19,6 +20,8 @@ class MotionOnlyBlockSkipProcEager(BaseBlockSkipProc):
         # W_fire: consecutive positives needed to enter EAGER;
         #         ALSO the burst window size (c_burst ← W_fire)
         self.w_fire: int = self.params.get("fire_confirm_k", 2)
+        with ConsoleLog("DEBUG"):
+            pprint(f'{self.n_chk=}, {self.w_clr=}, {self.w_fire=}')
 
         # --- FSM State (start in EAGER — skipping must be earned) ---
         self.eager_mode: bool = True

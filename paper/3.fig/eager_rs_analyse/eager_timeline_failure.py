@@ -75,20 +75,20 @@ for _, row in df.iterrows():
             f"{prob:.2f}",
             ha="center",
             va="center",
-            fontsize=6,
+            fontsize=13,
             fontweight="bold",
             color="white" if val == 1 else "#333333",
             rotation=-90,
         )
 
-ax1.set_ylabel("Classifier $\\mathcal{M}$\n(SmokeOnly conf.)", fontsize=10, labelpad=8)
+ax1.set_ylabel("Classifier $\\mathcal{M}$\n(SmokeOnly conf.)", fontsize=13, labelpad=8)
 ax1.set_ylim(0, 1.62)
 ax1.set_yticks([0, 0.5, 1.0])
 ax1.tick_params(axis="y", labelsize=9)
 ax1.spines[["top", "right"]].set_visible(False)
 ax1.axhline(0.5, color="gray", linestyle=":", linewidth=0.9, alpha=0.6)
 ax1.text(
-    frames[-1] + 0.8, 0.51, "0.5 threshold", fontsize=7.5, color="gray", va="bottom"
+    frames[-1] + 0.8, 0.51, "0.5 threshold", fontsize=13.5, color="gray", va="bottom"
 )
 
 # Ground truth note
@@ -97,7 +97,7 @@ ax1.text(
     0.97,
     "Ground truth: background only (None)  |  ALL positive predictions are FALSE ALARMS",
     transform=ax1.transAxes,
-    fontsize=8.5,
+    fontsize=13.5,
     color="#7f0000",
     fontstyle="italic",
     va="top",
@@ -116,12 +116,12 @@ for _, row in df.iterrows():
             "S" if val == 1 else "R",
             ha="center",
             va="center",
-            fontsize=7,
+            fontsize=13,
             fontweight="bold",
         )
 
 ax2.set_yticks([])
-ax2.set_ylabel("Skip\ndecision $s_t$", fontsize=10, labelpad=8)
+ax2.set_ylabel("Skip\ndecision $s_t$", fontsize=13, labelpad=8)
 ax2.set_ylim(0, 1.4)
 ax2.spines[["top", "right", "left"]].set_visible(False)
 
@@ -132,7 +132,7 @@ if len(pre):
         1.47,
         "Normal mode\n(skip active)",
         ha="center",
-        fontsize=8,
+        fontsize=13,
         color="#1b5e20",
         fontstyle="italic",
         bbox=dict(boxstyle="round,pad=0.25", fc="#f1f8f1", ec="#81c784", lw=0.8),
@@ -144,7 +144,7 @@ if len(eager_on):
         1.47,
         "Eager mode ON — locked\n(FAR sustained)",
         ha="center",
-        fontsize=8,
+        fontsize=13,
         color="#b85c00",
         fontstyle="italic",
         bbox=dict(boxstyle="round,pad=0.25", fc="#fff8f0", ec="darkorange", lw=0.8),
@@ -167,7 +167,7 @@ axes[0].annotate(
     f"Eager ON\n(frame {eager_start})\nstuck, never clears",
     xy=(eager_start - 0.5, prob_at_start),
     xytext=(eager_start + 5, 1.32),
-    fontsize=8.5,
+    fontsize=13.5,
     color="darkorange",
     fontweight="bold",
     arrowprops=dict(arrowstyle="->", color="darkorange", lw=1.3),
@@ -187,7 +187,7 @@ if len(fp_df):
         f"$N_{{chk}}$ forced check\n→ false alarm\n(frame {first_fp})",
         xy=(first_fp, prob_fp),
         xytext=(first_fp - 11, 1.28),
-        fontsize=8,
+        fontsize=13,
         color="#aa0000",
         fontweight="bold",
         arrowprops=dict(arrowstyle="->", color="#aa0000", lw=1.1),
@@ -216,7 +216,7 @@ ax1.legend(
             label="Normal mode — skip active (green tint)",
         ),
     ],
-    fontsize=8,
+    fontsize=13,
     loc="upper left",
     framealpha=0.92,
     bbox_to_anchor=(0.01, 0.93),
@@ -226,20 +226,20 @@ ax2.legend(
         mpatches.Patch(color="#98df8a", alpha=0.88, label="Skipped (S)"),
         mpatches.Patch(color="#ff9896", alpha=0.88, label="Inference run (R)"),
     ],
-    fontsize=8,
+    fontsize=13,
     loc="lower right",
     framealpha=0.9,
 )
 
 # ── X-axis & title ────────────────────────────────────────────────────────────
 ax2.set_xticks(frames[::5])
-ax2.set_xticklabels(frames[::5], fontsize=8)
-ax2.set_xlabel("Frame index", fontsize=11)
+ax2.set_xticklabels(frames[::5], fontsize=13)
+ax2.set_xlabel("Frame index", fontsize=13)
 
 plt.suptitle(
-    "Case A — Eager Mode Failure: False-Alarm Locks Eager ON in Static Background Scene\n"
-    "Video: aihub__lb_none__0175   |   Ground truth: background only (None)   |   Frames 1–50",
-    fontsize=11,
+    "Eager Mode Failure: False-Alarm Locks Eager ON in Static Background Scene\n"
+    "Video: aihub__lb_none__0175   |   Ground truth: background only (None)   |   Frames 1-50",
+    fontsize=15,
     fontweight="bold",
     y=1.02,
 )
