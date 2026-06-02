@@ -233,7 +233,7 @@ ax2.set_xlabel("Frame index", fontsize=13)
 
 plt.suptitle(
     "Eager Mode Success: Rescuing Missed Smoke Detections (slow-developing or nearly stationary smoke event)\n"
-    "Video: aihub__lb_smoke__0208   |   Ground truth: SmokeOnly   |   Frames 55-115",
+    "Video: aihub__lb_smoke__0208   |   Ground truth: FireSmoke",
     fontsize=15,
     fontweight="bold",
     y=1.02,

@@ -93,19 +93,78 @@ def build_csv(df_eager, df_skip, frame_start, frame_end):
     return pd.DataFrame(rows)
 
 
+import os
+import cv2
+
+
+def extract_frame(video_path, frame_idx, out_dir=BASE):
+    """
+    Extract frame index from video filename. Frame index start from 1
+    The output frame will be named based on the video filename (e.g., video.mp4 -> video.png)
+    """
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
+
+    # Get the base filename without extension
+    video_filename = os.path.basename(video_path)
+    base_name, _ = os.path.splitext(video_filename)
+
+    output_path = os.path.join(out_dir, f"{base_name}.png")
+
+    # Open the video file
+    cap = cv2.VideoCapture(video_path)
+    if not cap.isOpened():
+        print(f"Error: Could not open video file {video_path}")
+        return None
+
+    # OpenCV frame indices are 0-based, so subtract 1 from the 1-based index
+    target_frame = frame_idx - 1
+
+    # Set the video position to the target frame
+    cap.set(cv2.CAP_PROP_POS_FRAMES, target_frame)
+
+    # Read the frame
+    ret, frame = cap.read()
+
+    if ret:
+        # Save the frame
+        cv2.imwrite(output_path, frame)
+        print(f"Successfully extracted frame {frame_idx} to {output_path}")
+    else:
+        print(f"Error: Could not read frame {frame_idx} from {video_path}")
+
+    # Release the video capture object
+    cap.release()
+
+    return output_path
+
+
 # ── Load raw results ──────────────────────────────────────────────────────────
 
-df_a_eager = pd.read_csv(BASE + "aihub__lb_none__0175_results_eager.csv", sep=";")
-df_a_skip = pd.read_csv(BASE + "aihub__lb_none__0175_results_skipOnly.csv", sep=";")
-df_b_eager = pd.read_csv(BASE + "aihub__lb_smoke__0208_results_eager.csv", sep=";")
-df_b_skip = pd.read_csv(BASE + "aihub__lb_smoke__0208_results_skipOnly.csv", sep=";")
+df_a_eager = pd.read_csv(BASE + "aihub__lb_smoke__0208_results_eager.csv", sep=";")
+df_a_skip = pd.read_csv(BASE + "aihub__lb_smoke__0208_results_skipOnly.csv", sep=";")
 
-# ── CASE A : frames 20-50 ─────────────────────────────────────────────────────
-df_case_a = build_csv(df_a_eager, df_a_skip, frame_start=20, frame_end=50)
-df_case_a.to_csv(BASE + "_eager_timeline_failure.csv", sep=";", index=False)
-print(f"[CASE A] Saved eager_timeline_failure.csv  ({len(df_case_a)} rows)")
+df_b_eager = pd.read_csv(BASE + "aihub__lb_none__0175_results_eager.csv", sep=";")
+df_b_skip = pd.read_csv(BASE + "aihub__lb_none__0175_results_skipOnly.csv", sep=";")
 
-# ── CASE B : frames 10–55 ───────────────────────────────────────────────────
-df_case_b = build_csv(df_b_eager, df_b_skip, frame_start=155, frame_end=205)
-df_case_b.to_csv(BASE + "_eager_timeline_success.csv", sep=";", index=False)
-print(f"[CASE B] Saved eager_timeline_success.csv  ({len(df_case_b)} rows)")
+# ── CASE Success : frames 10-55 ───────────────────────────────────────────────────
+df_case_success = build_csv(df_a_eager, df_a_skip, frame_start=10, frame_end=55)
+df_case_success.to_csv(BASE + "_eager_timeline_success.csv", sep=";", index=False)
+print(f"[CASE B] Saved eager_timeline_success.csv  ({len(df_case_success)} rows)")
+
+extract_frame(
+    BASE + "aihub__lb_smoke__0208.mp4", frame_idx=175
+)  # example frame from the slow-developing smoke video
+os.rename(
+    BASE + "aihub__lb_smoke__0208.png",
+    BASE + "_eager_timeline_success_example.png",
+)
+
+# ── CASE Failure : frames 20-50 ─────────────────────────────────────────────────────
+df_case_failure = build_csv(df_b_eager, df_b_skip, frame_start=20, frame_end=50)
+df_case_failure.to_csv(BASE + "_eager_timeline_failure.csv", sep=";", index=False)
+print(f"[CASE A] Saved eager_timeline_failure.csv  ({len(df_case_failure)} rows)")
+extract_frame(BASE + "aihub__lb_none__0175.mp4", frame_idx=20)  # example frame
+os.rename(
+    BASE + "aihub__lb_none__0175.png",
+    BASE + "_eager_timeline_failure_example.png",)
