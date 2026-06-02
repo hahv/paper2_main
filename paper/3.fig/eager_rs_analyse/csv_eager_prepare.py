@@ -148,7 +148,7 @@ df_b_eager = pd.read_csv(BASE + "aihub__lb_none__0175_results_eager.csv", sep=";
 df_b_skip = pd.read_csv(BASE + "aihub__lb_none__0175_results_skipOnly.csv", sep=";")
 
 # ── CASE Success : frames 10-55 ───────────────────────────────────────────────────
-df_case_success = build_csv(df_a_eager, df_a_skip, frame_start=10, frame_end=55)
+df_case_success = build_csv(df_a_eager, df_a_skip, frame_start=155, frame_end=205)
 df_case_success.to_csv(BASE + "_eager_timeline_success.csv", sep=";", index=False)
 print(f"[CASE B] Saved eager_timeline_success.csv  ({len(df_case_success)} rows)")
 

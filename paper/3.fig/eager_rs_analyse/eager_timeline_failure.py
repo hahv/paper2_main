@@ -194,6 +194,39 @@ if len(fp_df):
         bbox=dict(boxstyle="round,pad=0.25", fc="white", ec="#aa0000", lw=0.8),
     )
 
+# ── Video thumbnail inset ─────────────────────────────────────────────────────
+import matplotlib.image as mpimg
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+
+thumb_path = BASE_CSV + "_eager_timeline_failure_example.png"
+if os.path.exists(thumb_path):
+    thumb_img = mpimg.imread(thumb_path)
+
+    ax_inset = inset_axes(
+        ax1,
+        width="20%",
+        height="60%",
+        loc="upper right",
+        bbox_to_anchor=(-0.05, 0.105, 1, 1),
+        bbox_transform=ax1.transAxes,
+        borderpad=0,
+    )
+    ax_inset.imshow(thumb_img)
+    ax_inset.axis("off")
+
+    for spine in ax_inset.spines.values():
+        spine.set_visible(True)
+        spine.set_edgecolor("#555555")
+        spine.set_linewidth(1.2)
+
+    ax_inset.set_title(
+        "Sample frame",
+        fontsize=13,
+        color="#444444",
+        pad=3,
+        loc="center",
+    )
+
 # ── Legends ───────────────────────────────────────────────────────────────────
 ax1.legend(
     handles=[
@@ -238,7 +271,7 @@ ax2.set_xlabel("Frame index", fontsize=13)
 
 plt.suptitle(
     "Eager Mode Failure: False-Alarm Locks Eager ON in Static Background Scene\n"
-    "Video: aihub__lb_none__0175   |   Ground truth: background only (None)   |   Frames 1-50",
+    "Video: aihub__lb_none__0175 | Ground truth: None (Background only)",
     fontsize=15,
     fontweight="bold",
     y=1.02,

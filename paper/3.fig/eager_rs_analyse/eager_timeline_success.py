@@ -188,6 +188,39 @@ if len(eager_on):
         bbox=dict(boxstyle="round,pad=0.25", fc="white", ec="darkorange", lw=0.9),
     )
 
+# ── Video thumbnail inset ─────────────────────────────────────────────────────
+import matplotlib.image as mpimg
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+
+thumb_path = BASE_CSV + "_eager_timeline_success_example.png"
+if os.path.exists(thumb_path):
+    thumb_img = mpimg.imread(thumb_path)
+
+    ax_inset = inset_axes(
+        ax1,
+        width="13%",
+        height="60%",
+        loc="upper right",
+        bbox_to_anchor=(-0.01, -0.02, 1, 1),
+        bbox_transform=ax1.transAxes,
+        borderpad=0,
+    )
+    ax_inset.imshow(thumb_img)
+    ax_inset.axis("off")
+
+    for spine in ax_inset.spines.values():
+        spine.set_visible(True)
+        spine.set_edgecolor("#555555")
+        spine.set_linewidth(1.2)
+
+    ax_inset.set_title(
+        "Sample frame\n(video start)",
+        fontsize=13,
+        color="#444444",
+        pad=3,
+        loc="center",
+    )
+
 # ── Legends ───────────────────────────────────────────────────────────────────
 ax1.legend(
     handles=[
