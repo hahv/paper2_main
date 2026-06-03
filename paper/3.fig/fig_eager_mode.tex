@@ -6,10 +6,10 @@
         \textsc{AccMotionDet}-based skip module. Transitions are annotated with
         \textit{if} conditions and \textit{then} actions specifying variable
         updates. In \textsc{Normal} mode, $\mathcal{S}$ operates as designed,
-        with periodic forced checks every $N_{\mathrm{chk}}$ frames. Upon
-        $W_{\mathrm{fire}}$ consecutive positive predictions, the system enters
-        \textsc{Eager} mode, bypassing $\mathcal{S}$ (i.e., $s_t = 1$) to
+        with periodic forced checks every $N_{\mathrm{chk}}$ skipped frames.
+        Upon $W_{\mathrm{fire}}$ consecutive positive predictions, the system
+        enters \textsc{Eager} mode, bypassing $\mathcal{S}$ (i.e., $s_t = 1$) to
         forward every frame to $\mathcal{M}$. The system returns to
         \textsc{Normal} mode after $W_{\mathrm{clr}}$ consecutive negative
-        predictions. }\label{fig:eager_mode}
+    predictions. }\label{fig:eager_mode}
 \end{figure}
