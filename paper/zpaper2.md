@@ -847,8 +847,31 @@ Figure \ref{fig:qualitative_failure} shows five representative failure cases, wh
 ```{=latex}
 \input{./3.fig/fig_eager_analysis_failure.tex}
 ```
+To demonstrate how \textsc{Eager} mode operates in practice, we visualize
+per-frame timeline results for both \textsc{Eager} and \textsc{Normal} mode on
+two representative videos: a success case (Figure
+\ref{fig:eager_analysis_success}) and a failure case (Figure
+\ref{fig:eager_analysis_failure}).
 
-A notable drawback of Eager mode shown in Table \ref{tb:cmp_other_temp_eager} is its tendency to increase false alarms (from 0.136% to 0.251%). Our analysis reveals that Eager mode cannot distinguish false-alarm-prone static scenes from genuine slow-developing or settled smoke events, as both exhibit near-zero inter-frame motion. In such static scenes, the classifier may produce fire/smoke predictions on several consecutive frames, causing the system to enter and remain in Eager mode with prolonged forced inference and elevated FAR. This highlights a fundamental limitation of heuristic, motion-based skip logic: it is insufficient to robustly handle all scenarios. We leave this as an open research question, with potential directions including skip modules that incorporate richer cues (such as color, texture, or learned features) to discriminate between these scene types.
+As shown in Figure \ref{fig:eager_analysis_success}, \textsc{Eager} mode forces
+inference on frames that would otherwise be skipped due to insufficient motion,
+enabling detection of slow-developing or nearly stationary smoke that
+\textsc{Normal} mode alone would miss --- thus recovering recall in this
+critical scenario. However, a trade-off of \textsc{Eager} mode is an increase in
+the false alarm rate (FAR) from 0.136% to 0.251% (Table
+\ref{tb:cmp_other_temp_eager}). This arises because \textsc{Eager} mode cannot
+distinguish static, false-alarm-prone scenes from genuine slow-developing or nearly
+stationary smoke,
+as both exhibit near-zero inter-frame motion. On such scenes, consecutive
+positive predictions from $\mathcal{M}$ cause the system to enter and persist in
+\textsc{Eager} mode, sustaining forced inference and elevated FAR throughout the
+video, as illustrated in Figure \ref{fig:eager_analysis_failure}.
+
+This highlights a fundamental limitation of heuristic, motion-based skip logic:
+it is insufficient to robustly handle all scenarios. We leave this as an open
+research question, with potential directions including skip modules that
+incorporate richer cues (such as color, texture, or learned features) to
+discriminate between these scene types.
 
 
 # Conclusion {#sec:conclusion label="Conclusion"}
