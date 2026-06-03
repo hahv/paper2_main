@@ -29,15 +29,18 @@ Output CSV format (semicolon-separated):
 
 import pandas as pd
 import ast
+from halib import *
 
 BASE = "./paper/3.fig/eager_rs_analyse/raw_csv/"
 
 
 def parse_probs(probs_str):
-    """Extract SmokeOnly probability (class index 2) from probs column string."""
+    """Extract Fire/Smoke probability (class index 2) from probs column
+    string."""
+    # ["Fire", "None", "SmokeOnly"]
     try:
         probs = ast.literal_eval(str(probs_str))
-        return float(probs[2])
+        return 1 - float(probs[1])  # FireSmoke prob = 1 - None prob
     except Exception:
         return 0.0
 
@@ -61,34 +64,33 @@ def build_csv(df_eager, df_skip, frame_start, frame_end):
     for fi in range(frame_start, frame_end + 1):
         e_row = sub_eager.loc[fi] if fi in sub_eager.index else None
         s_row = sub_skip.loc[fi] if fi in sub_skip.index else None
+        # !DEBUG
+        pprint_box(e_row, title=f"Frame {fi}")
+        class_names = (
+            s_row["class_names"] if s_row is not None else ["Fire", "None", "SmokeOnly"]
+        )
+        pred_label_idx = s_row["pred_label_idx"]  # ty:ignore[not-subscriptable]
+        pred_label = class_names[pred_label_idx]
+        if "pred_label" in s_row and s_row["pred_label"] is not None:  # ty:ignore[unsupported-operator, not-subscriptable]
+            pred_label = s_row["pred_label"]  # ty:ignore[not-subscriptable]
 
-        # Skip decision: was this frame blocked by the skip module?
-        skipped = 1 if (s_row is not None and s_row["pred_label"] == "skipped") else 0
-
+        skipped = 1 if pred_label == "skipped" else 0
         # Eager mode active?
         eager = 1 if (e_row is not None and e_row["eager_mode"]) else 0
+        classifier = 1 if not skipped or eager else 0
 
-        # Classifier output - use eager-run result (the live system output)
-        if (
-            e_row is not None
-            and pd.notna(e_row.get("pred_label"))
-            and e_row["pred_label"] not in ("skipped",)
-        ):
-            classifier = 1 if e_row["pred_label"] in ("Fire", "SmokeOnly") else 0
-            prob = parse_probs(e_row["probs"])
-        else:
-            classifier = 0
-            prob = 0.0
+        prob = 0.0 if (skipped and not eager) else parse_probs(e_row["probs"])  # ty:ignore[not-subscriptable]
+        row = {
+            "frame": fi,
+            "classifier": classifier,
+            "prob": round(prob, 4),
+            "skipped": skipped,
+            "eager_mode": eager,
+        }
+        pprint_box(row, title=f"Compiled Row for Frame {fi}")
+        console.rule()
 
-        rows.append(
-            {
-                "frame": fi,
-                "classifier": classifier,
-                "prob": round(prob, 4),
-                "skipped": skipped,
-                "eager_mode": eager,
-            }
-        )
+        rows.append(row)
 
     return pd.DataFrame(rows)
 
@@ -147,8 +149,8 @@ df_a_skip = pd.read_csv(BASE + "aihub__lb_smoke__0208_results_skipOnly.csv", sep
 df_b_eager = pd.read_csv(BASE + "aihub__lb_none__0175_results_eager.csv", sep=";")
 df_b_skip = pd.read_csv(BASE + "aihub__lb_none__0175_results_skipOnly.csv", sep=";")
 
-# ── CASE Success : frames 10-55 ───────────────────────────────────────────────────
-df_case_success = build_csv(df_a_eager, df_a_skip, frame_start=155, frame_end=205)
+# ── CASE Success───────────────────────────────────────────────────
+df_case_success = build_csv(df_a_eager, df_a_skip, frame_start=160, frame_end=195)
 df_case_success.to_csv(BASE + "_eager_timeline_success.csv", sep=";", index=False)
 print(f"[CASE B] Saved eager_timeline_success.csv  ({len(df_case_success)} rows)")
 
@@ -160,11 +162,12 @@ os.rename(
     BASE + "_eager_timeline_success_example.png",
 )
 
-# ── CASE Failure : frames 20-50 ─────────────────────────────────────────────────────
+# ── CASE Failure ─────────────────────────────────────────────────────
 df_case_failure = build_csv(df_b_eager, df_b_skip, frame_start=20, frame_end=40)
 df_case_failure.to_csv(BASE + "_eager_timeline_failure.csv", sep=";", index=False)
 print(f"[CASE A] Saved eager_timeline_failure.csv  ({len(df_case_failure)} rows)")
 extract_frame(BASE + "aihub__lb_none__0175.mp4", frame_idx=20)  # example frame
 os.rename(
     BASE + "aihub__lb_none__0175.png",
-    BASE + "_eager_timeline_failure_example.png",)
+    BASE + "_eager_timeline_failure_example.png",
+)

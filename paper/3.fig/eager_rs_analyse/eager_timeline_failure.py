@@ -68,14 +68,14 @@ for _, row in df.iterrows():
     color = "#d62728" if val == 1 else "#aec7e8"
     ax1.bar(f, max(prob, 0.04), color=color, width=0.8, align="center", alpha=0.88)
 
-    if f % 5 == 0 and prob > 0.1:
+    if f % 3 == 0 and prob > 0.1:
         ax1.text(
             f,
             max(prob, 0.04) / 2,
             f"{prob:.2f}",
             ha="center",
             va="center",
-            fontsize=13,
+            fontsize=12,
             fontweight="bold",
             color="white" if val == 1 else "#333333",
             rotation=-90,
@@ -87,7 +87,7 @@ ax1.set_ylim(0, 1.62)
 ax1.set_yticks([0, 0.5, 1.0])
 ax1.tick_params(axis="y", labelsize=9)
 ax1.spines[["top", "right"]].set_visible(False)
-# ax1.axhline(0.5, color="gray", linestyle=":", linewidth=0.9, alpha=0.6)
+ax1.axhline(0.5, color="gray", linestyle=":", linewidth=0.9, alpha=0.6)
 # ax1.text(
 #     frames[-1] + 0.8, 0.51, "0.5 threshold", fontsize=12, color="gray", va="bottom"
 # )
@@ -162,14 +162,14 @@ if len(eager_on):
 
     # ── Top row: annotation with arrow pointing down to the bar ──────────
     axes[0].annotate(
-        "Eager ON: forced inference $\\rightarrow$ False Alarm\n(skipped in Normal mode due to no motion detected)",
+        "Eager ON: forced inference $\\rightarrow$ False Alarm\n(would be skipped in Normal mode due to no motion detected)",
         xy=(mid_eager, bar_top),  # arrow tip: top of the bar
         xytext=(mid_eager, 1.2),  # text position: above
         ha="center",
+        va="bottom",
         fontsize=13,
         color="#b85c00",
         fontstyle="italic",
-        va="bottom",
         arrowprops=dict(arrowstyle="->", color="darkorange", lw=1.3),
         bbox=dict(boxstyle="round,pad=0.25", fc="#fff8f0", ec="darkorange", lw=0.8),
         annotation_clip=False,
@@ -200,7 +200,7 @@ prob_at_start = float(df[df["frame"] == eager_start]["prob"].values[0])
 axes[0].annotate(
     f"Eager = ON, \n then persists",
     xy=(eager_start - 0.5, prob_at_start),
-    xytext=(eager_start + 4, 1.0),
+    xytext=(eager_start + 2.5, 1.0),
     fontsize=13,
     color="darkorange",
     fontweight="bold",
@@ -265,29 +265,15 @@ if os.path.exists(thumb_path):
 ax1.legend(
     handles=[
         mpatches.Patch(
-            color="#d62728", alpha=0.88, label="Positive prediction \n (FALSE ALARM)"
+            color="#d62728", alpha=0.88, label="FALSE ALARM \n(Positive prediction in safe, static scene)"
         ),
-        # mpatches.Patch(
-        #     color="#aec7e8", alpha=0.88, label="Negative prediction (correct)"
-        # ),
-        # mpatches.Patch(
-        #     color="#fff3e0",
-        #     alpha=0.8,
-        #     ec="darkorange",
-        #     label="Eager mode ON — locked (orange tint)",
-        # ),
-        # mpatches.Patch(
-        #     color="#e8f5e9",
-        #     alpha=0.8,
-        #     ec="#81c784",
-        #     label="Normal mode — skip active (green tint)",
-        # ),
     ],
     fontsize=13,
     loc="upper left",
     framealpha=0.92,
     bbox_to_anchor=(0.005, 0.94),
 )
+
 ax2.legend(
     handles=[
         mpatches.Patch(color="#98df8a", alpha=0.88, label="Skipped (S)"),
@@ -304,7 +290,7 @@ ax2.set_xticklabels(frames[::5], fontsize=13)
 ax2.set_xlabel("Frame index", fontsize=13)
 
 plt.suptitle(
-    "Eager Mode Failure: False-Alarm-Prone Static Scene Locks Eager ON\n Video: aihub__lb_none__0175 | Ground truth: None (Background only)",
+    "Eager Mode Failure: False-Alarm-Prone Static Scene Locks Eager ON\n Video: aihub__lb_none__0175 | Ground truth (All frames): None",
     fontsize=15,
     fontweight="bold",
     y=1.02,
