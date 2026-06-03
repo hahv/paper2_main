@@ -110,7 +110,7 @@ for _, row in df.iterrows():
     f, val = int(row["frame"]), int(row["skipped"])
     color = "#98df8a" if val == 1 else "#ff9896"
     ax2.bar(f, 1, color=color, width=0.8, align="center", alpha=0.88)
-    if f % 5 == 0:
+    if f % 3 == 0:
         ax2.text(
             f,
             0.5,
