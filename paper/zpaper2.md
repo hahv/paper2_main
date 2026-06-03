@@ -59,7 +59,23 @@ intervention and minimizing damage.
 
 <!-- !Existing DL approaches -->
 
-In recent years, DL-based approaches have emerged as the prevailing methodology in fire and smoke detection systems [@cheng2024visual; @gragnaniello2024fire]. In practical deployments, such  systems are commonly integrated  into  CCTV video pipelines, where DL-based classifiers or object detectors perform inference on every individual frame. While this per-frame paradigm is straightforward to implement, it exhibits two major limitations. First, it relies solely on spatial information within isolated frames, neglecting temporal cues like motion video sequences. Second, in surveillance scenarios, particularly in **indoor** environments, video streams can exhibit minimal visual variation across consecutive frames due to static scene content. Indiscriminately applying computationally intensive DL models to every frame under these conditions introduces significant processing redundancy, increasing latency and computational overhead without improving detection performance. This inefficiency is further amplified by the well-known accuracy-efficiency trade-off in DL: high-accuracy models typically demand substantial computational resources, and indiscriminate frame processing amplifies resource demands, and indiscriminate per-frame inference magnifies these demands, posing a significant barrier to real-time deployment.
+In recent years, DL-based approaches have emerged as the prevailing methodology
+in fire and smoke detection systems [@cheng2024visual; @gragnaniello2024fire].
+In practical deployments, such  systems are commonly integrated  into  CCTV
+video pipelines, where DL-based classifiers or object detectors perform
+inference on every individual frame. While this per-frame paradigm is
+straightforward to implement, it exhibits two major limitations. First, it
+relies solely on spatial information within isolated frames, neglecting temporal
+cues like motion video sequences. Second, in surveillance scenarios,
+particularly in **indoor** environments, video streams can exhibit minimal
+visual variation across consecutive frames due to static scene content.
+Indiscriminately applying computationally intensive DL models to every frame
+under these conditions introduces significant processing redundancy, increasing
+latency and computational overhead without improving detection performance. This
+inefficiency is further amplified by the well-known accuracy-efficiency
+trade-off in DL: high-accuracy models typically demand substantial computational
+resources, and indiscriminate per-frame inference magnifies these demands,
+posing a significant barrier to real-time deployment.
 
 <!-- !What we propose -->
 
