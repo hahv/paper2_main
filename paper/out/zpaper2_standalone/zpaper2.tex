@@ -174,7 +174,7 @@
 Motion-Heuristic Skip Module for Accelerated Inference in Indoor
 Environments}
 \author{Hoang Van-Ha, Jong Weon Lee, Park Chun-Su}
-\date{2026.06.02}
+\date{2026.06.05}
 
 \begin{document}
 \maketitle
@@ -238,7 +238,6 @@ redundancy, increasing latency and computational overhead without
 improving detection performance. This inefficiency is further amplified
 by the well-known accuracy-efficiency trade-off in DL: high-accuracy
 models typically demand substantial computational resources, and
-indiscriminate frame processing amplifies resource demands, and
 indiscriminate per-frame inference magnifies these demands, posing a
 significant barrier to real-time deployment.
 
@@ -257,10 +256,10 @@ classifier. To address a key failure mode of motion-based skipping ---
 namely, missed detections arising from slow-developing or nearly
 stationary smoke events --- the framework additionally incorporates an
 Eager mode that periodically forces inference updates to recover
-detection recall. As illustrated in Fig. 1, the conventional pipeline
-processes every frame through the classifier, whereas the proposed
-pipeline adds the skip module early in the process to conditionally
-suppress redundant inference calls.
+detection recall. As illustrated in Figure \ref{fig:pipeline}, the
+conventional pipeline processes every frame through the classifier,
+whereas the proposed pipeline adds the skip module early in the process
+to conditionally suppress redundant inference calls.
 
 In particular, our main contributions are summarized as follows:
 
@@ -272,9 +271,12 @@ In particular, our main contributions are summarized as follows:
   computational cost without modifying the underlying classifier. The
   proposed module is designed as a plug-and-play component compatible
   with existing fire and smoke detection pipelines. A systematic
-  hyperparameter optimization procedure is further developed to identify
-  the optimal operating configuration for maximizing throughput while
-  preserving detection performance.
+  hyperparameter optimization procedure is developed to identify the
+  optimal operating configuration for maximizing throughput while
+  preserving detection performance. The skip module is further augmented
+  with \textsc{Eager} mode, which mitigates missed detections on
+  slow-developing or nearly stationary smoke --- a key failure mode of
+  motion-based skipping.
 \item
   \textbf{Indoor Fire and Smoke Video Dataset:} We construct an
   annotated dataset comprising 150 indoor fire and smoke videos
@@ -286,7 +288,7 @@ In particular, our main contributions are summarized as follows:
   evaluating detection systems in static surveillance scenarios.
 \item
   \textbf{Comprehensive System Evaluation and Analysis:} The proposed
-  framework is integrated with a high-capacity DL classifier (BIG model)
+  framework is integrated with a high-capacity DL classifier (BIG Model)
   and evaluated on the constructed dataset against a per-frame inference
   baseline and existing methods. Results demonstrate approximately 30\%
   higher throughput than the baseline, with a recall reduction of
@@ -295,7 +297,8 @@ In particular, our main contributions are summarized as follows:
   effectiveness of the Eager mode in recovering detection performance
   while preserving most throughput gains. Beyond quantitative
   benchmarking, a detailed efficiency analysis of the proposed system is
-  conducted, and success and failure cases.
+  conducted, alongside a qualitative examination of representative
+  success and failure cases.
 \end{itemize}
 
 The rest of this paper is organized as follows:
@@ -303,14 +306,14 @@ Section~\ref{sec:relatedWork} reviews existing fire and smoke detection
 methods for video and relevant motion detection techniques,
 contextualizing the need for efficient processing in static surveillance
 scenarios. Section~\ref{sec:method} describes the proposed system
-architecture, the design of the skip-module, its integration with the
+architecture, the design of the skip module, its integration with the
 classifier, the hyperparameter optimization strategy, and the Eager mode
 proposed to address missed detections arising from slow-developing or
 nearly stationary smoke events. Section~\ref{sec:results} presents the
 experimental setup, evaluation metrics, and results on the large-scale
 indoor video dataset, including comparative analyses against the
 baseline and an existing temporally-aware method, and qualitative
-examination of success and failure cases of the proposed skip module.
+examination of success and failure cases of the proposed method.
 Finally, Section~\ref{sec:conclusion} summarizes the key findings and
 discusses limitations and future research directions.
 
@@ -638,7 +641,7 @@ formalized in Algorithm \ref{alg:acc_motion_det}.
             \Require Downsampled frames $\tilde{f}_t,\,
             \tilde{f}_{\text{prev}}$;
             accumulated mask $\mathbf{K}_{t-1}$ (initialized to $\mathbf{0}$)
-            \Param $\tau_d$: pixel difference sensitivity,\;
+            \Param $\tau_d$: pixel difference sensitivity threshold,\;
             $\omega$: motion increment,\;
             $\tau_m$: activation threshold,\;
             $K_{\max}$: accumulation cap,\;
@@ -700,12 +703,12 @@ formalized in Algorithm \ref{alg:acc_motion_det}.
         \textsc{AccMotionDet}-based skip module. Transitions are annotated with
         \textit{if} conditions and \textit{then} actions specifying variable
         updates. In \textsc{Normal} mode, $\mathcal{S}$ operates as designed,
-        with periodic forced checks every $N_{\mathrm{chk}}$ frames. Upon
-        $W_{\mathrm{fire}}$ consecutive positive predictions, the system enters
-        \textsc{Eager} mode, bypassing $\mathcal{S}$ (i.e., $s_t = 1$) to
+        with periodic forced checks every $N_{\mathrm{chk}}$ skipped frames.
+        Upon $W_{\mathrm{fire}}$ consecutive positive predictions, the system
+        enters \textsc{Eager} mode, bypassing $\mathcal{S}$ (i.e., $s_t = 1$) to
         forward every frame to $\mathcal{M}$. The system returns to
         \textsc{Normal} mode after $W_{\mathrm{clr}}$ consecutive negative
-        predictions. }\label{fig:eager_mode}
+    predictions. }\label{fig:eager_mode}
 \end{figure}
 
 
@@ -717,31 +720,28 @@ the activation threshold of the motion detector, causing the skip module
 to incorrectly bypass frames containing actual fire or smoke activity.
 To mitigate this limitation, the proposed framework augments the skip
 module with an \textsc{Eager} mode that periodically forces inference
-updates.
-
-When the classifier \(\mathcal{M}\) produces positive fire/ smoke
-predictions on \(W_{\text{fire}}\) consecutive non-skipped frames, the
-system transition from Normal mode to \textsc{Eager} mode and suppresses
-all skip decisions by setting \(s_t = 1\), forcing inference on every
-frame. The system remains in \textsc{Eager} mode until the scene is
-declared safe again, which occurs when the classifier \(\mathcal{M}\)
-returns negative predictions for \(W_{\text{clr}}\) consecutive frames.
-At that point, the system returns to \textsc{Normal} mode with the skip
-module re-enabled.
-
-Additionally, while operating in Normal mode, the system periodically
-forces inference on \(W_{\text{fire}}\) consecutive frames after every
-\(N_{\text{chk}}\) skipped frames. This mechanism ensures the classifier
-retains opportunities to detect emerging fire or smoke activity and
-transition to \textsc{Eager} mode when necessary. Consequently, the
-proposed design improves recall for slow-developing or nearly stationary
-smoke events while preserving the throughput gains provided by the skip
-module during \textsc{Normal} mode operation.
-
-Figure \ref{fig:eager_mode} illustrates the state machine of
+updates. Figure \ref{fig:eager_mode} illustrates the state machine of
 \textsc{Eager} mode with the transition conditions and corresponding
 actions for each state and how states transition during system
 operation.
+
+When the classifier \(\mathcal{M}\) produces positive fire/ smoke
+predictions on \(W_{\text{fire}}\) consecutive non-skipped frames, the
+system transition from \textsc{Normal} mode to \textsc{Eager} mode and
+suppresses all skip decisions by setting \(s_t = 1\), forcing inference
+on every frame. The system remains in \textsc{Eager} mode until the
+scene is declared safe again, which occurs when the classifier
+\(\mathcal{M}\) returns negative predictions for \(W_{\text{clr}}\)
+consecutive frames. At that point, the system returns to \textsc{Normal}
+mode with the skip module re-enabled. Additionally, while operating in
+\textsc{Normal} mode, the system periodically forces inference on
+\(W_{\text{fire}}\) consecutive frames after every \(N_{\text{chk}}\)
+skipped frames. This mechanism ensures the classifier retains
+opportunities to detect emerging fire or smoke activity and transition
+to \textsc{Eager} mode when necessary. Consequently, the proposed design
+improves recall for slow-developing or nearly stationary smoke events
+while preserving the throughput gains provided by the skip module during
+\textsc{Normal} mode operation.
 
 \subsection{Skip Module Hyperparameter
 Optimization}\label{sec:hyperparam}
@@ -1018,7 +1018,7 @@ signals unsafe skipping of fire/smoke frames.
 \textbf{Baseline Models}: To demonstrate both the superiority of the
 high-capacity classifier over lightweight alternatives and the
 effectiveness of the proposed skip module in accelerating its inference,
-we evaluate the following baseline models alongside our BIG model:
+we evaluate the following baseline models alongside our BIG Model:
 
 \begin{itemize}
 \item
@@ -1042,7 +1042,7 @@ we evaluate the following baseline models alongside our BIG model:
 \end{itemize}
 
 \textbf{Proposed Classifier (BIG Model \(\mathcal{M}\) --- HGNetV2)}:
-The BIG model \(\mathcal{M}\) is obtained by fine-tuning a pretrained
+The BIG Model \(\mathcal{M}\) is obtained by fine-tuning a pretrained
 High-Performance GPU Network v2 (HGNetV2), specifically the
 \texttt{hgnetv2\_b5.ssld\_stage2\_ft\_in1k} checkpoint
 \citeproc{ref-hgnetv2timm:online}{{[}35{]}} from the Timm library
@@ -1126,7 +1126,7 @@ The search space is as follows:
   responses to minor pixel-level disturbances. The three values provide
   a systematic sweep from fine to coarse sensitivity.
 \item
-  \textbf{Difference sensitivity threshold}
+  \textbf{Pixel difference sensitivity threshold}
   \(\tau_d \in \{3, 5, 7, 10\}\): defines the minimum absolute
   inter-frame intensity change required for a pixel to be declared
   active. This range is chosen to cover diverse sensitivity levels, from
@@ -1217,8 +1217,8 @@ AccMotionDet-based Skip Module}\label{sec:accMotionResults}
         absolute recall drop relative to the baseline in parentheses, i.e.,
         Recall (-Recall Drop). The best and second-best results for each metric
         are highlighted in \textbf{bold} and \textit{\underline{italic
-        underline}}, respectively. Note that Motion increment $\omega=5$ and
-        Decay rate $\delta=0.1$ are fixed across all configurations. }
+        underline}}, respectively. Note that Accumulation Step $\omega=5$ and
+        Decay rate $\delta=1$ are fixed across all configurations. }
     \label{tb:val_results_accMotionDet}
     \csvreader[separator=semicolon,
         no head,
@@ -1272,11 +1272,11 @@ search space (of 96 configurations) are as follows:
   accumulation naturally suppresses false activations, rendering more
   aggressive thresholds unnecessary.
 \item
-  \textbf{Difference sensitivity threshold (\(\tau_d \in \{3, 5\}\))}:
-  Limited to the lower end of the FrameDiffDet search space, as higher
-  values were found to cause excessive frame skipping and unacceptable
-  recall degradation, as described in
-  Section~\ref{sec:frameDiffResults}.
+  \textbf{Pixel difference sensitivity threshold
+  (\(\tau_d \in \{3, 5\}\))}: Limited to the lower end of the
+  FrameDiffDet search space, as higher values were found to cause
+  excessive frame skipping and unacceptable recall degradation, as
+  described in Section~\ref{sec:frameDiffResults}.
 \item
   \textbf{Accumulation step (\(\omega=5\))} and \textbf{Decay rate
   (\(\delta=1\))}: We fix these parameters to streamline the
@@ -1289,12 +1289,12 @@ search space (of 96 configurations) are as follows:
   reducing the dimensionality of the search space.
 \item
   \textbf{Activation threshold (\(\tau_m \in \{5, 10\}\))}: This
-  threshold serves as the decision gate for the motion mask, labeling
-  pixels as active only when their accumulated motion score exceeds
-  \(\tau_m\). Given the fixed accumulation parameters
-  (\(\omega=5, \delta=1\)), \(\tau_m=5\) and \(\tau_m=10\) are
-  approximately equivalent to requiring motion signals over 2 and 3
-  consecutive frames, respectively.
+  activation threshold labels pixels in the motion mask as active only
+  when their accumulated motion score reaches or exceeds \(\tau_m\).
+  Given the fixed accumulation parameters (\(\omega=5, \delta=1\)),
+  \(\tau_m=5\) and \(\tau_m=10\) are approximately equivalent to
+  requiring motion signals over 2 and 3 consecutive frames,
+  respectively.
 \item
   \textbf{Accumulation cap (\(K_{\max} \in \{15, 25, 35\}\))}: This
   parameter limits the maximum accumulated motion score to prevent
@@ -1324,8 +1324,8 @@ Skip Module}\label{sec:e2e-perf}
 
 \begin{table}[htbp]
     \caption{Frame-level performance and throughput of the proposed pipeline
-    against lightweight fire-and-smoke detectors on the test set. ``Our Big
-    Model (with Skip Module)'' refers to the full proposed pipeline. Recall,
+    against lightweight fire-and-smoke detectors on the test set. ``Big
+    Model with Skip Module'' refers to the full proposed pipeline. Recall,
     FAR, Accuracy, and Precision are reported in percentage (\%); FPS is
     averaged across all frames in the test videos. GFLOPs denotes the static
     per-frame floating-point operations ($10^9$) of the detection model. The
@@ -1360,25 +1360,25 @@ Skip Module}\label{sec:e2e-perf}
 
 Table \ref{tb:perf_per_frame} benchmarks the proposed pipeline
 (\textsc{AccMotionDet} skip module with the optimal configuration paired
-with the Big Model) against lightweight fire-and-smoke detectors,
+with the BIG Model) against lightweight fire-and-smoke detectors,
 described in Section \ref{sec:baselines}. The baseline BIG Model
 (without skip module) achieves the highest recall (95.62\%), accuracy
 (98.77\%), and F1-score (0.97), substantially outperforming all
 lightweight alternatives. This gap reflects the consequences of neural
 scaling laws \citeproc{ref-hestness2017deep}{{[}40{]}},
 \citeproc{ref-alabdulmohsin2022revisiting}{{[}41{]}},
-\citeproc{ref-bahri2024explaining}{{[}42{]}}: the BIG model benefits
+\citeproc{ref-bahri2024explaining}{{[}42{]}}: the BIG Model benefits
 from both a more expressive architecture and a significantly larger
 training dataset. Notably, MobileNet and FireNet exhibit near-degenerate
 recall of 5.84\% and 34.1\%, respectively, rendering them unsuitable for
 safety-critical fire and smoke detection despite their speed and
 compactness. YOLOv5s achieves the highest throughput (109.94 FPS) but
 still suffers a recall of 68.58\%, roughly 27 percentage points below
-the BIG model, confirming that no lightweight alternative achieves an
+the BIG Model, confirming that no lightweight alternative achieves an
 acceptable accuracy--efficiency balance on this task.
 
 \textbf{Effect of the Skip Module:} Integrating the skip module yields a
-consistent set of improvements across nearly all metrics. Throughput
+consistent set of improvements across several metrics. Throughput
 increases from 24.97 to 32.32 FPS, a gain of approximately 29\%, while
 the F1-score is almost fully preserved at 0.969. Recall drops by only
 1.23 percentage points (95.616\% \(\to\) 94.384\%), remaining within the
@@ -1386,7 +1386,7 @@ safety constraint \(\delta_R = 0.015\). A less obvious but notable
 benefit is the reduction in FAR from 0.251\% to 0.136\%, accompanied by
 a precision increase from 99.166\% to 99.541\%: by suppressing inference
 on near-static background frames, the skip module also eliminates a
-class of incorrect detections that the BIG model would otherwise
+class of incorrect detections that the BIG Model would otherwise
 generate.
 
 \subsubsection{Comparison with Temporal
@@ -1543,12 +1543,12 @@ As established in Section \ref{sec:e2e-perf}, the AccMotionDet-based
 skip module achieved a throughput improvement of nearly 30\% in FPS;
 however, this came at the cost of a 1.23\% reduction in recall, which is
 likely attributable to missed detections in slow-developing or nearly
-stationary smoke scenarios. To address this limitation, the Eager mode
-is introduced as a complementary mechanism to augment the skip module
-and recover recall in such cases. In this section, the Eager mode is
-evaluated in conjunction with the AccMotionDet-based skip module, with
-its hyperparameters fixed to the optimal values identified in Section
-\ref{sec:accMotionResults} (i.e.,
+stationary smoke scenarios. To address this limitation, the
+\textsc{Eager} mode is introduced as a complementary mechanism to
+augment the skip module and recover recall in such cases. In this
+section, the \textsc{Eager} mode is evaluated in conjunction with the
+AccMotionDet-based skip module, with its hyperparameters fixed to the
+optimal values identified in Section \ref{sec:accMotionResults} (i.e.,
 \(\alpha{=}0.5,B{=}32,\tau{=}0.05,\tau_d{=}5,\tau_m{=}5,K_{\max}{=}15\)).
 A grid search is then conducted over the Eager mode parameters to
 identify the optimal configuration, as follows:
@@ -1563,12 +1563,12 @@ identify the optimal configuration, as follows:
 \item
   \textbf{Clearance window \(W_{\mathrm{clr}} \in \{3, 5, 7\}\)}: This
   parameter defines the number of consecutive negative predictions
-  required to exit eager mode and resume normal skip operation. The
-  range is deliberately set larger than that of \(W_{\mathrm{fire}}\),
-  reflecting an asymmetric cost structure: a premature exit risks missed
-  detections, whereas a delayed exit only causes the system to run
-  unnecessary inference on a few extra frames --- a minor and acceptable
-  efficiency loss.
+  required to exit \textsc{Eager} mode and resume normal skip operation.
+  The range is deliberately set larger than that of
+  \(W_{\mathrm{fire}}\), reflecting an asymmetric cost structure: a
+  premature exit risks missed detections, whereas a delayed exit only
+  causes the system to run unnecessary inference on a few extra frames
+  --- a minor and acceptable efficiency loss.
 \item
   \textbf{Forced-check interval
   \(N_{\mathrm{chk}} \in \{10, 20, 30, 50\}\)}: defines the maximum
@@ -1630,7 +1630,7 @@ mode on system performance. \textsc{Eager} mode successfully recovers
 recall on slow-developing or settled smoke scenarios, increasing from
 \(94.384\%\) (\textsc{AccMotionDet} only) to \(95.565\%\)
 (\textsc{AccMotionDet} + \textsc{Eager}), nearly matching the baseline
-recall of \(95.616\%\) (Big Model without skip module) --- a recovery of
+recall of \(95.616\%\) (BIG Model without skip module) --- a recovery of
 critical importance in safety-critical applications. However, this
 improvement comes with two costs: the skip rate slightly decreases from
 \(34.93\%\) to \(34.31\%\), and the false alarm rate (FAR) increases
@@ -1645,7 +1645,7 @@ full \textsc{AccMotionDet} pipeline (Algorithm
 grayscale, stores it for subsequent use in \textsc{Normal} mode, and
 applies only temporal decay. Consequently, per-frame computation in
 \textsc{Eager} mode is lighter than in \textsc{Normal} mode (where both
-the full-step \textsc{AccMotionDet} skip module and Big Model inference
+the full-step \textsc{AccMotionDet} skip module and BIG Model inference
 are active), yielding the observed FPS gain despite the lower skip rate.
 
 \subsubsection{Quantitative and Qualitative
@@ -1659,32 +1659,32 @@ Analysis}\label{quantitative-and-qualitative-analysis}
   \caption{Computational efficiency of the proposed skip-module: (a) average
   processing time of the skip-module (1.79 ms) compared to the BIG model
   inference time (39.88 ms), representing a $\times 22$ reduction; (b) system
-  throughput with and without the skip-module, yielding a 29.4\% improvement in
+  throughput with and without the skip module, yielding a 29.4\% improvement in
   FPS.}\label{fig:fps_increase}
 \end{figure}
 
-To evaluate the efficiency of the skip module, the BIG model was run on
+To evaluate the efficiency of the skip module, the BIG Model was run on
 the test set \(\mathcal{D}_\text{test}\) with and without the skip
-module. The average processing time of the skip module, the BIG model
+module. The average processing time of the skip module, the BIG Model
 inference time, and the overall system FPS were recorded in both cases.
 The results are visualized in Figure \ref{fig:fps_increase}.
 
 As shown in Figure \ref{fig:fps_increase}, the skip module requires an
 average processing time of only 1.79 ms per frame, which is
-approximately ×22 lower than the BIG model inference time of 39.88 ms.
+approximately ×22 lower than the BIG Model inference time of 39.88 ms.
 In the best case, the skip module correctly identifies and bypasses
 negative frames, contributing only 1.79 ms of overhead. In the worst
-case, where the skip module fails to bypass a frame and the BIG model
+case, where the skip module fails to bypass a frame and the BIG Model
 inference is subsequently invoked, the additional latency introduced by
 the skip module is 1.79 ms --- a mere 4.5\% increase relative to the BIG
-model inference time. Overall, integrating the skip module improves
+Model inference time. Overall, integrating the skip module improves
 system throughput by approximately 30\% on \(\mathcal{D}_\text{test}\),
 demonstrating its effectiveness for real-time fire and smoke detection
 in indoor surveillance scenarios.
 
 \paragraph{Qualitative Analysis}\label{qualitative-analysis}
 
-To understand how the skip module operates in coordination with the Big
+To understand how the skip module operates in coordination with the BIG
 Model, we visualize the inference results of the \textsc{AccMotionDet}
 skip module on the test set \(\mathcal{D}_\text{test}\) in RGB images
 together with the corresponding foreground motion masks generated by the
@@ -1712,7 +1712,7 @@ These cases can be grouped into two categories:
 \item
   \textbf{Correctly skipped static background frames} (Fig.
   \ref{fig:qualitative_success}a,b): \textsc{AccMotionDet} identifies
-  static background frames and skips them without invoking the Big
+  static background frames and skips them without invoking the BIG
   Model. The corresponding motion masks are empty, indicating no active
   motion regions.
 \item
@@ -1755,11 +1755,11 @@ cases, which can be grouped into three categories:
   prevents background frames from being skipped, resulting in
   unnecessary inference.
 \item
-  \textbf{Incorrect Big Model predictions} (Fig.
+  \textbf{Incorrect BIG Model predictions} (Fig.
   \ref{fig:qualitative_failure}d,e): Even when fire or smoke frames are
-  correctly forwarded, the Big Model may still produce an incorrect
-  label, especially when the target occupies only a small portion of the
-  frame.
+  correctly forwarded, the BIG Model may still produce an incorrect
+  label, especially when the target objects (fire/smoke) occupies only a
+  small portion of the frame.
 \end{itemize}
 
 \paragraph{Analysis of Eager Mode: Recall-FAR
@@ -1767,26 +1767,66 @@ Trade-off}\label{sec:analysis_eager}
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=\linewidth]{3.fig/eager_timeline.png}
-    \caption{Per-frame timeline illustrating a false-alarm scenario under
-    Eager mode. Once the classifier $\mathcal{M}$ produces
-    $W_{\text{fire}}$ consecutive positive predictions on a static
-    ambiguous scene, the system enters Eager mode (orange region),
-    forcing inference on every subsequent frame and causing a sustained
-    increase in FAR until $W_{\text{clr}}$ consecutive negative
-    predictions are observed.}
-    \label{fig:eager_timeline}
+    \includegraphics[width=\linewidth]{3.fig/eager_timeline_success.png}
+
+    \caption{A per-frame timeline example illustrating a recall-recovery
+        scenario under \textsc{Eager} mode. Initially, the skip module
+        suppresses inference on
+        slow-developing smoke frames with minimal inter-frame motion
+        (\textsc{Normal} Mode Zone).
+        Once the classifier $\mathcal{M}$ yields positive predictions on
+        $W_{\text{fire}}=1$ consecutive frame(s) in \textsc{Normal} mode, the
+        system transitions to
+        \textsc{Eager} mode. This forces inference on every subsequent frame,
+        enabling continuous
+        smoke detection that would otherwise be missed---thus
+        achieving a successful
+        recall-recovery (\textcolor[HTML]{e8736f}{bars with light red}
+        ). Notably, from frames 163 to 168, the system returns
+        \texttt{None} predictions yet remains in \textsc{Eager} mode because
+        the number of
+        consecutive negative frames has not reached $W_{\text{clr}}=7$, which is
+    insufficient to trigger an exit back to \textsc{Normal} mode.}
+    \label{fig:eager_analysis_success}
 \end{figure}
 
-A notable drawback of Eager mode shown in Table
-\ref{tb:cmp_other_temp_eager} is its tendency to increase false alarms
-(from 0.136\% to 0.251\%). Our analysis reveals that Eager mode cannot
-distinguish false-alarm-prone static scenes from genuine slow-developing
-or settled smoke events, as both exhibit near-zero inter-frame motion.
-In such static scenes, the classifier may produce fire/smoke predictions
-on several consecutive frames, causing the system to enter and remain in
-Eager mode with prolonged forced inference and elevated FAR. This
-highlights a fundamental limitation of heuristic, motion-based skip
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\linewidth]{3.fig/eager_timeline_failure.png}
+    \caption{A per-frame timeline example illustrating a false-alarm scenario
+        under \textsc{Eager} mode. Once the classifier $\mathcal{M}$ produces consecutive
+        positive predictions over multiple frames on a static,
+        false-alarm-prone scene,
+        the system enters \textsc{Eager} mode and persists in it, forcing
+        inference on every
+    subsequent frame and causing an increase in FAR.}
+    \label{fig:eager_analysis_failure}
+\end{figure}
+
+
+To demonstrate how \textsc{Eager} mode operates in practice, we
+visualize per-frame timeline results for both \textsc{Eager} and
+\textsc{Normal} mode on two representative videos: a success case
+(Figure \ref{fig:eager_analysis_success}) and a failure case (Figure
+\ref{fig:eager_analysis_failure}).
+
+As shown in Figure \ref{fig:eager_analysis_success}, \textsc{Eager} mode
+forces inference on frames that would otherwise be skipped due to
+insufficient motion, enabling detection of slow-developing or nearly
+stationary smoke that \textsc{Normal} mode alone would miss --- thus
+recovering recall in this critical scenario. However, a trade-off of
+\textsc{Eager} mode is an increase in the false alarm rate (FAR) from
+0.136\% to 0.251\% (Table \ref{tb:cmp_other_temp_eager}). This arises
+because \textsc{Eager} mode cannot distinguish static, false-alarm-prone
+scenes from genuine slow-developing or nearly stationary smoke, as both
+exhibit near-zero inter-frame motion. On such scenes, consecutive
+positive predictions from \(\mathcal{M}\) cause the system to enter and
+persist in \textsc{Eager} mode, sustaining forced inference and elevated
+FAR throughout the video, as illustrated in Figure
+\ref{fig:eager_analysis_failure}.
+
+This highlights a fundamental limitation of heuristic, motion-based skip
 logic: it is insufficient to robustly handle all scenarios. We leave
 this as an open research question, with potential directions including
 skip modules that incorporate richer cues (such as color, texture, or

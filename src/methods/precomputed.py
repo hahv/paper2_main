@@ -33,7 +33,7 @@ class PrecomputedRsProc:
 
         if not expected_csv_path or not os.path.exists(expected_csv_path):
             raise FileNotFoundError(
-                f"Precomputed file not found for video: {video_path}"
+                f"Precomputed file not found for video: {video_path}, expected at: {expected_csv_path}"
             )
 
         # Load CSV using standard loader handler
