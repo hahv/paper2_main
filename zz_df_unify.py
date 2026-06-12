@@ -4,7 +4,7 @@ import os
 
 # ── DataFrame building ────────────────────────────────────────────────────────
 
-def get_df(indir: str) -> pd.DataFrame:
+def get_df(indir: str, outdir=".", outfile_name="unified_data.csv", copy_raw_data: bool = False) -> pd.DataFrame:
     """Merge per-experiment timeline CSVs into one unified DataFrame."""
     TARGET_FILE = "_timeline_report_raw.csv"
     FIXED_COLS = ["video", "video_path", "num_frames", "frame_idx", "gt_label"]
@@ -17,6 +17,8 @@ def get_df(indir: str) -> pd.DataFrame:
 
     df_list = []
     method_unique_list = []
+    if outdir:
+        os.makedirs(outdir, exist_ok=True)
     for exp_dir in exp_dirs:
         csv_path = os.path.join(indir, exp_dir, TARGET_FILE)
         df = pd.read_csv(
@@ -29,6 +31,13 @@ def get_df(indir: str) -> pd.DataFrame:
             f"Duplicate method name '{method_name}' found in multiple CSVs"
         )
         method_unique_list.append(method_name)
+        
+        if copy_raw_data and outdir:
+            raw_outdir = os.path.join(outdir, "raw_data")
+            os.makedirs(raw_outdir, exist_ok=True)
+            fs.copy_file(
+                csv_path, os.path.join(raw_outdir, f"{method_name}__{TARGET_FILE}")
+            )
 
         extra_cols = [c for c in df.columns if c not in FIXED_COLS]
         predict_col = [c for c in extra_cols if c in method_name]
@@ -42,7 +51,7 @@ def get_df(indir: str) -> pd.DataFrame:
         df["gt_label"] = df["gt_label"].str.lower()
 
         df = df[FIXED_COLS + [method_name]].set_index(JOIN_COLS)
-        pprint(df.columns.tolist())
+        # pprint(df.columns.tolist())
         # make method_name col values consistent (lowercase, remove spaces)
         df[method_name] = df[method_name].str.lower().str.strip()
 
@@ -61,5 +70,10 @@ def get_df(indir: str) -> pd.DataFrame:
         c for c in unified_df.columns if c.endswith("_dir") or c.endswith("_path")
     ]:
         unified_df[col] = unified_df[col].apply(normalize_paths)
-
+    
+    if outdir:
+        os.makedirs(outdir, exist_ok=True)
+        outfile = os.path.join(outdir, outfile_name)
+        unified_df.to_csv(outfile, index=False, sep=";", encoding="utf-8")
+        
     return unified_df
