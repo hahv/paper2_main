@@ -36,6 +36,9 @@ eqnPrefix:
 
 ---
 
+<!-- !IMPORTANT NOTE -->
+<!-- ! The FPS value in this paper is calculated based on the fixed hardware of HaHV-MainPC; but using the specific version of NVidia GPU Driver (see paper/4.table/__gpu_driver_for_FPS.png), if you change the driver version, the FPS may vary significantly -->
+
 # Introduction {#sec:introduction}
 
 <!-- !START_SYNC_BLOCK -->
