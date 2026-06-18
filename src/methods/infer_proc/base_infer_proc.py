@@ -5,7 +5,8 @@ import numpy as np
 
 from src.config import Config
 from src.utils import get_cls_in_pkg
-
+from collections import deque
+from typing import Dict, Any, Optional
 
 class InferProcFactory:
     @staticmethod
@@ -66,21 +67,31 @@ class NormalInferProc(BaseInferProc):
 
 class ProfInferProc(BaseInferProc):
     """
-    Inference post-processor with access to runtime config for more advanced logic.
+    C++-style inference post-processor (from Professor's code) that applies a reliability threshold to determine the final predicted label.
     """
 
     def __init__(self, params: Optional[Dict[str, Any]] = None):
         super().__init__(params)
-        self.cfg = self.params["cfg"]
+        self.reliable_th = self.params.get("reliable_th", 0.7)
 
     def proc_infer_results(self, logits_ls, probs_ls, classNames) -> Dict[str, Any]:
-        label_idx = int(np.argmax(probs_ls))
-        assert label_idx < len(classNames), "Class index out of range."
-
-        pred_label = classNames[label_idx]
+        probs = np.asarray(probs_ls, dtype=float)
+        logits = np.asarray(logits_ls, dtype=float) if logits_ls is not None else None
+        # class_name = [Fire, None, SmokeOnly]
+        NONE_LB_IDX = classNames.index("None")
+        label_idx = int(np.argmax(probs))
+        original_prob = probs[label_idx]
+        if original_prob < self.reliable_th:
+            if label_idx != NONE_LB_IDX:
+                print(f"Unreliable prediction: original label '{classNames[label_idx]}' with prob {original_prob:.4f} below threshold {self.reliable_th}. Setting to 'None'.")
+            label_idx = NONE_LB_IDX
+            predLabel = classNames[NONE_LB_IDX]
+        else:
+            predLabel = classNames[label_idx]
+        
         return {
-            "logits": logits_ls,
-            "probs": probs_ls,
+            "logits": logits,
+            "probs": probs,
             "predLabelIdx": label_idx,
-            "predLabel": pred_label,
+            "predLabel": predLabel,
         }

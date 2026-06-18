@@ -33,9 +33,16 @@ modelCfg:
 inferCfg:
   do_infer: true
   # how model inference results are processed.
+  # infer_proc:
+  #   name: base_infer_proc.NormalInferProc # ProfInferProc: professor infer logic
+  #   extra: null # extra parameters for the InferProc, if needed
+  
+  # how model inference results are processed.
   infer_proc:
-    name: base_infer_proc.NormalInferProc # ProfInferProc: professor infer logic
-    extra: null # extra parameters for the InferProc, if needed
+    name: base_infer_proc.ProfInferProc # ProfInferProc: professor infer logic
+    extra: 
+      reliable_th: 0.7 # probability threshold for reliable prediction in ProfInferProc; can be tuned based on validation set performance
+
   num_infer_workers: 0 # set to 0 for no parallel; 1 worker for 1 video
   skip_if_exists: true
   limit: -1 # -1 for no limit
