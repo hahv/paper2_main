@@ -1,3 +1,4 @@
+from numpy.f2py.rules import k
 from halib import *
 
 import cv2
@@ -20,6 +21,7 @@ import torch.multiprocessing as mp
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
 from src.results.timeline.tl_report import TlReportGen
+from src.methods.infer_proc.base_infer_proc import InferProcFactory, BaseInferProc
 
 # Constants for package paths (avoids magic strings scattered in code)
 PKG_METHODS = "src.methods"
@@ -109,7 +111,10 @@ class BaseMethod(ABC):
         self.precomputed_rs_proc = None
         if getattr(self.cfg.inferCfg, "pre_computed_no_skip_dir", None):
             from src.methods.precomputed import PrecomputedRsProc
+
             self.precomputed_rs_proc = PrecomputedRsProc(self.cfg)
+        # ! add infer_proc to kwargs for method_cls
+        self.infer_proc: BaseInferProc = InferProcFactory.create_infer_proc(self.cfg)
 
     @abstractmethod
     def infer_frame(self, frame, frame_idx: int) -> dict:
@@ -271,15 +276,21 @@ class BaseMethod(ABC):
             self.after_infer_video_dir(video_dir)
             if self.cfg.methodCfg.get_name() == "temp_method_motion_block_haze":
                 # Save the logged haze scores for no-motion frames to a CSV for analysis
-                from ..methods.skip.motion_only_block_skip_proc_haze import MotionOnlyBlockSkipProcHaze
-                no_motion_haze_scores = MotionOnlyBlockSkipProcHaze.NO_MOTION_HAZE_SCORE_LIST
+                from ..methods.skip.motion_only_block_skip_proc_haze import (
+                    MotionOnlyBlockSkipProcHaze,
+                )
+
+                no_motion_haze_scores = (
+                    MotionOnlyBlockSkipProcHaze.NO_MOTION_HAZE_SCORE_LIST
+                )
                 # print the scores mean and std for quick analysis
                 if no_motion_haze_scores:
                     mean_score = np.mean(no_motion_haze_scores)
                     std_score = np.std(no_motion_haze_scores)
                     console.rule("No-motion frame haze score summary")
-                    pprint(f"No-motion frame haze scores: mean={mean_score:.4f}, std={std_score:.4f}")
-
+                    pprint(
+                        f"No-motion frame haze scores: mean={mean_score:.4f}, std={std_score:.4f}"
+                    )
 
     def _infer_video_worker(self, video_path: str, video_idx: int, total_videos: int):
         """

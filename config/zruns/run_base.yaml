@@ -29,8 +29,13 @@ modelCfg:
   input_size: [360, 640] # [H, W], for timm models
   class_names: [Fire, None, SmokeOnly]
   # class_names: [FireSmoke, None]
+
 inferCfg:
   do_infer: true
+  # how model inference results are processed.
+  infer_proc:
+    name: base_infer_proc.NormalInferProc # ProfInferProc: professor infer logic
+    extra: null # extra parameters for the InferProc, if needed
   num_infer_workers: 0 # set to 0 for no parallel; 1 worker for 1 video
   skip_if_exists: true
   limit: -1 # -1 for no limit

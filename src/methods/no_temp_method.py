@@ -45,6 +45,24 @@ class NoTempMethod(BaseMethod):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         frame_batch = frame_batch.to(device)
         return frame_batch
+    
+    # def proc_infer_results(self, logits_ls, probs_ls, classNames):
+    #     """Process the raw inference results to extract the predicted label and
+    #     probabilities.
+    #     logits_ls: list of raw outputs from the model (torch.Tensor)
+    #     probs_ls: list of probabilities after applying softmax (torch.Tensor)
+    #     classNames: list of class names corresponding to the model's output
+    #     """
+    #     # Get the index of the most likely class
+    #     labelIdx = int(np.argmax(probs_ls))
+    #     assert labelIdx < len(classNames), "Class index out of range."
+    #     pred_label = classNames[labelIdx]
+    #     return {
+    #         "logits": logits_ls,
+    #         "probs": probs_ls,
+    #         "predLabelIdx": labelIdx,
+    #         "predLabel": pred_label,
+    #     }
 
     def infer_frame(self, frame, frame_idx: int) -> dict:
         """Perform inference on the pre-processed frame."""
@@ -70,23 +88,8 @@ class NoTempMethod(BaseMethod):
 
             # 2. Calculate probabilities using the softmax function
             probs = F.softmax(logits, dim=1)
-
-        # 3. Get the index of the most likely class
-        labelIdx = int(torch.argmax(probs, dim=1).item())
-
-        # 4. Convert tensors to lists for easier handling
-        logits = logits.cpu().squeeze().tolist()
-        probs = probs.cpu().squeeze().tolist()
-        assert len(probs) == len(self.cfg.modelCfg.class_names), (
-            "Mismatch in number of classes and probabilities."
-        )
-        # 5. Get the predicted class name
+        
+        logits_ls = logits.cpu().squeeze().tolist()
+        probs_ls = probs.cpu().squeeze().tolist()
         classNames: list[str] = self.cfg.modelCfg.class_names
-        assert labelIdx < len(classNames), "Class index out of range."
-        pred_label = classNames[labelIdx]
-        return {
-            "logits": logits,
-            "probs": probs,
-            "predLabelIdx": labelIdx,
-            "predLabel": pred_label,
-        }
+        return self.infer_proc.proc_infer_results(logits_ls, probs_ls, classNames)

@@ -74,6 +74,10 @@ class GeneralCfg(NamedCfg, YAMLWizard):
             self.computer_name = get_PC_abbr_name()
         self.project_dir = normalize_paths(self.project_dir)  # ty:ignore[missing-argument]
 
+@dataclass
+class InferProcCfg(YAMLWizard):
+    name: str = "normal_infer_proc"
+    extra: Optional[Dict[str, Any]] = None
 
 @dataclass
 class InferConfig(YAMLWizard):
@@ -96,6 +100,7 @@ class InferConfig(YAMLWizard):
     timeline_video_name_limit: Optional[int] = 40
     timeline_table_decimals: Optional[int] = 4
     pre_computed_no_skip_dir: Optional[str] = None
+    infer_proc: InferProcCfg = field(default_factory=InferProcCfg)
 
 @dataclass
 class ModelConfig(YAMLWizard):

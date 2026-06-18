@@ -49,4 +49,5 @@
     "[python]": {
         "editor.defaultFormatter": "charliermarsh.ruff"
     },
+    "editor.fontSize": 14,
 }
