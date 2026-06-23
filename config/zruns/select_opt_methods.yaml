@@ -13,5 +13,5 @@ method_selector:
     # - temp_method_motion_block_eager
     # - temp_method_motion_block_eager_prof
     # - temp_method_rule_block
-    - temp_method_pcheck_prof_win_vote_skip_eager
-    # - temp_method_pcheck_streak_count_skip_eager
+    # - temp_method_pcheck_prof_win_vote_skip_eager
+    - temp_method_pcheck_streak_count_skip_eager
