@@ -4,7 +4,7 @@ from typing import Tuple, Dict, Any
 from src.config import Config
 from src.methods.skip.base_skip_proc import BaseSkipProc
 
-class IdlePeriodSkipProcProf(BaseSkipProc):
+class PCheckProfWinVoteSkipProcEager(BaseSkipProc):
     def __init__(self, cfg: Config):
         super().__init__(cfg)
 
@@ -15,8 +15,6 @@ class IdlePeriodSkipProcProf(BaseSkipProc):
         # cfg.fdPeriod = 16;  // check period in the idle mode
         self.fd_period: int = self.params.get("fd_period", 16)  # fixed at 16
         self.window_size: int = self.params.get("window_size", 16)  # fixed at 16
-        self.reliable_th = self.params.get("reliable_th", 0.7)
-
         self.fd_cnt: int = 0
         self.fire_hist = [0] * self.window_size
         self.smoke_hist = [0] * self.window_size
@@ -66,23 +64,7 @@ class IdlePeriodSkipProcProf(BaseSkipProc):
 
         # 1) Extract label and probability info
         pred_label = pred_info.get("predLabel", "")
-        pred_probs = pred_info.get("predProbs", [])
-        pred_label_idx = pred_info.get("predLabelIdx", -1)
-
-        # Softmax score for the chosen label (like C++ `score`)
-        if (
-            pred_probs
-            and pred_label_idx is not None
-            and 0 <= pred_label_idx < len(pred_probs)
-        ):
-            score = float(pred_probs[pred_label_idx])
-        else:
-            score = 0.0
-
-        # 2) Apply reliability threshold: score < reliable_th → label = "None"
-        if score < self.reliable_th:
-            pred_label = "None"
-
+        assert len(pred_label) > 0, "Predicted label is empty."
         # 3) Map final label to fire/smoke flags (C++ behavior)
         label_lower = pred_label.lower()
         if label_lower == "fire":

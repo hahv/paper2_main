@@ -97,6 +97,8 @@ def get_cls_in_pkg(
     ] = default_fileName_to_clsName,
 ):
     "This function imports a class from a specified package and file name. Using a provided function, it converts the file name to the corresponding class name and retrieves the class from the module."
+
+    # pprint(locals())
     having_cls_name = "." in fileName_ClsName
     class_path = None
     if having_cls_name:

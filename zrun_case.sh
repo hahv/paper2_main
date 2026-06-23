@@ -64,4 +64,5 @@
 
 python ./zbin/run_multi.py \
     --base_yaml "config/zruns/run_base.yaml" \
-    --sweep_yaml "config/zruns/select_ds_ufire_02.yaml"
+    --sweep_yaml "config/zruns/select_ds_ufire_02.yaml" \
+    -pc "zout/zruns/MainPC__ds_UFireIndoor2__mt_no_temp_method__af4b0d32a3d2__20260623.172205"

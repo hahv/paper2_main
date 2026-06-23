@@ -1,6 +1,6 @@
 general:
   seed: 1
-  skip_exp_if_exists: true # ! skip if same experiment with same config existed
+  skip_exp_if_exists: false # ! skip if same experiment with same config existed
   is_optim_mode: false # ! set to true when doing hyper-parameter optimization
   project_dir: /mnt/e/SyncData/paper2_main
   outdir: zout/zruns
@@ -33,20 +33,20 @@ modelCfg:
 inferCfg:
   do_infer: true
   # how model inference results are processed.
-  # infer_proc:
-  #   name: base_infer_proc.NormalInferProc # ProfInferProc: professor infer logic
-  #   extra: null # extra parameters for the InferProc, if needed
+  infer_proc:
+    name: base_infer_proc.NormalInferProc # ProfInferProc: professor infer logic
+    extra: null # extra parameters for the InferProc, if needed
   
   # how model inference results are processed.
-  infer_proc:
-    name: base_infer_proc.ProfInferProc # ProfInferProc: professor infer logic
-    extra: 
-      reliable_th: 0.7 # probability threshold for reliable prediction in ProfInferProc; can be tuned based on validation set performance
+  # infer_proc:
+  #   name: base_infer_proc.ProfInferProc # ProfInferProc: professor infer logic
+  #   extra: 
+  #     reliable_th: 0.7 # probability threshold for reliable prediction in ProfInferProc; can be tuned based on validation set performance
 
   num_infer_workers: 0 # set to 0 for no parallel; 1 worker for 1 video
   skip_if_exists: true
   limit: -1 # -1 for no limit
-  save_video_results: true
+  save_video_results: false
   save_csv_results: true
   csv_infer_pattern: "_results"
   csv_columns:

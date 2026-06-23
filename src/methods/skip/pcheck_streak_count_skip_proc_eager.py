@@ -3,17 +3,17 @@ from typing import Tuple, Dict, Any
 from src.config import Config
 from src.methods.skip.base_block_skip_proc import BaseSkipProc
 
-class PeriodicCheckSkipProcEager(BaseSkipProc):
+class PCheckStreakCountSkipProcEager(BaseSkipProc):
     def __init__(self, cfg: Config):
         super().__init__(cfg)
 
         # --- FSM Parameters ---
         # n_chk: periodic wake-up interval (frames to skip before forced infer)
-        self.n_chk: int = self.params.get("n_chk", 30)
+        self.n_chk: int = self.params.get("n_chk", 50)
         # w_clr: consecutive non-fire frames needed to exit EAGER → NON-EAGER
-        self.w_clr: int = self.params.get("w_clr", 10)
+        self.w_clr: int = self.params.get("w_clr", 7)
         # w_fire: consecutive fire/smoke infers needed to exit NON-EAGER → EAGER
-        self.w_fire: int = self.params.get("fire_confirm_k", 2)
+        self.w_fire: int = self.params.get("fire_confirm_k", 1)
 
         with ConsoleLog("DEBUG"):
             pprint(f"{self.n_chk=}, {self.w_clr=}, {self.w_fire=}")
