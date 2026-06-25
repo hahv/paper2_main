@@ -5,5 +5,6 @@ extra_cfgs:
   skip_proc:
     name: pcheck_prof_win_vote_skip_proc_eager.PCheckProfWinVoteSkipProcEager
     params:
-      fd_period: 16 # periodic check interval (frames)
-      fd_win_size: 16 # window size for majority voting (frames)
+      # !Note: valid config <=> fd_win_size >= fd_period
+      fd_period: [8, 16, 24, 32] # periodic check interval (frames)
+      fd_win_size: [8, 16, 24, 32] # window size for majority voting (frames)

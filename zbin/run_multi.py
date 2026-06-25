@@ -2,6 +2,7 @@
 
 # os.environ["OPENCV_FFMPEG_DEBUG"] = "1"
 # os.environ["OPENCV_LOG_LEVEL"] = "VERBOSE"
+from sympy.physics.units import me
 from lightning.pytorch.loggers import WandbLogger
 
 from halib import *
@@ -10,7 +11,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from tap import *
-from typing import List
+from typing import List, Dict, Any
 from halib.exp.core.param_gen import ParamGen
 from src.config import Config
 from src.exp import Paper2Exp
@@ -124,7 +125,15 @@ def main():
             optim_param_gen = ParamGen.from_files(
                 sweep_yaml=opt_cfg_path, base_yaml=None
             )
-            optim_cfgs = optim_param_gen.expand()
+
+            def filter_fn(flatten_dict: Dict[str, Any]) -> bool:
+                if method_name == "temp_method_pcheck_prof_win_vote_skip_eager":
+                    pprint(flatten_dict)
+                    return False
+                else:
+                    return True
+            
+            optim_cfgs = optim_param_gen.expand(filter_fn=filter_fn)
             # # ! debug
             # for idx, optim_cfg in enumerate(optim_cfgs):
             #     pprint_box(
