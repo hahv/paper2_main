@@ -109,26 +109,43 @@ class WeightedSelect(ParamSelect):
         # 3. Pass 2 — Range-normalize OVER Theta_feasible, then score
         # ==========================================
         combine_col = GlobalConst.COL_PARAM_COMBINED_SCORE
-
-        if len(df_feasible) > 0:
-            # Normalize rho and S_r over the feasible set only
-            df_feasible[GlobalConst.COL_PARAM_RECALL_RET_NORM] = self._range_normalize(
-                df_feasible[GlobalConst.COL_PARAM_RECALL_RET]
-            )
-            df_feasible[GlobalConst.COL_PARAM_SKIP_RATE_NORM] = self._range_normalize(
-                df_feasible[GlobalConst.COL_PARAM_SKIP_RATE]
-            )
-            df_feasible[combine_col] = (
-                self.w_r * df_feasible[GlobalConst.COL_PARAM_RECALL_RET_NORM]
-                + self.w_s * df_feasible[GlobalConst.COL_PARAM_SKIP_RATE_NORM]
-            )
-
+        assert len(df_feasible) > 0, (
+            "No feasible configurations found. Ensure that the DataFrame contains configurations that meet the feasibility criteria."
+        )
+        # Normalize rho and S_r over the feasible set only
+        df_feasible[GlobalConst.COL_PARAM_RECALL_RET_NORM] = self._range_normalize(
+            df_feasible[GlobalConst.COL_PARAM_RECALL_RET]
+        )
+        df_feasible[GlobalConst.COL_PARAM_SKIP_RATE_NORM] = self._range_normalize(
+            df_feasible[GlobalConst.COL_PARAM_SKIP_RATE]
+        )
+        df_feasible[combine_col] = (
+            self.w_r * df_feasible[GlobalConst.COL_PARAM_RECALL_RET_NORM]
+            + self.w_s * df_feasible[GlobalConst.COL_PARAM_SKIP_RATE_NORM]
+        )
         # Also compute raw (un-normalized) score on full df_rest for logging in df_full
         df_rest[GlobalConst.COL_PARAM_RECALL_RET_NORM] = float("nan")
         df_rest[GlobalConst.COL_PARAM_SKIP_RATE_NORM] = float("nan")
         df_rest[combine_col] = float("nan")
+        # with ConsoleLog("df_rest"):
+        #     csvfile.fn_display_df(df_rest)
+        
+        # with ConsoleLog("df_feasible"):
+        #     csvfile.fn_display_df(df_feasible)
+        
+        # df_rest.update(df_feasible)
         # Backfill normalized values and scores into df_rest where feasible
-        df_rest.update(df_feasible)
+        # ! fixed for df_rest.update(df_feasible) not working as expected, using
+        # loc instead (error with pandas > 3.0)
+        cols_to_merge = [
+            GlobalConst.COL_PARAM_RECALL_RET_NORM,
+            GlobalConst.COL_PARAM_SKIP_RATE_NORM,
+            combine_col,
+        ]
+        for col in cols_to_merge:
+            df_rest[col] = df_rest[col].astype("float64")
+            df_feasible[col] = df_feasible[col].astype("float64")
+            df_rest.loc[df_feasible.index, col] = df_feasible[col].to_numpy()
 
         # ==========================================
         # 4. Finalize DataFrames

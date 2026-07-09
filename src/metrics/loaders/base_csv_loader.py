@@ -47,7 +47,7 @@ class BaseRawCsvLoader(ABC):
 
         video_name = Path(video_path).stem
         csv_file = os.path.join(str(csv_dir), f"{video_name}{csv_pattern}.csv")
-        pprint(f'CSV file path: {csv_file}')
+        # pprint(f'CSV file path: {csv_file}')
         if not os.path.exists(csv_file):
             return ""
         return csv_file

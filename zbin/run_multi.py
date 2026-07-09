@@ -69,6 +69,7 @@ def _get_cfg_path(method_name: str, prefix: str) -> str | None:
     cfg_path = os.path.join(BASE_CFG_OPTIM, file_name)
     return cfg_path if os.path.exists(cfg_path) else None
 
+
 def get_opt_cfg(method_name: str) -> str | None:
     return _get_cfg_path(method_name, "opt_")
 
@@ -128,11 +129,29 @@ def main():
 
             def filter_fn(flatten_dict: Dict[str, Any]) -> bool:
                 if method_name == "temp_method_pcheck_prof_win_vote_skip_eager":
-                    pprint(flatten_dict)
-                    return False
+                    window_size = flatten_dict.get(
+                        "extra_cfgs.skip_proc.params.window_size", 16
+                    )
+                    fd_period = flatten_dict.get(
+                        "extra_cfgs.skip_proc.params.fd_period", 16
+                    )
+                    return window_size >= fd_period
+                elif method_name == "temp_method_pcheck_streak_count_skip_eager":
+                    n_chk = flatten_dict.get(
+                        "extra_cfgs.skip_proc.params.n_chk", 50
+                    )
+                    w_clr = flatten_dict.get(
+                        "extra_cfgs.skip_proc.params.w_clr", 7
+                    )
+                    # fire_confirm_k = flatten_dict.get(
+                    #     "extra_cfgs.skip_proc.params.fire_confirm_k", 1
+                    # )
+                    return (
+                        w_clr >= n_chk
+                    )
                 else:
                     return True
-            
+
             optim_cfgs = optim_param_gen.expand(filter_fn=filter_fn)
             # # ! debug
             # for idx, optim_cfg in enumerate(optim_cfgs):
