@@ -23,6 +23,12 @@ class VideoLabelerBase(ABC):
             "dataset_path": self.dataset_path,
             "num_videos": len(self.video_list),
         }
+    def get_label_outfile(self, video_path: str, label_file_posfix: str) -> str:
+            """Generate the output label file path for a given video."""
+            parent_dir = os.path.dirname(video_path)
+            fname = fs.get_file_name(video_path, split_file_ext=True)[0]
+            fname_csv = f"{fname}{label_file_posfix}.csv"
+            return os.path.join(parent_dir, fname_csv)
 
     def process_labeling(self, to_csv: bool = True, max_workers: int = 8) -> None:
         """Process labeling for all videos in the dataset."""
@@ -37,22 +43,15 @@ class VideoLabelerBase(ABC):
 
         with open(config_file, "w") as f:
             yaml.dump(self._generate_config(), f)
-
+        
         def process_single_video(video_path: str) -> str:
             """Process a single video and save labels if required."""
-            # get parent dir of video_path
-            parent_dir = os.path.dirname(video_path)
-            fname = fs.get_file_name(video_path, split_file_ext=True)[0]
-            fname_csv = f"{fname}{self.label_file_posfix}.csv"
-            outfile = os.path.join(
-                parent_dir,
-                fname_csv,
-            )
-            if os.path.exists(outfile):
+            outfile = self.get_label_outfile(video_path,self.label_file_posfix)
+            if os.path.exists(outfile) and self.skip_existing:
                 console.print(f"Label file already exists, skipping: {outfile}")
                 return video_path
             label_df = self.get_labels(video_path)
-            if to_csv:
+            if to_csv and label_df is not None and not label_df.empty:
                 console.print(f"Saving label to:")
                 pprint_local_path(outfile, get_wins_path=True)
                 print("\n\n")

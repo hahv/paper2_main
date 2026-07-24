@@ -1,0 +1,6 @@
+# dataset_name: dataset_all
+dataset_name: UFireIndoorFullRelabel
+dataset_path: /mnt/e/SyncData/paper2_main/datasets/UFireIndoorFull_Relabel
+label_file_posfix: __labels
+search_recursive: true
+skip_existing: false
