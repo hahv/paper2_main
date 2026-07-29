@@ -26,7 +26,7 @@ from halib import *
 
 
 class Args(Tap):
-    indir: str = "./datasets/UFireIndoorFull" # Input directory containing CSV files (searched recursively)
+    indir: str = "./datasets/UFireIndoorFull_Relabel" # Input directory containing CSV files (searched recursively)
     outdir: str = "./zlabels_updated" # Output directory for generated TXT files (mirrors indir structure)
 
 
