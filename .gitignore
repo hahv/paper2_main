@@ -41,3 +41,4 @@ __before_refactor/zlabels_updated
 __before_refactor/zout
 
 __before_refactor/wandb
+__before_refactor/src/.slack_env.yaml
