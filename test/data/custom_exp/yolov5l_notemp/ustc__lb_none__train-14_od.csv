@@ -1,2 +1,0 @@
-video;frame_id;pred_id;cls;cls_conf;x1;y1;x2;y2;elapsed_time
-ustc__lb_none__train-14;645;0;Smoke;0.2617339789867401;892;580;1100;825;0.015686988830566406

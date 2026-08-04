@@ -1,3 +1,0 @@
-video;frame_id;pred_id;cls;cls_conf;x1;y1;x2;y2;elapsed_time
-wisenet__lb_none__set_3_video3_3;2116;0;Smoke;0.25011926889419556;1156;242;1280;490;0.0
-wisenet__lb_none__set_3_video3_3;2124;0;Smoke;0.27233147621154785;1229;400;1279;505;0.0

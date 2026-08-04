@@ -1,2 +1,0 @@
-experiment;dataset;tl_type;metric_accuracy;metric_f1_score;metric_precision;metric_recall (TPR);metric_FPR (False Alarm Rate);metric_FPS
-yolov5l_notemp_per_frame;UFireIndoorFull;no_skip;0.8375086784362793;0.5913673639297485;0.7917778491973877;0.4719180166721344;0.0411807112395763;78.2814712524414

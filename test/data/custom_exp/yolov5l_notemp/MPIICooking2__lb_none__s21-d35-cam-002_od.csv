@@ -1,2 +1,0 @@
-video;frame_id;pred_id;cls;cls_conf;x1;y1;x2;y2;elapsed_time
-MPIICooking2__lb_none__s21-d35-cam-002;200;0;Fire;0.2941662669181824;1;784;25;835;0.009586334228515625

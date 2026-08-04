@@ -1,5 +1,0 @@
-exp_id;Recall;Filter_Rate;grid_size;motion_thresh;smoke_rules
-exp_001;0.991;0.721;16x16;0.015;True
-exp_002;0.990;0.683;16x16;0.020;True
-exp_003;0.992;0.657;32x32;0.010;True
-exp_004;0.972;0.650;16x16;0.020;False

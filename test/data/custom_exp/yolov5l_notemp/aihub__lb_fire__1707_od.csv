@@ -1,2 +1,0 @@
-video;frame_id;pred_id;cls;cls_conf;x1;y1;x2;y2;elapsed_time
-aihub__lb_fire__1707;3;0;Smoke;0.3197327256202698;734;8;1028;266;0.017244815826416016

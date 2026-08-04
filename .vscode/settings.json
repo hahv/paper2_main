@@ -29,7 +29,7 @@
         "**/*.aux": true,
         "**/*.log": true,
         "**/*.out": true,
-        "**/wandb": true,
+        "**/wandb": false,
         "tb/*.log": true,
         "**/.vscode": false,
         "**/__pycache__": true,
@@ -43,7 +43,7 @@
         "**/ruff.toml": true,
         "**/pyproject.toml": true,
         "**/.yamlfmt": true,
-        "**/.markdownlint.yaml": true,
+        "**/.markdownlint.yaml": true
     },
     "notebook.formatOnSave.enabled": true,
     // Disable the Python language server; using ty (Astral.sh) for faster linting and formatting
