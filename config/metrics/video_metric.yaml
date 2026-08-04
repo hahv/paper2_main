@@ -1,0 +1,15 @@
+# name: metrics_set1
+# ! for all metrics, we use the macro average for multi-class classification
+# ! except for FPR (False Alarm Rate)
+# !  in FPR, we convert `fire` or `smoke` to positive class, and `non-fire` to negative class, then calculate FPR based on binary classification
+metric_names:
+  - accuracy
+  - f1_score
+  - precision
+  - recall (TPR)
+  - FPR (False Alarm Rate)
+  - FPS
+extra_cfgs:
+  # per_video: calculate based on video-level
+  # per_frame: calculate based on frame-level (main metric)
+  mode: [per_video, per_frame]

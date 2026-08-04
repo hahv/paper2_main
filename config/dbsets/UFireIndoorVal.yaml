@@ -1,2 +1,2 @@
-__base__: config/dbsets/UFireIndoor2.yaml
+__base__: config/dbsets/UFireIndoorFull.yaml
 dir_path: datasets/UFireIndoorFull/val

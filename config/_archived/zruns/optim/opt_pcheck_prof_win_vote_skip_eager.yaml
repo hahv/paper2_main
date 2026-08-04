@@ -1,0 +1,12 @@
+extra_cfgs:
+  skip_proc:
+    name: pcheck_prof_win_vote_skip_proc_eager.PCheckProfWinVoteSkipProcEager
+    params: # ! contraint: window_size >= fd_period
+      fd_period: # period_interval_check
+        start: 8
+        stop: 57
+        step: 8
+      window_size: # window_size for voting (rolling detection window) 
+        start: 8
+        stop: 57
+        step: 8

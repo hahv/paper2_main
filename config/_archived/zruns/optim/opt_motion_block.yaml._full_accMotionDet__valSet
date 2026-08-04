@@ -1,0 +1,20 @@
+extra_cfgs:
+  # result_proc:
+  #   video: [video_block_skip_rs_proc, fgmask_block_skip_rs_proc]
+  skip_proc:
+    name: motion_only_block_skip_proc
+    params:
+      scale_factor: [0.5, 1.0]
+      block_size_orig: [16, 32]
+      block_ratio_th: [0.05, 0.10]
+      motion:
+        name: acc_motion_det.AccMotionDet
+        params:
+          diff_frame_th: [3, 5]
+          impact_plus_one: 5
+          mask_th: [5, 10]
+          max_val: [15, 25, 35]
+          decay: 1
+
+# We fix δ = 1 because it represents the minimal integer decay step compatible with uint8 arithmetic and the chosen increment α = 5. With δ = 1, the charge-to-discharge ratio is 5:1, meaning a pixel requires five consecutive frames of no motion to lose the heat gained from a single motion event. This asymmetry is intentional: detection should be easier to trigger than to extinguish, which is the conservative design principle for a safety-critical skip module. Searching δ independently of M_max would be redundant since both reduce to a single interpretable quantity — the persistence tail length (max_val - mask_th)/δ — which directly controls the temporal memory of the motion detector.
+# # M_max ∈ {15, 25, 35} was searched to evaluate persistence tail lengths of 5, 15, and 25 frames respectively, while δ = 1 was fixed to avoid redundant parameterization of the temporal memory mechanism.

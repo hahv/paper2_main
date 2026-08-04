@@ -1,0 +1,53 @@
+general:
+  seed: 1
+  skip_exp_if_exists: false # ! skip if same experiment with same config existed
+  project_dir: null
+  outdir: zout
+  computer_name: null # PC name that run the experiment
+  time_stamp: null
+
+dbset_selector:
+  list_dbsets: [] # empty, will populate from config/dbsets
+  selected_dbset: UFireIndoorFull # will be set later
+
+metric_selector:
+  list_metrics: [] # empty, will populate from config/metrics
+  selected_metric: video_metric # will be set later
+
+method_selector:
+  list_methods: [] # empty, will populate from config/methods
+  selected_method: no_temp_method # noTemp
+
+modelCfg:
+  base_model: hgnetv2_b5.ssld_stage2_ft_in1k # model name in timm
+  model_path: models/hgnetv2_b5.ssld_stage2_ft_in1k-20260224-76-98.66.pth
+  input_size: [360, 640] # [H, W], for timm models
+  class_names: [fire, none, smoke]
+
+inferCfg:
+  do_infer: true
+  infer_proc:
+    name: base_infer_proc.NormalInferProc # ProfInferProc: professor infer logic
+    extra: null # extra parameters for the InferProc, if needed
+  # how model inference results are processed.
+  # infer_proc:
+  #   name: base_infer_proc.ProfInferProc # ProfInferProc: professor infer logic
+  #   extra: 
+  #     reliable_th: 0.7 # probability threshold for reliable prediction in ProfInferProc; can be tuned based on validation set performance
+  num_infer_workers: 0 # set to 0 for no parallel; 1 worker for 1 video
+  skip_if_exists: true
+  limit: 100 # number of frames to infer on each video ; -1 for all frames
+  # results saving options
+  save_video_results: true
+  save_csv_results: true
+  # csv output file patterns. e.g. "video1_results.csv" for video1.mp4
+  csv_infer_pattern: "_results"
+  csv_columns:
+    - class_names
+    - logits
+    - probs
+    - pred_label_idx
+    - pred_label
+  # metric calculation options
+  calc_metrics: false
+  use_profiler: true

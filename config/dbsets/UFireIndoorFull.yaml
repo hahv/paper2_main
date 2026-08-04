@@ -1,2 +1,6 @@
-__base__: config/dbsets/UFireIndoor2.yaml
-dir_path: datasets/UFireIndoorFull
+dir_path: datasets/UFireIndoorFull_Relabel_FireSmokeNone
+extra_cfgs:
+  ds_metric_src: csv_metric_src
+  ds_recursive: true
+  ds_gt_file_pattern: "__labels"
+  csv_loader_cls: base_csv_loader.BaseRawCsvLoader
