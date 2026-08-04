@@ -1,0 +1,213 @@
+custom-exp-dir: /mnt/e/SyncData/paper2_main/test/custom_exp/firenet
+dbset-selector:
+  dbset-used:
+    dir-path: datasets/UFireIndoorFull
+    extra-cfgs:
+      csv_loader_cls: base_csv_loader.BaseRawCsvLoader
+      ds_gt_file_pattern: __labels
+      ds_metric_src: csv_metric_src
+      ds_recursive: true
+    name: UFireIndoorFull
+    vname2path: null
+  list-dbsets:
+  - dir-path: datasets/DFire/DFire_Full_ValTest/test
+    extra-cfgs:
+      csv_loader_cls: dfire_csv_loader.DFireCsvLoader
+      ds_metric_src: csv_metric_src
+    name: DFire
+    vname2path: null
+  - dir-path: datasets/FireNet
+    extra-cfgs: null
+    name: FireNet
+    vname2path: null
+  - dir-path: datasets/UFireIndoor2
+    extra-cfgs:
+      csv_loader_cls: base_csv_loader.BaseRawCsvLoader
+      ds_gt_file_pattern: __labels
+      ds_metric_src: csv_metric_src
+      ds_recursive: true
+    name: UFireIndoor2
+    vname2path: null
+  - dir-path: datasets/UFireIndoorFull
+    extra-cfgs:
+      csv_loader_cls: base_csv_loader.BaseRawCsvLoader
+      ds_gt_file_pattern: __labels
+      ds_metric_src: csv_metric_src
+      ds_recursive: true
+    name: UFireIndoorFull
+    vname2path: null
+  - dir-path: datasets/UFireIndoorMiss
+    extra-cfgs:
+      csv_loader_cls: base_csv_loader.BaseRawCsvLoader
+      ds_gt_file_pattern: __labels
+      ds_metric_src: csv_metric_src
+      ds_recursive: true
+    name: UFireIndoorMiss
+    vname2path: null
+  - dir-path: datasets/UFireIndoorFull/test
+    extra-cfgs:
+      csv_loader_cls: base_csv_loader.BaseRawCsvLoader
+      ds_gt_file_pattern: __labels
+      ds_metric_src: csv_metric_src
+      ds_recursive: true
+    name: UFireIndoorTest
+    vname2path: null
+  - dir-path: datasets/UFireIndoorFull/val
+    extra-cfgs:
+      csv_loader_cls: base_csv_loader.BaseRawCsvLoader
+      ds_gt_file_pattern: __labels
+      ds_metric_src: csv_metric_src
+      ds_recursive: true
+    name: UFireIndoorVal
+    vname2path: null
+  selected-dbset: UFireIndoorFull
+general:
+  computer-name: MainPC
+  is-optim-mode: false
+  log-cfg:
+    wandb-cfg: null
+  outdir: ''
+  project-dir: /mnt/e/SyncData/paper2_main/test/custom_exp
+  seed: 1
+  skip-exp-if-exists: false
+  time-stamp: '20260309.135241'
+infer-cfg:
+  calc-metrics: true
+  csv-columns:
+  - pred_label
+  csv-infer-pattern: _results
+  do-infer: true
+  limit: -1
+  log-transforms: false
+  num-infer-workers: 1
+  save-csv-results: false
+  save-timeline-vis: true
+  save-video-results: false
+  skip-if-exists: false
+  timeline-table-mode: p
+  use-profiler: false
+  verbose: false
+method-selector:
+  list-methods:
+  - extra-cfgs:
+      tl_type: no_skip
+    name: external_method
+  - extra-cfgs:
+      result_proc:
+        video:
+        - video_infer_rs_proc
+    name: no_temp_method
+  - extra-cfgs:
+      persist_thres: 0.5
+      result_proc:
+        video:
+        - video_infer_rs_proc
+      window_size: 20
+    name: temp_baseline_Tpt_method
+  - extra-cfgs:
+      result_proc:
+        video:
+        - video_block_skip_rs_proc
+        - fgmask_block_skip_rs_proc
+      skip_proc:
+        name: motion_only_block_skip_proc
+        params:
+          block_ratio_th: 0.1
+          block_size_orig: 32
+          min_roi_ratio: 0.7
+          motion:
+            name: acc_motion_det.AccMotionDet
+            params:
+              decay: 1
+              diff_frame_th: 3
+              impact_plus_one: 5
+              mask_th: 10
+              max_val: 25
+          scale_factor: 1.0
+    name: temp_method_motion_block
+  - extra-cfgs:
+      result_proc:
+        video:
+        - video_block_skip_rs_proc
+        - fgmask_block_skip_rs_proc
+      skip_proc:
+        name: rule_based_block_skip_proc
+        params:
+          block_active_thresh: 0.1
+          block_size_orig: 32
+          motion:
+            name: framediff_det.FrameDiffDet
+            params:
+              diff_thresh: 3
+          rule_params:
+            active_ratio_threshold: 0.2
+            wavelet_channel: r
+            wavelet_energy_thres: 50.0
+          scale_factor: 1.0
+    name: temp_method_rule_block
+  method-used:
+    extra-cfgs:
+      tl_type: no_skip
+    name: external_method
+  selected-method: external_method
+metric-selector:
+  list-metrics:
+  - extra-cfgs:
+      mode:
+      - per_video
+      - per_frame
+    metric-names:
+    - accuracy
+    - f1_score
+    - precision
+    - recall (TPR)
+    - FPR (False Alarm Rate)
+    - FPS
+    name: per_frame_metric
+  - extra-cfgs:
+      mode:
+      - per_video
+    metric-names:
+    - accuracy
+    - f1_score
+    - precision
+    - recall (TPR)
+    - FPR (False Alarm Rate)
+    - FPS
+    name: per_video_metric
+  metric-used:
+    extra-cfgs:
+      mode:
+      - per_video
+      - per_frame
+    metric-names:
+    - accuracy
+    - f1_score
+    - precision
+    - recall (TPR)
+    - FPR (False Alarm Rate)
+    - FPS
+    name: per_frame_metric
+  selected-metric: per_frame_metric
+model-cfg:
+  base-model: dummy
+  class-names:
+  - Fire
+  - None
+  - SmokeOnly
+  input-size:
+  - 360
+  - 640
+  model-path: dummy
+original-yaml-str: "dbset_selector:\n  list_dbsets: []\n  selected_dbset: UFireIndoorFull\n\
+  general:\n  computer_name: null\n  is_optim_mode: false\n  log_cfg:\n    wandb_cfg:\
+  \ null\n  outdir: zout/zruns\n  project_dir: /mnt/e/SyncData/paper2_main\n  seed:\
+  \ 1\n  skip_exp_if_exists: false\n  time_stamp: null\ninferCfg:\n  calc_metrics:\
+  \ true\n  csv_columns:\n  - pred_label\n  csv_infer_pattern: _results\n  do_infer:\
+  \ true\n  limit: -1\n  log_transforms: false\n  num_infer_workers: 1\n  save_csv_results:\
+  \ false\n  save_timeline_vis: true\n  save_video_results: false\n  skip_if_exists:\
+  \ false\n  timeline_table_mode: p\n  use_profiler: false\n  verbose: false\nmethod_selector:\n\
+  \  list_methods: []\n  selected_method: external_method\nmetric_selector:\n  list_metrics:\
+  \ []\n  selected_metric: per_frame_metric\nmodelCfg:\n  base_model: dummy\n  class_names:\n\
+  \  - Fire\n  - None\n  - SmokeOnly\n  input_size:\n  - 360\n  - 640\n  model_path:\
+  \ dummy\n"

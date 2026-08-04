@@ -1,0 +1,4 @@
+video;frame_id;pred_id;cls;cls_conf;x1;y1;x2;y2;elapsed_time
+wisenet__lb_none__set_2_video2_4;2201;0;Smoke;0.25538164377212524;0;74;105;673;0.0
+wisenet__lb_none__set_2_video2_4;2201;1;Smoke;0.3247113525867462;0;388;99;671;0.0
+wisenet__lb_none__set_2_video2_4;2202;0;Smoke;0.4092230200767517;0;404;108;657;0.015696287155151367

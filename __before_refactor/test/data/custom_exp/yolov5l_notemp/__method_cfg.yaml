@@ -1,0 +1,3 @@
+extra_cfgs:
+  tl_type: no_skip
+method_name: external_method
