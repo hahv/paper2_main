@@ -1,3 +1,0 @@
-[lint]
-select = ["E", "F", "I"] # Enable Pyflakes (E), pycodestyle (F), and Isort (I)
-ignore = ["F403", "F405", "I001", "E501", "F541", "E722", "E402"] # Ignore specific warnings

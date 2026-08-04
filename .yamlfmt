@@ -1,7 +1,0 @@
-# .yamlfmt
-formatter:
-  indent: 2          # ← set your desired spaces per indent level (default: 2)
-  # Optional extras you might like:
-  # indentless_arrays: true   # no extra indent for lists (Kubernetes-style)
-  # max_line_length: 120
-  # retain_line_breaks: true

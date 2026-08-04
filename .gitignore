@@ -42,3 +42,9 @@ __before_refactor/zout
 
 __before_refactor/wandb
 __before_refactor/src/.slack_env.yaml
+
+.yamlfmt
+mutagen.yml.lock
+ruff.toml
+.markdownlint.yaml
+.commit-rules.md
