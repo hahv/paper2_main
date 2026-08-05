@@ -22,11 +22,14 @@ general:
 is_optim_mode: false
 
 dbset_selector:
-  selected_dbset: ["UFireIndoorFull"] # a list of datasets to run
+  # A list of datasets to run
+  selected_dbset: ["UFireIndoorFull"]
 metric_selector:
-  selected_metric: ["video_metric"] # a list of metrics to run
+  # A list of metrics to run
+  selected_metric: ["video_metric"]
 method_selector:
-  selected_method: # a list of methods to run
+  # A list of methods to run
+  selected_method: 
     - no_temp_method
     - temp_method_motion_block
     # - temp_method_motion_block_eager

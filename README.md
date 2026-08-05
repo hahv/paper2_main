@@ -75,12 +75,33 @@ The output directory adheres to the following naming convention: `<pc_name>__<da
             ds_metric_src: csv_metric_src 
             csv_loader_cls: base_csv_loader.BaseRawCsvLoader
         ```
-    *   **Data Loading and Conversion (`src/metrics/base_metric_src`):** The `CsvMetricSrc` module calls `BaseRawCsvLoader` to ingest both ground truth and prediction CSV files. The loader executes the label conversion—merging `fire` and `smoke` labels into the unified `fire_smoke` class—and returns the normalized DataFrame to `CsvMetricSrc` for final metric calculation.
+    *   **Data Loading and Conversion (`src/metrics/base_metric_src`):** The
+        `CsvMetricSrc` module calls `BaseRawCsvLoader` to ingest both ground
+        truth and prediction CSV files. The loader executes the label
+        conversion—merging `fire` and `smoke` labels into the unified
+        `fire_smoke` class—and returns the normalized DataFrame to
+        `CsvMetricSrc` for final metric calculation.
 
 ### Use case 02:  Configuration and Running Multiple Experiments (or Do the Parameter Optimization)
 
 > [!note]
 > To execute hyperparameter optimization, set `general.is_optim_mode: true` in your configuration file. Ensure the selected method has a corresponding parameter search space defined in a YAML file within the `config/optim/` directory. Refer to `config/run_multi.yaml` for detailed optimization guidelines.
+
+To execute multiple experiments or conduct hyperparameter optimization,
+configure the `config/run_multi.yaml` file to define the target datasets,
+methodologies, evaluation metrics, and optimization state `is_optim_mode`.
+
+Execute the batch processing script using the following command:
+
+```bash
+python run_multi.py \
+    --base_yaml config/run_base.yaml \
+    --sweep_yaml config/run_multi.yaml \
+    --pre_computed_no_skip_dir <<path_to_precomputed_no_skip_dir>>
+```
+
+> [!note] 
+> **Inference Caching:** The `--pre_computed_no_skip_dir` flag is optional but highly recommended. Supplying a directory with pre-computed inference results (e.g., outputs from `no_temp_method`) allows subsequent methods (such as `temp_method_motion_block.yaml`) to bypass redundant calculations, significantly reducing overall computation time.
 
 ### Use Case 3: Cross-Run Performance Comparison Reporting
 

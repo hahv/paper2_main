@@ -2,13 +2,12 @@
 
 # os.environ["OPENCV_FFMPEG_DEBUG"] = "1"
 # os.environ["OPENCV_LOG_LEVEL"] = "VERBOSE"
-from sympy.physics.units import me
-from lightning.pytorch.loggers import WandbLogger
 
 from halib import *
 import sys
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# ! add <<prj_root>> to sys.path so we can import modules from src folder
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from tap import *
 from typing import List, Dict, Any
@@ -22,12 +21,8 @@ class RunMultiArgs(Tap):
     pre_computed_no_skip_dir: str = ""
 
     def configure(self):
-        self.add_argument(
-            "-opt",
-            "--is_optim_mode",
-            action="store_true",
-            help="Whether to run in optimization mode",
-        )
+        self.add_argument("-b", "--base_yaml")
+        self.add_argument("-s", "--sweep_yaml")
         self.add_argument(
             "-pc",
             "--pre_computed_no_skip_dir",
@@ -77,9 +72,7 @@ def main():
         method_name = cfg_item.methodCfg.name
 
         opt_cfg_path = None
-        use_optim_mode = args.is_optim_mode or cfg_item.general.is_optim_mode
-        if args.is_optim_mode:
-            opt_cfg_path = get_opt_cfg(method_name)  # ty:ignore[invalid-argument-type]
+        use_optim_mode = cfg_item.general.is_optim_mode
 
         if method_name not in cfg_stats:
             cfg_stats[method_name] = 0
@@ -98,6 +91,9 @@ def main():
                 sweep_yaml=opt_cfg_path, base_yaml=None
             )
 
+            # ! Even we declare the search space in the optim config
+            # ! (in `config/optim`), we may want to filter out some invalid
+            # ! combinations of hyperparams, this func allows us to do that.
             def filter_fn(flatten_dict: Dict[str, Any]) -> bool:
                 if method_name == "temp_method_pcheck_prof_win_vote_skip_eager":
                     window_size = flatten_dict.get(
@@ -124,19 +120,9 @@ def main():
                     return True
 
             optim_cfgs = optim_param_gen.expand(filter_fn=filter_fn)
-            # # ! debug
-            # for idx, optim_cfg in enumerate(optim_cfgs):
-            #     pprint_box(
-            #         optim_cfg,
-            #         title=f"Optim Config {idx + 1}/{len(optim_cfgs)} for {method_name}",
-            #     )
-            # assert False, (
-            #     "Debugging: Check the optim configs generated before merging with base config."
-            # )
-
             for optim_param_set in optim_cfgs:
                 base_cfg = Config.from_custom_yaml_file_or_str(
-                    cfg_item.original_yaml_str  # ty:ignore[invalid-argument-type]
+                    cfg_item.original_yaml_str
                 )
                 # ! only update the content of extra_cfgs
                 optim_params = optim_param_set["extra_cfgs"]
@@ -161,14 +147,10 @@ def main():
         )
         csvfile.fn_display_df(df_stats)
 
-    
     # with ConsoleLog('All cfgs:'):
     #     for idx, config in tqdm(enumerate(all_optim_run_cfgs)):
     #         pprint(config.methodCfg)
-
-    #     assert 0, "Debugging: Check the final list of configs to run after
-    #     processing optim configs and task split."
-
+    
     for idx, config in tqdm(enumerate(all_optim_run_cfgs)):
         current_cfg: Config = config
         if args.pre_computed_no_skip_dir:
@@ -178,12 +160,8 @@ def main():
             with ConsoleLog("Using pre-computed", characters="*"):
                 pprint(args.pre_computed_no_skip_dir)
 
-
         cfg_run_status = f"Running config {idx + 1}/{len(all_optim_run_cfgs)}"
         console.rule(cfg_run_status)
-
-        # exp_dict = current_cfg.methodCfg.get_dict()
-        # pprint(exp_dict)
 
         single_exp = MyExp(current_cfg)
         single_exp.run_exp()
