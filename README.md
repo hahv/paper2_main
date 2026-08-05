@@ -82,14 +82,24 @@ The output directory adheres to the following naming convention: `<pc_name>__<da
 
 
 
+### Use Case 3: Cross-Run Performance Comparison Reporting
 
-### Use case 03: Generate the Comparison Report between Runs
+To aggregate and evaluate multiple experiment runs stored within the `zout` directory, utilize the `run_report.py` script to generate a comprehensive performance comparison report.
 
+**Execution Command**
+```bash
+python run_report.py --indir ./zout --metric_cfg_file config/metrics/video_metric.yaml --outdir ./zout/__report
+```
 
+*   **Optional Flag:** Append `--skip_plot` to bypass visual rendering (SVG generation) and strictly output the tabular CSV data files.
 
+**Output Structure**
+The resulting artifacts are saved to the defined `--outdir` directory and formatted as follows:
 
-
-
-
-
-
+```text
+__report/
+├── perf_report__per_frame.csv
+├── perf_report__per_frame.svg
+├── perf_report__per_video.csv
+└── perf_report__per_video.svg
+```
