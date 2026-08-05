@@ -4,9 +4,6 @@ from typing import List, Optional, Tuple, Callable
 from torchvision import transforms
 from timm.data import resolve_data_config, create_transform
 
-import os
-from halib import pprint_local_path
-
 def filter_dict_by_keys(input_dict: dict, keys: List[str]) -> dict:
     # Iterate over 'keys' to preserve their order
     return {k: input_dict[k] for k in keys if k in input_dict}
@@ -120,62 +117,3 @@ def get_transform(model_name: str, input_size: Optional[List[int]] = None):
         val_tfm = _remove_color_jitter(val_tfm)
 
         return val_tfm
-
-
-def copy_to_paper_raw_csv(
-    infile: str, outdir: str = r"./paper/4.table/raw", add_prefix="_raw"
-) -> str:
-    os.makedirs(outdir, exist_ok=True)
-    filename = os.path.basename(infile)
-
-    if add_prefix and not filename.startswith(add_prefix):
-        filename = f"{add_prefix}{filename}"
-
-    base_name, ext = os.path.splitext(filename)
-    outfile = os.path.join(outdir, filename)
-
-    counter = 1
-    while os.path.exists(outfile):
-        filename = f"{base_name}_{counter}{ext}"
-        outfile = os.path.join(outdir, filename)
-        counter += 1
-
-    os.system(f"cp {infile} {outfile}")
-    pprint_local_path(outfile, get_wins_path=True, tag_or_box_title="Copied to paper raw csv at ⏬:", using_box=True)
-
-    # Generate YAML ONLY referencing the base, un-numbered file
-    original_base_filename = f"{base_name}{ext}"
-    yaml_outfile = os.path.join(outdir, original_base_filename.replace(".csv", ".yaml"))
-    if not os.path.exists(yaml_outfile):
-        yaml_content = f'input: raw/{original_base_filename}\noutput: output/\nsep: ";"\n'
-        with open(yaml_outfile, "w", encoding="utf-8") as f:
-            f.write(yaml_content)
-
-    return outfile
-
-
-def test():
-    pkg_cls = {
-        "src.methods": ["no_temp_method", "temp_Baseline_TPT_method", "temp_method"],
-        "src.metrics": ["csv_metric_src"],
-        "src.results": ["csv_rs_proc", "video_base_rs_proc", "video_rs_fgmask_proc"],
-    }
-    from rich.pretty import pprint
-    import sys
-
-    # get current folder of this file
-    import os
-
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    proj_dir = os.path.dirname(current_dir)
-    pprint(f"Proj dir: {proj_dir}")
-    sys.path.append(proj_dir)
-
-    for pkg_name, file_names in pkg_cls.items():
-        for file_name in file_names:
-            cls = get_cls_in_pkg(pkg_name, fileName_ClsName=file_name)
-            pprint(cls)
-
-
-if __name__ == "__main__":
-    test()

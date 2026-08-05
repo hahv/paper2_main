@@ -1,6 +1,8 @@
 general:
   seed: 1
-  skip_exp_if_exists: false # Skip if experiment config already exists
+  # ! Skip if experiment config already exists 
+  # ! (existed means: check `Config.expSameCfgExists` in `src/config.py`)
+  skip_exp_if_exists: false 
   is_optim_mode: false # Set to true for hyperparameter tuning
   project_dir: null # Auto-resolves to project root
   outdir: zout # Output directory
@@ -42,7 +44,7 @@ inferCfg:
   num_infer_workers: 0 # Parallel workers (0 for sequential)
   skip_if_exists: true # Skip video if results already exist
   limit: -1 # Max frames to process (-1 for all)
-  save_video_results: true # Save visual output as video (.mp4)
+  save_video_results: false # Save visual output as video (.mp4)
   save_csv_results: true # Save numerical output as CSV
   csv_infer_pattern: "_results" # Suffix for CSV filenames
   csv_columns: # Data columns to save in CSV
