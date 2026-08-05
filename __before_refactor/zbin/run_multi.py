@@ -14,7 +14,7 @@ from tap import *
 from typing import List, Dict, Any
 from halib.exp.core.param_gen import ParamGen
 from src.config import Config
-from src.exp import Paper2Exp
+from src.exp import MyExp
 from src.utils import clear_slack_channel
 
 from halib.filetype import yamlfile
@@ -255,7 +255,7 @@ def main():
             wandb_params_dict = current_cfg.methodCfg.get_wandb_dict(
                 config_mask=wandb_params_cfg_dict["extra_cfgs"]
             )
-        single_exp = Paper2Exp(current_cfg, wandb_logger=cfg_wandb_logger)
+        single_exp = MyExp(current_cfg, wandb_logger=cfg_wandb_logger)
         single_exp.run_exp()
 
         # ! log the selected hyper-parameters to wandb

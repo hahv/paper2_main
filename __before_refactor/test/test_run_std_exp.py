@@ -8,7 +8,7 @@ from halib import *  # noqa: F403
 from halib.system.path import normalize_paths
 from tap import Tap
 
-from src.exp import Paper2Exp
+from src.exp import MyExp
 
 
 class RunStdExpArgs(Tap):
@@ -18,7 +18,7 @@ class RunStdExpArgs(Tap):
         self.add_argument("-e", "--exp_dir")
 
 def run_standard_exp(exp_dir: str):
-    experiment = Paper2Exp.from_standard_exp(exp_dir)
+    experiment = MyExp.from_standard_exp(exp_dir)
     metric_rs = experiment.run_exp()
     return metric_rs
 

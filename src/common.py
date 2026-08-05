@@ -29,36 +29,9 @@ class GlobalConst:
     METRIC_PER_VIDEO = "per_video"
     NO_FRAMES_SKIP_IN_FPS_CALC = 3  # Number of initial frames to skip for FPS calculation, due to initialization overhead
 
-    # general
-    # ! do not access directly, use proj_root() instead
-    __PROJECT_ROOT = "/mnt/e/SyncData/paper2_main"
-
     # method name pattern
     NOTEMP_MT_PATTERN = "no_temp_method"
 
-    # timeline
-    TL_TYPE_GT = "gt"
-    TL_TYPE_NO_SKIP = "no_skip"
-    TL_TYPE_SKIP = "skip"
-
-    # timeline labels for ground truth
-    TL_GT_FIRESMOKE = "FireSmoke"
-    TL_GT_NONE = "None"
-
-    # timeline labels for baseline methods (no-skip)
-    TL_NOSKIP_CORRECT_POS = "Recall"  # TP
-    TL_NOSKIP_CORRECT_NEG = "True Negative"  # TN
-    # TL_NOSKIP_CORRECT = "Correct"  # TP+TN (combined for reporting)
-    TL_NOSKIP_FALSE_ALARM_FP = "False Alarm"  # FP
-    TL_NOSKIP_MISS_FN = "Miss"  # FN
-
-    # timeline labels for skip/temporal method
-    TL_SKIP_CORRECT_SKIP = "Correct Skip"  # no fire/smoke+correctly skipped
-    TL_SKIP_CORRECT_INFER = "Correct Infer."  # fire/smoke+correctly processed
-    TL_SKIP_FALSE_SKIP = "False Skip"  # fire/smoke but incorrectly skipped
-    TL_SKIP_WASTED_INFER = "Wasted Infer."  # incorrectly proc (wasted resources)
-
-    TL_CSV_FILE_NAME = "_timeline_report.csv"
     # This is a template cfg file for external runs (fireNet, mobilenet, yolo)
     EXTERNAL_CFG = "config/zruns/_run_ext.yaml"
 
@@ -84,7 +57,3 @@ class GlobalConst:
     # Optim report file name
     OPT_ALL_RP_FILE_PREFIX = "_opt_all_rp__"
     OPT_SELECTED_RP_FILE_SUFFIX = "_opt_sel_rp__"
-
-    @staticmethod
-    def proj_root() -> str:
-        return normalize_paths(GlobalConst.__PROJECT_ROOT)

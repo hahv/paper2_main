@@ -1,53 +1,53 @@
 general:
   seed: 1
-  skip_exp_if_exists: false # ! skip if same experiment with same config existed
-  project_dir: null
-  outdir: zout
-  computer_name: null # PC name that run the experiment
-  time_stamp: null
+  skip_exp_if_exists: false # Skip if experiment config already exists
+  is_optim_mode: false # Set to true for hyperparameter tuning
+  project_dir: null # Auto-resolves to project root
+  outdir: zout # Output directory
+  computer_name: null # Machine hostname
+  time_stamp: null # Auto-populated with current time
 
 dbset_selector:
-  list_dbsets: [] # empty, will populate from config/dbsets
-  selected_dbset: UFireIndoorFull # will be set later
-
+  list_dbsets: [] # Auto-populated from config/dbsets
+  selected_dbset: UFireIndoorFull # Target dataset
 metric_selector:
-  list_metrics: [] # empty, will populate from config/metrics
-  selected_metric: video_metric # will be set later
-
+  list_metrics: [] # Auto-populated from config/metrics
+  selected_metric: video_metric # Target evaluation metric
 method_selector:
-  list_methods: [] # empty, will populate from config/methods
-  selected_method: no_temp_method # noTemp
-
+  list_methods: [] # Auto-populated from config/methods
+  selected_method: no_temp_method # Selected processing method
 modelCfg:
-  base_model: hgnetv2_b5.ssld_stage2_ft_in1k # model name in timm
-  model_path: models/__new2_hgnetv2_b5.ssld_stage2_ft_in1k-20260224-76-98.66.pth
-  input_size: [360, 640] # [H, W], for timm models
-  class_names: [fire, none, smoke]
+  base_model: hgnetv2_b5.ssld_stage2_ft_in1k # Model architecture name in timm
+  model_path: models/__new2_hgnetv2_b5.ssld_stage2_ft_in1k-20260224-76-98.66.pth # Path to model weights
+  input_size: [360, 640] # Input resolution [H, W]
+  class_names: [fire, none, smoke] # Target prediction classes
 
 inferCfg:
-  do_infer: true
+  do_infer: true # Enable inference phase
+
+  # Inference post-processing logic
   infer_proc:
-    name: base_infer_proc.NormalInferProc # ProfInferProc: professor infer logic
-    extra: null # extra parameters for the InferProc, if needed
-  # how model inference results are processed.
+    name: base_infer_proc.NormalInferProc # Selected processing module
+    extra: null # Additional parameters for the module
+
+  # Example alternative processing logic
   # infer_proc:
-  #   name: base_infer_proc.ProfInferProc # ProfInferProc: professor infer logic
-  #   extra: 
-  #     reliable_th: 0.7 # probability threshold for reliable prediction in ProfInferProc; can be tuned based on validation set performance
-  num_infer_workers: 0 # set to 0 for no parallel; 1 worker for 1 video
-  skip_if_exists: true
-  limit: 100 # number of frames to infer on each video ; -1 for all frames
-  # results saving options
-  save_video_results: true
-  save_csv_results: true
-  # csv output file patterns. e.g. "video1_results.csv" for video1.mp4
-  csv_infer_pattern: "_results"
-  csv_columns:
+  #   name: base_infer_proc.ProfInferProc
+  #   extra:
+  #     reliable_th: 0.7 # Confidence threshold for reliable predictions
+
+  num_infer_workers: 0 # Parallel workers (0 for sequential)
+  skip_if_exists: true # Skip video if results already exist
+  limit: -1 # Max frames to process (-1 for all)
+  save_video_results: false # Save visual output as video
+  save_csv_results: true # Save numerical output as CSV
+  csv_infer_pattern: "_results" # Suffix for CSV filenames
+  csv_columns: # Data columns to save in CSV
     - class_names
     - logits
     - probs
     - pred_label_idx
     - pred_label
-  # metric calculation options
-  calc_metrics: false
-  use_profiler: true
+  calc_metrics: true # Calculate performance metrics
+  use_profiler: true # Measure resource usage and execution time
+  verbose: false # Enable detailed logging

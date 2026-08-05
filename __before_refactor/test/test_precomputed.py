@@ -6,7 +6,7 @@ sys.path.append(os.path.dirname(current_dir))  # Add parent directory to sys.pat
 
 import unittest
 from src.methods.precomputed import PrecomputedRsProc
-from src.exp import Paper2Exp
+from src.exp import MyExp
 
 from halib import *
 
@@ -16,7 +16,7 @@ class TestPrecomputedRsProc(unittest.TestCase):
         # Use real standard experiment path
         self.exp_dir_path = "./zout/zoptim/MainPC__ds_UFireIndoor2__mt_no_temp_method__af4b0d32a3d2__20260316.172122"
 
-        self.experiment: Paper2Exp = Paper2Exp.from_standard_exp(self.exp_dir_path)
+        self.experiment: MyExp = MyExp.from_standard_exp(self.exp_dir_path)
         self.cfg = self.experiment.full_cfg
 
         # Inject the precomputed dir config dynamically as it's testing this specific feature

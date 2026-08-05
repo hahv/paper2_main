@@ -4,60 +4,8 @@ from typing import List, Optional, Tuple, Callable
 from torchvision import transforms
 from timm.data import resolve_data_config, create_transform
 
-from halib.utils.slack_op import SlackUtils
 import os
-from halib.filetype import yamlfile
-from halib.system.path import get_PC_abbr_name
 from halib import pprint_local_path
-import math
-from halib import pprint
-
-SLACK_TOKEN = None
-SLACK_CHANNEL_ID = None
-
-def split_task_by_cfg(task_cfg_yaml: str, total_exps: int, pc_name=get_PC_abbr_name()):
-    """
-    This function splits a task into sub-tasks based on the provided YAML configuration. The YAML file should specify the number of experiments to allocate to each sub-task. The function returns a list of sub-task configurations, each containing the allocated number of experiments and the corresponding configuration details.
-
-    Args:
-        task_cfg_yaml (str): Path to the YAML configuration file that defines the sub-tasks and their experiment allocations.
-        total_exps (int): The total number of experiments that need to be allocated across the sub-tasks.
-
-    Returns:
-        List[dict]: A list of dictionaries, where each dictionary represents a sub-task with its allocated number of experiments and configuration details.
-    """
-    # Load the YAML configuration
-    cfg_dict = yamlfile.load_yaml(task_cfg_yaml, to_dict=True)
-    pprint(cfg_dict)
-
-    result = {}
-    prev = 0
-    items = list(cfg_dict.items())
-    for i, (machine, weight) in enumerate(items):
-        end = (
-            total_exps
-            if i == len(items) - 1
-            else prev + math.ceil(weight / 100 * total_exps)
-        )
-        result[machine] = (prev, end)
-        prev = end
-    assert pc_name in result, f"PC name '{pc_name}' not found in the configuration. Available keys: {list(result.keys())}"
-    return result[pc_name], result
-
-
-def clear_slack_channel(sleep_interval: float = 0.5):
-    global SLACK_TOKEN, SLACK_CHANNEL_ID
-    if SLACK_TOKEN is None or SLACK_CHANNEL_ID is None:
-        # get current dir of this file
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        slack_env_yaml = os.path.join(current_dir, ".slack_env.yaml")
-        slack_cfg_dict = yamlfile.load_yaml(slack_env_yaml, to_dict=True)
-        SLACK_TOKEN = slack_cfg_dict["SLACK_TOKEN"]
-        SLACK_CHANNEL_ID = slack_cfg_dict["SLACK_CHANNEL_ID"]
-
-    slack_util = SlackUtils(token=SLACK_TOKEN)
-    slack_util.clear_channel(channel_id=SLACK_CHANNEL_ID, sleep_interval=sleep_interval)
-
 
 def filter_dict_by_keys(input_dict: dict, keys: List[str]) -> dict:
     # Iterate over 'keys' to preserve their order

@@ -18,41 +18,9 @@ from halib.exp.core.base_config import (
 )
 from src.common import GlobalConst
 
-import wandb
-from lightning.pytorch.loggers.wandb import WandbLogger
 # -----------------------------------------------------------------------------
 # 4. GENERAL CONFIGS
 # -----------------------------------------------------------------------------
-
-
-@dataclass
-class WanDBCfg(YAMLWizard):
-    project: str
-    mode: str
-    wandb_key: str
-
-    def get_logger(self, name: Optional[str] = None) -> WandbLogger:
-        # 1. Authenticate using the key from config
-        # relogin=True ensures it overwrites any previously cached local keys
-        if self.wandb_key:
-            wandb.login(key=self.wandb_key, relogin=True)
-        wandb_logger = WandbLogger(
-            project=self.project,
-            mode=self.mode,
-            name=name,
-        )
-        return wandb_logger
-
-    def get_hash(self):
-        cfg_dict = yaml.safe_load(self.to_yaml())
-        return DictUtils.get_unique_hash(cfg_dict)
-
-
-@dataclass
-class LogCfg(YAMLWizard):
-    wandb_cfg: Optional[WanDBCfg] = None
-
-
 @dataclass
 class GeneralCfg(NamedCfg, YAMLWizard):
     seed: int
@@ -60,7 +28,6 @@ class GeneralCfg(NamedCfg, YAMLWizard):
     is_optim_mode: bool
     project_dir: str
     outdir: str
-    log_cfg: LogCfg
     computer_name: Optional[str] = None
     time_stamp: Optional[str] = None
 
@@ -163,19 +130,6 @@ class MethodCfg(AutoNamedCfg):
             "extra_cfgs": self.extra_cfgs,
         }
 
-    def get_wandb_dict(
-        self, config_mask: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
-        """Dictionary representation suitable for logging to Weights & Biases."""
-        if config_mask is None:
-            return self.get_dict()
-        else:
-            filtered_dict = DictUtils.apply_inclusion_mask(self.extra_cfgs, config_mask)  # ty:ignore[invalid-argument-type]
-            wandb_dict = {"method_name": self.name}
-            wandb_dict.update(filtered_dict)
-            return wandb_dict
-
-
 @dataclass
 class DatasetSelector(BaseSelectorCfg[DatasetCfg]):
     list_dbsets: List[DatasetCfg] = field(default_factory=list)
@@ -222,7 +176,6 @@ class MethodSelector(BaseSelectorCfg[MethodCfg]):
 # -----------------------------------------------------------------------------
 # 5. MAIN CONFIG
 # -----------------------------------------------------------------------------
-
 
 @dataclass
 class Config(ExpBaseCfg):
@@ -335,11 +288,6 @@ class Config(ExpBaseCfg):
                 pprint_local_path(existing_dir, get_wins_path=True)
         return should_skip
 
-    def get_wandb_logger(self, name: Optional[str] = None) -> Optional[WandbLogger]:
-        logger = None
-        if self.general.log_cfg.wandb_cfg is not None:
-            logger = self.general.log_cfg.wandb_cfg.get_logger(name=name)
-        return logger
 
     def print_meta_info(self):
         with ConsoleLog("Meta Info"):

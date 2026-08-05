@@ -11,7 +11,7 @@ from halib.exp.perf.perfcalc import PerfCalc, PerfTB
 from halib.filetype import yamlfile
 from tap import *
 from loguru import logger as llogger
-from src.exp import Paper2Exp
+from src.exp import MyExp
 from src.common import GlobalConst
 from src.param_select import WeightedSelect
 from src.utils import copy_to_paper_raw_csv  # noqa: F401
@@ -76,12 +76,12 @@ def gen_exp_perf_csv(exp_dir: str, force=False) -> bool:
         return GlobalConst.EXTERNAL_CFG
 
     if not standard_exp:
-        custom_exp: Paper2Exp = Paper2Exp.from_custom_exp(
+        custom_exp: MyExp = MyExp.from_custom_exp(
             exp_dir_path=exp_dir, find_cfgFile_func=get_cfg_fn
         )
         custom_exp.run_exp()
     else:
-        standard_exp: Paper2Exp = Paper2Exp.from_standard_exp(exp_dir_path=exp_dir)
+        standard_exp: MyExp = MyExp.from_standard_exp(exp_dir_path=exp_dir)
         pprint(f"[Perf Report Gen] for standard exp: {exp_name}")
         standard_exp.run_exp()
 

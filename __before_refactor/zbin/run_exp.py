@@ -5,7 +5,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from tap import Tap
 from src.config import Config
-from src.exp import Paper2Exp
+from src.exp import MyExp
 
 
 class RunExp(Tap):
@@ -14,7 +14,7 @@ class RunExp(Tap):
 
 def run_single_exp(exp_cfg_file, method_cfg_dict=None):
     cfg = Config.from_custom_yaml_file(exp_cfg_file)
-    experiment = Paper2Exp(cfg)
+    experiment = MyExp(cfg)
     if method_cfg_dict is not None:
         cfg.methodCfg.extra_cfgs.update(method_cfg_dict)  # ty:ignore[unresolved-attribute]
     # update the method config with new hyperparameters

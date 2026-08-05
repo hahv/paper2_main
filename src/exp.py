@@ -15,7 +15,7 @@ from typing import Callable
 from pathlib import Path
 
 
-class Paper2Exp(BaseExp):
+class MyExp(BaseExp):
     """
     Custom experiment class that extends BaseExperiment.
     """
@@ -38,7 +38,7 @@ class Paper2Exp(BaseExp):
 
     # ! add a function to allow dynmmically load with baseline method (not Paper2Exp class) by creating a custom Config
     @classmethod
-    def from_standard_exp(cls, exp_dir_path: str) -> "Paper2Exp":
+    def from_standard_exp(cls, exp_dir_path: str) -> "MyExp":
         """
         Reload a previously-completed standard experiment from its output directory.
         Reconstructs the Config from the saved __config.yaml (original-yaml-str),

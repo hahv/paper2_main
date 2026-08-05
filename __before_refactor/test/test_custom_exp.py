@@ -11,7 +11,7 @@ from halib import *
 from tap import *
 
 from src.config import *
-from src.exp import Paper2Exp
+from src.exp import MyExp
 from src.external_exp import ExternalExpRunner
 from src.common import GlobalConst
 
@@ -63,7 +63,7 @@ def test_exp_from_custom_dir(
     custom_exp_dir: str = TEST_EXP_DIR_FIRENET, cfg_find_fn=_external_cfg_fn
 ):
     """Run the full Paper2Exp pipeline for a firenet external experiment."""
-    exp = Paper2Exp.from_custom_exp(
+    exp = MyExp.from_custom_exp(
         exp_dir_path=custom_exp_dir,
         find_cfgFile_func=cfg_find_fn,
     )
@@ -114,7 +114,7 @@ def test_exp_vs_external_exp(
     #   into exp_dir.
     # ------------------------------------------------------------------
     console.rule("[bold]Paper2Exp — run full pipeline[/bold]")
-    exp = Paper2Exp.from_custom_exp(
+    exp = MyExp.from_custom_exp(
         exp_dir_path=str(exp_dir),
         find_cfgFile_func=cfg_find_fn,
     )
@@ -165,7 +165,7 @@ def gen_perf_report_custom_exps():
     for exp_dir in tqdm(custom_exp_dirs):
         exp_dir_name = fs.get_dir_name(exp_dir)
         console.rule(f"Gen report for exp <<{exp_dir_name}>>")
-        exp = Paper2Exp.from_custom_exp(
+        exp = MyExp.from_custom_exp(
             exp_dir_path=exp_dir,
             find_cfgFile_func=_external_cfg_fn,
         )

@@ -1,0 +1,17 @@
+general:
+  is_optim_mode: false
+dbset_selector:
+  selected_dbset: ["UFireIndoorFull"]
+metric_selector:
+  selected_metric: ["per_frame_metric"]
+method_selector:
+  selected_method:
+    # - no_temp_method
+    # - temp_baseline_Tpt_method
+    # - temp_method_motion_block
+    # - temp_method_motion_block_haze
+    # - temp_method_motion_block_eager
+    # - temp_method_motion_block_eager_prof
+    # - temp_method_rule_block
+    - temp_method_pcheck_prof_win_vote_skip_eager
+    - temp_method_pcheck_streak_count_skip_eager

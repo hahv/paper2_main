@@ -14,22 +14,13 @@ from tap import *
 from typing import List, Dict, Any
 from halib.exp.core.param_gen import ParamGen
 from src.config import Config
-from src.exp import Paper2Exp
-from src.utils import clear_slack_channel
+from src.exp import MyExp
 
-from halib.filetype import yamlfile
-
-from halib.system.path import get_PC_abbr_name
-from src.utils import split_task_by_cfg
-
-
-class RunOptimArgs(Tap):
-    base_yaml: str = r"./config/zruns/run_base.yaml"
-    sweep_yaml: str = r"./config/zruns/run_multi.yaml"
-    clean_slack: bool = False
+class RunMultiArgs(Tap):
+    base_yaml: str = r"./config/run_base.yaml"
+    sweep_yaml: str = r"./config/run_multi.yaml"
     is_optim_mode: bool = False
     pre_computed_no_skip_dir: str = ""
-    split_task_by_cfg: bool = False
 
     def configure(self):
         self.add_argument(
@@ -43,13 +34,6 @@ class RunOptimArgs(Tap):
             "--pre_computed_no_skip_dir",
             help="Path to precomputed inferences to skip actual model execution",
         )
-        self.add_argument(
-            "-split",
-            "--split_task_by_cfg",
-            action="store_true",
-            help="Split tasks based on the configuration file",
-        )
-
 
 def _get_cfg_path(method_name: str, prefix: str) -> str | None:
     """Helper to resolve paths for optim or wandb config files."""
@@ -73,21 +57,10 @@ def _get_cfg_path(method_name: str, prefix: str) -> str | None:
 def get_opt_cfg(method_name: str) -> str | None:
     return _get_cfg_path(method_name, "opt_")
 
-
-def get_wandb_params_cfg(method_name: str) -> str | None:
-    return _get_cfg_path(method_name, "keep_opt_")
-
-
-def send_slack_noti(logger: WandbLogger, message: str):
-    logger.experiment.alert("Run Optim", message, level="INFO", wait_duration=0.001)
-    time.sleep(0.5)
-
-
 def main():
-    args = RunOptimArgs().parse_args()
+    args = RunMultiArgs().parse_args()
     base_yaml = args.base_yaml
     sweep_yaml = args.sweep_yaml
-    clean_slack = args.clean_slack
 
     ls_run_dicts = ParamGen.from_files(
         sweep_yaml=sweep_yaml, base_yaml=base_yaml
@@ -100,7 +73,6 @@ def main():
     all_optim_run_cfgs: List[Config] = []
     cfg_stats = {}
 
-    split_task = args.split_task_by_cfg
 
     for idx, cfg_item in enumerate(initial_ls_run_cfgs):
         method_name = cfg_item.methodCfg.name
@@ -179,39 +151,18 @@ def main():
                 all_optim_run_cfgs.append(base_cfg)
             cfg_stats[method_name] += len(optim_cfgs)
 
-    if split_task:
-        with ConsoleLog("Task Split", characters="🔻"):
-            (start_idx, end_idx), split_result = split_task_by_cfg(
-                "./config/zruns/ztask_split.yaml",
-                total_exps=len(all_optim_run_cfgs),
-                pc_name=get_PC_abbr_name(),
-            )
-            total_exps = len(all_optim_run_cfgs)
-            pprint_box(split_result, title="Task Split Result")
-            all_optim_run_cfgs = all_optim_run_cfgs[start_idx:end_idx]
-            console.log(
-                f"Num exp This PC: <<{len(all_optim_run_cfgs)}/ {total_exps}>> with indices [{start_idx}:{end_idx}]"
-            )
-
     num_cfg_str = f"Total {len(all_optim_run_cfgs)} configs to run"
     console.rule(num_cfg_str)
 
-    # ! Clear slack channel for new run (to make it less noisy)
-    if clean_slack:
-        clear_slack_channel()
     with ConsoleLog("Config Stats"):
         df_stats = pd.DataFrame.from_dict(
             cfg_stats,
             orient="index",
-            columns=["Num Configs"],  # ty:ignore[invalid-argument-type]
+            columns=["Num Configs"],
         )
         csvfile.fn_display_df(df_stats)
 
-    cfg_stats_str = "Config Stats:\n" + str(cfg_stats)
-    ls_meta_info_to_send = [num_cfg_str, cfg_stats_str]
-
-    did_send_meta = False
-
+    
     # with ConsoleLog('All cfgs:'):
     #     for idx, config in tqdm(enumerate(all_optim_run_cfgs)):
     #         pprint(config.methodCfg)
@@ -228,13 +179,6 @@ def main():
             with ConsoleLog("Using pre-computed", characters="*"):
                 pprint(args.pre_computed_no_skip_dir)
 
-        cfg_name = current_cfg.get_cfg_name()
-        cfg_wandb_logger: WandbLogger = current_cfg.get_wandb_logger(name=cfg_name)
-
-        if not did_send_meta:
-            for cfg_run_status in ls_meta_info_to_send:
-                send_slack_noti(cfg_wandb_logger, cfg_run_status)
-            did_send_meta = True
 
         cfg_run_status = f"Running config {idx + 1}/{len(all_optim_run_cfgs)}"
         console.rule(cfg_run_status)
@@ -242,30 +186,8 @@ def main():
         # exp_dict = current_cfg.methodCfg.get_dict()
         # pprint(exp_dict)
 
-        send_slack_noti(cfg_wandb_logger, cfg_run_status)
-        cfg_wandb_logger.experiment.log({"msg": cfg_run_status})
-
-        method_name = current_cfg.methodCfg.name
-        wandb_params_cfg_path = get_wandb_params_cfg(method_name)
-        wandb_params_dict = {}
-        if wandb_params_cfg_path:
-            wandb_params_cfg_dict = yamlfile.load_yaml(
-                wandb_params_cfg_path, to_dict=True
-            )
-            wandb_params_dict = current_cfg.methodCfg.get_wandb_dict(
-                config_mask=wandb_params_cfg_dict["extra_cfgs"]
-            )
-        single_exp = Paper2Exp(current_cfg, wandb_logger=cfg_wandb_logger)
+        single_exp = MyExp(current_cfg)
         single_exp.run_exp()
-
-        # ! log the selected hyper-parameters to wandb
-        if len(wandb_params_dict) > 0:
-            cfg_wandb_logger.log_hyperparams(wandb_params_dict)
-
-        # ! TODO: need to save perf metrics too
-
-        cfg_wandb_logger.experiment.finish()
-
 
 if __name__ == "__main__":
     main()
