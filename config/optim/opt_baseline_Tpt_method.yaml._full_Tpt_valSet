@@ -1,5 +1,0 @@
-extra_cfgs:
-  result_proc:
-    video: [video_infer_rs_proc]
-  window_size: [5, 10, 15, 20, 25, 30]
-  persist_thres: "0:1.01:0.05"

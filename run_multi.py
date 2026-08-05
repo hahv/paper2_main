@@ -19,7 +19,6 @@ from src.exp import MyExp
 class RunMultiArgs(Tap):
     base_yaml: str = r"./config/run_base.yaml"
     sweep_yaml: str = r"./config/run_multi.yaml"
-    is_optim_mode: bool = False
     pre_computed_no_skip_dir: str = ""
 
     def configure(self):

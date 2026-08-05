@@ -63,7 +63,7 @@ The output directory adheres to the following naming convention: `<pc_name>__<da
 | `__exp_end_summary.txt` | The final execution summary log containing run details. |
 
 
-4. Metric Calculation and Label Normalization
+4. **Metric Calculation and Label Normalization**
     The evaluation pipeline utilizes `torchmetrics` for metric computation. To standardize the evaluation process, the framework enforces a binary classification task (`fire_smoke` vs. `none`), mapping the model's native ternary outputs (`fire`, `smoke`, `none`) into this unified format.
 
     This standardization is executed across the following components:
@@ -79,14 +79,15 @@ The output directory adheres to the following naming convention: `<pc_name>__<da
 
 ### Use case 02:  Configuration and Running Multiple Experiments (or Do the Parameter Optimization)
 
-
-
+> [!note]
+> To execute hyperparameter optimization, set `general.is_optim_mode: true` in your configuration file. Ensure the selected method has a corresponding parameter search space defined in a YAML file within the `config/optim/` directory. Refer to `config/run_multi.yaml` for detailed optimization guidelines.
 
 ### Use Case 3: Cross-Run Performance Comparison Reporting
 
 To aggregate and evaluate multiple experiment runs stored within the `zout` directory, utilize the `run_report.py` script to generate a comprehensive performance comparison report.
 
 **Execution Command**
+
 ```bash
 python run_report.py --indir ./zout --metric_cfg_file config/metrics/video_metric.yaml --outdir ./zout/__report
 ```
