@@ -20,7 +20,6 @@ from src.utils import get_cls_in_pkg
 import torch.multiprocessing as mp
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
-from src.results.timeline.tl_report import TlReportGen
 from src.methods.infer_proc.base_infer_proc import InferProcFactory, BaseInferProc
 
 # Constants for package paths (avoids magic strings scattered in code)
@@ -183,18 +182,6 @@ class BaseMethod(ABC):
         if self.profiler:
             self.profiler.report_and_plot(outdir=self.outdir)
 
-        if self.cfg.inferCfg.save_timeline_vis:
-            with ConsoleLog("Generate timeline report"):
-                try:
-                    TlReportGen.gen_TlReport_exp(
-                        self.outdir,
-                        table_mode=self.cfg.inferCfg.timeline_table_mode,  # ty:ignore[invalid-argument-type]
-                        video_name_limit=self.cfg.inferCfg.timeline_video_name_limit,  # ty:ignore[invalid-argument-type]
-                        table_decimals=self.cfg.inferCfg.timeline_table_decimals,  # ty:ignore[invalid-argument-type]
-                    )
-                except Exception as e:
-                    console.print(f"[red]Failed to generate timeline report: {e}[/red]")
-
     def before_infer_video(self, video_path: str):
         """Hook method called before starting inference on a video."""
         pass
@@ -274,23 +261,6 @@ class BaseMethod(ABC):
                         print(f"Worker failed with error: {e}")
 
             self.after_infer_video_dir(video_dir)
-            if self.cfg.methodCfg.get_name() == "temp_method_motion_block_haze":
-                # Save the logged haze scores for no-motion frames to a CSV for analysis
-                from ..methods.skip.motion_only_block_skip_proc_haze import (
-                    MotionOnlyBlockSkipProcHaze,
-                )
-
-                no_motion_haze_scores = (
-                    MotionOnlyBlockSkipProcHaze.NO_MOTION_HAZE_SCORE_LIST
-                )
-                # print the scores mean and std for quick analysis
-                if no_motion_haze_scores:
-                    mean_score = np.mean(no_motion_haze_scores)
-                    std_score = np.std(no_motion_haze_scores)
-                    console.rule("No-motion frame haze score summary")
-                    pprint(
-                        f"No-motion frame haze scores: mean={mean_score:.4f}, std={std_score:.4f}"
-                    )
 
     def _infer_video_worker(self, video_path: str, video_idx: int, total_videos: int):
         """

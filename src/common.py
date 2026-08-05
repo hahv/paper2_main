@@ -1,5 +1,7 @@
 from halib.system.path import *
 
+# ! dynamically get <<PRJ_ROOT>> based on the current file path
+PROJECT_DIR = Path(__file__).parent.parent
 
 class GlobalConst:
     # csv column names

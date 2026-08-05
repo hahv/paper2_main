@@ -1,51 +1,95 @@
-# iNet Evaluation Scripts on UFireIndoorVideo datasets
+This guide outlines the environment setup and execution process for the iNet fire and smoke detection model evaluation scripts using the UFireIndoorVideo datasets.
 
-This repository contains the evaluation scripts (python) for the iNet model
-fire/smoke detection on UFireIndoorVideo datasets.
+### Prerequisites
 
-Pls follow the following steps to run the evaluation scripts:
-> [!Note] This repository using `cuda 12.9` so make sure you have the correct version of `cuda` installed in your system. 
-> Also it is recommended to run it in `WSL2` environment with `Ubuntu 24.04` OS.
-> You can install `Ubuntu 24.04` in `WSL2` by following this [instruction
-> link](https://ubuntu.com/wsl/docs/stable/howto/install-ubuntu-wsl2/). Although
-> we still can run this in Windows environment.
+*   **CUDA Architecture:** Version 12.9 is required. Verify your current installation using the following command:
+    ```bash
+    nvcc --version
+    ```
+*   **Operating System:** Execution within a WSL2 environment using Ubuntu 24.04 is highly recommended, though Windows environments are natively supported. For setup assistance, reference the [Ubuntu WSL2 installation guide](https://ubuntu.com/wsl/docs/stable/howto/install-ubuntu-wsl2/).
+
+---
+
+### Environment Setup
+
+Project dependencies are managed using the `uv` package manager.
+
+1. **Install Manager:** Install `uv` by following the [official installation instructions](https://docs.astral.sh/uv/getting-started/installation/).
+2. **Install Dependencies:** Create and synchronize the virtual environment (`.venv`). You must append the `--extra gpu` flag to ensure PyTorch is installed with CUDA support:
+    ```bash
+    uv sync --extra gpu
+    ```
+3. **Activate Environment:** Navigate to the project root and activate the virtual environment before running any Python scripts:
+    ```bash
+    cd <prj_root>
+    
+    # For Ubuntu/WSL2
+    source .venv/bin/activate
+    
+    # For Windows
+    .venv/Scripts/activate
+    ```
+
+---
+
+### Use case 01:  Configuration and Run Single Experiment
+
+1. **Configure Parameters:** Modify the target YAML configuration file (e.g., `config/run_base.yaml`) to set experimental parameters. Key configurations include:
+    * **Dataset Selection:** Defined via `dbset_selector.selected_dbset`.
+    * **Methodology**: `method_selector.selected_method`
+    * **Metrics:** `metric_selector.selected_metric`
+    * **Model:** `modelCfg` which models to use, including architecture and weight path.
+    * **Inference:**  `inferCfg` how the inference process, whether to save
+        video outputs, CSV results, etc.
+
+2. **Run Experiment:** Execute the evaluation script, passing your modified configuration file as an argument:
+
+    ```bash
+    python run_exp.py --cfg config/run_base.yaml
+    ```
+3. **Output Artifacts**: Experiment outputs are saved in the directory defined by the `general.outdir` parameter in your configuration file.
+
+The output directory adheres to the following naming convention: `<pc_name>__<dataset_name>__<used_method_name>__<hash_value>__<timestamp>`. The `hash_value` is explicitly derived from the `extra_cfgs` parameter of the chosen method.
+**Output File Registry**: experiment output sample when running `config/_run_template.yaml`: `MainPC__ds_UFireIndoor2__mt_no_temp_method__af4b0d32a3d2__20260805.151048`
+
+| File Pattern | Description |
+| :--- | :--- |
+| `*_out.mp4` | Visual video outputs of the inference process. e.g. `aihub__lb_fire__0182_out.mp4` |
+| `*__perf.csv` | Performance results based on the defined `metric_selector.selected_metric` (e.g., `per_frame` or `per_video`). |
+| `_[*]__pred_vs_gt.csv` | Prediction versus ground truth comparisons formatted for the selected evaluation metric mode. e.g. `_[per_frame]__pred_vs_gt.csv` |
+| `<<video_name>>_results.csv` | Raw, per-frame prediction data for individual videos within the target dataset. |
+| `__config.yaml` | The base configuration file utilized for the active experiment. e.g. `aihub__lb_fire__0182_results.csv` |
+| `__method_cfg.yaml` | The specific method configuration (`method_selector.selected_method`) applied during execution. |
+| `__exp_end_summary.txt` | The final execution summary log containing run details. |
 
 
-```bash
-   nvcc --version
-```
+4. Metric Calculation and Label Normalization
+    The evaluation pipeline utilizes `torchmetrics` for metric computation. To standardize the evaluation process, the framework enforces a binary classification task (`fire_smoke` vs. `none`), mapping the model's native ternary outputs (`fire`, `smoke`, `none`) into this unified format.
 
-## 1. Install python dependencies
+    This standardization is executed across the following components:
 
-We use `uv` to install the dependencies. First, install `uv` (depending on your
-dev environment/OS) via this [instruction
-link](https://docs.astral.sh/uv/getting-started/installation/)
-Then we can create the venv folder `.venv` by running the following command:
+    *   **Pipeline Initialization (`src/exp.py`):** The `prepare_metrics` function explicitly sets `num_classes = 2`.
+    *   **Dataset Configuration (e.g., `config/dbsets/UFireIndoorFull.yaml`):** The target dataset configuration dictates the data loading pipeline:
+        ```yaml
+        extra_cfgs:
+            ds_metric_src: csv_metric_src 
+            csv_loader_cls: base_csv_loader.BaseRawCsvLoader
+        ```
+    *   **Data Loading and Conversion (`src/metrics/base_metric_src`):** The `CsvMetricSrc` module calls `BaseRawCsvLoader` to ingest both ground truth and prediction CSV files. The loader executes the label conversion—merging `fire` and `smoke` labels into the unified `fire_smoke` class—and returns the normalized DataFrame to `CsvMetricSrc` for final metric calculation.
 
-```bash
-   uv sync --extra gpu # must has --extra gpu to install pytorch with cuda support
-```
+### Use case 02:  Configuration and Running Multiple Experiments (or Do the Parameter Optimization)
 
-## 2. Change the values in config file
 
-The `config/config.yaml` file contains the configuration parameters for the
-evaluation scripts. You need to change the values in this file according to your
-requirements. The parameters are explained in the comments in the config file.
 
-## 3. Run the evaluation scripts
 
-Run the following command to run the evaluation scripts:
 
-```bash
-   uv run python run.py --c config/config.yaml
-```
+### Use case 03: Generate the Comparison Report between Runs
 
-or activate the venv and run the script directly:
 
-```bash
-   source .venv/bin/activate # or .venv/Scripts/activate for Windows
-   python run.py --c config/config.yaml
-```
 
-> [!Note] Each config `yaml` file will generate a hash value based on the config
-> values, including: [general, dataset, modelCfg, methodCfg, evalCfg]. The hash value will be used to
+
+
+
+
+
+

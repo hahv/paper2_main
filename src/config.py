@@ -16,7 +16,7 @@ from halib.exp.core.base_config import (
     ExpBaseCfg,
     NamedCfg,
 )
-from src.common import GlobalConst
+from src.common import GlobalConst, PROJECT_DIR
 
 # -----------------------------------------------------------------------------
 # 4. GENERAL CONFIGS
@@ -39,7 +39,7 @@ class GeneralCfg(NamedCfg, YAMLWizard):
             self.time_stamp = now_str()
         if self.computer_name is None or len(str(self.computer_name)) == 0:
             self.computer_name = get_PC_abbr_name()
-        self.project_dir = normalize_paths(self.project_dir)  # ty:ignore[missing-argument]
+        self.project_dir = normalize_paths(PROJECT_DIR)  # ty:ignore[missing-argument]
 
 @dataclass
 class InferProcCfg(YAMLWizard):
@@ -56,16 +56,9 @@ class InferConfig(YAMLWizard):
     save_csv_results: bool
     csv_columns: List[str]
     calc_metrics: bool
-    log_transforms: bool
     use_profiler: bool
     verbose: bool
-    save_timeline_vis: Optional[bool] = True
-    timeline_table_mode: Optional[str] = (
-        "pfc"  # options: p (percent), fc (frame count), both (pfc)
-    )
     csv_infer_pattern: Optional[str] = GlobalConst.INFER_FILE_PATTERN
-    timeline_video_name_limit: Optional[int] = 40
-    timeline_table_decimals: Optional[int] = 4
     pre_computed_no_skip_dir: Optional[str] = None
     infer_proc: InferProcCfg = field(default_factory=InferProcCfg)
 

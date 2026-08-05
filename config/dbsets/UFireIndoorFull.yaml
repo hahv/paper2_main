@@ -1,6 +1,9 @@
-dir_path: datasets/UFireIndoorFull_Relabel_FireSmokeNone
+dir_path: datasets/UFireIndoorFull
 extra_cfgs:
-  ds_metric_src: csv_metric_src
+  # ! Specify the metric source class for this dataset, that defines how to load ground truth and predictions for metric calculation
+  # ! this value is the file name of the metric source class in src/metrics (e.g., src/metrics/csv_metric_src.py => csv_metric_src)
+  ds_metric_src: csv_metric_src 
+  # ! Specify the CSV loader class to use for `ds_metric_src` to load ground truth and predictions from CSV files
+  csv_loader_cls: base_csv_loader.BaseRawCsvLoader
   ds_recursive: true
   ds_gt_file_pattern: "__labels"
-  csv_loader_cls: base_csv_loader.BaseRawCsvLoader

@@ -59,13 +59,6 @@ class CsvRsProc(BaseRsProc):
         row_dict["probs"] = infer_dict["probs"]
         row_dict["pred_label_idx"] = infer_dict["predLabelIdx"]
         row_dict["pred_label"] = infer_dict["predLabel"]
-
-        # ! #hahv: extra columns for VISUALIZATION eager mode analysis
-        eager_mode = "n/a"
-        if 'mt_proc' in infer_dict:
-            # pprint_box(infer_dict["mt_proc"], title="Motion Proc Data in CsvRsProc")
-            eager_mode = infer_dict["mt_proc"].get("eager_mode", "n/a")
-        row_dict['eager_mode'] = eager_mode
         return row_dict
 
     def handle_frame_results(self, frame_bgr, frame_rs_dict: dict):

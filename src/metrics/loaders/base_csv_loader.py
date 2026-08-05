@@ -89,7 +89,7 @@ class BaseRawCsvLoader(ABC):
             encoding="utf-8",
             dtype=dtype_map,
             keep_default_na=False,
-        )  # ty:ignore[no-matching-overload]
+        )
 
         # Standardize GT label column
         if is_gt and "label" in df.columns and GlobalConst.COL_GT not in df.columns:

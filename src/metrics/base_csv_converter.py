@@ -140,6 +140,7 @@ class BaseCSVConverter(ABC):
         return rs_df
 
 
+
 class FireSmokeLabelConverter(BaseCSVConverter):
     """
     Standard converter that helps normalizing fire/smoke labels to 'firesmoke' or 'none'.

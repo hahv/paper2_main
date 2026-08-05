@@ -36,33 +36,14 @@ class NoTempMethod(BaseMethod):
         pil_img = Image.fromarray(frame_rgb)
         # global LOG_TRANSFORM
         val_transform = get_transform(model_name, self.cfg.modelCfg.input_size)
-        if not self.cfg.inferCfg.log_transforms:
-            with ConsoleLog("Infer transform"):
-                pprint(val_transform)
+        # with ConsoleLog("Infer transform"):
+        #     pprint(val_transform)
         # Apply the transformation
         frame_batch = val_transform(pil_img).unsqueeze(0)  # Add batch dimension
         # Move the frame batch to the appropriate device
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         frame_batch = frame_batch.to(device)
         return frame_batch
-    
-    # def proc_infer_results(self, logits_ls, probs_ls, classNames):
-    #     """Process the raw inference results to extract the predicted label and
-    #     probabilities.
-    #     logits_ls: list of raw outputs from the model (torch.Tensor)
-    #     probs_ls: list of probabilities after applying softmax (torch.Tensor)
-    #     classNames: list of class names corresponding to the model's output
-    #     """
-    #     # Get the index of the most likely class
-    #     labelIdx = int(np.argmax(probs_ls))
-    #     assert labelIdx < len(classNames), "Class index out of range."
-    #     pred_label = classNames[labelIdx]
-    #     return {
-    #         "logits": logits_ls,
-    #         "probs": probs_ls,
-    #         "predLabelIdx": labelIdx,
-    #         "predLabel": pred_label,
-    #     }
 
     def infer_frame(self, frame, frame_idx: int) -> dict:
         """Perform inference on the pre-processed frame."""

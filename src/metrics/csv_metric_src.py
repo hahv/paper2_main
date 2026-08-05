@@ -11,8 +11,6 @@ from src.utils import get_cls_in_pkg
 from src.metrics.base_metric_src import BaseMetricSrc
 from src.metrics.loaders.base_csv_loader import BaseRawCsvLoader
 from src.metrics.base_csv_converter import *
-from src.common import GlobalConst
-
 
 class CsvMetricSrc(BaseMetricSrc):
     """
@@ -23,23 +21,18 @@ class CsvMetricSrc(BaseMetricSrc):
 
     def __init__(self, cfg: Config):
         self.cfg = cfg
-        modes = cfg.metricCfg.extra_cfgs.get("mode", ["per-video"])  # ty:ignore[possibly-missing-attribute]
+        modes = cfg.metricCfg.extra_cfgs.get("mode", ["per-video"])  # ty:ignore[unresolved-attribute]
         super().__init__(cfg.dbsetCfg.name, modes=modes)  # ty:ignore[invalid-argument-type]
 
         # -----------------------------------------------------------
-        # ! LOAD ADAPTER
-        # We read 'adapter_cls' from config (e.g., 'DFireAdapter')
-        # Defaulting to DFireAdapter to maintain backward compatibility
-        # -----------------------------------------------------------
-        csv_loader_name = cfg.dbsetCfg.extra_cfgs.get("csv_loader_cls")  # ty:ignore[possibly-missing-attribute]
+        csv_loader_name = cfg.dbsetCfg.extra_cfgs.get("csv_loader_cls")  # ty:ignore[unresolved-attribute]
 
-        # Dynamically load the adapter class from src.metrics.adapters.dataset_adapters
+        # ! create a dynamic loader
         csv_loader_cls = get_cls_in_pkg(
             pkg_name="src.metrics.loaders",
             fileName_ClsName=csv_loader_name,  # ty:ignore[invalid-argument-type]
         )
-
-        # Initialize adapter
+        # Initialize loader
         self.csv_loader: BaseRawCsvLoader = csv_loader_cls(self.cfg)
         video_list = self.cfg.dbsetCfg.get_video_list()
         # ! global cache of video_name => raw_gt_pred_df
@@ -66,7 +59,7 @@ class CsvMetricSrc(BaseMetricSrc):
             return "FPS"  # FPS is always per-frame, so we can use a unified key for caching
         else:
             return mode  # for other metrics, we cache by mode (per-frame or per-video)
-
+    # !mode: "per-frame" or "per-video"
     def unify_df_by_mode(self, mode, metric, **kwargs) -> tuple[pd.DataFrame, str]:
         list_of_converted_dfs = []
         for video_name, df in self.video_gt_pred_df_dict.items():

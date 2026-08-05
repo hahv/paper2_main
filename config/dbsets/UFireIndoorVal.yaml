@@ -1,2 +1,5 @@
+# ! use the same base config as UFireIndoorFull
 __base__: config/dbsets/UFireIndoorFull.yaml
+
+# ! override the dir_path to point to the validation set
 dir_path: datasets/UFireIndoorFull/val
