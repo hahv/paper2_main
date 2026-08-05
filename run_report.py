@@ -19,16 +19,13 @@ class ReportArgs(Tap):
     metric_cfg_file: str = "config/metrics/video_metric.yaml"
     outdir: str = "./zout/__report" # output dir for the performance report
     skip_plot: bool = False  # whether to skip plotting the performance metrics
-    force: bool = False  # re-generate if already exists.
     def configure(self):
         self.add_argument("-i", "--indir")
         self.add_argument("-m", "--metric_cfg_file")
         self.add_argument("-o", "--outdir")
         self.add_argument("-noplot", "--skip_plot", action="store_true")
-        self.add_argument("-f", "--force", action="store_true")
 
 #! ================= PERFORMANCE REPORT =================
-
 def default_exp_csv_filter_fn(exp_file_name: str) -> bool:
     """
     Default filter function for experiments.
@@ -44,7 +41,7 @@ def having_perf_csv(exp_dir: str) -> bool:
     return any(default_exp_csv_filter_fn(csv_file) for csv_file in csv_files)
 
 
-def gen_exp_perf_csv(exp_dir: str, force=False) -> bool:
+def gen_exp_perf_csv(exp_dir: str) -> bool:
     """
     Generates performance CSV files for the given experiment directory.
     This is a placeholder function and should be implemented with the actual logic to generate CSV files.
@@ -66,7 +63,7 @@ def gen_exp_perf_csv(exp_dir: str, force=False) -> bool:
         llogger.warning(f"Failed to generate performance CSV for {exp_dir}")
         return False
 
-def prepare_exp_dir(in_dir: str, report_dir: str, force=False):
+def prepare_exp_dir(in_dir: str, report_dir: str):
     """
     Prepares the experiment directory for reporting.
     Generates performance CSV files if they don't exist.
@@ -79,12 +76,11 @@ def prepare_exp_dir(in_dir: str, report_dir: str, force=False):
     with ConsoleLog("Preparing exp dirs for reporting..."):
         for exp_dir in tqdm(exp_dirs):
             assert os.path.isdir(exp_dir), f"{exp_dir} is not a directory"
-            # ! If the performance CSV file does not exist in the experiment
-            # directory, generate it. or force regenerate if force=True
-            if not having_perf_csv(exp_dir) or force:
+            # ! If the perf CSV file does not exist, generate it
+            if not having_perf_csv(exp_dir):
                 llogger.info(f"Generating performance CSV for {exp_dir}...")
                 try:
-                    did_gen = gen_exp_perf_csv(exp_dir, force=force)
+                    did_gen = gen_exp_perf_csv(exp_dir)
                     if not did_gen:
                         raise Exception("CSV generation failed")
                 except Exception as e:
@@ -101,7 +97,6 @@ def report_perf(
     report_dir: str,
     save_csv: bool = True,
     skip_plot: bool = False,
-    force=False,
 ):
     assert os.path.exists(metric_cfg_file), (
         f"No metric files found in {metric_cfg_file}"
@@ -120,12 +115,11 @@ def report_perf(
     os.makedirs(report_dir, exist_ok=True)
 
     # !First prepare the experiment directories by generating performance CSV files if they don't exist.
-    prepare_exp_dir(indir, report_dir, force=force)
+    prepare_exp_dir(indir, report_dir)
     metricSet_df_dict = {}
     for metricSet_name in metricSet_names:
         pattern = f"{metricSet_name}{SEP}perf"
         # pprint(f" Find {pattern} in {indir}")
-
         # FIX: Capture 'pattern' as a default argument (p=pattern)
         # This freezes the value of 'pattern' at the moment the lambda is created.
         def exp_csv_filter_fn(csv_file_name, p=pattern):
@@ -153,9 +147,8 @@ def main():
     indir = args.indir
     metric_dir = args.metric_cfg_file
     report_dir = args.outdir
-    force = args.force
     report_perf(
-        indir, metric_dir, report_dir, skip_plot=args.skip_plot, force=force
+        indir, metric_dir, report_dir, skip_plot=args.skip_plot
     )
 
 if __name__ == "__main__":
