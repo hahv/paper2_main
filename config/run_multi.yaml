@@ -18,7 +18,7 @@ general:
   # - False (Standard Mode): Executes a standard sequential evaluation of multiple 
   #   methods. Each method runs exactly once using the static hyperparameters defined 
   #   in its native configuration file (e.g., `temp_method_motion_block.yaml`).
-  is_optim_mode: false
+  is_optim_mode: true
 
 dbset_selector:
   # A list of datasets to run
@@ -31,7 +31,7 @@ method_selector:
   # A list of methods to run
   selected_method: 
     # - no_temp_method
-    - temp_method_motion_block
-    - temp_method_motion_block_eager
+    # - temp_method_motion_block
+    # - temp_method_motion_block_eager
     - temp_method_streak_count_eager
-    - temp_method_window_vote_eager
+    # - temp_method_window_vote_eager

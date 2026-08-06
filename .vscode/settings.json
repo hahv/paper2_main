@@ -42,7 +42,7 @@
         "**/~$_issue_track.xlsx": true,
         "**/.commit-rules.md": true,
         "**/ruff.toml": true,
-        "**/pyproject.toml": true,
+        // "**/pyproject.toml": true,
         "**/.yamlfmt": true,
         "**/.markdownlint.yaml": true,
         "paper": true 

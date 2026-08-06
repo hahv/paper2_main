@@ -1,3 +1,4 @@
+from torch.ao.quantization.fx.utils import return_arg_list
 import os
 import sys
 
@@ -12,6 +13,7 @@ from halib.filetype import yamlfile
 from tap import *
 from loguru import logger as llogger
 from src.exp import MyExp
+from typing import cast
 
 class ReportArgs(Tap):
     indir: str = "./zout"  # input directory containing multiple experiment directories
@@ -19,11 +21,13 @@ class ReportArgs(Tap):
     metric_cfg_file: str = "config/metrics/video_metric.yaml"
     outdir: str = "./zout/__report" # output dir for the performance report
     skip_plot: bool = False  # whether to skip plotting the performance metrics
+    is_optim_report: bool = False  # whether to generate an optimization report instead of a performance report
     def configure(self):
         self.add_argument("-i", "--indir")
         self.add_argument("-m", "--metric_cfg_file")
         self.add_argument("-o", "--outdir")
         self.add_argument("-noplot", "--skip_plot", action="store_true")
+        self.add_argument("-opt", "--is_optim_report", action="store_true")
 
 #! ================= PERFORMANCE REPORT =================
 def default_exp_csv_filter_fn(exp_file_name: str) -> bool:
@@ -95,6 +99,7 @@ def report_perf(
     indir: str,
     metric_cfg_file: str,
     report_dir: str,
+    is_report_optim: bool = False,
     save_csv: bool = True,
     skip_plot: bool = False,
 ):
@@ -124,11 +129,22 @@ def report_perf(
         # This freezes the value of 'pattern' at the moment the lambda is created.
         def exp_csv_filter_fn(csv_file_name, p=pattern):
             return p in csv_file_name
-
-        perfTb_by_metric: PerfTB = PerfCalc.get_perftb_for_multi_exps(
-            indir, exp_csv_filter_fn=exp_csv_filter_fn
-        )
+        
+        raw_df = None
+        if is_report_optim:
+            perfTb_by_metric, raw_df = PerfCalc.get_perftb_for_multi_exps(
+                indir,
+                exp_csv_filter_fn=exp_csv_filter_fn,
+                show_all_cols=True,
+                return_raw_df=True,
+            )  # ty:ignore[not-iterable]
+        else:
+            perfTb_by_metric = PerfCalc.get_perftb_for_multi_exps(
+                indir, exp_csv_filter_fn=exp_csv_filter_fn
+            )
         outfile = os.path.join(report_dir, f"perf_report__{metricSet_name}.csv")
+        # Explicitly cast to PerfTB for downstream code
+        perfTb_by_metric = cast(PerfTB, perfTb_by_metric)
         perf_metric_df = perfTb_by_metric.to_csv(outfile)
         pprint_local_path(
             outfile,
@@ -140,6 +156,16 @@ def report_perf(
                 save_path=os.path.join(report_dir, f"perf_report__{metricSet_name}.svg")
             )
         metricSet_df_dict[metricSet_name] = perf_metric_df
+        
+        # ! for optim case, we also save the raw_df for further analysis
+        if is_report_optim and raw_df is not None:
+            raw_outfile = os.path.join(report_dir, f"full_perf_report__{metricSet_name}.csv")
+            raw_df.to_csv(raw_outfile, index=False, sep=";")
+            pprint_local_path(
+                raw_outfile,
+                get_wins_path=True,
+                tag_or_box_title="Save raw perf df to ⏬:",
+            )
     return metricSet_df_dict
 
 def main():
@@ -147,8 +173,9 @@ def main():
     indir = args.indir
     metric_dir = args.metric_cfg_file
     report_dir = args.outdir
+    is_optim_report = args.is_optim_report
     report_perf(
-        indir, metric_dir, report_dir, skip_plot=args.skip_plot
+        indir, metric_dir, report_dir, is_report_optim=is_optim_report, skip_plot=args.skip_plot
     )
 
 if __name__ == "__main__":

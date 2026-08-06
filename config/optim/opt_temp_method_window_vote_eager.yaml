@@ -1,6 +1,6 @@
 extra_cfgs:
   skip_proc:
-    name: pcheck_prof_win_vote_skip_proc_eager.PCheckProfWinVoteSkipProcEager
+    name: window_vote_proc_eager.WindowVoteEagerProc
     params: # ! contraint: window_size >= fd_period
       fd_period: # period_interval_check
         start: 8

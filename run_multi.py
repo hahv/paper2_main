@@ -29,27 +29,13 @@ class RunMultiArgs(Tap):
             help="Path to precomputed inferences to skip actual model execution",
         )
 
-def _get_cfg_path(method_name: str, prefix: str) -> str | None:
-    """Helper to resolve paths for optim or wandb config files."""
+
+def get_opt_cfg(method_name: str, suffix: str="opt_") -> str | None:
     BASE_CFG_OPTIM = "config/optim"
+    opt_cfg_path = os.path.join(BASE_CFG_OPTIM, f"{suffix}{method_name}.yaml")
+    return opt_cfg_path if os.path.exists(opt_cfg_path) else None
 
-    if "temp_baseline" in method_name:
-        suffix = method_name.replace("temp_baseline_", "")
-        file_name = f"{prefix}baseline_{suffix}.yaml"
-    elif "temp_method" in method_name:
-        suffix = method_name.replace("temp_method_", "")
-        file_name = f"{prefix}{suffix}.yaml"
-    else:
-        return None
-    # pprint(locals())
-    # assert 0, "Debugging: Check the method name parsing logic and the generated file name."
-
-    cfg_path = os.path.join(BASE_CFG_OPTIM, file_name)
-    return cfg_path if os.path.exists(cfg_path) else None
-
-
-def get_opt_cfg(method_name: str) -> str | None:
-    return _get_cfg_path(method_name, "opt_")
+    
 
 def main():
     args = RunMultiArgs().parse_args()
@@ -59,7 +45,6 @@ def main():
     ls_run_dicts = ParamGen.from_files(
         sweep_yaml=sweep_yaml, base_yaml=base_yaml
     ).expand()
-    # pprint_box(ls_run_dicts)
     
     # console.rule("config files:")
     # pprint_box(base_yaml, title="Base Config")
@@ -75,7 +60,6 @@ def main():
     all_optim_run_cfgs: List[Config] = []
     cfg_stats = {}
 
-
     for idx, cfg_item in enumerate(initial_ls_run_cfgs):
         method_name = cfg_item.methodCfg.name
 
@@ -84,21 +68,20 @@ def main():
 
         if method_name not in cfg_stats:
             cfg_stats[method_name] = 0
-        if opt_cfg_path is None:
-            if use_optim_mode:
-                console.log(
-                    f"[yellow]No optimization config found for method {method_name}, skipping hyper-parameter optimization.[/yellow]"
-                )
+        
+        if not use_optim_mode:
             all_optim_run_cfgs.append(cfg_item)
             cfg_stats[method_name] += 1
         else:
+            opt_cfg_path = get_opt_cfg(method_name)  # ty:ignore[invalid-argument-type]
+            assert opt_cfg_path is not None, f"No optimization config found for method {method_name}"
+            pprint_box('use OPTIM mode')
             console.log(
                 f"[green]Found optimization config for method {method_name}: {opt_cfg_path}[/green]"
             )
             optim_param_gen = ParamGen.from_files(
                 sweep_yaml=opt_cfg_path, base_yaml=None
             )
-
             # ! Even we declare the search space in the optim config
             # ! (in `config/optim`), we may want to filter out some invalid
             # ! combinations of hyperparams, this func allows us to do that.
@@ -130,7 +113,7 @@ def main():
             optim_cfgs = optim_param_gen.expand(filter_fn=filter_fn)
             for optim_param_set in optim_cfgs:
                 base_cfg = Config.from_custom_yaml_file_or_str(
-                    cfg_item.original_yaml_str
+                    cfg_item.original_yaml_str  # ty:ignore[invalid-argument-type]
                 )
                 # ! only update the content of extra_cfgs
                 optim_params = optim_param_set["extra_cfgs"]
