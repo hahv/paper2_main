@@ -100,8 +100,25 @@ python run_multi.py \
     --pre_computed_no_skip_dir <<path_to_precomputed_no_skip_dir>>
 ```
 
-> [!note] 
-> **Inference Caching:** The `--pre_computed_no_skip_dir` flag is optional but highly recommended. Supplying a directory with pre-computed inference results (e.g., outputs from `no_temp_method`) allows subsequent methods (such as `temp_method_motion_block.yaml`) to bypass redundant calculations, significantly reducing overall computation time.
+> [!note]
+> **Inference Caching:** The `--pre_computed_no_skip_dir` flag is optional but highly recommended to minimize computation time. By providing a directory containing pre-computed inference results (e.g., outputs from `no_temp_method`), subsequent methods (such as `temp_method*.yaml` configurations) will bypass redundant inferences.
+>
+> **Example Usage:**
+>
+> Bash
+>
+> ```
+> python run_multi.py --pre_computed_no_skip_dir ./zout/MainPC__ds_UFireIndoor2__mt_no_temp_method__af4b0d32a3d2__20260806.145109
+> ```
+
+The `config/run_multi.yaml` file specifies the currently supported evaluation methods:
+
+* **`no_temp_method`:** Baseline inference without temporal skipping.
+* **`temp_method_motion_block`:** Motion-based block skipping.
+* **`temp_method_motion_block_eager`:** Motion-based block skipping incorporating an eager state evaluation.
+* **`temp_method_streak_count_eager`:** Streak-count-based skipping with an
+  eager state (i.e `temp_method_motion_block_eager`, but excludes motion detection).
+* **`temp_method_window_vote_eager`:** Window-vote-based skipping with an eager state (`iNet` framework implementation by **Prof. Park**; excludes motion detection).
 
 ### Use Case 3: Cross-Run Performance Comparison Reporting
 

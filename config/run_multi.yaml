@@ -4,35 +4,34 @@
 # 2. Conducting parameter grid searches or hyperparameter optimization for a
 #    specific method.
 # ! This file will be parsed and used by `src/run_multi.py`.
-
+# ! it has a similar structure to `config/run_base.yaml`, but is designed for sequential execution of multiple experiments.
 general:
-
-# ! Be aware: The `is_optim_mode` flag is crucial for determining the execution mode of the pipeline.
-# The `is_optim_mode` flag dictates the pipeline's execution behavior:
-#
-# - True (Optimization Mode): Executes a parameter grid search or hyperparameter 
-#   optimization for a single method. It dynamically generates and runs multiple 
-#   configurations by varying the `extra_cfgs` values according to the search space 
-#   defined in `config/optim/` (e.g., mapping `temp_method_motion_block.yaml` to 
-#   `opt_temp_method_motion_block.yaml`).
-#
-# - False (Standard Mode): Executes a standard sequential evaluation of multiple 
-#   methods. Each method runs exactly once using the static hyperparameters defined 
-#   in its native configuration file (e.g., `temp_method_motion_block.yaml`).
-is_optim_mode: false
+  # ! Be aware: The `is_optim_mode` flag is crucial for determining the execution mode of the pipeline.
+  # The `is_optim_mode` flag dictates the pipeline's execution behavior:
+  #
+  # - True (Optimization Mode): Executes a parameter grid search or hyperparameter 
+  #   optimization for a single method. It dynamically generates and runs multiple 
+  #   configurations by varying the `extra_cfgs` values according to the search space 
+  #   defined in `config/optim/` (e.g., mapping `temp_method_motion_block.yaml` to 
+  #   `opt_temp_method_motion_block.yaml`).
+  #
+  # - False (Standard Mode): Executes a standard sequential evaluation of multiple 
+  #   methods. Each method runs exactly once using the static hyperparameters defined 
+  #   in its native configuration file (e.g., `temp_method_motion_block.yaml`).
+  is_optim_mode: false
 
 dbset_selector:
   # A list of datasets to run
-  selected_dbset: ["UFireIndoorFull"]
+  # ! we set to "UFireIndoor2" for quick dev and testing
+  selected_dbset: ["UFireIndoor2"] # UFireIndoorFull
 metric_selector:
   # A list of metrics to run
   selected_metric: ["video_metric"]
 method_selector:
   # A list of methods to run
   selected_method: 
-    - no_temp_method
+    # - no_temp_method
     - temp_method_motion_block
-    # - temp_method_motion_block_eager
-    # - temp_method_motion_block_eager_prof
-    # - temp_method_pcheck_prof_win_vote_skip_eager
-    # - temp_method_pcheck_streak_count_skip_eager
+    - temp_method_motion_block_eager
+    - temp_method_streak_count_eager
+    - temp_method_window_vote_eager

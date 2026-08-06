@@ -4,7 +4,9 @@ from typing import Tuple, Dict, Any
 from src.config import Config
 from src.methods.skip.base_skip_proc import BaseSkipProc
 
-class PCheckProfWinVoteSkipProcEager(BaseSkipProc):
+# ! This skip method is solely based on Eager/Non-Eager logic, implemented by
+# ! Prof.Park (in iNet framework)
+class WindowVoteEagerProc(BaseSkipProc):
     def __init__(self, cfg: Config):
         super().__init__(cfg)
 

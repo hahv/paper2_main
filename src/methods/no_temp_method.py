@@ -54,10 +54,12 @@ class NoTempMethod(BaseMethod):
             and self.precomputed_rs_proc is not None
         ):
             precomputed_rs = self.precomputed_rs_proc.get_frame_data(frame_idx)
+            # ! WARNING that we are using pre-computed infer results
             if precomputed_rs is not None:
                 if not NoTempMethod.USED_CACHED_PRINTED:
-                    with ConsoleLog("Important", characters="🐸"):
+                    with ConsoleLog("Important", characters="⛔"):
                         pprint("Using precomputed results")
+                        time.sleep(5) # pause to make sure users see the msg
                     NoTempMethod.USED_CACHED_PRINTED = True
                 return precomputed_rs
 

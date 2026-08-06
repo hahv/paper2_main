@@ -3,7 +3,7 @@ extra_cfgs:
     # video: [video_block_skip_rs_proc, fgmask_block_skip_rs_proc]
     video: [video_block_skip_rs_proc]
   skip_proc:
-    name: pcheck_streak_count_skip_proc_eager.PCheckStreakCountSkipProcEager
+    name: streak_count_proc_eager.StreakCountEagerProc
     params:
       n_chk: 24 # forced check interval (skip state -> eager state transition)
       w_clr: 24 # eager exit window (frames)

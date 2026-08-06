@@ -3,7 +3,7 @@ extra_cfgs:
     # video: [video_block_skip_rs_proc, fgmask_block_skip_rs_proc]
     video: [video_block_skip_rs_proc]
   skip_proc:
-    name: pcheck_prof_win_vote_skip_proc_eager.PCheckProfWinVoteSkipProcEager
+    name: window_vote_proc_eager.WindowVoteEagerProc
     params:
       # !Note: valid config <=> fd_win_size >= fd_period
       fd_period: 48 # periodic check interval (frames)

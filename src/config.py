@@ -191,7 +191,7 @@ class Config(ExpBaseCfg):
         outfile = os.path.join(self.get_outdir(), "__method_cfg.yaml")
         with open(outfile, "w") as f:
             yaml.dump(method_dict, f, default_flow_style=False)
-            with ConsoleLog('Method_cfg', characters="🔴"):
+            with ConsoleLog('Method_cfg', characters="🔻"):
                 pprint(method_dict)
                 time.sleep(3)
 

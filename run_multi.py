@@ -31,7 +31,7 @@ class RunMultiArgs(Tap):
 
 def _get_cfg_path(method_name: str, prefix: str) -> str | None:
     """Helper to resolve paths for optim or wandb config files."""
-    BASE_CFG_OPTIM = "config/zruns/optim"
+    BASE_CFG_OPTIM = "config/optim"
 
     if "temp_baseline" in method_name:
         suffix = method_name.replace("temp_baseline_", "")
@@ -59,6 +59,14 @@ def main():
     ls_run_dicts = ParamGen.from_files(
         sweep_yaml=sweep_yaml, base_yaml=base_yaml
     ).expand()
+    # pprint_box(ls_run_dicts)
+    
+    # console.rule("config files:")
+    # pprint_box(base_yaml, title="Base Config")
+    # pprint_box(sweep_yaml, title="Sweep Config")
+    
+    # for idx, cfg in enumerate(ls_run_dicts):
+    #     pprint_box(cfg, title=f"Sweep Config {idx + 1}")
 
     initial_ls_run_cfgs: List[Config] = [
         Config.from_custom_yaml_file_or_str(cfg) for cfg in ls_run_dicts

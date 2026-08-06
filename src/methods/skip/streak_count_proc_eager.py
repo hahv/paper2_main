@@ -3,7 +3,9 @@ from typing import Tuple, Dict, Any
 from src.config import Config
 from src.methods.skip.base_block_skip_proc import BaseSkipProc
 
-class PCheckStreakCountSkipProcEager(BaseSkipProc):
+# ! This skip method is solely based on Eager/Non-Eager FSM logic, and does not
+# ! use motion detection at all.
+class StreakCountEagerProc(BaseSkipProc):
     def __init__(self, cfg: Config):
         super().__init__(cfg)
 
