@@ -1,3 +1,4 @@
+from IPython.testing.decorators import skip
 from dill.tests.test_registered import p
 from halib import *
 from halib.common.common import seed_everything
@@ -11,6 +12,7 @@ from halib.utils.dict import DictUtils
 from src.common import GlobalConst
 
 from pathlib import Path
+from src.metrics.loaders.base_csv_loader import BaseRawCsvLoader
 
 
 class MyExp(BaseExp):
@@ -111,7 +113,67 @@ class MyExp(BaseExp):
         if self.metric_backend is not None:
             for metric_instance in self.metric_backend.metric_info.values():  # ty:ignore[unresolved-attribute]
                 metric_instance.reset()
+        
+    def calc_skip_rate(self) -> float:
+        """
+        Calculates the skip rate for temporal methods with skip processing enabled.
 
+        The skip rate is defined as the ratio of correctly skipped frames to the
+        total number of safe frames (i.e., frames without fire or smoke). If the
+        current method does not utilize a skip process, this returns 0.0.
+
+        Returns:
+            float: The calculated skip rate.
+        """
+        method_cfg = self.full_cfg.methodCfg
+
+        is_temp_method = "temp_method" in method_cfg.name  # ty:ignore[unsupported-operator]
+        has_skip_proc = method_cfg.extra_cfgs and "skip_proc" in method_cfg.extra_cfgs
+
+        # Early exit if the method does not support skip processing
+        if not (is_temp_method and has_skip_proc):
+            return -1
+
+        csv_loader_name = self.full_cfg.dbsetCfg.extra_cfgs.get("csv_loader_cls")  # ty:ignore[unresolved-attribute]
+
+        # ! create a dynamic loader
+        csv_loader_cls = get_cls_in_pkg(
+            pkg_name="src.metrics.loaders",
+            fileName_ClsName=csv_loader_name,  # ty:ignore[invalid-argument-type]
+        )
+        # Initialize loader
+        self.csv_loader: BaseRawCsvLoader = csv_loader_cls(self.full_cfg)
+        video_list = self.full_cfg.dbsetCfg.get_video_list()
+        # ! global cache of video_name => raw_gt_pred_df
+        gt_pred_df_list = []
+        for vpath in video_list:
+            raw_gt_pred_df = self.csv_loader.load_video_gt_pred_df(video_path=vpath)
+            assert raw_gt_pred_df is not None, (
+                f"Failed to load GT/Pred for video {vpath}"
+            )
+            gt_pred_df_list.append(raw_gt_pred_df)
+        # Concatenate all video DataFrames into a single DataFrame
+        all_videos_df = pd.concat(gt_pred_df_list, ignore_index=True)        
+        pprint_box(all_videos_df.columns.tolist(), title="Columns in GT/Pred DataFrame")
+        # columns = ['frame_idx', 'video_path', 'gt_label', 'video',
+        # 'num_frames', 'elapsed_time', 'class_names', 'logits', 'probs',
+        # 'pred_label_idx', 'pred_label']
+        
+        outdir = self.full_cfg.get_outdir()
+        # save all df to CSV for debugging
+        all_videos_df.to_csv(f"{outdir}/_all_videos_gt_pred_skip_rate_calc.csv", sep=";", encoding="utf-8", index=False)
+        
+        safe_frames_df = all_videos_df[all_videos_df["gt_label"] == "none"]
+        # count correctly skipped frames (pred_label == "none" and gt_label == "none")
+        correctly_skipped_frames_df = safe_frames_df[safe_frames_df["pred_label"] == "skipped"]
+
+        # debug:
+        console.print(f"Total safe frames: {len(safe_frames_df)}")
+        console.print(f"Correctly skipped frames: {len(correctly_skipped_frames_df)}")
+                
+        skip_rate = len(correctly_skipped_frames_df) / len(safe_frames_df) if len(safe_frames_df) > 0 else 0.0
+        return skip_rate
+    
     def run_exp(self, should_calc_metrics=True, reload_env=False, *args, **kwargs):
         with ConsoleLog("Exp Info", characters="🔻"):
             exp_info = {
@@ -156,6 +218,14 @@ class MyExp(BaseExp):
                     if "result_proc" in extra_data_orig:
                         del extra_data_orig["result_proc"]
                     extra_data = DictUtils.flatten(extra_data_orig)
+                
+                # ! add skip rate as extra data item
+                if mode == "per_frame":
+                    skip_rate = self.calc_skip_rate()
+                    if skip_rate >= 0.0:
+                        if extra_data is None:
+                            extra_data = {}
+                        extra_data["skip_rate"] = skip_rate
 
                 perf_results, outfile = self.calc_perfs(
                     raw_metrics_data=metrics_data,

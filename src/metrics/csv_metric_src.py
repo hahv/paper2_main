@@ -96,6 +96,7 @@ class CsvMetricSrc(BaseMetricSrc):
         cache_key = self.metric_mode_to_cache_key(mode, metric)
         return all_videos_df, cache_key
 
+    # !mode: "per-frame" or "per-video"
     def get_metric_data_by_mode(self, metric, mode, **kwargs) -> Any:
         metric = metric.strip()
         cache_key = self.metric_mode_to_cache_key(mode, metric)

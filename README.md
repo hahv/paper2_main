@@ -51,8 +51,12 @@ Project dependencies are managed using the `uv` package manager.
     ```
 3. **Output Artifacts**: Experiment outputs are saved in the directory defined by the `general.outdir` parameter in your configuration file.
 
-The output directory adheres to the following naming convention: `<pc_name>__<dataset_name>__<used_method_name>__<hash_value>__<timestamp>`. The `hash_value` is explicitly derived from the `extra_cfgs` parameter of the chosen method.
-**Output File Registry**: experiment output sample when running `config/_run_template.yaml`: `MainPC__ds_UFireIndoor2__mt_no_temp_method__af4b0d32a3d2__20260805.151048`
+  The output directory adheres to the following naming convention: `<pc_name>__<dataset_name>__<used_method_name>__<hash_value>__<timestamp>`. The `hash_value` is explicitly derived from the `extra_cfgs` parameter of the chosen method.
+  **Output File Registry**: experiment output sample when running `config/_run_template.yaml`: `MainPC__ds_UFireIndoor2__mt_no_temp_method__af4b0d32a3d2__20260805.151048`
+
+  > [!note]
+  >
+  > all `*.csv` output files use semicolon (`;`) as separator (not comma `,`)
 
 | File Pattern | Description |
 | :--- | :--- |

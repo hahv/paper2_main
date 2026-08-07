@@ -385,7 +385,6 @@ class BaseMethod(ABC):
         #! even if SKIP_INFER, we still need to call after_video to do some clean up
         for handler in self.result_handlers:
             handler.after_video(video_path=video_path)
-        print(f"\nFinished inference for: {video_path}\n")
 
         # ! Hook: Call the hook method after video inference
         self.after_infer_video(video_path=video_path)

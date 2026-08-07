@@ -19,7 +19,6 @@ class ReportArgs(Tap):
     indir: str = "./zout"  # input directory containing multiple experiment directories
     # ! experiments in `indir` should use the same metric set defined in `metric_cfg_file` for performance evaluation
     metric_cfg_file: str = "config/metrics/video_metric.yaml"
-    outdir: str = "./zout/__report" # output dir for the performance report
     outdir: Optional[str] = (
         None  # Output dir for the performance report (defaults to {indir}/__report)
     )
@@ -106,7 +105,7 @@ def prepare_exp_dir(in_dir: str, report_dir: str):
 def report_perf(
     indir: str,
     metric_cfg_file: str,
-    report_dir: str,
+    out_dir: str,
     is_report_optim: bool = False,
     save_csv: bool = True,
     skip_plot: bool = False,
@@ -120,15 +119,15 @@ def report_perf(
     box_info = {
         "Input Directory": indir,
         "Metric Directory": metric_cfg_file,
-        "Report Directory": report_dir,
+        "Report Directory": out_dir,
         "Metric Set Names": metricSet_names,
     }
     pprint_box(box_info, title="Report Generation Parameters")
 
-    os.makedirs(report_dir, exist_ok=True)
+    os.makedirs(out_dir, exist_ok=True)
 
     # !First prepare the experiment directories by generating performance CSV files if they don't exist.
-    prepare_exp_dir(indir, report_dir)
+    prepare_exp_dir(indir, out_dir)
     metricSet_df_dict = {}
     for metricSet_name in metricSet_names:
         pattern = f"{metricSet_name}{SEP}perf"
@@ -150,7 +149,7 @@ def report_perf(
             perfTb_by_metric = PerfCalc.get_perftb_for_multi_exps(
                 indir, exp_csv_filter_fn=exp_csv_filter_fn
             )
-        outfile = os.path.join(report_dir, f"perf_report__{metricSet_name}.csv")
+        outfile = os.path.join(out_dir, f"perf_report__{metricSet_name}.csv")
         # Explicitly cast to PerfTB for downstream code
         perfTb_by_metric = cast(PerfTB, perfTb_by_metric)
         perf_metric_df = perfTb_by_metric.to_csv(outfile)
@@ -161,13 +160,13 @@ def report_perf(
         )
         if not skip_plot:
             perfTb_by_metric.plot(
-                save_path=os.path.join(report_dir, f"perf_report__{metricSet_name}.svg")
+                save_path=os.path.join(out_dir, f"perf_report__{metricSet_name}.svg")
             )
         metricSet_df_dict[metricSet_name] = perf_metric_df
         
         # ! for optim case, we also save the raw_df for further analysis
         if is_report_optim and raw_df is not None:
-            raw_outfile = os.path.join(report_dir, f"full_perf_report__{metricSet_name}.csv")
+            raw_outfile = os.path.join(out_dir, f"full_perf_report__{metricSet_name}.csv")
             raw_df.to_csv(raw_outfile, index=False, sep=";")
             pprint_local_path(
                 raw_outfile,
@@ -180,10 +179,10 @@ def main():
     args = ReportArgs().parse_args()
     indir = args.indir
     metric_dir = args.metric_cfg_file
-    report_dir = args.outdir
+    out_dir = args.outdir
     is_optim_report = args.is_optim_report
     report_perf(
-        indir, metric_dir, report_dir, is_report_optim=is_optim_report, skip_plot=args.skip_plot
+        indir, metric_dir, out_dir, is_report_optim=is_optim_report, skip_plot=args.skip_plot  # ty:ignore[invalid-argument-type]
     )
 
 if __name__ == "__main__":

@@ -19,7 +19,7 @@ general:
   #   methods. Each method runs exactly once using the static hyperparameters defined 
   #   in its native configuration file (e.g., `temp_method_motion_block.yaml`).
   # ! WARNING: only set to True if you are performing hyper-param search
-  is_optim_mode: true
+  is_optim_mode: false
 
 dbset_selector:
   # A list of datasets to run
@@ -31,8 +31,8 @@ metric_selector:
 method_selector:
   # A list of methods to run
   selected_method: 
-    # - no_temp_method
-    # - temp_method_motion_block
+    - no_temp_method
+    - temp_method_motion_block
     # - temp_method_motion_block_eager
-    - temp_method_streak_count_eager
+    # - temp_method_streak_count_eager
     # - temp_method_window_vote_eager
