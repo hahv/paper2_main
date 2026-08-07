@@ -1,5 +1,7 @@
 This guide outlines the environment setup and execution process for the iNet fire and smoke detection model evaluation scripts using the UFireIndoorVideo datasets.
 
+## General Guide to Execute the Evaluation Scripts
+
 ### Prerequisites
 
 *   **CUDA Architecture:** Version 12.9 is required. Verify your current installation using the following command:
@@ -127,18 +129,50 @@ To aggregate and evaluate multiple experiment runs stored within the `zout` dire
 **Execution Command**
 
 ```bash
-python run_report.py --indir ./zout --metric_cfg_file config/metrics/video_metric.yaml --outdir ./zout/__report
+python run_report.py --indir ./zout --metric_cfg_file config/metrics/video_metric.yaml
 ```
 
-*   **Optional Flag:** Append `--skip_plot` to bypass visual rendering (SVG generation) and strictly output the tabular CSV data files.
+*   **Optional Flag:** 
+
++ Append `--skip_plot` to bypass visual rendering (SVG generation) and strictly
+  output the tabular CSV data files.
++ Append `--is_optim_report` to indicate that the report stems from optimization runs. The final output will detail the method name, dataset, performance metrics, and **hyperparameters** for each run, providing the necessary data to analyze how different configurations impact model performance.
++ Append `--outdir` to specify a custom output directory for the report files. if omitted, the default output directory will be `{indir}/__report`.
 
 **Output Structure**
 The resulting artifacts are saved to the defined `--outdir` directory and formatted as follows:
 
 ```text
 __report/
-├── perf_report__per_frame.csv
-├── perf_report__per_frame.svg
-├── perf_report__per_video.csv
-└── perf_report__per_video.svg
+ ├──    full_perf_report__per_frame.csv  # if is_optim_report flag enable
+ ├──    full_perf_report__per_video.csv  # if is_optim_report flag enable
+ ├──    perf_report__per_frame.csv
+ ├──    perf_report__per_frame.svg
+ ├──    perf_report__per_video.csv
+ └──    perf_report__per_video.svg
 ```
+
+## Dataset
+You need to download the UFireIndoorFull and UFireIndoor2 datasets from
+SyncThing folder at `SyncProf/UFire_Indoor_Dataset`
+
+![UFireIndoorFull](./dataset_info.png)
+
+
+## Project Structure
+
+The following tree structure outlines the organization of the project files and directories:
+
+```bash
+ └──    config/  # yaml files for configuring the dataset, method, metric, etc.
+ └──    datasets/ # the dataset folder: UFireIndoorFull and UFireIndoor2
+ └──    models/ # the model files here (.pth files)
+ ├──    pyproject.toml # uv project configuration file
+ ├──    run_exp.py # run  a single experiment (exp)
+ ├──    run_multi.py # run mutiple exps or do the parameter optimization (optim)
+ ├──    run_report.py # gen performance report for multiple exps (or optim runs)
+ └──    src/ # main source code for the project
+ └──    zout/ # the default output for exp runs
+
+```
+To understand the detailed project structure, please refer to the [PROJ_STRUCTURE.md](./PROJ_STRUCTURE.md) file.

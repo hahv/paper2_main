@@ -169,6 +169,7 @@ class MethodSelector(BaseSelectorCfg[MethodCfg]):
 # -----------------------------------------------------------------------------
 # 5. MAIN CONFIG
 # -----------------------------------------------------------------------------
+OTPIM_TIME_STAMP = None
 
 @dataclass
 class Config(ExpBaseCfg):
@@ -428,11 +429,33 @@ class Config(ExpBaseCfg):
         self.general.project_dir = str(exp_path.parent)
         self.general.outdir = ""
         self.cfg_name = exp_path.name
+    
+    
+    def update_for_optim_mode(self) -> None:
+        """
+        Configures the output directory for optimization mode.
 
-    def update_for_optim_mode(self):
+        To ensure optimization runs are isolated for comparative analysis (e.g., via
+        `run_report.py --is_optim_report`), this method checks the target output directory.
+        If the directory is already populated, a new timestamped subdirectory is created
+        and assigned as the new output path to prevent data mixing.
         """
-        When in optimization mode, we want to save all runs under a common directory for easier comparison.
-        This function modifies the general.project_dir and general.outdir to achieve that.
-        """
-        # ! Force to "zout/zoptim" for optimization runs, to make it easy to find and compare results
-        self.general.outdir = GlobalConst.OPTIM_OUTDIR
+        outdir_path = Path(self.general.outdir)
+        new_outdir = outdir_path
+        global OTPIM_TIME_STAMP
+        if OTPIM_TIME_STAMP is None:
+            pprint_box(
+                "Setting OTPIM_TIME_STAMP for the first time.",
+                title="Optimization Mode Timestamp",
+            )
+            # ! only set the timestamp once to ensure consistency across multiple calls
+            OTPIM_TIME_STAMP = now_str()
+            # If the directory exists and is not empty, isolate the runs in a new folder
+            if outdir_path.exists() and any(outdir_path.iterdir()):
+                new_outdir = outdir_path / f"_optim_runs_{OTPIM_TIME_STAMP}"
+                new_outdir.mkdir(parents=True, exist_ok=True)
+        else:
+            new_outdir = outdir_path / f"_optim_runs_{OTPIM_TIME_STAMP}"
+
+        # ! Update the general.outdir to the new path (if changed)
+        self.general.outdir = str(new_outdir)

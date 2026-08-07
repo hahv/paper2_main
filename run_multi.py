@@ -152,6 +152,7 @@ def main():
                 pprint(args.pre_computed_no_skip_dir)
 
         cfg_run_status = f"Running config {idx + 1}/{len(all_optim_run_cfgs)}"
+        pprint('\n\n\n')
         console.rule(cfg_run_status)
 
         single_exp = MyExp(current_cfg)

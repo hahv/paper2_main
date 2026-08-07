@@ -1,4 +1,3 @@
-from torch.ao.quantization.fx.utils import return_arg_list
 import os
 import sys
 
@@ -13,13 +12,17 @@ from halib.filetype import yamlfile
 from tap import *
 from loguru import logger as llogger
 from src.exp import MyExp
-from typing import cast
+from typing import cast, Optional
+from pathlib import Path
 
 class ReportArgs(Tap):
     indir: str = "./zout"  # input directory containing multiple experiment directories
     # ! experiments in `indir` should use the same metric set defined in `metric_cfg_file` for performance evaluation
     metric_cfg_file: str = "config/metrics/video_metric.yaml"
     outdir: str = "./zout/__report" # output dir for the performance report
+    outdir: Optional[str] = (
+        None  # Output dir for the performance report (defaults to {indir}/__report)
+    )
     skip_plot: bool = False  # whether to skip plotting the performance metrics
     is_optim_report: bool = False  # whether to generate an optimization report instead of a performance report
     def configure(self):
@@ -28,6 +31,11 @@ class ReportArgs(Tap):
         self.add_argument("-o", "--outdir")
         self.add_argument("-noplot", "--skip_plot", action="store_true")
         self.add_argument("-opt", "--is_optim_report", action="store_true")
+    
+    def process_args(self):
+        # Dynamically set outdir if the user did not provide it via CLI
+        if self.outdir is None:
+            self.outdir = str(Path(self.indir) / "__report")
 
 #! ================= PERFORMANCE REPORT =================
 def default_exp_csv_filter_fn(exp_file_name: str) -> bool:

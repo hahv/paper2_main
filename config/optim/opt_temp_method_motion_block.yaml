@@ -4,6 +4,12 @@ extra_cfgs:
   skip_proc:
     name: motion_only_block_skip_proc
     params:
+      # ! HYPERPARAMETER SEARCH SPACE SPECIFICATION
+      # ! Parameter spaces are defined per the
+      # !`halib.exp.core.param_gen.ParamGen` schema using the following formats:
+      #  - Discrete array: `[1, 2, 3]`
+      #  - String-based linear space: `"start:stop:step"` (e.g., `"0:10:2"` yields `[0, 2, 4, 6, 8]`)
+      #  - Dictionary-based linear space: `{'start': 0, 'stop': 1, 'step': 0.1}`
       scale_factor: [0.5]
       block_size_orig: [32]
       block_ratio_th: [0.05]
