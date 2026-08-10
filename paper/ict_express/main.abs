@@ -1,0 +1,24 @@
+Conventional deep learning (DL)-based fire and smoke detection systems
+		perform inference on every video frame using high-complexity models to
+		classify the presence of fire or smoke. However, in surveillance
+		scenarios, particularly indoor environments, video streams frequently
+		contain long periods of static background frames with little or no
+		motion, rendering per-frame inference redundant and wasteful of
+		computational resources. To address this limitation, this study proposes
+		an efficient inference acceleration framework for fire and smoke
+		surveillance systems that combines a motion-aware skip module with an
+		Eager mode for recall recovery. The skip module leverages motion
+		detection to selectively bypass unnecessary DL inference on
+		non-informative frames, while the Eager mode periodically forces
+		inference updates to mitigate missed detections from slow-developing or
+		nearly stationary smoke events. Evaluation on a large-scale dataset
+		comprising 150 indoor videos demonstrates that the proposed framework
+		achieves nearly 30\% higher throughput than the baseline performing
+		per-frame inference, with only a 0.05\% reduction in recall. In
+		contrast, using the skip module alone results in a 1.23\% recall drop,
+		highlighting the effectiveness of the Eager mode in recovering detection
+		performance while preserving most of the throughput gain. These results
+		demonstrate that the proposed framework provides an effective
+		plug-and-play inference acceleration strategy for real-time indoor fire
+		and smoke surveillance systems.
+	

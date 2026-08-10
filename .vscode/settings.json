@@ -45,7 +45,7 @@
         // "**/pyproject.toml": true,
         "**/.yamlfmt": true,
         "**/.markdownlint.yaml": true,
-        "paper": true 
+        // "paper": true 
     },
     "notebook.formatOnSave.enabled": true,
     // Disable the Python language server; using ty (Astral.sh) for faster linting and formatting
@@ -55,4 +55,5 @@
     },
     "editor.fontSize": 14,
     "explorerExclude.backup": {},
+    "explorerExcludeManager.backup": {},
 }
