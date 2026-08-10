@@ -2,6 +2,7 @@
 %% Migrated manuscript: A.tex content merged into the ICT Express / Elsevier
 %% cas-dc double-column template (B.tex).
 %%
+\pdfminorversion=7
 \documentclass[a4paper,fleqn]{cas-dc}
 
 \usepackage[numbers]{natbib}
@@ -29,6 +30,7 @@
 \usepackage{algorithm}
 \usepackage{algorithmicx}
 \usepackage{algpseudocode}
+\usepackage{needspace}
 
 \algdef{SE}[SUBALG]{Indent}{EndIndent}{}{\algorithmicend\ }
 \algtext*{Indent}
@@ -51,28 +53,77 @@
 	\def\floatpagepagefraction{1}
 	\def\textpagefraction{.001}
 	
-	\shorttitle{Motion-Heuristic Skip Module for Real-Time Fire Surveillance}
-	\shortauthors{Hoang Van-Ha et~al.}
-	
+%	\shorttitle{Motion-Heuristic Skip Module for Real-Time Fire Surveillance}
+%	\shortauthors{Hoang Van-Ha et~al.}
+%	
+%	\title[mode=title]{Efficient Real-Time Fire Surveillance: A Lightweight
+%		Motion-Heuristic Skip Module for Accelerated Inference in Indoor
+%		Environments}
+%	
+%	\author[1]{Hoang Van-Ha}
+%	\cormark[1]
+%	\ead{}
+%	
+%	\author[1]{Jong Weon Lee}
+%	
+%	\author[1]{Park Chun-Su}
+%	\cormark[1]
+%	
+%	\affiliation[1]{organization={Sejong University},
+%		addressline={},
+%		city={Seoul},
+%		country={Republic of Korea}}
+%	
+%	\cortext[cor1]{Corresponding author}
+
 	\title[mode=title]{Efficient Real-Time Fire Surveillance: A Lightweight
 		Motion-Heuristic Skip Module for Accelerated Inference in Indoor
 		Environments}
+	\tnotemark[1]
+	\tnotetext[1]{This work was supported by the Technology Development
+		Program through the Korean Ministry of Small and Medium Enterprises
+		(SMEs) and Startups under Grant S3147433. This research was supported
+		by the MSIT (Ministry of Science and ICT), Korea, under the ITRC
+		(Information Technology Research Center) support program
+		(IITP-2022-RS-2022-00156354) supervised by the IITP (Institute for
+		Information \& Communications Technology Planning \& Evaluation).}
+	\shorttitle{Motion-Heuristic Skip Module for Real-Time Fire Surveillance}
+	\shortauthors{Hoang Van-Ha et~al.}
 	
-	\author[1]{Hoang Van-Ha}
+	\author[1]{Van-Ha Hoang}[orcid=0000-0001-6248-4539]
+	\ead{hahv@sju.ac.kr}
+
+	\credit{Writing – original draft, Data curation, Methodology, Investigation, Formal
+		analysis, Visualization, Conceptualization}
+	
+	\author[2]{Jong Weon Lee}
+	\ead{jwlee@sejong.ac.kr}
+	\credit{Writing -- review \& editing, Supervision, Funding acquisition}
+	
+	\author[3]{Chun-Su Park}[orcid=0000-0003-4250-2597]
 	\cormark[1]
-	\ead{}
+	\ead{cspk@skku.edu}
+	\credit{Writing -- review \& editing, Methodology, Formal
+		analysis, Supervision, Project administration, Funding acquisition}
+		
 	
-	\author[1]{Jong Weon Lee}
-	
-	\author[1]{Park Chun-Su}
-	\cormark[1]
-	
-	\affiliation[1]{organization={Sejong University},
-		addressline={},
+	\affiliation[1]{organization={Department of Software, Sejong University},
 		city={Seoul},
-		country={Republic of Korea}}
+		postcode={05006},
+		country={South Korea}}
 	
-	\cortext[cor1]{Corresponding author}
+	\affiliation[2]{organization={Department of Software, Sejong University},
+		city={Seoul},
+		postcode={05006},
+		country={South Korea}}
+	
+	\affiliation[3]{organization={Department of Computer Education, Sungkyunkwan University},
+		city={Seoul},
+		postcode={03063},
+		country={South Korea}}
+	
+	\cortext[cor1]{Corresponding author: Chun-Su Park (e-mail: cspk@skku.edu).}
+	
 	
 	\begin{abstract}
 		Conventional deep learning (DL)-based fire and smoke detection systems
@@ -1560,6 +1611,11 @@
 	framework, represent promising directions for further improving system
 	efficiency and detection accuracy.
 	
+	\printcredits
+	
+	\section{Declaration of competing interest}
+	 The authors declare that there is no conflict of interest in this paper.
+	
 	%% Loading bibliography style file
 	\bibliographystyle{cas-model2-names}
 	
@@ -1572,6 +1628,7 @@
 % Converted from 7bio.tex (IEEEbiography) to match the style used in the
 % original B-2.tex template.
 % ---------------------------------------------------------------------
+\needspace{6\baselineskip}
 
 \bio{figs/authors/a1}
 Van-Ha Hoang received an engineering degree in Software and an M.S.
