@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.7.18)  10 AUG 2026 16:35
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.7.18)  10 AUG 2026 17:23
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1413,19 +1413,19 @@ d real
  []
 
 )
-<figs/authors/a1.jpg, id=743, 1189.44376pt x 1585.925pt>
-File: figs/authors/a1.jpg Graphic file (type jpg)
-<use figs/authors/a1.jpg>
-Package pdftex.def Info: figs/authors/a1.jpg  used on input line 1633.
-(pdftex.def)             Requested size: 72.55452pt x 96.72433pt.
+<figs/authors/a1.png, id=743, 1798.72pt x 2398.9625pt>
+File: figs/authors/a1.png Graphic file (type png)
+<use figs/authors/a1.png>
+Package pdftex.def Info: figs/authors/a1.png  used on input line 1633.
+(pdftex.def)             Requested size: 72.55452pt x 96.74747pt.
 
 ... wr-fig: [BL: 10.0pt] ...
-... wr-fig: [LINE-FP: 10.17243347167969] ...
+... wr-fig: [LINE-FP: 10.17474670410156] ...
 ... wr-fig: [LINE-INT: 10] ...
-File: figs/authors/a1.jpg Graphic file (type jpg)
-<use figs/authors/a1.jpg>
-Package pdftex.def Info: figs/authors/a1.jpg  used on input line 1633.
-(pdftex.def)             Requested size: 72.55452pt x 96.72433pt.
+File: figs/authors/a1.png Graphic file (type png)
+<use figs/authors/a1.png>
+Package pdftex.def Info: figs/authors/a1.png  used on input line 1633.
+(pdftex.def)             Requested size: 72.55452pt x 96.74747pt.
 
 Underfull \hbox (badness 1226) in paragraph at lines 1633--1641
 \T1/stix/m/n/8 In-sti-tute of In-for-mat-ics (NII) in Tokyo, Japan.
@@ -1455,16 +1455,16 @@ File: figs/authors/a3.png Graphic file (type png)
 <use figs/authors/a3.png>
 Package pdftex.def Info: figs/authors/a3.png  used on input line 1652.
 (pdftex.def)             Requested size: 72.55452pt x 99.02914pt.
-[16 <./figs/authors/a1.jpg> <./figs/authors/a2.jpg> <./figs/authors/a3.png>]
+[16 <./figs/authors/a1.png> <./figs/authors/a2.jpg> <./figs/authors/a3.png>]
 (./main.aux)
 Package rerunfilecheck Info: File `main.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
  ) 
 Here is how much of TeX's memory you used:
- 23037 strings out of 478023
- 406628 string characters out of 5835647
+ 23035 strings out of 478023
+ 406578 string characters out of 5835647
  950067 words of memory out of 5000000
- 40982 multiletter control sequences out of 15000+600000
+ 40980 multiletter control sequences out of 15000+600000
  618879 words of font info for 223 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  87i,14n,131p,1028b,1449s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -1512,9 +1512,9 @@ ix/stix-mathrm-bold.pfb><d:/Program Files/texlive/2022/texmf-dist/fonts/type1/p
 ublic/stix/stix-mathrm.pfb><d:/Program Files/texlive/2022/texmf-dist/fonts/type
 1/public/stix/stix-mathscr.pfb><d:/Program Files/texlive/2022/texmf-dist/fonts/
 type1/public/stix/stix-mathsf.pfb>
-Output written on main.pdf (16 pages, 11660138 bytes).
+Output written on main.pdf (16 pages, 15931721 bytes).
 PDF statistics:
- 893 PDF objects out of 1000 (max. 8388607)
+ 894 PDF objects out of 1000 (max. 8388607)
  618 compressed objects within 7 object streams
  124 named destinations out of 1000 (max. 500000)
  66 words of extra memory for PDF output out of 10000 (max. 10000000)
