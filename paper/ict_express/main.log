@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.7.18)  10 AUG 2026 19:13
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.7.18)  10 AUG 2026 19:20
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1392,15 +1392,6 @@ n/10 To
 
 [14 <./3.fig/fig_qualitative_success.pdf> <./3.fig/fig_qualitative_failure.pdf>
  <./3.fig/eager_timeline_success.png> <./3.fig/eager_timeline_failure.png>]
-Underfull \hbox (badness 1009) in paragraph at lines 1623--1637
-\T1/stix/m/n/10 IITP(Institute for In-for-ma-tion & Com-mu-ni-ca-tions Tech-
- []
-
-
-Underfull \hbox (badness 1681) in paragraph at lines 1623--1637
-\T1/stix/m/n/10 ported by the AN-CHOR through the Seoul AN-CHOR
- []
-
 (./main.bbl
 Underfull \hbox (badness 10000) in paragraph at lines 29--36
 []\T1/stix/m/n/8 , .  Paddleclas/docs/en/models/pp-hgnetv2_en.md at
@@ -1422,7 +1413,7 @@ d real
 <figs/authors/a1.png, id=744, 1798.72pt x 2398.9625pt>
 File: figs/authors/a1.png Graphic file (type png)
 <use figs/authors/a1.png>
-Package pdftex.def Info: figs/authors/a1.png  used on input line 1655.
+Package pdftex.def Info: figs/authors/a1.png  used on input line 1669.
 (pdftex.def)             Requested size: 72.55452pt x 96.74747pt.
 
 ... wr-fig: [BL: 10.0pt] ...
@@ -1430,30 +1421,30 @@ Package pdftex.def Info: figs/authors/a1.png  used on input line 1655.
 ... wr-fig: [LINE-INT: 10] ...
 File: figs/authors/a1.png Graphic file (type png)
 <use figs/authors/a1.png>
-Package pdftex.def Info: figs/authors/a1.png  used on input line 1655.
+Package pdftex.def Info: figs/authors/a1.png  used on input line 1669.
 (pdftex.def)             Requested size: 72.55452pt x 96.74747pt.
 
-Underfull \hbox (badness 1226) in paragraph at lines 1655--1663
+Underfull \hbox (badness 1226) in paragraph at lines 1669--1677
 \T1/stix/m/n/8 In-sti-tute of In-for-mat-ics (NII) in Tokyo, Japan.
  []
 
 <figs/authors/a2.jpg, id=745, 283.0575pt x 376.40625pt>
 File: figs/authors/a2.jpg Graphic file (type jpg)
 <use figs/authors/a2.jpg>
-Package pdftex.def Info: figs/authors/a2.jpg  used on input line 1665.
+Package pdftex.def Info: figs/authors/a2.jpg  used on input line 1679.
 (pdftex.def)             Requested size: 72.55452pt x 96.47913pt.
 ... wr-fig: [BL: 10.0pt] ...
 ... wr-fig: [LINE-FP: 10.14791259765625] ...
 ... wr-fig: [LINE-INT: 10] ...
 File: figs/authors/a2.jpg Graphic file (type jpg)
 <use figs/authors/a2.jpg>
-Package pdftex.def Info: figs/authors/a2.jpg  used on input line 1665.
+Package pdftex.def Info: figs/authors/a2.jpg  used on input line 1679.
 (pdftex.def)             Requested size: 72.55452pt x 96.47913pt.
 [16 <./figs/authors/a1.png> <./figs/authors/a2.jpg>]
 <figs/authors/a3.png, id=757, 275.52937pt x 353.06906pt>
 File: figs/authors/a3.png Graphic file (type png)
 <use figs/authors/a3.png>
-Package pdftex.def Info: figs/authors/a3.png  used on input line 1676.
+Package pdftex.def Info: figs/authors/a3.png  used on input line 1690.
 (pdftex.def)             Requested size: 72.55452pt x 92.97023pt.
 
 ... wr-fig: [BL: 10.0pt] ...
@@ -1461,19 +1452,19 @@ Package pdftex.def Info: figs/authors/a3.png  used on input line 1676.
 ... wr-fig: [LINE-INT: 10] ...
 File: figs/authors/a3.png Graphic file (type png)
 <use figs/authors/a3.png>
-Package pdftex.def Info: figs/authors/a3.png  used on input line 1676.
+Package pdftex.def Info: figs/authors/a3.png  used on input line 1690.
 (pdftex.def)             Requested size: 72.55452pt x 92.97023pt.
 <figs/authors/a4.png, id=758, 317.68687pt x 433.62pt>
 File: figs/authors/a4.png Graphic file (type png)
 <use figs/authors/a4.png>
-Package pdftex.def Info: figs/authors/a4.png  used on input line 1681.
+Package pdftex.def Info: figs/authors/a4.png  used on input line 1695.
 (pdftex.def)             Requested size: 72.55452pt x 99.02914pt.
 ... wr-fig: [BL: 10.0pt] ...
 ... wr-fig: [LINE-FP: 10.40291442871094] ...
 ... wr-fig: [LINE-INT: 10] ...
 File: figs/authors/a4.png Graphic file (type png)
 <use figs/authors/a4.png>
-Package pdftex.def Info: figs/authors/a4.png  used on input line 1681.
+Package pdftex.def Info: figs/authors/a4.png  used on input line 1695.
 (pdftex.def)             Requested size: 72.55452pt x 99.02914pt.
 [17
 
@@ -1533,7 +1524,7 @@ ix/stix-mathrm-bold.pfb><d:/Program Files/texlive/2022/texmf-dist/fonts/type1/p
 ublic/stix/stix-mathrm.pfb><d:/Program Files/texlive/2022/texmf-dist/fonts/type
 1/public/stix/stix-mathscr.pfb><d:/Program Files/texlive/2022/texmf-dist/fonts/
 type1/public/stix/stix-mathsf.pfb>
-Output written on main.pdf (17 pages, 16191233 bytes).
+Output written on main.pdf (17 pages, 16191230 bytes).
 PDF statistics:
  903 PDF objects out of 1000 (max. 8388607)
  624 compressed objects within 7 object streams
