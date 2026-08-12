@@ -1,379 +1,220 @@
-\begin{thebibliography}{42}
-\expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
-\providecommand{\url}[1]{\texttt{#1}}
-\providecommand{\href}[2]{#2}
-\providecommand{\path}[1]{#1}
-\providecommand{\DOIprefix}{doi:}
-\providecommand{\ArXivprefix}{arXiv:}
-\providecommand{\URLprefix}{URL: }
-\providecommand{\Pubmedprefix}{pmid:}
-\providecommand{\doi}[1]{\href{http://dx.doi.org/#1}{\path{#1}}}
-\providecommand{\Pubmed}[1]{\href{pmid:#1}{\path{#1}}}
-\providecommand{\bibinfo}[2]{#2}
-\ifx\xfnm\relax \def\xfnm[#1]{\unskip,\space#1}\fi
-%Type = Misc
-\bibitem[{AIH()}]{AIHub87:online}
-, .
-\newblock \bibinfo{title}{Ai-hub}.
-\newblock \URLprefix
-  \url{https://aihub.or.kr/aihubdata/data/view.do?dataSetSn=71751}.
-  \bibinfo{note}{[Online; accessed 2025-12-10]}.
-%Type = Misc
-\bibitem[{Fir()}]{Firesens4:online}
-, .
-\newblock \bibinfo{title}{Firesense}.
-\newblock \URLprefix \url{https://www.firesense.eu/}. \bibinfo{note}{[Online;
-  accessed 2025-12-10]}.
-%Type = Misc
-\bibitem[{hgn()}]{hgnetv2PaddleCl7:online}
-, .
-\newblock \bibinfo{title}{Paddleclas/docs/en/models/pp-hgnetv2\_en.md at
-  f1233c18455b8acde4fc42ab0bea575fa06daa8e · paddlepaddle/paddleclas}.
-\newblock \URLprefix
-  \url{https://github.com/PaddlePaddle/PaddleClas/blob/f1233c18455b8acde4fc42ab0bea575fa06daa8e/docs/en/models/PP-HGNetV2_en.md?plain=1#L33}.
-  \bibinfo{note}{[Online; accessed 2026-04-07]}.
-%Type = Misc
-\bibitem[{sou(2025)}]{southkoreafire:online}
-, \bibinfo{year}{2025}.
-\newblock \bibinfo{title}{South korea wildfires become biggest on record as
-  disaster chief points to ‘harsh reality’ of climate crisis | south korea
-  | the guardian}.
-\newblock \URLprefix
-  \url{https://www.theguardian.com/world/2025/mar/27/south-korea-fires-death-toll-rises-worst-in-history}.
-  \bibinfo{note}{[Online; accessed 2025-10-12]}.
-%Type = Misc
-\bibitem[{hgn(2025)}]{hgnetv2timm:online}
-, \bibinfo{year}{2025}.
-\newblock \bibinfo{title}{timm/hgnetv2\_b5.ssld\_stage2\_ft\_in1k · hugging
-  face}.
-\newblock \URLprefix
-  \url{https://huggingface.co/timm/hgnetv2_b5.ssld_stage2_ft_in1k}.
-  \bibinfo{note}{[Online; accessed 2026-04-07]}.
-%Type = Article
-\bibitem[{Alabdulmohsin et~al.(2022)Alabdulmohsin, Neyshabur and
-  Zhai}]{alabdulmohsin2022revisiting}
-\bibinfo{author}{Alabdulmohsin, I.M.}, \bibinfo{author}{Neyshabur, B.},
-  \bibinfo{author}{Zhai, X.}, \bibinfo{year}{2022}.
-\newblock \bibinfo{title}{Revisiting neural scaling laws in language and
-  vision}.
-\newblock \bibinfo{journal}{Advances in Neural Information Processing Systems}
-  \bibinfo{volume}{35}, \bibinfo{pages}{22300--22312}.
-%Type = Article
-\bibitem[{Ali and Ghodrat(2025)}]{ali2025toward}
-\bibinfo{author}{Ali, M.M.}, \bibinfo{author}{Ghodrat, M.},
-  \bibinfo{year}{2025}.
-\newblock \bibinfo{title}{Toward reliable fire detection in indoor cctv
-  footage: Reducing false alarms from benign flames using 3d attention cnns}.
-\newblock \bibinfo{journal}{IEEE Access} .
-%Type = Article
-\bibitem[{Bahri et~al.(2024)Bahri, Dyer, Kaplan, Lee and
-  Sharma}]{bahri2024explaining}
-\bibinfo{author}{Bahri, Y.}, \bibinfo{author}{Dyer, E.},
-  \bibinfo{author}{Kaplan, J.}, \bibinfo{author}{Lee, J.},
-  \bibinfo{author}{Sharma, U.}, \bibinfo{year}{2024}.
-\newblock \bibinfo{title}{Explaining neural scaling laws}.
-\newblock \bibinfo{journal}{Proceedings of the National Academy of Sciences}
-  \bibinfo{volume}{121}, \bibinfo{pages}{e2311878121}.
-%Type = Article
-\bibitem[{Cao et~al.(2019)Cao, Yang, Tang and Lu}]{cao2019attention}
-\bibinfo{author}{Cao, Y.}, \bibinfo{author}{Yang, F.}, \bibinfo{author}{Tang,
-  Q.}, \bibinfo{author}{Lu, X.}, \bibinfo{year}{2019}.
-\newblock \bibinfo{title}{An attention enhanced bidirectional lstm for early
-  forest fire smoke recognition}.
-\newblock \bibinfo{journal}{IEEE Access} \bibinfo{volume}{7},
-  \bibinfo{pages}{154732--154742}.
-%Type = Inproceedings
-\bibitem[{Cazzolato et~al.(2017)Cazzolato, Avalhais, Chino, Ramos, de~Souza,
-  Rodrigues-Jr and Traina}]{cazzolato2017fismo}
-\bibinfo{author}{Cazzolato, M.T.}, \bibinfo{author}{Avalhais, L.},
-  \bibinfo{author}{Chino, D.}, \bibinfo{author}{Ramos, J.S.},
-  \bibinfo{author}{de~Souza, J.A.}, \bibinfo{author}{Rodrigues-Jr, J.F.},
-  \bibinfo{author}{Traina, A.}, \bibinfo{year}{2017}.
-\newblock \bibinfo{title}{Fismo: A compilation of datasets from emergency
-  situations for fire and smoke analysis}, in: \bibinfo{booktitle}{Brazilian
-  symposium on databases-SBBD}, \bibinfo{organization}{SBC Uberl{\^a}ndia,
-  Brazil}. pp. \bibinfo{pages}{213--223}.
-%Type = Misc
-\bibitem[{Cetin(2015)}]{VisiFireBilkent:online}
-\bibinfo{author}{Cetin, E.}, \bibinfo{year}{2015}.
-\newblock \bibinfo{title}{Computer vision based fire detection software}.
-\newblock \URLprefix \url{http://signal.ee.bilkent.edu.tr/VisiFire/}.
-  \bibinfo{note}{[Online; accessed 2025-12-10]}.
-%Type = Article
-\bibitem[{Cheng et~al.(2024)Cheng, Chen, Wang, Li, Xian and
-  Yu}]{cheng2024visual}
-\bibinfo{author}{Cheng, G.}, \bibinfo{author}{Chen, X.}, \bibinfo{author}{Wang,
-  C.}, \bibinfo{author}{Li, X.}, \bibinfo{author}{Xian, B.},
-  \bibinfo{author}{Yu, H.}, \bibinfo{year}{2024}.
-\newblock \bibinfo{title}{Visual fire detection using deep learning: A survey}.
-\newblock \bibinfo{journal}{Neurocomputing} \bibinfo{volume}{596},
-  \bibinfo{pages}{127975}.
-%Type = Article
-\bibitem[{Cui et~al.(2021)Cui, Guo, Du, He, Li, Wu, Liu, Wen, Huang, Hu
-  et~al.}]{cui2021beyond}
-\bibinfo{author}{Cui, C.}, \bibinfo{author}{Guo, R.}, \bibinfo{author}{Du, Y.},
-  \bibinfo{author}{He, D.}, \bibinfo{author}{Li, F.}, \bibinfo{author}{Wu, Z.},
-  \bibinfo{author}{Liu, Q.}, \bibinfo{author}{Wen, S.}, \bibinfo{author}{Huang,
-  J.}, \bibinfo{author}{Hu, X.}, et~al., \bibinfo{year}{2021}.
-\newblock \bibinfo{title}{Beyond self-supervision: A simple yet effective
-  network distillation alternative to improve backbones}.
-\newblock \bibinfo{journal}{arXiv preprint arXiv:2103.05959} .
-%Type = Article
-\bibitem[{Deniz et~al.(2024)Deniz, Ros, Ortigosa and
-  Barranco}]{deniz2024optimized}
-\bibinfo{author}{Deniz, D.}, \bibinfo{author}{Ros, E.},
-  \bibinfo{author}{Ortigosa, E.M.}, \bibinfo{author}{Barranco, F.},
-  \bibinfo{year}{2024}.
-\newblock \bibinfo{title}{Optimized edge-cloud system for activity monitoring
-  using knowledge distillation}.
-\newblock \bibinfo{journal}{Electronics} \bibinfo{volume}{13},
-  \bibinfo{pages}{4786}.
-%Type = Article
-\bibitem[{Foggia et~al.(2015)Foggia, Saggese and Vento}]{foggia2015real}
-\bibinfo{author}{Foggia, P.}, \bibinfo{author}{Saggese, A.},
-  \bibinfo{author}{Vento, M.}, \bibinfo{year}{2015}.
-\newblock \bibinfo{title}{Real-time fire detection for video-surveillance
-  applications using a combination of experts based on color, shape, and
-  motion}.
-\newblock \bibinfo{journal}{IEEE TRANSACTIONS on circuits and systems for video
-  technology} \bibinfo{volume}{25}, \bibinfo{pages}{1545--1556}.
-%Type = Article
-\bibitem[{Garcia-Garcia et~al.(2020)Garcia-Garcia, Bouwmans and
-  Silva}]{garcia2020background}
-\bibinfo{author}{Garcia-Garcia, B.}, \bibinfo{author}{Bouwmans, T.},
-  \bibinfo{author}{Silva, A.J.R.}, \bibinfo{year}{2020}.
-\newblock \bibinfo{title}{Background subtraction in real applications:
-  Challenges, current models and future directions}.
-\newblock \bibinfo{journal}{Computer Science Review} \bibinfo{volume}{35},
-  \bibinfo{pages}{100204}.
-%Type = Article
-\bibitem[{Geng et~al.(2024)Geng, Su, Cao, Li and Liu}]{geng2024yolofm}
-\bibinfo{author}{Geng, X.}, \bibinfo{author}{Su, Y.}, \bibinfo{author}{Cao,
-  X.}, \bibinfo{author}{Li, H.}, \bibinfo{author}{Liu, L.},
-  \bibinfo{year}{2024}.
-\newblock \bibinfo{title}{Yolofm: An improved fire and smoke object detection
-  algorithm based on yolov5n}.
-\newblock \bibinfo{journal}{Scientific Reports} \bibinfo{volume}{14},
-  \bibinfo{pages}{4543}.
-%Type = Inproceedings
-\bibitem[{Ghodrati et~al.(2021)Ghodrati, Bejnordi and
-  Habibian}]{ghodrati2021frameexit}
-\bibinfo{author}{Ghodrati, A.}, \bibinfo{author}{Bejnordi, B.E.},
-  \bibinfo{author}{Habibian, A.}, \bibinfo{year}{2021}.
-\newblock \bibinfo{title}{Frameexit: Conditional early exiting for efficient
-  video recognition}, in: \bibinfo{booktitle}{Proceedings of the IEEE/CVF
-  Conference on Computer Vision and Pattern Recognition}, pp.
-  \bibinfo{pages}{15608--15618}.
-%Type = Article
-\bibitem[{Gragnaniello et~al.(2024)Gragnaniello, Greco, Sansone and
-  Vento}]{gragnaniello2024fire}
-\bibinfo{author}{Gragnaniello, D.}, \bibinfo{author}{Greco, A.},
-  \bibinfo{author}{Sansone, C.}, \bibinfo{author}{Vento, B.},
-  \bibinfo{year}{2024}.
-\newblock \bibinfo{title}{Fire and smoke detection from videos: A literature
-  review under a novel taxonomy}.
-\newblock \bibinfo{journal}{Expert Systems with Applications}
-  \bibinfo{volume}{255}, \bibinfo{pages}{124783}.
-%Type = Article
-\bibitem[{Gragnaniello et~al.(2025)Gragnaniello, Greco, Sansone and
-  Vento}]{gragnaniello2025flame}
-\bibinfo{author}{Gragnaniello, D.}, \bibinfo{author}{Greco, A.},
-  \bibinfo{author}{Sansone, C.}, \bibinfo{author}{Vento, B.},
-  \bibinfo{year}{2025}.
-\newblock \bibinfo{title}{Flame: fire detection in videos combining a deep
-  neural network with a model-based motion analysis}.
-\newblock \bibinfo{journal}{Neural Computing and Applications}
-  \bibinfo{volume}{37}, \bibinfo{pages}{6181--6197}.
-%Type = Article
-\bibitem[{Hestness et~al.(2017)Hestness, Narang, Ardalani, Diamos, Jun,
-  Kianinejad, Patwary, Yang and Zhou}]{hestness2017deep}
-\bibinfo{author}{Hestness, J.}, \bibinfo{author}{Narang, S.},
-  \bibinfo{author}{Ardalani, N.}, \bibinfo{author}{Diamos, G.},
-  \bibinfo{author}{Jun, H.}, \bibinfo{author}{Kianinejad, H.},
-  \bibinfo{author}{Patwary, M.M.A.}, \bibinfo{author}{Yang, Y.},
-  \bibinfo{author}{Zhou, Y.}, \bibinfo{year}{2017}.
-\newblock \bibinfo{title}{Deep learning scaling is predictable, empirically}.
-\newblock \bibinfo{journal}{arXiv preprint arXiv:1712.00409} .
-%Type = Article
-\bibitem[{Huang et~al.(2022)Huang, Liu, Wang, Yuan and Chen}]{huang2022fire}
-\bibinfo{author}{Huang, L.}, \bibinfo{author}{Liu, G.}, \bibinfo{author}{Wang,
-  Y.}, \bibinfo{author}{Yuan, H.}, \bibinfo{author}{Chen, T.},
-  \bibinfo{year}{2022}.
-\newblock \bibinfo{title}{Fire detection in video surveillances using
-  convolutional neural networks and wavelet transform}.
-\newblock \bibinfo{journal}{Engineering Applications of Artificial
-  Intelligence} \bibinfo{volume}{110}, \bibinfo{pages}{104737}.
-%Type = Article
-\bibitem[{Jadon et~al.(2019)Jadon, Omama, Varshney, Ansari and
-  Sharma}]{jadon2019firenet}
-\bibinfo{author}{Jadon, A.}, \bibinfo{author}{Omama, M.},
-  \bibinfo{author}{Varshney, A.}, \bibinfo{author}{Ansari, M.S.},
-  \bibinfo{author}{Sharma, R.}, \bibinfo{year}{2019}.
-\newblock \bibinfo{title}{Firenet: a specialized lightweight fire \& smoke
-  detection model for real-time iot applications}.
-\newblock \bibinfo{journal}{arXiv preprint arXiv:1905.11922} .
-%Type = Misc
-\bibitem[{Jocher(2020)}]{JocherYOLOv5byUltralytics2020}
-\bibinfo{author}{Jocher, G.}, \bibinfo{year}{2020}.
-\newblock \bibinfo{title}{{YOLOv5 by Ultralytics}}.
-\newblock \URLprefix \url{https://github.com/ultralytics/yolov5},
-  \DOIprefix\doi{10.5281/zenodo.3908559}.
-%Type = Article
-\bibitem[{Khan et~al.(2025a)Khan, Bajwa, Raza and Anwar}]{khan2025beyond}
-\bibinfo{author}{Khan, R.A.}, \bibinfo{author}{Bajwa, U.I.},
-  \bibinfo{author}{Raza, R.H.}, \bibinfo{author}{Anwar, M.W.},
-  \bibinfo{year}{2025}a.
-\newblock \bibinfo{title}{Beyond boundaries: Advancements in fire and smoke
-  detection for indoor and outdoor surveillance feeds}.
-\newblock \bibinfo{journal}{Engineering Applications of Artificial
-  Intelligence} \bibinfo{volume}{142}, \bibinfo{pages}{109855}.
-%Type = Article
-\bibitem[{Khan et~al.(2025b)Khan, Ullah, Yar, Ullah, Khan, Kim and
-  Baik}]{khan2025optimized}
-\bibinfo{author}{Khan, Z.A.}, \bibinfo{author}{Ullah, F.U.M.},
-  \bibinfo{author}{Yar, H.}, \bibinfo{author}{Ullah, W.},
-  \bibinfo{author}{Khan, N.}, \bibinfo{author}{Kim, M.J.},
-  \bibinfo{author}{Baik, S.W.}, \bibinfo{year}{2025}b.
-\newblock \bibinfo{title}{Optimized cross-module attention network and
-  medium-scale dataset for effective fire detection}.
-\newblock \bibinfo{journal}{Pattern Recognition} \bibinfo{volume}{161},
-  \bibinfo{pages}{111273}.
-%Type = Article
-\bibitem[{Kingma and Ba(2014)}]{kingma2014adam}
-\bibinfo{author}{Kingma, D.P.}, \bibinfo{author}{Ba, J.}, \bibinfo{year}{2014}.
-\newblock \bibinfo{title}{Adam: A method for stochastic optimization}.
-\newblock \bibinfo{journal}{arXiv preprint arXiv:1412.6980} .
-%Type = Article
-\bibitem[{Ko et~al.(2011)Ko, Ham and Nam}]{KMUFireSmokeDataset}
-\bibinfo{author}{Ko, B.C.}, \bibinfo{author}{Ham, S.J.}, \bibinfo{author}{Nam,
-  J.Y.}, \bibinfo{year}{2011}.
-\newblock \bibinfo{title}{Modeling and formalization of fuzzy finite automata
-  for detection of irregular fire flames}.
-\newblock \bibinfo{journal}{IEEE Transactions on Circuits and Systems for Video
-  Technology} \bibinfo{volume}{21}, \bibinfo{pages}{1903--1912}.
-%Type = Article
-\bibitem[{Lin et~al.(2017)Lin, Zhang, Zhang, Jia, Xu and Wang}]{lin2017smoke}
-\bibinfo{author}{Lin, G.}, \bibinfo{author}{Zhang, Y.}, \bibinfo{author}{Zhang,
-  Q.}, \bibinfo{author}{Jia, Y.}, \bibinfo{author}{Xu, G.},
-  \bibinfo{author}{Wang, J.}, \bibinfo{year}{2017}.
-\newblock \bibinfo{title}{Smoke detection in video sequences based on dynamic
-  texture using volume local binary patterns.}
-\newblock \bibinfo{journal}{KSII Trans. Internet Inf. Syst.}
-  \bibinfo{volume}{11}, \bibinfo{pages}{5522--5536}.
-%Type = Article
-\bibitem[{Marroquin et~al.(2019)Marroquin, Dubois and
-  Nicolle}]{marroquin2019wisenet}
-\bibinfo{author}{Marroquin, R.}, \bibinfo{author}{Dubois, J.},
-  \bibinfo{author}{Nicolle, C.}, \bibinfo{year}{2019}.
-\newblock \bibinfo{title}{Wisenet: An indoor multi-camera multi-space dataset
-  with contextual information and annotations for people detection and
-  tracking}.
-\newblock \bibinfo{journal}{Data in brief} \bibinfo{volume}{27},
-  \bibinfo{pages}{104654}.
-%Type = Inproceedings
-\bibitem[{Mukhopadhyay et~al.(2019)Mukhopadhyay, Iyer, Kadam and
-  Koli}]{mukhopadhyay2019fpga}
-\bibinfo{author}{Mukhopadhyay, D.}, \bibinfo{author}{Iyer, R.},
-  \bibinfo{author}{Kadam, S.}, \bibinfo{author}{Koli, R.},
-  \bibinfo{year}{2019}.
-\newblock \bibinfo{title}{Fpga deployable fire detection model for real-time
-  video surveillance systems using convolutional neural networks}, in:
-  \bibinfo{booktitle}{2019 Global Conference for Advancement in Technology
-  (GCAT)}, \bibinfo{organization}{IEEE}. pp. \bibinfo{pages}{1--7}.
-%Type = Misc
-\bibitem[{(NFPA)(1)}]{californiafire:online}
-\bibinfo{author}{(NFPA), N.F.P.A.}, \bibinfo{year}{1}.
-\newblock \bibinfo{title}{Nfpa report - largest fire losses in the united
-  states}.
-\newblock \URLprefix
-  \url{https://www.nfpa.org/education-and-research/research/nfpa-research/fire-statistical-reports/large-loss-fires-in-the-united-states/largest-fire-losses-in-the-united-states}.
-  \bibinfo{note}{[Online; accessed 2025-10-12]}.
-%Type = Article
-\bibitem[{{\"O}nal and Dand{\i}l(2024)}]{onal2024video}
-\bibinfo{author}{{\"O}nal, O.}, \bibinfo{author}{Dand{\i}l, E.},
-  \bibinfo{year}{2024}.
-\newblock \bibinfo{title}{Video dataset for the detection of safe and unsafe
-  behaviours in workplaces}.
-\newblock \bibinfo{journal}{Data in Brief} \bibinfo{volume}{56},
-  \bibinfo{pages}{110791}.
-%Type = Article
-\bibitem[{Rohrbach et~al.(2016)Rohrbach, Rohrbach, Regneri, Amin, Andriluka,
-  Pinkal and Schiele}]{rohrbach2016recognizing}
-\bibinfo{author}{Rohrbach, M.}, \bibinfo{author}{Rohrbach, A.},
-  \bibinfo{author}{Regneri, M.}, \bibinfo{author}{Amin, S.},
-  \bibinfo{author}{Andriluka, M.}, \bibinfo{author}{Pinkal, M.},
-  \bibinfo{author}{Schiele, B.}, \bibinfo{year}{2016}.
-\newblock \bibinfo{title}{Recognizing fine-grained and composite activities
-  using hand-centric features and script data}.
-\newblock \bibinfo{journal}{International Journal of Computer Vision}
-  \bibinfo{volume}{119}, \bibinfo{pages}{346--373}.
-%Type = Article
-\bibitem[{Sobral and Vacavant(2014)}]{sobral2014comprehensive}
-\bibinfo{author}{Sobral, A.}, \bibinfo{author}{Vacavant, A.},
-  \bibinfo{year}{2014}.
-\newblock \bibinfo{title}{A comprehensive review of background subtraction
-  algorithms evaluated with synthetic and real videos}.
-\newblock \bibinfo{journal}{Computer Vision and Image Understanding}
-  \bibinfo{volume}{122}, \bibinfo{pages}{4--21}.
-%Type = Inproceedings
-\bibitem[{Steffens et~al.(2015)Steffens, Rodrigues and
-  da~Costa~Botelho}]{steffens2015unconstrained}
-\bibinfo{author}{Steffens, C.R.}, \bibinfo{author}{Rodrigues, R.N.},
-  \bibinfo{author}{da~Costa~Botelho, S.S.}, \bibinfo{year}{2015}.
-\newblock \bibinfo{title}{An unconstrained dataset for non-stationary video
-  based fire detection}, in: \bibinfo{booktitle}{2015 12th Latin American
-  robotics symposium and 2015 3rd Brazilian symposium on robotics (LARS-SBR)},
-  \bibinfo{organization}{IEEE}. pp. \bibinfo{pages}{25--30}.
-%Type = Inproceedings
-\bibitem[{Steffens et~al.(2016)Steffens, Rodrigues and
-  da~Costa~Botelho}]{steffens2016non}
-\bibinfo{author}{Steffens, C.R.}, \bibinfo{author}{Rodrigues, R.N.},
-  \bibinfo{author}{da~Costa~Botelho, S.S.}, \bibinfo{year}{2016}.
-\newblock \bibinfo{title}{Non-stationary vfd evaluation kit: Dataset and
-  metrics to fuel video-based fire detection development}, in:
-  \bibinfo{booktitle}{Latin American Robotics Symposium},
-  \bibinfo{organization}{Springer}. pp. \bibinfo{pages}{135--151}.
-%Type = Article
-\bibitem[{de~Venancio et~al.(2023)de~Venancio, Campos, Rezende, Lisboa and
-  Barbosa}]{de2023hybrid}
-\bibinfo{author}{de~Venancio, P.V.A.}, \bibinfo{author}{Campos, R.J.},
-  \bibinfo{author}{Rezende, T.M.}, \bibinfo{author}{Lisboa, A.C.},
-  \bibinfo{author}{Barbosa, A.V.}, \bibinfo{year}{2023}.
-\newblock \bibinfo{title}{A hybrid method for fire detection based on spatial
-  and temporal patterns}.
-\newblock \bibinfo{journal}{Neural Computing and Applications}
-  \bibinfo{volume}{35}, \bibinfo{pages}{9349--9361}.
-%Type = Article
-\bibitem[{de~Ven{\^a}ncio et~al.(2022)de~Ven{\^a}ncio, Lisboa and
-  Barbosa}]{dfiredataset}
-\bibinfo{author}{de~Ven{\^a}ncio, P.V.A.}, \bibinfo{author}{Lisboa, A.C.},
-  \bibinfo{author}{Barbosa, A.V.}, \bibinfo{year}{2022}.
-\newblock \bibinfo{title}{An automatic fire detection system based on deep
-  convolutional neural networks for low-power, resource-constrained devices}.
-\newblock \bibinfo{journal}{Neural Computing and Applications}
-  \bibinfo{volume}{34}, \bibinfo{pages}{15349--15368}.
-%Type = Misc
-\bibitem[{Wightman(2019)}]{rw2019timm}
-\bibinfo{author}{Wightman, R.}, \bibinfo{year}{2019}.
-\newblock \bibinfo{title}{Pytorch image models}.
-\newblock
-  \bibinfo{howpublished}{\url{https://github.com/rwightman/pytorch-image-models}}.
-\newblock \DOIprefix\doi{10.5281/zenodo.4414861}.
-%Type = Article
-\bibitem[{Yu et~al.(2013)Yu, Mei and Zhang}]{yu2013real}
-\bibinfo{author}{Yu, C.}, \bibinfo{author}{Mei, Z.}, \bibinfo{author}{Zhang,
-  X.}, \bibinfo{year}{2013}.
-\newblock \bibinfo{title}{A real-time video fire flame and smoke detection
-  algorithm}.
-\newblock \bibinfo{journal}{Procedia Engineering} \bibinfo{volume}{62},
-  \bibinfo{pages}{891--898}.
-%Type = Article
-\bibitem[{Zivkovic and Van Der~Heijden(2006)}]{zivkovic2006efficient}
-\bibinfo{author}{Zivkovic, Z.}, \bibinfo{author}{Van Der~Heijden, F.},
-  \bibinfo{year}{2006}.
-\newblock \bibinfo{title}{Efficient adaptive density estimation per image pixel
-  for the task of background subtraction}.
-\newblock \bibinfo{journal}{Pattern recognition letters} \bibinfo{volume}{27},
-  \bibinfo{pages}{773--780}.
+\begin{thebibliography}{10}
+\expandafter\ifx\csname url\endcsname\relax
+  \def\url#1{\texttt{#1}}\fi
+\expandafter\ifx\csname urlprefix\endcsname\relax\def\urlprefix{URL }\fi
+\expandafter\ifx\csname href\endcsname\relax
+  \def\href#1#2{#2} \def\path#1{#1}\fi
+
+\bibitem{californiafire:online}
+N.~F. P.~A. (NFPA),
+  \href{https://www.nfpa.org/education-and-research/research/nfpa-research/fire-statistical-reports/large-loss-fires-in-the-united-states/largest-fire-losses-in-the-united-states}{Nfpa
+  report - largest fire losses in the united states}, [Online; accessed
+  2025-10-12] (1 1).
+\newline\urlprefix\url{https://www.nfpa.org/education-and-research/research/nfpa-research/fire-statistical-reports/large-loss-fires-in-the-united-states/largest-fire-losses-in-the-united-states}
+
+\bibitem{southkoreafire:online}
+\href{https://www.theguardian.com/world/2025/mar/27/south-korea-fires-death-toll-rises-worst-in-history}{South
+  korea wildfires become biggest on record as disaster chief points to ‘harsh
+  reality’ of climate crisis | south korea | the guardian}, [Online; accessed
+  2025-10-12] (7 2025).
+\newline\urlprefix\url{https://www.theguardian.com/world/2025/mar/27/south-korea-fires-death-toll-rises-worst-in-history}
+
+\bibitem{cheng2024visual}
+G.~Cheng, X.~Chen, C.~Wang, X.~Li, B.~Xian, H.~Yu, Visual fire detection using
+  deep learning: A survey, Neurocomputing 596 (2024) 127975.
+
+\bibitem{gragnaniello2024fire}
+D.~Gragnaniello, A.~Greco, C.~Sansone, B.~Vento, Fire and smoke detection from
+  videos: A literature review under a novel taxonomy, Expert Systems with
+  Applications 255 (2024) 124783.
+
+\bibitem{geng2024yolofm}
+X.~Geng, Y.~Su, X.~Cao, H.~Li, L.~Liu, Yolofm: An improved fire and smoke
+  object detection algorithm based on yolov5n, Scientific Reports 14~(1) (2024)
+  4543.
+
+\bibitem{khan2025optimized}
+Z.~A. Khan, F.~U.~M. Ullah, H.~Yar, W.~Ullah, N.~Khan, M.~J. Kim, S.~W. Baik,
+  Optimized cross-module attention network and medium-scale dataset for
+  effective fire detection, Pattern Recognition 161 (2025) 111273.
+
+\bibitem{khan2025beyond}
+R.~A. Khan, U.~I. Bajwa, R.~H. Raza, M.~W. Anwar, Beyond boundaries:
+  Advancements in fire and smoke detection for indoor and outdoor surveillance
+  feeds, Engineering Applications of Artificial Intelligence 142 (2025) 109855.
+
+\bibitem{cao2019attention}
+Y.~Cao, F.~Yang, Q.~Tang, X.~Lu, An attention enhanced bidirectional lstm for
+  early forest fire smoke recognition, IEEE Access 7 (2019) 154732--154742.
+
+\bibitem{ali2025toward}
+M.~M. Ali, M.~Ghodrat, Toward reliable fire detection in indoor cctv footage:
+  Reducing false alarms from benign flames using 3d attention cnns, IEEE
+  Access.
+
+\bibitem{de2023hybrid}
+P.~V.~A. de~Venancio, R.~J. Campos, T.~M. Rezende, A.~C. Lisboa, A.~V. Barbosa,
+  A hybrid method for fire detection based on spatial and temporal patterns,
+  Neural Computing and Applications 35~(13) (2023) 9349--9361.
+
+\bibitem{gragnaniello2025flame}
+D.~Gragnaniello, A.~Greco, C.~Sansone, B.~Vento, Flame: fire detection in
+  videos combining a deep neural network with a model-based motion analysis,
+  Neural Computing and Applications 37~(8) (2025) 6181--6197.
+
+\bibitem{sobral2014comprehensive}
+A.~Sobral, A.~Vacavant, A comprehensive review of background subtraction
+  algorithms evaluated with synthetic and real videos, Computer Vision and
+  Image Understanding 122 (2014) 4--21.
+
+\bibitem{garcia2020background}
+B.~Garcia-Garcia, T.~Bouwmans, A.~J.~R. Silva, Background subtraction in real
+  applications: Challenges, current models and future directions, Computer
+  Science Review 35 (2020) 100204.
+
+\bibitem{zivkovic2006efficient}
+Z.~Zivkovic, F.~Van Der~Heijden, Efficient adaptive density estimation per
+  image pixel for the task of background subtraction, Pattern recognition
+  letters 27~(7) (2006) 773--780.
+
+\bibitem{ghodrati2021frameexit}
+A.~Ghodrati, B.~E. Bejnordi, A.~Habibian, Frameexit: Conditional early exiting
+  for efficient video recognition, in: Proceedings of the IEEE/CVF Conference
+  on Computer Vision and Pattern Recognition, 2021, pp. 15608--15618.
+
+\bibitem{yu2013real}
+C.~Yu, Z.~Mei, X.~Zhang, A real-time video fire flame and smoke detection
+  algorithm, Procedia Engineering 62 (2013) 891--898.
+
+\bibitem{Firesens4:online}
+\href{https://www.firesense.eu/}{Firesense}, [Online; accessed 2025-12-10].
+\newline\urlprefix\url{https://www.firesense.eu/}
+
+\bibitem{KMUFireSmokeDataset}
+B.~C. Ko, S.~J. Ham, J.~Y. Nam, Modeling and formalization of fuzzy finite
+  automata for detection of irregular fire flames, IEEE Transactions on
+  Circuits and Systems for Video Technology 21~(12) (2011) 1903--1912.
+
+\bibitem{VisiFireBilkent:online}
+E.~Cetin, \href{http://signal.ee.bilkent.edu.tr/VisiFire/}{Computer vision
+  based fire detection software}, [Online; accessed 2025-12-10] (2015).
+\newline\urlprefix\url{http://signal.ee.bilkent.edu.tr/VisiFire/}
+
+\bibitem{foggia2015real}
+P.~Foggia, A.~Saggese, M.~Vento, Real-time fire detection for
+  video-surveillance applications using a combination of experts based on
+  color, shape, and motion, IEEE TRANSACTIONS on circuits and systems for video
+  technology 25~(9) (2015) 1545--1556.
+
+\bibitem{steffens2015unconstrained}
+C.~R. Steffens, R.~N. Rodrigues, S.~S. da~Costa~Botelho, An unconstrained
+  dataset for non-stationary video based fire detection, in: 2015 12th Latin
+  American robotics symposium and 2015 3rd Brazilian symposium on robotics
+  (LARS-SBR), IEEE, 2015, pp. 25--30.
+
+\bibitem{lin2017smoke}
+G.~Lin, Y.~Zhang, Q.~Zhang, Y.~Jia, G.~Xu, J.~Wang, Smoke detection in video
+  sequences based on dynamic texture using volume local binary patterns., KSII
+  Trans. Internet Inf. Syst. 11~(11) (2017) 5522--5536.
+
+\bibitem{jadon2019firenet}
+A.~Jadon, M.~Omama, A.~Varshney, M.~S. Ansari, R.~Sharma, Firenet: a
+  specialized lightweight fire \& smoke detection model for real-time iot
+  applications, arXiv preprint arXiv:1905.11922.
+
+\bibitem{cazzolato2017fismo}
+M.~T. Cazzolato, L.~Avalhais, D.~Chino, J.~S. Ramos, J.~A. de~Souza, J.~F.
+  Rodrigues-Jr, A.~Traina, Fismo: A compilation of datasets from emergency
+  situations for fire and smoke analysis, in: Brazilian symposium on
+  databases-SBBD, SBC Uberl{\^a}ndia, Brazil, 2017, pp. 213--223.
+
+\bibitem{dfiredataset}
+P.~V.~A. de~Ven{\^a}ncio, A.~C. Lisboa, A.~V. Barbosa, An automatic fire
+  detection system based on deep convolutional neural networks for low-power,
+  resource-constrained devices, Neural Computing and Applications 34~(18)
+  (2022) 15349--15368.
+
+\bibitem{huang2022fire}
+L.~Huang, G.~Liu, Y.~Wang, H.~Yuan, T.~Chen, Fire detection in video
+  surveillances using convolutional neural networks and wavelet transform,
+  Engineering Applications of Artificial Intelligence 110 (2022) 104737.
+
+\bibitem{AIHub87:online}
+\href{https://aihub.or.kr/aihubdata/data/view.do?dataSetSn=71751}{Ai-hub},
+  [Online; accessed 2025-12-10].
+\newline\urlprefix\url{https://aihub.or.kr/aihubdata/data/view.do?dataSetSn=71751}
+
+\bibitem{onal2024video}
+O.~{\"O}nal, E.~Dand{\i}l, Video dataset for the detection of safe and unsafe
+  behaviours in workplaces, Data in Brief 56 (2024) 110791.
+
+\bibitem{deniz2024optimized}
+D.~Deniz, E.~Ros, E.~M. Ortigosa, F.~Barranco, Optimized edge-cloud system for
+  activity monitoring using knowledge distillation, Electronics 13~(23) (2024)
+  4786.
+
+\bibitem{rohrbach2016recognizing}
+M.~Rohrbach, A.~Rohrbach, M.~Regneri, S.~Amin, M.~Andriluka, M.~Pinkal,
+  B.~Schiele, Recognizing fine-grained and composite activities using
+  hand-centric features and script data, International Journal of Computer
+  Vision 119~(3) (2016) 346--373.
+
+\bibitem{marroquin2019wisenet}
+R.~Marroquin, J.~Dubois, C.~Nicolle, Wisenet: An indoor multi-camera
+  multi-space dataset with contextual information and annotations for people
+  detection and tracking, Data in brief 27 (2019) 104654.
+
+\bibitem{steffens2016non}
+C.~R. Steffens, R.~N. Rodrigues, S.~S. da~Costa~Botelho, Non-stationary vfd
+  evaluation kit: Dataset and metrics to fuel video-based fire detection
+  development, in: Latin American Robotics Symposium, Springer, 2016, pp.
+  135--151.
+
+\bibitem{mukhopadhyay2019fpga}
+D.~Mukhopadhyay, R.~Iyer, S.~Kadam, R.~Koli, Fpga deployable fire detection
+  model for real-time video surveillance systems using convolutional neural
+  networks, in: 2019 Global Conference for Advancement in Technology (GCAT),
+  IEEE, 2019, pp. 1--7.
+
+\bibitem{hgnetv2timm:online}
+\href{https://huggingface.co/timm/hgnetv2_b5.ssld_stage2_ft_in1k}{timm/hgnetv2\_b5.ssld\_stage2\_ft\_in1k
+  · hugging face}, [Online; accessed 2026-04-07] (9 2025).
+\newline\urlprefix\url{https://huggingface.co/timm/hgnetv2_b5.ssld_stage2_ft_in1k}
+
+\bibitem{rw2019timm}
+R.~Wightman, Pytorch image models,
+  \url{https://github.com/rwightman/pytorch-image-models} (2019).
+\newblock \href {http://dx.doi.org/10.5281/zenodo.4414861}
+  {\path{doi:10.5281/zenodo.4414861}}.
+
+\bibitem{cui2021beyond}
+C.~Cui, R.~Guo, Y.~Du, D.~He, F.~Li, Z.~Wu, Q.~Liu, S.~Wen, J.~Huang, X.~Hu,
+  et~al., Beyond self-supervision: A simple yet effective network distillation
+  alternative to improve backbones, arXiv preprint arXiv:2103.05959.
+
+\bibitem{hgnetv2PaddleCl7:online}
+\href{https://github.com/PaddlePaddle/PaddleClas/blob/f1233c18455b8acde4fc42ab0bea575fa06daa8e/docs/en/models/PP-HGNetV2_en.md?plain=1#L33}{Paddleclas/docs/en/models/pp-hgnetv2\_en.md
+  at f1233c18455b8acde4fc42ab0bea575fa06daa8e · paddlepaddle/paddleclas},
+  [Online; accessed 2026-04-07].
+\newline\urlprefix\url{https://github.com/PaddlePaddle/PaddleClas/blob/f1233c18455b8acde4fc42ab0bea575fa06daa8e/docs/en/models/PP-HGNetV2_en.md?plain=1#L33}
+
+\bibitem{kingma2014adam}
+D.~P. Kingma, J.~Ba, Adam: A method for stochastic optimization, arXiv preprint
+  arXiv:1412.6980.
+
+\bibitem{hestness2017deep}
+J.~Hestness, S.~Narang, N.~Ardalani, G.~Diamos, H.~Jun, H.~Kianinejad, M.~M.~A.
+  Patwary, Y.~Yang, Y.~Zhou, Deep learning scaling is predictable, empirically,
+  arXiv preprint arXiv:1712.00409.
+
+\bibitem{alabdulmohsin2022revisiting}
+I.~M. Alabdulmohsin, B.~Neyshabur, X.~Zhai, Revisiting neural scaling laws in
+  language and vision, Advances in Neural Information Processing Systems 35
+  (2022) 22300--22312.
+
+\bibitem{bahri2024explaining}
+Y.~Bahri, E.~Dyer, J.~Kaplan, J.~Lee, U.~Sharma, Explaining neural scaling
+  laws, Proceedings of the National Academy of Sciences 121~(27) (2024)
+  e2311878121.
 
 \end{thebibliography}
