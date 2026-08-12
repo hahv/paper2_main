@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.7.18)  12 AUG 2026 15:14
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.7.18)  12 AUG 2026 15:29
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1160,107 +1160,93 @@ LaTeX Font Info:    Trying to load font information for U+txsyc on input line 1
 (d:/Program Files/texlive/2022/texmf-dist/tex/latex/txfonts/utxsyc.fd
 File: utxsyc.fd 2000/12/15 v3.1
 )
-Underfull \vbox (badness 3724) has occurred while \output is active []
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [1{d:/Program Files/texlive/2022/texmf-var/fonts/map/pdftex/updmap/pdftex.map}
 
 
 ]
 LaTeX Font Info:    Trying to load font information for TS1+txr on input line 2
-44.
+32.
 
 (d:/Program Files/texlive/2022/texmf-dist/tex/latex/txfonts/ts1txr.fd
 File: ts1txr.fd 2000/12/15 v3.1
 )
-Underfull \hbox (badness 2310) in paragraph at lines 244--256
+Underfull \hbox (badness 2310) in paragraph at lines 232--244
 []\OT1/txr/bx/n/10 Motion-Aware Skip Mod-ule: \OT1/txr/m/n/10 A lightweight
  []
 
 
-Underfull \hbox (badness 2744) in paragraph at lines 244--256
+Underfull \hbox (badness 2744) in paragraph at lines 232--244
 \OT1/txr/m/n/10 skip mod-ule is pro-posed that ex-ploits frame
  []
 
 
-Underfull \hbox (badness 1102) in paragraph at lines 244--256
+Underfull \hbox (badness 1102) in paragraph at lines 232--244
 \OT1/txr/m/n/10 pat-i-ble with ex-ist-ing fire and smoke de-tec-tion
  []
 
 
-Underfull \hbox (badness 1117) in paragraph at lines 244--256
+Underfull \hbox (badness 1117) in paragraph at lines 232--244
 \OT1/txr/m/n/10 skip mod-ule is fur-ther aug-mented with \OT1/txr/m/sc/10 Ea-ge
 r
  []
 
 [2]
-
-Package natbib Warning: Author undefined for citation`khan2025beyond' 
-(natbib)                on page 3 on input line 314.
-
-
-Package natbib Warning: Author undefined for citation`cao2019attention' 
-(natbib)                on page 3 on input line 316.
+Underfull \hbox (badness 1342) in paragraph at lines 300--317
+\OT1/txr/m/n/10 re-sen-ta-tive meth-ods in-clude the work of [[]], who
+ []
 
 
-Package natbib Warning: Author undefined for citation`ali2025toward' 
-(natbib)                on page 3 on input line 318.
+Underfull \hbox (badness 1168) in paragraph at lines 300--317
+\OT1/txr/m/n/10 who em-ploy 3D CNNs with at-ten-tion mech-a-nisms
+ []
 
 
-Package natbib Warning: Author undefined for citation`sobral2014comprehensive' 
+Underfull \hbox (badness 1221) in paragraph at lines 300--317
+\OT1/txr/m/n/10 to jointly cap-ture spatio-temporal pat-terns. While
+ []
 
-(natbib)                on page 3 on input line 346.
-
-
-Package natbib Warning: Author undefined for citation`garcia2020background' 
-(natbib)                on page 3 on input line 346.
-
-<3.fig/fig_pipeline.pdf, id=133, 756.91786pt x 537.48804pt>
+<3.fig/fig_pipeline.pdf, id=132, 756.91786pt x 537.48804pt>
 File: 3.fig/fig_pipeline.pdf Graphic file (type pdf)
 <use 3.fig/fig_pipeline.pdf>
-Package pdftex.def Info: 3.fig/fig_pipeline.pdf  used on input line 374.
+Package pdftex.def Info: 3.fig/fig_pipeline.pdf  used on input line 362.
 (pdftex.def)             Requested size: 222.0pt x 157.63904pt.
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [3 <./3.fig/fig_pipeline.pdf>]
-<3.fig/fig_skip_module.pdf, id=223, 814.94466pt x 159.52599pt>
+[3 <./3.fig/fig_pipeline.pdf>]
+<3.fig/fig_skip_module.pdf, id=222, 814.94466pt x 159.52599pt>
 File: 3.fig/fig_skip_module.pdf Graphic file (type pdf)
 <use 3.fig/fig_skip_module.pdf>
-Package pdftex.def Info: 3.fig/fig_skip_module.pdf  used on input line 435.
+Package pdftex.def Info: 3.fig/fig_skip_module.pdf  used on input line 423.
 (pdftex.def)             Requested size: 222.0pt x 43.45474pt.
 Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on in
-put line 440.
+put line 428.
 
-Underfull \hbox (badness 1509) in paragraph at lines 513--513
+Underfull \hbox (badness 1509) in paragraph at lines 501--501
 []\OT1/txr/bx/n/10 Algorithm 2 \OT1/txr/m/n/10 Frame Dif-fer-ence De-tec-tor (F
 rameD-
  []
 
-
-Package natbib Warning: Author undefined for citation`yu2013real' 
-(natbib)                on page 4 on input line 533.
-
 [4 <./3.fig/fig_skip_module.pdf>]
-Underfull \hbox (badness 2096) in paragraph at lines 560--562
+Underfull \hbox (badness 2096) in paragraph at lines 548--550
 []\OT1/txr/m/n/10 Downsampled frames $[]\OML/txmi/m/it/10 ;  []$\OT1/txr/m/n/10
  ; ac-cu-mu-lated
  []
 
-<3.fig/eager_mode.pdf, id=318, 492.59032pt x 474.48265pt>
+<3.fig/eager_mode.pdf, id=317, 492.59032pt x 474.48265pt>
 File: 3.fig/eager_mode.pdf Graphic file (type pdf)
 <use 3.fig/eager_mode.pdf>
-Package pdftex.def Info: 3.fig/eager_mode.pdf  used on input line 601.
+Package pdftex.def Info: 3.fig/eager_mode.pdf  used on input line 589.
 (pdftex.def)             Requested size: 199.79865pt x 192.45401pt.
 
-Underfull \hbox (badness 1107) in paragraph at lines 614--625
+Underfull \hbox (badness 1107) in paragraph at lines 602--613
 \OT1/txr/m/n/10 door surveil-lance video dataset re-vealed that slow-
  []
 
 [5 <./3.fig/eager_mode.pdf>]
-<3.fig/fig_videodb.pdf, id=431, 1246.75111pt x 492.2419pt>
+<3.fig/fig_videodb.pdf, id=432, 1246.75111pt x 492.2419pt>
 File: 3.fig/fig_videodb.pdf Graphic file (type pdf)
 <use 3.fig/fig_videodb.pdf>
-Package pdftex.def Info: 3.fig/fig_videodb.pdf  used on input line 761.
+Package pdftex.def Info: 3.fig/fig_videodb.pdf  used on input line 749.
 (pdftex.def)             Requested size: 222.0pt x 87.64581pt.
 > Step: init table outer spec.
 > Step: parse table options.
@@ -1270,89 +1256,80 @@ Package pdftex.def Info: 3.fig/fig_videodb.pdf  used on input line 761.
 > Step: execute table commands.
 > Step: calculate cell and line sizes.
 LaTeX Font Info:    Font shape `OT1/txr/b/n' in size <7> not available
-(Font)              Font shape `OT1/txr/bx/n' tried instead on input line 795.
+(Font)              Font shape `OT1/txr/bx/n' tried instead on input line 783.
 > Step: build the whole table.
-
-
-Package natbib Warning: Author undefined for citation`de2023hybrid' 
-(natbib)                on page 6 on input line 834.
-
-[6 <./3.fig/fig_videodb.pdf>]
-Overfull \hbox (22.74539pt too wide) detected at line 867
+ [6 <./3.fig/fig_videodb.pdf>]
+Overfull \hbox (22.74539pt too wide) detected at line 855
 []
  []
 
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [7]
-Underfull \hbox (badness 10000) in paragraph at lines 908--930
+[7]
+Underfull \hbox (badness 10000) in paragraph at lines 896--918
 []\OT1/txr/bx/n/10 Proposed Clas-si-fier (BIG Model $\OMS/txsy/m/n/10 M$ \OT1/t
 xr/bx/n/10 ---
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 908--930
+Underfull \hbox (badness 10000) in paragraph at lines 896--918
 \OT1/txr/bx/n/10 HGNetV2)\OT1/txr/m/n/10 : The BIG Model $\OMS/txsy/m/n/10 M$ \
 OT1/txr/m/n/10 is ob-tained
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 908--930
+Underfull \hbox (badness 10000) in paragraph at lines 896--918
 \OT1/txr/m/n/10 by fine-tuning a pre-trained High-Performance
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 908--930
+Underfull \hbox (badness 10000) in paragraph at lines 896--918
 \OT1/txr/m/n/10 GPU Net-work v2 (HGNetV2), specif-i-cally the
  []
 
 
-Underfull \hbox (badness 1092) in paragraph at lines 908--930
+Underfull \hbox (badness 1092) in paragraph at lines 896--918
 \OT1/txr/m/n/10 from the Timm li-brary [[]], which was orig-i-nally
  []
 
 
-Underfull \hbox (badness 6412) in paragraph at lines 908--930
+Underfull \hbox (badness 6412) in paragraph at lines 896--918
 \OT1/txr/m/n/10 trained us-ing SSLD knowl-edge dis-til-la-tion [[]].
  []
 
 
-Underfull \hbox (badness 2452) in paragraph at lines 931--938
+Underfull \hbox (badness 2452) in paragraph at lines 919--926
 \OT1/txr/m/n/10 all ex-per-i-ments were con-ducted on a work-sta-tion
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 958--964
+Underfull \hbox (badness 10000) in paragraph at lines 946--952
  []\OT1/txr/m/it/10 Hyperparameter Op-ti-miza-tion Re-sults for the
  []
 
 
-Underfull \hbox (badness 3623) in paragraph at lines 958--964
+Underfull \hbox (badness 3623) in paragraph at lines 946--952
 \OT1/txr/m/it/10 FrameDiffDet-based Skip Mod-ule.[] \OT1/txr/m/n/10 To iden-tif
 y the
  []
 
 
-Underfull \hbox (badness 1231) in paragraph at lines 958--964
+Underfull \hbox (badness 1231) in paragraph at lines 946--952
 \OT1/txr/m/n/10 block ac-tive thresh-old $\OML/txmi/m/it/10 ^^\$\OT1/txr/m/n/10
  , and dif-fer-ence sen-si-tiv-ity
  []
 
 
-Underfull \hbox (badness 1565) in paragraph at lines 958--964
+Underfull \hbox (badness 1565) in paragraph at lines 946--952
 \OT1/txr/m/n/10 can-di-date con-fig-u-ra-tions. The search space is as
  []
 
 
-Underfull \hbox (badness 3503) in paragraph at lines 976--979
+Underfull \hbox (badness 3503) in paragraph at lines 964--967
 []\OT1/txr/bx/n/10 Pixel dif-fer-ence sen-si-tiv-ity thresh-old $\OML/txmi/m/it
 /10 ^^\[] \OMS/txsy/m/n/10 2
  []
 
-[8]
 LaTeX Font Info:    Font shape `OT1/txr/b/n' in size <8> not available
-(Font)              Font shape `OT1/txr/bx/n' tried instead on input line 991.
+(Font)              Font shape `OT1/txr/bx/n' tried instead on input line 979.
 > Step: init table outer spec.
 > Step: parse table options.
 > Step: split table.
@@ -1361,6 +1338,7 @@ LaTeX Font Info:    Font shape `OT1/txr/b/n' in size <8> not available
 > Step: execute table commands.
 > Step: calculate cell and line sizes.
 > Step: build the whole table.
+[8]
 > Step: init table outer spec.
 > Step: parse table options.
 > Step: split table.
@@ -1369,56 +1347,56 @@ LaTeX Font Info:    Font shape `OT1/txr/b/n' in size <8> not available
 > Step: execute table commands.
 > Step: calculate cell and line sizes.
 LaTeX Font Info:    Font shape `OT1/txr/b/n' in size <5> not available
-(Font)              Font shape `OT1/txr/bx/n' tried instead on input line 1095.
+(Font)              Font shape `OT1/txr/bx/n' tried instead on input line 1083.
 
 > Step: build the whole table.
 
-Underfull \hbox (badness 10000) in paragraph at lines 1098--1102
+Underfull \hbox (badness 10000) in paragraph at lines 1086--1090
  []\OT1/txr/m/it/10 Hyperparameter Op-ti-miza-tion Re-sults for the
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1098--1102
+Underfull \hbox (badness 10000) in paragraph at lines 1086--1090
 \OT1/txr/m/it/10 AccMotionDet-based Skip Mod-ule.[] \OT1/txr/m/n/10 The hy-per-
 pa-
  []
 
 
-Underfull \hbox (badness 2865) in paragraph at lines 1098--1102
+Underfull \hbox (badness 2865) in paragraph at lines 1086--1090
 \OT1/txr/m/n/10 ram-e-ter search for \OT1/txr/m/sc/10 Ac-c-Mo-tion-Det \OT1/txr
 /m/n/10 is de-signed to
  []
 
 
-Underfull \hbox (badness 2469) in paragraph at lines 1098--1102
+Underfull \hbox (badness 2469) in paragraph at lines 1086--1090
 \OT1/txr/m/n/10 the tem-po-ral ac-cu-mu-la-tion of mo-tion scores over
  []
 
 
-Underfull \hbox (badness 1147) in paragraph at lines 1106--1109
+Underfull \hbox (badness 1147) in paragraph at lines 1094--1097
 \OT1/txr/m/n/10 stricted to a nar-rower range than in FrameD-
  []
 
 
-Underfull \hbox (badness 2418) in paragraph at lines 1109--1111
+Underfull \hbox (badness 2418) in paragraph at lines 1097--1099
 []\OT1/txr/bx/n/10 Pixel dif-fer-ence sen-si-tiv-ity thresh-old \OT1/txr/m/n/10
  ($\OML/txmi/m/it/10 ^^\[] \OMS/txsy/m/n/10 2
  []
 
 
-Underfull \hbox (badness 1502) in paragraph at lines 1123--1134
+Underfull \hbox (badness 1502) in paragraph at lines 1111--1122
 []\OT1/txr/m/n/10 Table [][]3[][] presents rep-re-sen-ta-tive con-fig-u-ra-tion
 s of
  []
 
 
-Underfull \hbox (badness 1622) in paragraph at lines 1123--1134
+Underfull \hbox (badness 1622) in paragraph at lines 1111--1122
 \OT1/txr/m/n/10 straint $\OML/txmi/m/it/10 ^^N[] \OT1/txr/m/n/10 = 0\OML/txmi/m
 /it/10 :\OT1/txr/m/n/10 015$. The best-ranked con-fig-u-ra-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1136--1136
+Underfull \hbox (badness 10000) in paragraph at lines 1124--1124
 []\OT1/txr/m/it/10 Frame-Level Per-for-mance and Through-put:
  []
 
@@ -1430,31 +1408,31 @@ Underfull \hbox (badness 10000) in paragraph at lines 1136--1136
 > Step: execute table commands.
 > Step: calculate cell and line sizes.
 LaTeX Font Info:    Font shape `OT1/txr/b/n' in size <9> not available
-(Font)              Font shape `OT1/txr/bx/n' tried instead on input line 1171.
+(Font)              Font shape `OT1/txr/bx/n' tried instead on input line 1159.
 
 > Step: build the whole table.
 
-Underfull \hbox (badness 10000) in paragraph at lines 1174--1191
+Underfull \hbox (badness 10000) in paragraph at lines 1162--1179
 []\OT1/txr/m/n/10 Table [][]4[][] bench-marks the pro-posed pipeline
  []
 
 
-Underfull \hbox (badness 5985) in paragraph at lines 1174--1191
+Underfull \hbox (badness 5985) in paragraph at lines 1162--1179
 \OT1/txr/m/n/10 the high-est re-call (95.62%), ac-cu-racy (98.77%),
  []
 
 
-Underfull \hbox (badness 2096) in paragraph at lines 1174--1191
+Underfull \hbox (badness 2096) in paragraph at lines 1162--1179
 \OT1/txr/m/n/10 ben-e-fits from both a more ex-pres-sive ar-chi-tec-ture
  []
 
 
-Underfull \hbox (badness 1142) in paragraph at lines 1174--1191
+Underfull \hbox (badness 1142) in paragraph at lines 1162--1179
 \OT1/txr/m/n/10 of 5.84% and 34.1%, re-spec-tively, ren-der-ing them
  []
 
 
-Underfull \hbox (badness 2343) in paragraph at lines 1174--1191
+Underfull \hbox (badness 2343) in paragraph at lines 1162--1179
 \OT1/txr/m/n/10 de-spite their speed and com-pact-ness. YOLOv5s
  []
 
@@ -1475,11 +1453,6 @@ Underfull \hbox (badness 2343) in paragraph at lines 1174--1191
 > Step: execute table commands.
 > Step: calculate cell and line sizes.
 > Step: build the whole table.
-
-
-Package natbib Warning: Author undefined for citation`de2023hybrid' 
-(natbib)                on page 10 on input line 1279.
-
 > Step: init table outer spec.
 > Step: parse table options.
 > Step: split table.
@@ -1489,14 +1462,11 @@ Package natbib Warning: Author undefined for citation`de2023hybrid'
 > Step: calculate cell and line sizes.
 > Step: build the whole table.
 
-Underfull \hbox (badness 1024) in paragraph at lines 1347--1359
+Underfull \hbox (badness 1024) in paragraph at lines 1335--1347
 \OT1/txr/m/n/10 the op-ti-mal val-ues iden-ti-fied in Sec-tion [][]4.4.1[][] (i
 .e.,
  []
 
-
-Underfull \vbox (badness 1215) has occurred while \output is active []
-
 > Step: init table outer spec.
 > Step: parse table options.
 > Step: split table.
@@ -1505,23 +1475,20 @@ Underfull \vbox (badness 1215) has occurred while \output is active []
 > Step: execute table commands.
 > Step: calculate cell and line sizes.
 > Step: build the whole table.
- [10]
-<3.fig/fps_increase.pdf, id=634, 475.96822pt x 243.49971pt>
+<3.fig/fps_increase.pdf, id=624, 475.96822pt x 243.49971pt>
 File: 3.fig/fps_increase.pdf Graphic file (type pdf)
 <use 3.fig/fps_increase.pdf>
-Package pdftex.def Info: 3.fig/fps_increase.pdf  used on input line 1442.
+Package pdftex.def Info: 3.fig/fps_increase.pdf  used on input line 1430.
 (pdftex.def)             Requested size: 222.0pt x 113.57544pt.
-
-Underfull \vbox (badness 1024) has occurred while \output is active []
-
+[10]
 <3.fig/fig_qualitative_success.pdf, id=637, 4149.5025pt x 1683.1683pt>
 File: 3.fig/fig_qualitative_success.pdf Graphic file (type pdf)
 <use 3.fig/fig_qualitative_success.pdf>
 Package pdftex.def Info: 3.fig/fig_qualitative_success.pdf  used on input line 
-1483.
+1471.
 (pdftex.def)             Requested size: 222.0pt x 90.04475pt.
 
-Underfull \hbox (badness 1275) in paragraph at lines 1497--1501
+Underfull \hbox (badness 1275) in paragraph at lines 1485--1489
 []\OT1/txr/bx/n/10 Correctly skipped static back-ground frames
  []
 
@@ -1529,84 +1496,37 @@ Underfull \hbox (badness 1275) in paragraph at lines 1497--1501
 File: 3.fig/fig_qualitative_failure.pdf Graphic file (type pdf)
 <use 3.fig/fig_qualitative_failure.pdf>
 Package pdftex.def Info: 3.fig/fig_qualitative_failure.pdf  used on input line 
-1513.
+1501.
 (pdftex.def)             Requested size: 222.0pt x 76.01953pt.
 
-Underfull \hbox (badness 2744) in paragraph at lines 1531--1534
+Underfull \hbox (badness 2744) in paragraph at lines 1519--1522
 []\OT1/txr/bx/n/10 Wrongly passed frames / wasted in-fer-ence
  []
 
-[11 <./3.fig/fps_increase.pdf> <./3.fig/fig_qualitative_success.pdf>]
-<3.fig/eager_timeline_success.png, id=725, 1294.0345pt x 446.0665pt>
+[11 <./3.fig/fps_increase.pdf> <./3.fig/fig_qualitative_success.pdf> <./3.fig/f
+ig_qualitative_failure.pdf>]
+<3.fig/eager_timeline_success.png, id=747, 1294.0345pt x 446.0665pt>
 File: 3.fig/eager_timeline_success.png Graphic file (type png)
 <use 3.fig/eager_timeline_success.png>
 Package pdftex.def Info: 3.fig/eager_timeline_success.png  used on input line 1
-544.
+532.
 (pdftex.def)             Requested size: 222.0pt x 76.52455pt.
-<3.fig/eager_timeline_failure.png, id=727, 1294.0345pt x 483.0045pt>
+<3.fig/eager_timeline_failure.png, id=749, 1294.0345pt x 483.0045pt>
 File: 3.fig/eager_timeline_failure.png Graphic file (type png)
 <use 3.fig/eager_timeline_failure.png>
 Package pdftex.def Info: 3.fig/eager_timeline_failure.png  used on input line 1
-562.
+550.
 (pdftex.def)             Requested size: 222.0pt x 82.86142pt.
- [12 <./3.fig/fig_qualitative_failure.pdf> <./3.fig/eager_timeline_success.png>
- <./3.fig/eager_timeline_failure.png>]
+ [12 <./3.fig/eager_timeline_success.png> <./3.fig/eager_timeline_failure.png>]
+
 Underfull \hbox (badness 1895) in paragraph at lines 1641--1654
 \OT1/txr/m/n/10 RS-2025-23323861. This re-search was sup-ported
  []
 
-[13] [14
-
-] [15] [16] [17] [18] [19]
-<figs/authors/a1.png, id=796, 1798.72pt x 2398.9625pt>
-File: figs/authors/a1.png Graphic file (type png)
-<use figs/authors/a1.png>
-Package pdftex.def Info: figs/authors/a1.png  used on input line 1670.
-(pdftex.def)             Requested size: 48.84027pt x 65.12059pt.
-
-Underfull \hbox (badness 1028) in paragraph at lines 1673--1680
-\OT1/txr/m/n/10 sity of In-for-ma-tion Tech-nol-ogy (UIT),
- []
-
-<figs/authors/a2.jpg, id=797, 283.0575pt x 376.40625pt>
-File: figs/authors/a2.jpg Graphic file (type jpg)
-<use figs/authors/a2.jpg>
-Package pdftex.def Info: figs/authors/a2.jpg  used on input line 1685.
-(pdftex.def)             Requested size: 48.84027pt x 64.94737pt.
-<figs/authors/a3.png, id=798, 275.52937pt x 353.06906pt>
-File: figs/authors/a3.png Graphic file (type png)
-<use figs/authors/a3.png>
-Package pdftex.def Info: figs/authors/a3.png  used on input line 1700.
-(pdftex.def)             Requested size: 48.84027pt x 62.57996pt.
-
-Underfull \hbox (badness 2521) in paragraph at lines 1703--1713
-\OT1/txr/m/n/10 part-ment of Mecha-tronic En-gi-neer-ing,
- []
-
-
-Underfull \vbox (badness 1616) has occurred while \output is active []
-
-<figs/authors/a4.png, id=799, 317.68687pt x 433.62pt>
-File: figs/authors/a4.png Graphic file (type png)
-<use figs/authors/a4.png>
-Package pdftex.def Info: figs/authors/a4.png  used on input line 1718.
-(pdftex.def)             Requested size: 48.84027pt x 66.66122pt.
-
-Underfull \hbox (badness 1221) in paragraph at lines 1721--1733
-[]\OT1/txr/bx/n/10 Chun-Su Park \OT1/txr/m/n/10 re-ceived the B.S. and
- []
-
-(./main.bbl [20
-
-
- <./figs/authors/a1.png> <./figs/authors/a2.jpg> <./figs/authors/a3.png> <./fig
-s/authors/a4.png>]
+(./main.bbl
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [21]
+ [13]
 Underfull \hbox (badness 10000) in paragraph at lines 197--200
 [][][]\OT1/txr/m/n/8 Paddleclas/docs/en/models/pp-hgnetv2[]en.md at
  []
@@ -1623,17 +1543,19 @@ Underfull \hbox (badness 1365) in paragraph at lines 206--209
 nt
  []
 
-) [22
 
-] (./main.aux)
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+) [14]
+[15] [16] [17] [18] [19] [20] (./main.aux)
 Package rerunfilecheck Info: File `main.out' has not changed.
 (rerunfilecheck)             Checksum: C9A62CC3363F574077F6BF5967D65DC8;4115.
  ) 
 Here is how much of TeX's memory you used:
- 20061 strings out of 478023
- 363960 string characters out of 5835647
- 1049512 words of memory out of 5000000
- 38014 multiletter control sequences out of 15000+600000
+ 20009 strings out of 478023
+ 362885 string characters out of 5835647
+ 1051086 words of memory out of 5000000
+ 37972 multiletter control sequences out of 15000+600000
  547220 words of font info for 188 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  72i,13n,100p,1021b,1370s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -1669,10 +1591,10 @@ am Files/texlive/2022/texmf-dist/fonts/type1/public/txfonts/txsy.pfb><d:/Progra
 m Files/texlive/2022/texmf-dist/fonts/type1/urw/times/utmb8a.pfb><d:/Program Fi
 les/texlive/2022/texmf-dist/fonts/type1/urw/times/utmr8a.pfb><d:/Program Files/
 texlive/2022/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on main.pdf (22 pages, 15902662 bytes).
+Output written on main.pdf (20 pages, 10734907 bytes).
 PDF statistics:
- 954 PDF objects out of 1000 (max. 8388607)
- 686 compressed objects within 7 object streams
- 132 named destinations out of 1000 (max. 500000)
- 226 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 937 PDF objects out of 1000 (max. 8388607)
+ 678 compressed objects within 7 object streams
+ 128 named destinations out of 1000 (max. 500000)
+ 206 words of extra memory for PDF output out of 10000 (max. 10000000)
 
