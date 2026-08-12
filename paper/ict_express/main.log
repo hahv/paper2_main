@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.7.18)  10 AUG 2026 19:20
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.7.18)  12 AUG 2026 13:06
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -970,93 +970,93 @@ Package: ninecolors 2022-02-13 vv2022D Select colors with proper color contrast
 \openout4 = `main.abs'.
 
 LaTeX Font Info:    Trying to load font information for LS1+stixscr on input li
-ne 161.
+ne 135.
 
 (d:/Program Files/texlive/2022/texmf-dist/tex/latex/stix/ls1stixscr.fd
 File: ls1stixscr.fd 2015/04/17 v1.1.2-latex STIX script LS1 font definitions
 )
 LaTeX Font Info:    Trying to load font information for LS2+stixex on input lin
-e 161.
+e 135.
 
 (d:/Program Files/texlive/2022/texmf-dist/tex/latex/stix/ls2stixex.fd
 File: ls2stixex.fd 2015/04/17 v1.1.2-latex STIX extentions LS2 font definitions
 
 )
-LaTeX Font Info:    Trying to load font information for U+msa on input line 161
+LaTeX Font Info:    Trying to load font information for U+msa on input line 135
 .
 
 (d:/Program Files/texlive/2022/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 161
+LaTeX Font Info:    Trying to load font information for U+msb on input line 135
 .
 
 (d:/Program Files/texlive/2022/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
 LaTeX Font Info:    Trying to load font information for LS1+stixfrak on input l
-ine 161.
+ine 135.
 
 (d:/Program Files/texlive/2022/texmf-dist/tex/latex/stix/ls1stixfrak.fd
 File: ls1stixfrak.fd 2015/04/17 v1.1.2-latex STIX fraktur LS1 font definitions
 )
 LaTeX Font Info:    Trying to load font information for LS1+stixbb on input lin
-e 161.
+e 135.
 
 (d:/Program Files/texlive/2022/texmf-dist/tex/latex/stix/ls1stixbb.fd
 File: ls1stixbb.fd 2015/04/17 v1.1.2-latex STIX blackboard LS1 font definitions
 
 )
 LaTeX Font Info:    Trying to load font information for LS2+stixcal on input li
-ne 161.
+ne 135.
 
 (d:/Program Files/texlive/2022/texmf-dist/tex/latex/stix/ls2stixcal.fd
 File: ls2stixcal.fd 2015/04/17 v1.1.2-latex STIX calligraphic LS2 font definiti
 ons
 )
 LaTeX Font Info:    Trying to load font information for LS1+stixsf on input lin
-e 161.
+e 135.
 
 (d:/Program Files/texlive/2022/texmf-dist/tex/latex/stix/ls1stixsf.fd
 File: ls1stixsf.fd 2015/04/17 v1.1.2-latex STIX sans-serif LS1 font definitions
 
 )
 LaTeX Font Info:    Trying to load font information for LS2+stixtt on input lin
-e 161.
+e 135.
 
 (d:/Program Files/texlive/2022/texmf-dist/tex/latex/stix/ls2stixtt.fd
 File: ls2stixtt.fd 2015/04/17 v1.1.2-latex STIX typewriter LS2 font definitions
 
 )
-Overfull \hbox (123.62721pt too wide) detected at line 161
+Overfull \hbox (123.62721pt too wide) detected at line 135
 []
  []
 
 (./main.abs)
 
-Package hyperref Warning: Ignoring empty anchor on input line 161.
+Package hyperref Warning: Ignoring empty anchor on input line 135.
 
 
-Package hyperref Warning: Ignoring empty anchor on input line 161.
+Package hyperref Warning: Ignoring empty anchor on input line 135.
 
 <thumbnails/cas-email.jpeg, id=4, 225.84375pt x 225.84375pt>
 File: thumbnails/cas-email.jpeg Graphic file (type jpg)
 <use thumbnails/cas-email.jpeg>
-Package pdftex.def Info: thumbnails/cas-email.jpeg  used on input line 161.
+Package pdftex.def Info: thumbnails/cas-email.jpeg  used on input line 135.
 (pdftex.def)             Requested size: 7.99838pt x 8.0pt.
-LaTeX Font Info:    Trying to load font information for T1+zi4 on input line 16
-1.
+LaTeX Font Info:    Trying to load font information for T1+zi4 on input line 13
+5.
 (d:/Program Files/texlive/2022/texmf-dist/tex/latex/inconsolata/t1zi4.fd
 File: t1zi4.fd 2018/01/14 T1/zi4 (Inconsolata)
 )
 LaTeX Font Info:    Font shape `T1/zi4/m/n' will be
-(Font)              scaled to size 6.80005pt on input line 161.
+(Font)              scaled to size 6.80005pt on input line 135.
 
 
-Package hyperref Warning: Ignoring empty anchor on input line 161.
+Package hyperref Warning: Ignoring empty anchor on input line 135.
 
-LaTeX Font Info:    Trying to load font information for T1+cmss on input line 2
-17.
+LaTeX Font Info:    Trying to load font information for T1+cmss on input line 1
+92.
 (d:/Program Files/texlive/2022/texmf-dist/tex/latex/base/t1cmss.fd
 File: t1cmss.fd 2019/12/16 v2.5j Standard LaTeX font definitions
 ) [1{d:/Program Files/texlive/2022/texmf-var/fonts/map/pdftex/updmap/pdftex.map
@@ -1065,66 +1065,66 @@ File: t1cmss.fd 2019/12/16 v2.5j Standard LaTeX font definitions
 
  <./thumbnails/cas-email.jpeg>]
 LaTeX Font Info:    Trying to load font information for TS1+stix on input line 
-221.
+195.
 
 (d:/Program Files/texlive/2022/texmf-dist/tex/latex/stix/ts1stix.fd
 File: ts1stix.fd 2015/04/17 v1.1.2-latex STIX TS1 font definitions
 )
-Underfull \hbox (badness 1194) in paragraph at lines 221--233
+Underfull \hbox (badness 1194) in paragraph at lines 195--207
 []\T1/stix/b/n/10 Motion-Aware Skip Mod-ule: \T1/stix/m/n/10 A lightweight skip
 
  []
 
 
-Underfull \hbox (badness 1997) in paragraph at lines 221--233
+Underfull \hbox (badness 1997) in paragraph at lines 195--207
 \T1/stix/m/n/10 pu-ta-tional cost with-out mod-i-fy-ing the un-der-ly-ing
  []
 
 
-Overfull \hbox (0.58636pt too wide) in paragraph at lines 289--306
+Overfull \hbox (0.58636pt too wide) in paragraph at lines 263--280
 []\T1/stix/m/n/10 However, pro-cess-ing frames in-de-pen-dently dis-cards tem-
  []
 
 
-Underfull \hbox (badness 1642) in paragraph at lines 289--306
+Underfull \hbox (badness 1642) in paragraph at lines 263--280
 \T1/stix/m/n/10 or motion-based false pos-i-tive sup-pres-sion [[]] --- yet
  []
 
 [2]
-Overfull \hbox (4.68634pt too wide) in paragraph at lines 334--344
+Overfull \hbox (4.68634pt too wide) in paragraph at lines 308--318
 []\T1/stix/m/n/10 Existing ef-fi-cient video in-fer-ence meth-ods, such as Fram
 e-
  []
 
 
-Underfull \hbox (badness 1189) in paragraph at lines 334--344
+Underfull \hbox (badness 1189) in paragraph at lines 308--318
 \T1/stix/m/n/10 pro-cess frames based on pre-dic-tion con-fi-dence, thereby
  []
 
 <3.fig/fig_pipeline.pdf, id=60, 756.91786pt x 537.48804pt>
 File: 3.fig/fig_pipeline.pdf Graphic file (type pdf)
 <use 3.fig/fig_pipeline.pdf>
-Package pdftex.def Info: 3.fig/fig_pipeline.pdf  used on input line 351.
+Package pdftex.def Info: 3.fig/fig_pipeline.pdf  used on input line 325.
 (pdftex.def)             Requested size: 238.25444pt x 169.1866pt.
 
-Underfull \hbox (badness 1077) in paragraph at lines 357--368
+Underfull \hbox (badness 1077) in paragraph at lines 331--342
 []\T1/stix/m/n/10 The pro-posed sys-tem is a fire and smoke de-tec-tion
  []
 
 
-Underfull \hbox (badness 1024) in paragraph at lines 357--368
+Underfull \hbox (badness 1024) in paragraph at lines 331--342
 \T1/stix/m/n/10 wise in-fer-ence pipeline with a lightweight skip mod-ule
  []
 
 <3.fig/fig_skip_module.pdf, id=61, 814.94466pt x 159.52599pt>
 File: 3.fig/fig_skip_module.pdf Graphic file (type pdf)
 <use 3.fig/fig_skip_module.pdf>
-Package pdftex.def Info: 3.fig/fig_skip_module.pdf  used on input line 412.
+Package pdftex.def Info: 3.fig/fig_skip_module.pdf  used on input line 386.
 (pdftex.def)             Requested size: 238.25444pt x 46.63864pt.
 Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on in
-put line 417.
+put line 391.
 
-Underfull \hbox (badness 1033) in paragraph at lines 421--422
+Underfull \hbox (badness 1033) in paragraph at lines 395--396
 []\T1/stix/m/n/10 scale fac-tor $\LS1/stix/m/it/10 $\T1/stix/m/n/10 , block si
 ze $\LS1/stix/m/it/10 B$\T1/stix/m/n/10 , block ac-tive
  []
@@ -1133,22 +1133,22 @@ ze $\LS1/stix/m/it/10 B$\T1/stix/m/n/10 , block ac-tive
 <3.fig/eager_mode.pdf, id=235, 492.59032pt x 474.48265pt>
 File: 3.fig/eager_mode.pdf Graphic file (type pdf)
 <use 3.fig/eager_mode.pdf>
-Package pdftex.def Info: 3.fig/eager_mode.pdf  used on input line 578.
+Package pdftex.def Info: 3.fig/eager_mode.pdf  used on input line 552.
 (pdftex.def)             Requested size: 214.42754pt x 206.54308pt.
 
 
 LaTeX Font Warning: Font shape `T1/cmss/m/sc' in size <9> not available
-(Font)              Font shape `T1/cmr/m/sc' tried instead on input line 588.
+(Font)              Font shape `T1/cmr/m/sc' tried instead on input line 562.
 
 [4]
-Overfull \hbox (1.13959pt too wide) in paragraph at lines 697--714
+Overfull \hbox (1.13959pt too wide) in paragraph at lines 671--688
 []\T1/stix/b/n/10 FAR guar-an-tee and ex-clu-sion from scor-ing. \T1/stix/m/n/1
 0 Let $\LS1/stix/m/it/10 FP\LS1/stix/m/n/10 .\LS1/stix/m/it/10 ^^R\LS1/stix/m/n
 /10 /$
  []
 
 
-Underfull \hbox (badness 1189) in paragraph at lines 697--714
+Underfull \hbox (badness 1189) in paragraph at lines 671--688
 \T1/stix/m/n/10 must si-mul-ta-ne-ously be a base-line false pos-i-tive and a
  []
 
@@ -1156,7 +1156,7 @@ Underfull \hbox (badness 1189) in paragraph at lines 697--714
 <3.fig/fig_videodb.pdf, id=367, 1246.75111pt x 492.2419pt>
 File: 3.fig/fig_videodb.pdf Graphic file (type pdf)
 <use 3.fig/fig_videodb.pdf>
-Package pdftex.def Info: 3.fig/fig_videodb.pdf  used on input line 738.
+Package pdftex.def Info: 3.fig/fig_videodb.pdf  used on input line 712.
 (pdftex.def)             Requested size: 238.25444pt x 94.06772pt.
 > Step: init table outer spec.
 > Step: parse table options.
@@ -1167,42 +1167,42 @@ Package pdftex.def Info: 3.fig/fig_videodb.pdf  used on input line 738.
 > Step: calculate cell and line sizes.
 > Step: build the whole table.
 
-Underfull \hbox (badness 1466) in paragraph at lines 775--788
+Underfull \hbox (badness 1466) in paragraph at lines 749--762
 \T1/stix/m/n/10 in-clud-ing FireNet [[]], Fire-sense [[]], FiSmo [[]], and
  []
 
 [6 <./3.fig/fig_videodb.pdf>]
-Overfull \hbox (33.30095pt too wide) detected at line 846
+Overfull \hbox (33.30095pt too wide) detected at line 820
 []
  []
 
 [7]
 LaTeX Font Info:    Font shape `T1/zi4/m/n' will be
-(Font)              scaled to size 8.50006pt on input line 891.
+(Font)              scaled to size 8.50006pt on input line 865.
 
-Underfull \hbox (badness 1147) in paragraph at lines 888--910
+Underfull \hbox (badness 1147) in paragraph at lines 862--884
 \T1/stix/m/n/10 i-cally the \T1/zi4/m/n/10 hgnetv2_b5.ssld_stage2_ft_in1k \T1/s
 tix/m/n/10 check-point [[]]
  []
 
 
-Underfull \hbox (badness 1762) in paragraph at lines 888--910
+Underfull \hbox (badness 1762) in paragraph at lines 862--884
 \T1/stix/m/n/10 us-ing SSLD knowl-edge dis-til-la-tion [[]]. HGNetV2 [[]]
  []
 
 
-Underfull \hbox (badness 1776) in paragraph at lines 888--910
+Underfull \hbox (badness 1776) in paragraph at lines 862--884
 \T1/stix/m/n/10 sub-stan-tially higher ac-cu-racy than mod-els of com-pa-ra-
  []
 
 
-Overfull \hbox (23.74341pt too wide) in paragraph at lines 938--944
+Overfull \hbox (23.74341pt too wide) in paragraph at lines 912--918
  []\T1/stix/m/it/11 Hyperparameter Op-ti-miza-tion Re-sults for the FrameDiffDe
 t-
  []
 
 
-Overfull \hbox (11.2608pt too wide) in paragraph at lines 956--959
+Overfull \hbox (11.2608pt too wide) in paragraph at lines 930--933
 []\T1/stix/b/n/10 Pixel dif-fer-ence sen-si-tiv-ity thresh-old $\LS1/stix/m/it/
 10 ^^\[] \LS1/stix/m/n/10 Ë ^3\LS1/stix/m/it/10 ; \LS1/stix/m/n/10 5\LS1/stix/m
 /it/10 ; \LS1/stix/m/n/10 7\LS1/stix/m/it/10 ; \LS1/stix/m/n/10 10`$\T1/stix/m/
@@ -1226,7 +1226,7 @@ n/10 :
 > Step: calculate cell and line sizes.
 > Step: build the whole table.
 
-Overfull \hbox (26.4384pt too wide) in paragraph at lines 1078--1082
+Overfull \hbox (26.4384pt too wide) in paragraph at lines 1052--1056
  []\T1/stix/m/it/11 Hyperparameter Op-ti-miza-tion Re-sults for the AccMotionDe
 t-
  []
@@ -1241,24 +1241,24 @@ t-
 > Step: calculate cell and line sizes.
 > Step: build the whole table.
 
-Overfull \hbox (18.60347pt too wide) in paragraph at lines 1154--1171
+Overfull \hbox (18.60347pt too wide) in paragraph at lines 1128--1145
 []\T1/stix/m/n/10 Table [][]4[][] bench-marks the pro-posed pipeline (\T1/stix/
 m/sc/10 AccMotionDet
  []
 
 
-Underfull \hbox (badness 1406) in paragraph at lines 1154--1171
+Underfull \hbox (badness 1406) in paragraph at lines 1128--1145
 \T1/stix/m/n/10 sig-nif-i-cantly larger train-ing dataset. No-tably, Mo-bileNet
 
  []
 
 [9]
-Underfull \hbox (badness 1484) in paragraph at lines 1186--1197
+Underfull \hbox (badness 1484) in paragraph at lines 1160--1171
 []\T1/stix/m/n/10 Temporal Per-sis-tence Thresh-old-ing (TPT) [[]] aug-
  []
 
 
-Underfull \hbox (badness 1231) in paragraph at lines 1186--1197
+Underfull \hbox (badness 1231) in paragraph at lines 1160--1171
 \T1/stix/m/n/10 ments the stan-dard per-frame in-fer-ence pipeline with a
  []
 
@@ -1279,7 +1279,7 @@ Underfull \hbox (badness 1231) in paragraph at lines 1186--1197
 > Step: calculate cell and line sizes.
 > Step: build the whole table.
 
-Underfull \hbox (badness 1237) in paragraph at lines 1259--1268
+Underfull \hbox (badness 1237) in paragraph at lines 1233--1242
 []\T1/stix/m/n/10 We fol-low the hy-per-pa-ram-e-ter se-lec-tion pro-to-col of
  []
 
@@ -1293,18 +1293,18 @@ Underfull \hbox (badness 1237) in paragraph at lines 1259--1268
 > Step: calculate cell and line sizes.
 > Step: build the whole table.
 
-Underfull \hbox (badness 1173) in paragraph at lines 1327--1339
+Underfull \hbox (badness 1173) in paragraph at lines 1301--1313
 []\T1/stix/m/n/10 As es-tab-lished in Sec-tion [][]4.4.2[][], the AccMotionDet-
 
  []
 
 
-Underfull \hbox (badness 1308) in paragraph at lines 1327--1339
+Underfull \hbox (badness 1308) in paragraph at lines 1301--1313
 \T1/stix/m/n/10 in-tro-duced as a com-ple-men-tary mech-a-nism to aug-ment
  []
 
 
-Underfull \hbox (badness 1337) in paragraph at lines 1359--1363
+Underfull \hbox (badness 1337) in paragraph at lines 1333--1337
 []\T1/stix/m/n/10 The best-ranked con-fig-u-ra-tion ($\LS1/stix/m/it/10 W[] \LS
 1/stix/m/n/10 = 1\LS1/stix/m/it/10 ; W[] \LS1/stix/m/n/10 =
  []
@@ -1318,25 +1318,25 @@ Underfull \hbox (badness 1337) in paragraph at lines 1359--1363
 > Step: calculate cell and line sizes.
 > Step: build the whole table.
 
-Underfull \hbox (badness 2042) in paragraph at lines 1393--1404
+Underfull \hbox (badness 2042) in paragraph at lines 1367--1378
 \T1/stix/m/n/10 per-for-mance. \T1/stix/m/sc/10 Ea-ger \T1/stix/m/n/10 mode suc
 -cess-fully re-cov-ers re-call
  []
 
 
-Underfull \hbox (badness 1226) in paragraph at lines 1393--1404
+Underfull \hbox (badness 1226) in paragraph at lines 1367--1378
 \T1/stix/m/n/10 ing from 94.384% (\T1/stix/m/sc/10 AccMotionDet \T1/stix/m/n/10
  only) to 95.565%
  []
 
 [12]
-Overfull \hbox (11.21637pt too wide) in paragraph at lines 1405--1415
+Overfull \hbox (11.21637pt too wide) in paragraph at lines 1379--1389
 []\T1/stix/m/n/10 Despite the re-duced skip rate, over-all through-put marginal
 ly
  []
 
 
-Overfull \hbox (6.77632pt too wide) in paragraph at lines 1405--1415
+Overfull \hbox (6.77632pt too wide) in paragraph at lines 1379--1389
 \T1/stix/m/n/10 rithm [][]3[][]), our im-ple-men-ta-tion con-verts each frame t
 o grayscale,
  []
@@ -1344,16 +1344,16 @@ o grayscale,
 <3.fig/fps_increase.pdf, id=588, 475.96822pt x 243.49971pt>
 File: 3.fig/fps_increase.pdf Graphic file (type pdf)
 <use 3.fig/fps_increase.pdf>
-Package pdftex.def Info: 3.fig/fps_increase.pdf  used on input line 1422.
+Package pdftex.def Info: 3.fig/fps_increase.pdf  used on input line 1396.
 (pdftex.def)             Requested size: 238.25444pt x 121.89073pt.
 <3.fig/fig_qualitative_success.pdf, id=591, 4149.5025pt x 1683.1683pt>
 File: 3.fig/fig_qualitative_success.pdf Graphic file (type pdf)
 <use 3.fig/fig_qualitative_success.pdf>
 Package pdftex.def Info: 3.fig/fig_qualitative_success.pdf  used on input line 
-1463.
+1437.
 (pdftex.def)             Requested size: 238.25444pt x 96.61961pt.
 [13 <./3.fig/fps_increase.pdf>]
-Overfull \hbox (16.69551pt too wide) in paragraph at lines 1477--1481
+Overfull \hbox (16.69551pt too wide) in paragraph at lines 1451--1455
 []\T1/stix/b/n/10 Correctly skipped static back-ground frames \T1/stix/m/n/10 (
 Fig. [][]6[][]a,b):
  []
@@ -1362,10 +1362,10 @@ Fig. [][]6[][]a,b):
 File: 3.fig/fig_qualitative_failure.pdf Graphic file (type pdf)
 <use 3.fig/fig_qualitative_failure.pdf>
 Package pdftex.def Info: 3.fig/fig_qualitative_failure.pdf  used on input line 
-1493.
+1467.
 (pdftex.def)             Requested size: 238.25444pt x 81.60092pt.
 
-Overfull \hbox (6.57552pt too wide) in paragraph at lines 1511--1514
+Overfull \hbox (6.57552pt too wide) in paragraph at lines 1485--1488
 []\T1/stix/b/n/10 Wrongly passed frames / wasted in-fer-ence \T1/stix/m/n/10 (F
 ig. [][]7[][]b,c):
  []
@@ -1374,18 +1374,18 @@ ig. [][]7[][]b,c):
 File: 3.fig/eager_timeline_success.png Graphic file (type png)
 <use 3.fig/eager_timeline_success.png>
 Package pdftex.def Info: 3.fig/eager_timeline_success.png  used on input line 1
-524.
+498.
 (pdftex.def)             Requested size: 238.25444pt x 82.12624pt.
 LaTeX Font Info:    Font shape `T1/zi4/m/n' will be
-(Font)              scaled to size 7.65005pt on input line 1537.
+(Font)              scaled to size 7.65005pt on input line 1511.
 <3.fig/eager_timeline_failure.png, id=660, 1294.0345pt x 483.0045pt>
 File: 3.fig/eager_timeline_failure.png Graphic file (type png)
 <use 3.fig/eager_timeline_failure.png>
 Package pdftex.def Info: 3.fig/eager_timeline_failure.png  used on input line 1
-542.
+516.
 (pdftex.def)             Requested size: 238.25444pt x 88.92696pt.
 
-Underfull \hbox (badness 1178) in paragraph at lines 1551--1556
+Underfull \hbox (badness 1178) in paragraph at lines 1525--1530
  []\T1/stix/m/it/11 Analysis of Ea-ger Mode: Recall-FAR Trade-off[] \T1/stix/m/
 n/10 To
  []
@@ -1413,7 +1413,7 @@ d real
 <figs/authors/a1.png, id=744, 1798.72pt x 2398.9625pt>
 File: figs/authors/a1.png Graphic file (type png)
 <use figs/authors/a1.png>
-Package pdftex.def Info: figs/authors/a1.png  used on input line 1669.
+Package pdftex.def Info: figs/authors/a1.png  used on input line 1643.
 (pdftex.def)             Requested size: 72.55452pt x 96.74747pt.
 
 ... wr-fig: [BL: 10.0pt] ...
@@ -1421,30 +1421,30 @@ Package pdftex.def Info: figs/authors/a1.png  used on input line 1669.
 ... wr-fig: [LINE-INT: 10] ...
 File: figs/authors/a1.png Graphic file (type png)
 <use figs/authors/a1.png>
-Package pdftex.def Info: figs/authors/a1.png  used on input line 1669.
+Package pdftex.def Info: figs/authors/a1.png  used on input line 1643.
 (pdftex.def)             Requested size: 72.55452pt x 96.74747pt.
 
-Underfull \hbox (badness 1226) in paragraph at lines 1669--1677
+Underfull \hbox (badness 1226) in paragraph at lines 1643--1651
 \T1/stix/m/n/8 In-sti-tute of In-for-mat-ics (NII) in Tokyo, Japan.
  []
 
 <figs/authors/a2.jpg, id=745, 283.0575pt x 376.40625pt>
 File: figs/authors/a2.jpg Graphic file (type jpg)
 <use figs/authors/a2.jpg>
-Package pdftex.def Info: figs/authors/a2.jpg  used on input line 1679.
+Package pdftex.def Info: figs/authors/a2.jpg  used on input line 1653.
 (pdftex.def)             Requested size: 72.55452pt x 96.47913pt.
 ... wr-fig: [BL: 10.0pt] ...
 ... wr-fig: [LINE-FP: 10.14791259765625] ...
 ... wr-fig: [LINE-INT: 10] ...
 File: figs/authors/a2.jpg Graphic file (type jpg)
 <use figs/authors/a2.jpg>
-Package pdftex.def Info: figs/authors/a2.jpg  used on input line 1679.
+Package pdftex.def Info: figs/authors/a2.jpg  used on input line 1653.
 (pdftex.def)             Requested size: 72.55452pt x 96.47913pt.
 [16 <./figs/authors/a1.png> <./figs/authors/a2.jpg>]
 <figs/authors/a3.png, id=757, 275.52937pt x 353.06906pt>
 File: figs/authors/a3.png Graphic file (type png)
 <use figs/authors/a3.png>
-Package pdftex.def Info: figs/authors/a3.png  used on input line 1690.
+Package pdftex.def Info: figs/authors/a3.png  used on input line 1664.
 (pdftex.def)             Requested size: 72.55452pt x 92.97023pt.
 
 ... wr-fig: [BL: 10.0pt] ...
@@ -1452,19 +1452,19 @@ Package pdftex.def Info: figs/authors/a3.png  used on input line 1690.
 ... wr-fig: [LINE-INT: 10] ...
 File: figs/authors/a3.png Graphic file (type png)
 <use figs/authors/a3.png>
-Package pdftex.def Info: figs/authors/a3.png  used on input line 1690.
+Package pdftex.def Info: figs/authors/a3.png  used on input line 1664.
 (pdftex.def)             Requested size: 72.55452pt x 92.97023pt.
 <figs/authors/a4.png, id=758, 317.68687pt x 433.62pt>
 File: figs/authors/a4.png Graphic file (type png)
 <use figs/authors/a4.png>
-Package pdftex.def Info: figs/authors/a4.png  used on input line 1695.
+Package pdftex.def Info: figs/authors/a4.png  used on input line 1669.
 (pdftex.def)             Requested size: 72.55452pt x 99.02914pt.
 ... wr-fig: [BL: 10.0pt] ...
 ... wr-fig: [LINE-FP: 10.40291442871094] ...
 ... wr-fig: [LINE-INT: 10] ...
 File: figs/authors/a4.png Graphic file (type png)
 <use figs/authors/a4.png>
-Package pdftex.def Info: figs/authors/a4.png  used on input line 1695.
+Package pdftex.def Info: figs/authors/a4.png  used on input line 1669.
 (pdftex.def)             Requested size: 72.55452pt x 99.02914pt.
 [17
 
@@ -1473,10 +1473,10 @@ Package rerunfilecheck Info: File `main.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
  ) 
 Here is how much of TeX's memory you used:
- 23035 strings out of 478023
- 406581 string characters out of 5835647
- 950065 words of memory out of 5000000
- 40976 multiletter control sequences out of 15000+600000
+ 23034 strings out of 478023
+ 406565 string characters out of 5835647
+ 950617 words of memory out of 5000000
+ 40975 multiletter control sequences out of 15000+600000
  611404 words of font info for 208 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  87i,14n,131p,1028b,1451s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -1524,7 +1524,7 @@ ix/stix-mathrm-bold.pfb><d:/Program Files/texlive/2022/texmf-dist/fonts/type1/p
 ublic/stix/stix-mathrm.pfb><d:/Program Files/texlive/2022/texmf-dist/fonts/type
 1/public/stix/stix-mathscr.pfb><d:/Program Files/texlive/2022/texmf-dist/fonts/
 type1/public/stix/stix-mathsf.pfb>
-Output written on main.pdf (17 pages, 16191230 bytes).
+Output written on main.pdf (17 pages, 16190782 bytes).
 PDF statistics:
  903 PDF objects out of 1000 (max. 8388607)
  624 compressed objects within 7 object streams
